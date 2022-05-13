@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace BlogApp.Persistence.Configurations.Entities
 {
-    public class CategoryConfiguration : IEntityTypeConfiguration<Category>
+    public class CategoryConfiguration : BaseConfiguraiton<Category>
     {
         public void Configure(EntityTypeBuilder<Category> builder)
         {
