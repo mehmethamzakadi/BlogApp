@@ -7,6 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="DTOs\ParamsDTOs\**" />
+    <Compile Remove="DTOs\ResultDTOs\**" />
+    <EmbeddedResource Remove="DTOs\ParamsDTOs\**" />
+    <EmbeddedResource Remove="DTOs\ResultDTOs\**" />
+    <None Remove="DTOs\ParamsDTOs\**" />
+    <None Remove="DTOs\ResultDTOs\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\BlogApp.Domain\BlogApp.Domain.csproj" />
   </ItemGroup>
 
