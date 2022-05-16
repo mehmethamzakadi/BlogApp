@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
-using BlogApp.Application.DTOs.ParamsDTOs.Category;
-using BlogApp.Application.DTOs.ResultDTOs.Category;
+using BlogApp.Application.DTOs.Category;
 using BlogApp.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -14,8 +13,7 @@ namespace BlogApp.Application.Profiles
     {
         public CategoryProfile()
         {
-            CreateMap<Category, RsCategoryDto>().ReverseMap();
-            CreateMap<Category, PmCategoryDto>().ReverseMap();
+            CreateMap<Category, RsCategory>().ReverseMap();
         }
     }
 }

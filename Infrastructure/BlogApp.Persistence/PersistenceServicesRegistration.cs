@@ -18,7 +18,7 @@ namespace BlogApp.Persistence
         {
             services.AddDbContext<BlogAppDbContext>(options =>
                options.UseNpgsql(
-                   configuration.GetConnectionString("BlogAppConnectionString")));
+                   configuration.GetConnectionString("BlogAppPostgreConnectionString")));
 
 
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
