@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using BlogApp.Application.DTOs.Params;
-using BlogApp.Application.DTOs.Results;
+using BlogApp.Application.DTOs;
+using BlogApp.Application.Features.Categories.Commands;
 using BlogApp.Domain.Entities;
 
 namespace BlogApp.Application.Profiles
@@ -9,8 +9,12 @@ namespace BlogApp.Application.Profiles
     {
         public CategoryProfile()
         {
-            CreateMap<Category, RsCategory>().ReverseMap();
-            CreateMap<Category, PmCategory>().ReverseMap();
+            CreateMap<Category, CategoryDto>().ReverseMap();
+            CreateMap<Category, CreateCategoryCommand>().ReverseMap();
+            CreateMap<Category, UpdateCategoryCommand>().ReverseMap();
+            CreateMap<Category, DeleteCategoryCommand>().ReverseMap();
+
+
 
         }
     }

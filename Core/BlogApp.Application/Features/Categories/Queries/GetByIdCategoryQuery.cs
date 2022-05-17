@@ -1,16 +1,16 @@
 ﻿using AutoMapper;
+using BlogApp.Application.DTOs;
 using BlogApp.Application.DTOs.Common;
-using BlogApp.Application.DTOs.Results;
 using BlogApp.Application.Interfaces.Persistence;
 using MediatR;
 
 namespace BlogApp.Application.Features.Categories.Queries
 {
-    public class GetByIdCategoryQuery : IRequest<BaseResult<RsCategory>>
+    public class GetByIdCategoryQuery : IRequest<BaseResult<CategoryDto>>
     {
         public int Id { get; set; }
 
-        public class GetCategoryByIdQueryHandler : IRequestHandler<GetByIdCategoryQuery, BaseResult<RsCategory>>
+        public class GetCategoryByIdQueryHandler : IRequestHandler<GetByIdCategoryQuery, BaseResult<CategoryDto>>
         {
             private readonly IUnitOfWork _unitOfWork;
             private readonly IMapper _mapper;
@@ -21,10 +21,10 @@ namespace BlogApp.Application.Features.Categories.Queries
                 _mapper = mapper;
             }
 
-            public async Task<BaseResult<RsCategory>> Handle(GetByIdCategoryQuery request, CancellationToken cancellationToken)
+            public async Task<BaseResult<CategoryDto>> Handle(GetByIdCategoryQuery request, CancellationToken cancellationToken)
             {
                 var category = await _unitOfWork.CategoryRepository.GetByIdAsync(request.Id);
-                return BaseResult<RsCategory>.Success(_mapper.Map<RsCategory>(category));
+                return BaseResult<CategoryDto>.Success(_mapper.Map<CategoryDto>(category));
             }
         }
     }
