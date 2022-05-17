@@ -9,10 +9,13 @@
   <ItemGroup>
     <Compile Remove="DTOs\ParamsDTOs\**" />
     <Compile Remove="DTOs\ResultDTOs\**" />
+    <Compile Remove="Features\AppUsers\Commands\**" />
     <EmbeddedResource Remove="DTOs\ParamsDTOs\**" />
     <EmbeddedResource Remove="DTOs\ResultDTOs\**" />
+    <EmbeddedResource Remove="Features\AppUsers\Commands\**" />
     <None Remove="DTOs\ParamsDTOs\**" />
     <None Remove="DTOs\ResultDTOs\**" />
+    <None Remove="Features\AppUsers\Commands\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,7 +24,7 @@
 
   <ItemGroup>
     <Folder Include="Exceptions\" />
-    <Folder Include="Features\AppUsers\Commands\" />
+    <Folder Include="Features\AppUsers\" />
   </ItemGroup>
 
   <ItemGroup>
