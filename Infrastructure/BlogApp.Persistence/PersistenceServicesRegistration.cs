@@ -15,7 +15,21 @@ namespace BlogApp.Persistence
             services.AddDbContext<BlogAppDbContext>(options =>
                options.UseNpgsql(
                    configuration.GetConnectionString("BlogAppPostgreConnectionString")));
-            services.AddIdentityCore<AppUser>().AddEntityFrameworkStores<BlogAppDbContext>();
+            services.AddIdentityCore<AppUser>(options =>
+            {
+                //User Şifre Ayarları
+                options.Password.RequireDigit = true; //Sayı girme zorunluluğu
+                options.Password.RequiredLength = 6; //Minimum şifre uzunluğu.
+                options.Password.RequiredUniqueChars = 0; //Özel karakter bulundurma sayısı.
+                options.Password.RequireNonAlphanumeric = false; //Özel karakter bulundurma zorunluluğu.
+                options.Password.RequireLowercase = false; //Küçük harf bulundurma zorunluluğu.
+                options.Password.RequireUppercase = false; //Büyük harf bulundurma zorunluluğu.
+
+                //User Ayarları
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@"; //Bu karakterler dışında kullanım yapılamaz.
+                options.User.RequireUniqueEmail = true; //Tek mail adresi ile kayıt olabilme.
+
+            }).AddEntityFrameworkStores<BlogAppDbContext>();
 
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IUnitOfWork, UnitOfWork>();

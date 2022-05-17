@@ -12,6 +12,24 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddConfigureApplicationServices();
 builder.Services.AddConfigurePersistenceServices(builder.Configuration);
+builder.Services.AddSession();
+builder.Services.AddDistributedMemoryCache();
+
+builder.Services.ConfigureApplicationCookie(opt =>
+{
+    opt.LoginPath = new PathString("/Admin/User/Login");
+    opt.LogoutPath = new PathString("/Admin/User/Logout");
+    opt.Cookie = new CookieBuilder
+    {
+        Name = "BlogApp",
+        HttpOnly = true,
+        SameSite = SameSiteMode.Strict,
+        SecurePolicy = CookieSecurePolicy.SameAsRequest //Canlýda Always olmalýdýr.,
+    };
+    opt.SlidingExpiration = true;
+    opt.ExpireTimeSpan = TimeSpan.FromDays(7);
+    opt.AccessDeniedPath = new PathString("/Admin/User/AccessDenied");
+});
 
 
 var app = builder.Build();
@@ -23,11 +41,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseSession();
+
 app.UseHttpsRedirection();
 
-app.UseAuthentication();
+app.UseRouting();
 
-app.UseAuthorization();
+app.UseAuthentication(); //Kimlik doðrulamasý.
+
+app.UseAuthorization(); //Yetki kontrolü.
 
 app.MapControllers();
 

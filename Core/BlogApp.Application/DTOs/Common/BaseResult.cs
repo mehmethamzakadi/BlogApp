@@ -9,10 +9,10 @@ namespace BlogApp.Application.DTOs.Common
     public class BaseResult<T>
     {
         public bool IsSuccess { get; set; }
-        public T Value { get; set; }
+        public T? Value { get; set; }
         public string Error { get; set; }
 
-        public static BaseResult<T> Success(T value) => new() { IsSuccess = true, Value = value };
+        public static BaseResult<T> Success(T? value) => new() { IsSuccess = true, Value = value };
         public static BaseResult<T> Failure(string error) => new() { IsSuccess = false, Error = error };
     }
 }
