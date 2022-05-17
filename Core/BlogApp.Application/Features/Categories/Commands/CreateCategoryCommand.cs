@@ -5,7 +5,7 @@ using BlogApp.Application.DTOs.Params;
 using BlogApp.Domain.Entities;
 using BlogApp.Application.DTOs.Common;
 
-namespace BlogApp.Application.Features.CategoryFeature.Commands
+namespace BlogApp.Application.Features.Categories.Commands
 {
     public class CreateCategoryCommand : IRequest<BaseResult<PmCategory>>
     {

@@ -4,7 +4,7 @@ using BlogApp.Application.DTOs.Results;
 using BlogApp.Application.Interfaces.Persistence;
 using MediatR;
 
-namespace BlogApp.Application.Features.CategoryFeature.Queries
+namespace BlogApp.Application.Features.Categories.Queries
 {
     public class GetByIdCategoryQuery : IRequest<BaseResult<RsCategory>>
     {

@@ -1,8 +1,8 @@
 using BlogApp.Application.DTOs.Common;
 using BlogApp.Application.DTOs.Params;
 using BlogApp.Application.DTOs.Results;
-using BlogApp.Application.Features.CategoryFeature.Commands;
-using BlogApp.Application.Features.CategoryFeature.Queries;
+using BlogApp.Application.Features.Categories.Commands;
+using BlogApp.Application.Features.Categories.Queries;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.API.Controllers
