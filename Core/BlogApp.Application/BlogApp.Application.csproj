@@ -21,7 +21,6 @@
 
   <ItemGroup>
     <Folder Include="Exceptions\" />
-    <Folder Include="Features\Category\Commands\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,11 +1,7 @@
 ﻿using AutoMapper;
-using BlogApp.Application.DTOs.Category;
+using BlogApp.Application.DTOs.Params;
+using BlogApp.Application.DTOs.Results;
 using BlogApp.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BlogApp.Application.Profiles
 {
@@ -14,6 +10,8 @@ namespace BlogApp.Application.Profiles
         public CategoryProfile()
         {
             CreateMap<Category, RsCategory>().ReverseMap();
+            CreateMap<Category, PmCategory>().ReverseMap();
+
         }
     }
 }

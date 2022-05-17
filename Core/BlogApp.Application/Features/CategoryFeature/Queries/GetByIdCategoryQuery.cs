@@ -1,14 +1,9 @@
 ﻿using AutoMapper;
-using BlogApp.Application.DTOs.Category;
+using BlogApp.Application.DTOs.Results;
 using BlogApp.Application.Interfaces.Persistence;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace BlogApp.Application.Features.Category.Queries
+namespace BlogApp.Application.Features.CategoryFeature.Queries
 {
     public class GetByIdCategoryQuery : IRequest<RsCategory>
     {

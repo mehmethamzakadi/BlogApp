@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BlogApp.Application.Exceptions
+﻿namespace BlogApp.Application.Exceptions
 {
     public class BadRequestException : ApplicationException
     {

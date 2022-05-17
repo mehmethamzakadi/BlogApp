@@ -2,12 +2,7 @@
 using BlogApp.Domain.Common;
 using BlogApp.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BlogApp.Persistence.Repositories
 {
@@ -26,7 +21,7 @@ namespace BlogApp.Persistence.Repositories
             return entity;
         }
 
-        public async Task Delete(T entity)
+        public async Task Remove(T entity)
         {
             _dbContext.Set<T>().Remove(entity);
         }

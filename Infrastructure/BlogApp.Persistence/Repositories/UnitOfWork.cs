@@ -1,10 +1,5 @@
 ﻿using BlogApp.Application.Interfaces.Persistence;
 using BlogApp.Persistence.Contexts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BlogApp.Persistence.Repositories
 {
@@ -28,7 +23,7 @@ namespace BlogApp.Persistence.Repositories
             GC.SuppressFinalize(this);
         }
 
-        public async Task Save()
+        public async Task SaveAsync()
         {
             await _dbContext.SaveChangesAsync();
         }
