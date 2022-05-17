@@ -3,14 +3,15 @@ using BlogApp.Application.Interfaces.Persistence;
 using MediatR;
 using BlogApp.Application.DTOs.Params;
 using BlogApp.Domain.Entities;
+using BlogApp.Application.DTOs.Common;
 
 namespace BlogApp.Application.Features.CategoryFeature.Commands
 {
-    public class CreateCategoryCommand : IRequest<PmCategory>
+    public class CreateCategoryCommand : IRequest<BaseResult<PmCategory>>
     {
         public string Name { get; set; }
 
-        public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryCommand, PmCategory>
+        public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryCommand, BaseResult<PmCategory>>
         {
             private readonly IUnitOfWork _unitOfWork;
             private readonly IMapper _mapper;
@@ -21,12 +22,17 @@ namespace BlogApp.Application.Features.CategoryFeature.Commands
                 _mapper = mapper;
             }
 
-            public async Task<PmCategory> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
+            public async Task<BaseResult<PmCategory>> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
             {
-                var result = await _unitOfWork.CategoryRepository.AddAsync(new Category { Name = request.Name });
-                await _unitOfWork.SaveAsync();
+                if (!await _unitOfWork.CategoryRepository.ExistsAsync(c => c.Name.ToUpper() == request.Name.ToUpper()))
+                {
+                    var result = await _unitOfWork.CategoryRepository.AddAsync(new Category { Name = request.Name });
+                    await _unitOfWork.SaveAsync();
 
-                return _mapper.Map<PmCategory>(result);
+                    return BaseResult<PmCategory>.Success(_mapper.Map<PmCategory>(result));
+                }
+
+                return BaseResult<PmCategory>.Failure("Bu kategori adına ait kayıt zaten bulunmaktadır.");
             }
         }
     }

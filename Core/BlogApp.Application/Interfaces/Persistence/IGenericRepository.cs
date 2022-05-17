@@ -9,7 +9,7 @@ namespace BlogApp.Application.Interfaces.Persistence
         Task<IReadOnlyList<T>> GetAllAsync();
         IQueryable<T> GetWhere(Expression<Func<T, bool>> expression);
         Task<T> AddAsync(T entity);
-        Task<bool> Exists(int id);
+        Task<bool> ExistsAsync(Expression<Func<T, bool>> expression);
         Task Update(T entity);
         Task Remove(T entity);
     }

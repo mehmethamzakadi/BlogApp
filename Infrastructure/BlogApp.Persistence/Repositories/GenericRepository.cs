@@ -26,10 +26,9 @@ namespace BlogApp.Persistence.Repositories
             _dbContext.Set<T>().Remove(entity);
         }
 
-        public async Task<bool> Exists(int id)
+        public async Task<bool> ExistsAsync(Expression<Func<T, bool>> expression)
         {
-            var entity = await GetByIdAsync(id);
-            return entity != null;
+            return await _dbContext.Set<T>().AnyAsync(expression);
         }
 
         public async Task<IReadOnlyList<T>> GetAllAsync()
@@ -51,5 +50,7 @@ namespace BlogApp.Persistence.Repositories
         {
             _dbContext.Entry(entity).State = EntityState.Modified;
         }
+
+
     }
 }
