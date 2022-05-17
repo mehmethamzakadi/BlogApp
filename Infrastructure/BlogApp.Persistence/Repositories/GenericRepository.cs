@@ -21,7 +21,7 @@ namespace BlogApp.Persistence.Repositories
             return entity;
         }
 
-        public async Task Remove(T entity)
+        public void Remove(T entity)
         {
             _dbContext.Set<T>().Remove(entity);
         }
@@ -36,7 +36,7 @@ namespace BlogApp.Persistence.Repositories
             return await _dbContext.Set<T>().ToListAsync();
         }
 
-        public async Task<T> GetByIdAsync(int id)
+        public async Task<T?> GetByIdAsync(int id)
         {
             return await _dbContext.Set<T>().FindAsync(id);
         }
@@ -46,7 +46,7 @@ namespace BlogApp.Persistence.Repositories
             return _dbContext.Set<T>().Where(expression);
         }
 
-        public async Task Update(T entity)
+        public void Update(T entity)
         {
             _dbContext.Entry(entity).State = EntityState.Modified;
         }

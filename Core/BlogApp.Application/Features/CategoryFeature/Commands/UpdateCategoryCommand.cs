@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using BlogApp.Application.DTOs.Common;
+﻿using BlogApp.Application.DTOs.Common;
 using BlogApp.Application.Interfaces.Persistence;
 using MediatR;
 
@@ -27,7 +26,7 @@ namespace BlogApp.Application.Features.CategoryFeature.Commands
 
                 category.Name = request.Name;
 
-                await _unitOfWork.CategoryRepository.Update(category);
+                _unitOfWork.CategoryRepository.Update(category);
                 await _unitOfWork.SaveAsync();
 
                 return BaseResult<Unit>.Success(await Unit.Task);

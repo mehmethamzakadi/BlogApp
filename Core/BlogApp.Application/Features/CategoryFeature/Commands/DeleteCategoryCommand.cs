@@ -24,7 +24,7 @@ namespace BlogApp.Application.Features.CategoryFeature.Commands
                 if (category == null)
                     return BaseResult<Unit>.Failure("Kategori bilgisi bulunamadı.");
 
-                await _unitOfWork.CategoryRepository.Remove(category);
+                _unitOfWork.CategoryRepository.Remove(category);
                 await _unitOfWork.SaveAsync();
 
                 return BaseResult<Unit>.Success(await Unit.Task);
