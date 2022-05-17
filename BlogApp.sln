@@ -11,15 +11,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{197CF02C-055
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI", "UI", "{C6129020-1AEF-44AC-897E-EB6E57E8674D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlogApp.API", "API\BlogApp.API\BlogApp.API.csproj", "{773DAAAF-3EE0-4157-8763-7EB55FA37578}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlogApp.API", "API\BlogApp.API\BlogApp.API.csproj", "{773DAAAF-3EE0-4157-8763-7EB55FA37578}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlogApp.Domain", "Core\BlogApp.Domain\BlogApp.Domain.csproj", "{0FBC5805-AE70-4806-BBE5-93661DE1EEC5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlogApp.Domain", "Core\BlogApp.Domain\BlogApp.Domain.csproj", "{0FBC5805-AE70-4806-BBE5-93661DE1EEC5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlogApp.Application", "Core\BlogApp.Application\BlogApp.Application.csproj", "{E862D047-9938-4C0E-9659-CD03B67544B6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlogApp.Application", "Core\BlogApp.Application\BlogApp.Application.csproj", "{E862D047-9938-4C0E-9659-CD03B67544B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlogApp.Infrastructure", "Infrastructure\BlogApp.Infrastructure\BlogApp.Infrastructure.csproj", "{4067A87F-6350-4DAA-90C5-FED579529C94}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlogApp.Infrastructure", "Infrastructure\BlogApp.Infrastructure\BlogApp.Infrastructure.csproj", "{4067A87F-6350-4DAA-90C5-FED579529C94}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlogApp.Persistence", "Infrastructure\BlogApp.Persistence\BlogApp.Persistence.csproj", "{F53D79C0-C5DA-487F-824C-B64ABCCEFC2A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlogApp.Persistence", "Infrastructure\BlogApp.Persistence\BlogApp.Persistence.csproj", "{F53D79C0-C5DA-487F-824C-B64ABCCEFC2A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

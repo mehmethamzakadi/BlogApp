@@ -1,13 +1,14 @@
 ﻿using BlogApp.Domain.Common;
+using BlogApp.Domain.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace BlogApp.Persistence.Contexts
 {
-    public class AuditableDbContext : DbContext
+    public class AuditableDbContext : IdentityDbContext<AppUser, AppRole, int, AppUserClaim, AppUserRole, AppUserLogin, AppRoleClaim, AppUserToken>
     {
         public AuditableDbContext(DbContextOptions options) : base(options)
         {
-
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

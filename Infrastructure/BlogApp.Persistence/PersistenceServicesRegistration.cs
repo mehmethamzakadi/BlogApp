@@ -1,4 +1,5 @@
 ﻿using BlogApp.Application.Interfaces.Persistence;
+using BlogApp.Domain.Entities;
 using BlogApp.Persistence.Contexts;
 using BlogApp.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +15,7 @@ namespace BlogApp.Persistence
             services.AddDbContext<BlogAppDbContext>(options =>
                options.UseNpgsql(
                    configuration.GetConnectionString("BlogAppPostgreConnectionString")));
-
+            services.AddIdentityCore<AppUser>().AddEntityFrameworkStores<BlogAppDbContext>();
 
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IUnitOfWork, UnitOfWork>();
