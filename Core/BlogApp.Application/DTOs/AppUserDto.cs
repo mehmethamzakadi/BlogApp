@@ -9,7 +9,6 @@ namespace BlogApp.Application.DTOs
 {
     public class AppUserDto : BaseDto
     {
-
         public string UserName { get; set; }
 
         public string Email { get; set; }
