@@ -5,11 +5,11 @@ using MediatR;
 
 namespace BlogApp.Application.Features.Categories.Commands
 {
-    public class DeleteCategoryCommand : IRequest<BaseResult<DeleteCategoryCommand>>
+    public class DeleteCategoryCommand : IRequest<Unit>
     {
         public int Id { get; set; }
 
-        public class DeleteCategoryCommandHandler : IRequestHandler<DeleteCategoryCommand, BaseResult<DeleteCategoryCommand>>
+        public class DeleteCategoryCommandHandler : IRequestHandler<DeleteCategoryCommand, Unit>
         {
             private readonly IUnitOfWork _unitOfWork;
             private readonly IMapper _mapper;
@@ -20,16 +20,14 @@ namespace BlogApp.Application.Features.Categories.Commands
                 _mapper = mapper;
             }
 
-            public async Task<BaseResult<DeleteCategoryCommand>> Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
+            public async Task<Unit> Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
             {
                 var category = await _unitOfWork.CategoryRepository.GetByIdAsync(request.Id);
-                if (category == null)
-                    return BaseResult<DeleteCategoryCommand>.Failure("Kategori bilgisi bulunamadı.");
 
                 _unitOfWork.CategoryRepository.Remove(category);
                 await _unitOfWork.SaveAsync();
 
-                return BaseResult<DeleteCategoryCommand>.Success(_mapper.Map<DeleteCategoryCommand>(category));
+                return Unit.Value;
             }
         }
     }

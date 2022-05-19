@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BlogApp.Application.DTOs
+namespace BlogApp.Application.DTOs.AppUsers
 {
-    public class AppUserDto : BaseDto
+    public class AppUserResponseDto : BaseDto
     {
         public string UserName { get; set; }
 

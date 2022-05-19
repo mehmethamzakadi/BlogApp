@@ -1,8 +1,8 @@
 ﻿using BlogApp.Application.DTOs.Common;
 
-namespace BlogApp.Application.DTOs
+namespace BlogApp.Application.DTOs.Categories
 {
-    public class CategoryDto : BaseDto
+    public class CategoryResponseDto : BaseDto
     {
         public string Name { get; set; }
     }

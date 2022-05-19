@@ -1,18 +1,19 @@
 ﻿using AutoMapper;
-using BlogApp.Application.Interfaces.Persistence;
-using MediatR;
-using BlogApp.Domain.Entities;
+using BlogApp.Application.DTOs.AppUsers;
 using BlogApp.Application.DTOs.Common;
+using BlogApp.Domain.Entities;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
-using BlogApp.Application.DTOs;
 
 namespace BlogApp.Application.Features.AppUsers.Commands
 {
-    public class CreateAppUserCommand : IRequest<BaseResult<CreateAppUserCommand>>
+    public class CreateAppUserCommand : IRequest<bool>
     {
-        public AppUserCreateDto User { get; set; }
+        public string UserName { get; set; }
+        public string Email { get; set; }
+        public string Password { get; set; }
 
-        public class CreateUserCommandHandler : IRequestHandler<CreateAppUserCommand, BaseResult<CreateAppUserCommand>>
+        public class CreateUserCommandHandler : IRequestHandler<CreateAppUserCommand, bool>
         {
             private readonly UserManager<AppUser> _userManager;
             private readonly IMapper _mapper;
@@ -23,12 +24,12 @@ namespace BlogApp.Application.Features.AppUsers.Commands
                 _userManager = userManager;
             }
 
-            public async Task<BaseResult<CreateAppUserCommand>> Handle(CreateAppUserCommand request, CancellationToken cancellationToken)
+            public async Task<bool> Handle(CreateAppUserCommand request, CancellationToken cancellationToken)
             {
-                var user = _mapper.Map<AppUser>(request.User);
-                await _userManager.CreateAsync(user, request.User.Password);
-                return BaseResult<CreateAppUserCommand>.Success(null);
+                var user = _mapper.Map<AppUser>(request);
+                var response = await _userManager.CreateAsync(user, request.Password);
 
+                return response.Succeeded;
             }
         }
     }

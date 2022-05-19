@@ -1,4 +1,4 @@
-using BlogApp.Application.DTOs;
+using BlogApp.Application.DTOs.Categories;
 using BlogApp.Application.DTOs.Common;
 using BlogApp.Application.Features.Categories.Commands;
 using BlogApp.Application.Features.Categories.Queries;
@@ -9,19 +9,19 @@ namespace BlogApp.API.Controllers
     public class CategoryController : BaseApiController
     {
         [HttpGet]
-        public async Task<BaseResult<IReadOnlyList<CategoryDto>>> Get()
+        public async Task<IReadOnlyList<CategoryResponseDto>> Get()
         {
             return await Mediator.Send(new GetAllCategoriesQuery());
         }
 
         [HttpGet("{id}")]
-        public async Task<BaseResult<CategoryDto>> Get(int id)
+        public async Task<CategoryResponseDto> Get(int id)
         {
             return await Mediator.Send(new GetByIdCategoryQuery { Id = id });
         }
 
         [HttpPost]
-        public async Task<BaseResult<CreateCategoryCommand>> Post(CreateCategoryCommand category)
+        public async Task<CreateCategoryCommand> Post(CreateCategoryCommand category)
         {
             return await Mediator.Send(new CreateCategoryCommand { Name = category.Name });
         }

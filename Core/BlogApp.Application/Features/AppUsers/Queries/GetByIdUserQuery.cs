@@ -1,22 +1,17 @@
 ﻿using AutoMapper;
-using BlogApp.Application.DTOs;
+using BlogApp.Application.DTOs.AppUsers;
 using BlogApp.Application.DTOs.Common;
 using BlogApp.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BlogApp.Application.Features.AppUsers.Queries
 {
-    public class GetByIdUserQuery : IRequest<BaseResult<AppUserDto>>
+    public class GetByIdUserQuery : IRequest<AppUserResponseDto>
     {
         public int Id { get; set; }
 
-        public class GetByIdUserQueryHandler : IRequestHandler<GetByIdUserQuery, BaseResult<AppUserDto>>
+        public class GetByIdUserQueryHandler : IRequestHandler<GetByIdUserQuery, AppUserResponseDto>
         {
             private readonly UserManager<AppUser> _userManager;
             private readonly IMapper _mapper;
@@ -27,9 +22,10 @@ namespace BlogApp.Application.Features.AppUsers.Queries
                 _mapper = mapper;
             }
 
-            public async Task<BaseResult<AppUserDto>> Handle(GetByIdUserQuery request, CancellationToken cancellationToken)
+            public async Task<AppUserResponseDto> Handle(GetByIdUserQuery request, CancellationToken cancellationToken)
             {
-                return BaseResult<AppUserDto>.Success(_mapper.Map<AppUserDto>(_userManager.Users.Where(x => x.Id == request.Id).FirstOrDefault()));
+                var response = _mapper.Map<AppUserResponseDto>(_userManager.Users.Where(x => x.Id == request.Id).FirstOrDefault());
+                return response;
             }
         }
     }
