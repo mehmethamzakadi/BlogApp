@@ -1,33 +1,33 @@
-﻿using AutoMapper;
-using BlogApp.Application.DTOs.Common;
-using BlogApp.Application.Interfaces.Persistence;
+﻿using BlogApp.Application.Interfaces.Persistence;
+using BlogApp.Application.Utilities.Results;
 using MediatR;
 
 namespace BlogApp.Application.Features.Categories.Commands
 {
-    public class DeleteCategoryCommand : IRequest<Unit>
+    public class DeleteCategoryCommand : IRequest<IResult>
     {
         public int Id { get; set; }
 
-        public class DeleteCategoryCommandHandler : IRequestHandler<DeleteCategoryCommand, Unit>
+        public class DeleteCategoryCommandHandler : IRequestHandler<DeleteCategoryCommand, IResult>
         {
             private readonly IUnitOfWork _unitOfWork;
-            private readonly IMapper _mapper;
-
-            public DeleteCategoryCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+            public DeleteCategoryCommandHandler(IUnitOfWork unitOfWork)
             {
                 _unitOfWork = unitOfWork;
-                _mapper = mapper;
             }
 
-            public async Task<Unit> Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
+            public async Task<IResult> Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
             {
                 var category = await _unitOfWork.CategoryRepository.GetByIdAsync(request.Id);
+                if (category == null)
+                {
+                    return new ErrorResult("Kategori bilgisi bulunamadı!");
+                }
 
                 _unitOfWork.CategoryRepository.Remove(category);
                 await _unitOfWork.SaveAsync();
 
-                return Unit.Value;
+                return new SuccessResult("Kategori bilgisi başarıyla silindi.");
             }
         }
     }

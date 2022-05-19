@@ -1,5 +1,3 @@
-using BlogApp.Application.DTOs.Categories;
-using BlogApp.Application.DTOs.Common;
 using BlogApp.Application.Features.Categories.Commands;
 using BlogApp.Application.Features.Categories.Queries;
 using Microsoft.AspNetCore.Mvc;
@@ -9,33 +7,33 @@ namespace BlogApp.API.Controllers
     public class CategoryController : BaseApiController
     {
         [HttpGet]
-        public async Task<IReadOnlyList<CategoryResponseDto>> Get()
+        public async Task<IActionResult> Get()
         {
-            return await Mediator.Send(new GetAllCategoriesQuery());
+            return GetResponseOnlyResultData(await Mediator.Send(new GetAllCategoriesQuery()));
         }
 
         [HttpGet("{id}")]
-        public async Task<CategoryResponseDto> Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
-            return await Mediator.Send(new GetByIdCategoryQuery { Id = id });
+            return GetResponseOnlyResultData(await Mediator.Send(new GetByIdCategoryQuery { Id = id }));
         }
 
         [HttpPost]
-        public async Task<CreateCategoryCommand> Post(CreateCategoryCommand category)
+        public async Task<IActionResult> Post(CreateCategoryCommand category)
         {
-            return await Mediator.Send(new CreateCategoryCommand { Name = category.Name });
-        }
-
-        [HttpDelete("{id}")]
-        public async Task Delete(int id)
-        {
-            await Mediator.Send(new DeleteCategoryCommand { Id = id });
+            return GetResponseOnlyResultMessage(await Mediator.Send(category));
         }
 
         [HttpPut]
-        public async Task Put(UpdateCategoryCommand category)
+        public async Task<IActionResult> Put(UpdateCategoryCommand category)
         {
-            await Mediator.Send(new UpdateCategoryCommand { Id = category.Id, Name = category.Name });
+            return GetResponseOnlyResultMessage(await Mediator.Send(category));
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            return GetResponseOnlyResultMessage(await Mediator.Send(new DeleteCategoryCommand { Id = id }));
         }
     }
 }

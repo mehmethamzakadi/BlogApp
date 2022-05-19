@@ -1,14 +1,14 @@
 ﻿using AutoMapper;
 using BlogApp.Application.DTOs.Categories;
-using BlogApp.Application.DTOs.Common;
 using BlogApp.Application.Interfaces.Persistence;
+using BlogApp.Application.Utilities.Results;
 using MediatR;
 
 namespace BlogApp.Application.Features.Categories.Queries
 {
-    public class GetAllCategoriesQuery : IRequest<IReadOnlyList<CategoryResponseDto>>
+    public class GetAllCategoriesQuery : IRequest<IDataResult<IReadOnlyList<CategoryResponseDto>>>
     {
-        public class GetAllCategoriesQueryHandler : IRequestHandler<GetAllCategoriesQuery, IReadOnlyList<CategoryResponseDto>>
+        public class GetAllCategoriesQueryHandler : IRequestHandler<GetAllCategoriesQuery, IDataResult<IReadOnlyList<CategoryResponseDto>>>
         {
             private readonly IUnitOfWork _unitOfWork;
             private readonly IMapper _mapper;
@@ -19,11 +19,11 @@ namespace BlogApp.Application.Features.Categories.Queries
                 _mapper = mapper;
             }
 
-            public async Task<IReadOnlyList<CategoryResponseDto>> Handle(GetAllCategoriesQuery request, CancellationToken cancellationToken)
+            public async Task<IDataResult<IReadOnlyList<CategoryResponseDto>>> Handle(GetAllCategoriesQuery request, CancellationToken cancellationToken)
             {
-                var categories = await _unitOfWork.CategoryRepository.GetAllAsync();
-                var result = _mapper.Map<IReadOnlyList<CategoryResponseDto>>(categories);
-                return result;
+                var categoryList = await _unitOfWork.CategoryRepository.GetAllAsync();
+                var categoryDtoList = categoryList.Select(category => _mapper.Map<CategoryResponseDto>(category)).ToList();
+                return new SuccessDataResult<IReadOnlyList<CategoryResponseDto>>(categoryDtoList);
             }
         }
     }

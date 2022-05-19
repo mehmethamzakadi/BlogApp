@@ -1,35 +1,37 @@
-﻿using AutoMapper;
-using BlogApp.Application.Interfaces.Persistence;
-using BlogApp.Domain.Entities;
+﻿using BlogApp.Application.Interfaces.Persistence;
+using BlogApp.Application.Utilities.Results;
 using MediatR;
 
 namespace BlogApp.Application.Features.Categories.Commands
 {
-    public class UpdateCategoryCommand : IRequest<Unit>
+    public class UpdateCategoryCommand : IRequest<IResult>
     {
         public int Id { get; set; }
         public string Name { get; set; }
 
-        public class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategoryCommand, Unit>
+        public class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategoryCommand, IResult>
         {
             private readonly IUnitOfWork _unitOfWork;
-            private readonly IMapper _mapper;
 
-            public UpdateCategoryCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+            public UpdateCategoryCommandHandler(IUnitOfWork unitOfWork)
             {
                 _unitOfWork = unitOfWork;
-                _mapper = mapper;
             }
 
-            public async Task<Unit> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
+            public async Task<IResult> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
             {
                 var category = await _unitOfWork.CategoryRepository.GetByIdAsync(request.Id);
+                if (category == null)
+                {
+                    return new ErrorResult("Kategori bilgisi bulunamadı!");
+                }
+
                 category.Name = request.Name;
 
                 _unitOfWork.CategoryRepository.Update(category);
                 await _unitOfWork.SaveAsync();
 
-                return Unit.Value;
+                return new SuccessResult("Kategori bilgisi başarıyla güncellendi.");
             }
         }
     }

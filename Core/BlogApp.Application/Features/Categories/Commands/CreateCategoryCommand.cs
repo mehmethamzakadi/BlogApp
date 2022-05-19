@@ -1,33 +1,35 @@
-﻿using AutoMapper;
-using BlogApp.Application.Interfaces.Persistence;
-using MediatR;
+﻿using BlogApp.Application.Interfaces.Persistence;
+using BlogApp.Application.Utilities.Results;
 using BlogApp.Domain.Entities;
-using BlogApp.Application.DTOs.Common;
+using MediatR;
 
 namespace BlogApp.Application.Features.Categories.Commands
 {
-    public class CreateCategoryCommand : IRequest<CreateCategoryCommand>
+    public class CreateCategoryCommand : IRequest<IResult>
     {
         public string Name { get; set; }
 
-        public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryCommand, CreateCategoryCommand>
+        public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryCommand, IResult>
         {
             private readonly IUnitOfWork _unitOfWork;
-            private readonly IMapper _mapper;
 
-            public CreateCategoryCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+            public CreateCategoryCommandHandler(IUnitOfWork unitOfWork)
             {
                 _unitOfWork = unitOfWork;
-                _mapper = mapper;
             }
 
-            public async Task<CreateCategoryCommand> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
+            public async Task<IResult> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
             {
-
-                var result = await _unitOfWork.CategoryRepository.AddAsync(new Category { Name = request.Name });
-                await _unitOfWork.SaveAsync();
-
-                return _mapper.Map<CreateCategoryCommand>(result);
+                try
+                {
+                    await _unitOfWork.CategoryRepository.AddAsync(new Category { Name = request.Name });
+                    await _unitOfWork.SaveAsync();
+                    return new SuccessResult("Kategori bilgsi başarıyla eklendi.");
+                }
+                catch (Exception ex)
+                {
+                    return new ErrorResult("Kategori bilgsi eklerken hata oluştu!");
+                }
             }
         }
     }

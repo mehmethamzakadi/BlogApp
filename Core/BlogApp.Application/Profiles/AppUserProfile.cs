@@ -12,6 +12,7 @@ namespace BlogApp.Application.Profiles
         public AppUserProfile()
         {
             CreateMap<AppUser, AppUserResponseDto>().ReverseMap();
+            CreateMap<AppUser, CreateAppUserCommand>().ReverseMap();
         }
     }
 }

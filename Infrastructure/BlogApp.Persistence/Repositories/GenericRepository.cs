@@ -33,7 +33,9 @@ namespace BlogApp.Persistence.Repositories
 
         public async Task<IReadOnlyList<T>> GetAllAsync()
         {
-            return await _dbContext.Set<T>().ToListAsync();
+            return await _dbContext.Set<T>()
+                .OrderBy(x => x.Id)
+                .ToListAsync();
         }
 
         public async Task<T?> GetByIdAsync(int id)
