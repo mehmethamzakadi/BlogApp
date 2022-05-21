@@ -14,9 +14,10 @@ namespace BlogApp.Application.Features.AppUsers.Queries
         public class GetByIdUserQueryHandler : IRequestHandler<GetByIdUserQuery, IDataResult<AppUserResponseDto>>
         {
             private readonly UserManager<AppUser> _userManager;
+
             private readonly IMapper _mapper;
 
-            public GetByIdUserQueryHandler(UserManager<AppUser> userManager, IMapper mapper)
+            public GetByIdUserQueryHandler(UserManager<AppUser> userManager, IMapper mapper, SignInManager<AppUser> signInManager)
             {
                 _userManager = userManager;
                 _mapper = mapper;

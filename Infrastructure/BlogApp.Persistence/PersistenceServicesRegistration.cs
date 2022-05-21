@@ -2,9 +2,13 @@
 using BlogApp.Domain.Entities;
 using BlogApp.Persistence.Contexts;
 using BlogApp.Persistence.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace BlogApp.Persistence
 {
@@ -15,7 +19,8 @@ namespace BlogApp.Persistence
             services.AddDbContext<BlogAppDbContext>(options =>
                options.UseNpgsql(
                    configuration.GetConnectionString("BlogAppPostgreConnectionString")));
-            services.AddIdentityCore<AppUser>(options =>
+
+            services.AddIdentity<AppUser, AppRole>(options =>
             {
                 //User Şifre Ayarları
                 options.Password.RequireDigit = true; //Sayı girme zorunluluğu
@@ -28,8 +33,9 @@ namespace BlogApp.Persistence
                 //User Ayarları
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@"; //Bu karakterler dışında kullanım yapılamaz.
                 options.User.RequireUniqueEmail = true; //Tek mail adresi ile kayıt olabilme.
-
-            }).AddEntityFrameworkStores<BlogAppDbContext>();
+            })
+                .AddDefaultTokenProviders()
+                .AddEntityFrameworkStores<BlogAppDbContext>();
 
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IUnitOfWork, UnitOfWork>();

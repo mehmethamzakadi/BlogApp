@@ -25,6 +25,12 @@ namespace BlogApp.Application.Features.AppUsers.Commands
 
             public async Task<IResult> Handle(CreateAppUserCommand request, CancellationToken cancellationToken)
             {
+                var userExists = await _userManager.FindByEmailAsync(request.Email);
+                if (userExists != null)
+                {
+                    return new ErrorResult("Böyle bir kullanıcı zaten sistemde mevcut!");
+                }
+
                 var user = _mapper.Map<AppUser>(request);
                 var response = await _userManager.CreateAsync(user, request.Password);
                 if (!response.Succeeded)
