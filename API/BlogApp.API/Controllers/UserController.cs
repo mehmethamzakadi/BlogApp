@@ -35,5 +35,12 @@ namespace BlogApp.API.Controllers
         {
             return GetResponseOnlyResultMessage(await Mediator.Send(new DeleteAppUserCommand { Id = id }));
         }
+
+        [HttpPost]
+        [Route("login")]
+        public async Task<IActionResult> Login([FromBody] UserLoginQuery userLogin)
+        {
+            return GetResponseOnlyResultData(await Mediator.Send(new UserLoginQuery { Email = userLogin.Email, Password = userLogin.Password }));
+        }
     }
 }
