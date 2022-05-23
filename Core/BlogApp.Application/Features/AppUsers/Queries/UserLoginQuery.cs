@@ -12,12 +12,12 @@ using System.Text;
 
 namespace BlogApp.Application.Features.AppUsers.Queries
 {
-    public class UserLoginQuery : IRequest<IDataResult<AppUserLoginResponse>>
+    public class UserLoginQuery : IRequest<IDataResult<TokenInfo>>
     {
         public string? Email { get; set; }
         public string? Password { get; set; }
 
-        public class RegisterQueryHandler : IRequestHandler<UserLoginQuery, IDataResult<AppUserLoginResponse>>
+        public class RegisterQueryHandler : IRequestHandler<UserLoginQuery, IDataResult<TokenInfo>>
         {
             private readonly UserManager<AppUser> _userManager;
             private readonly SignInManager<AppUser> _signInManager;
@@ -33,17 +33,16 @@ namespace BlogApp.Application.Features.AppUsers.Queries
                 _signInManager = signInManager;
             }
 
-            public async Task<IDataResult<AppUserLoginResponse>> Handle(UserLoginQuery request, CancellationToken cancellationToken)
+            public async Task<IDataResult<TokenInfo>> Handle(UserLoginQuery request, CancellationToken cancellationToken)
             {
                 var user = await _userManager.FindByEmailAsync(request.Email);
+
                 if (user != null && await _userManager.CheckPasswordAsync(user, request.Password))
                 {
-
                     var userRoles = await _userManager.GetRolesAsync(user);
-
                     var authClaims = new List<Claim>
                     {
-                        new Claim(ClaimTypes.Name, user.UserName),
+                        new Claim(ClaimTypes.Email, user.Email),
                         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                     };
 
@@ -55,16 +54,15 @@ namespace BlogApp.Application.Features.AppUsers.Queries
                     await _signInManager.SignInWithClaimsAsync(user, false, authClaims);
 
                     var token = GetToken(authClaims);
-
-                    var result = new AppUserLoginResponse
+                    var result = new TokenInfo
                     {
                         Token = new JwtSecurityTokenHandler().WriteToken(token),
                         Expiration = token.ValidTo
                     };
 
-                    return new SuccessDataResult<AppUserLoginResponse>(result, "Giriş Başarılı");
+                    return new SuccessDataResult<TokenInfo>(result, "Giriş Başarılı");
                 }
-                return new ErrorDataResult<AppUserLoginResponse>("E-Mail veya şifre hatalı!");
+                return new ErrorDataResult<TokenInfo>("E-Mail veya şifre hatalı!");
             }
 
 

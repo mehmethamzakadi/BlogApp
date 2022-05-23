@@ -2,6 +2,7 @@ using BlogApp.Application;
 using BlogApp.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,33 +30,58 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidAudience = builder.Configuration["JWT:ValidAudience"],
         ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"])),
+        ClockSkew = TimeSpan.Zero
     };
 });
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
-//builder.Services.AddSession();
-//builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSwaggerGen(option =>
+{
+    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Blog App API", Version = "v1" });
+    option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Please enter a valid token",
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        BearerFormat = "JWT",
+        Scheme = "Bearer"
+    });
+    option.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type=ReferenceType.SecurityScheme,
+                    Id="Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
-//builder.Services.ConfigureApplicationCookie(opt =>
-//{
-//    opt.LoginPath = new PathString("/Admin/User/Login");
-//    opt.LogoutPath = new PathString("/Admin/User/Logout");
-//    opt.Cookie = new CookieBuilder
-//    {
-//        Name = "BlogApp",
-//        HttpOnly = true,
-//        SameSite = SameSiteMode.Strict,
-//        SecurePolicy = CookieSecurePolicy.SameAsRequest //Canlýda Always olmalýdýr.,
-//    };
-//    opt.SlidingExpiration = true;
-//    opt.ExpireTimeSpan = TimeSpan.FromDays(7);
-//    opt.AccessDeniedPath = new PathString("/Admin/User/AccessDenied");
-//});
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie = new CookieBuilder
+    {
+        Name = "BlogApp",
+        HttpOnly = true,
+        SameSite = SameSiteMode.Strict,
+        SecurePolicy = CookieSecurePolicy.SameAsRequest //Canlýda Always olmalýdýr.,
+    };
+    options.LoginPath = "/Identity/Account/Login";
+    options.LogoutPath = "/Identity/Account/Logout";
+    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+    options.SlidingExpiration = true;
+});
 
 
 var app = builder.Build();
@@ -67,11 +93,17 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-//app.UseSession();
-
 app.UseHttpsRedirection();
 
 app.UseAuthentication(); //Kimlik doðrulamasý.
+
+app.UseRouting();
+
+app.UseCors(opt => opt
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .SetIsOriginAllowed(origin => true) // allow any origin
+                .AllowCredentials()); // allow credentials
 
 app.UseAuthorization(); //Yetki kontrolü.
 

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.API.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,User")]
     public class CategoryController : BaseApiController
     {
         [HttpGet]
