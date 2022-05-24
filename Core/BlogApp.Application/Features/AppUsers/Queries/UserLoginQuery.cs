@@ -43,6 +43,8 @@ namespace BlogApp.Application.Features.AppUsers.Queries
                     var authClaims = new List<Claim>
                     {
                         new Claim(ClaimTypes.Email, user.Email),
+                        new Claim(ClaimTypes.Name, user.UserName),
+                        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                     };
 
@@ -50,7 +52,6 @@ namespace BlogApp.Application.Features.AppUsers.Queries
                     {
                         authClaims.Add(new Claim(ClaimTypes.Role, userRole));
                     }
-
                     await _signInManager.SignInWithClaimsAsync(user, false, authClaims);
 
                     var token = GetToken(authClaims);

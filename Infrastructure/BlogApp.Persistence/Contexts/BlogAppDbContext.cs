@@ -1,11 +1,12 @@
 ﻿using BlogApp.Domain.Entities;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace BlogApp.Persistence.Contexts
 {
     public class BlogAppDbContext : AuditableDbContext
     {
-        public BlogAppDbContext(DbContextOptions<BlogAppDbContext> options) : base(options)
+        public BlogAppDbContext(DbContextOptions<BlogAppDbContext> options, IHttpContextAccessor httpContextAccessor) : base(options, httpContextAccessor)
         {
         }
 
@@ -13,7 +14,7 @@ namespace BlogApp.Persistence.Contexts
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(BlogAppDbContext).Assembly);
         }
-
         public DbSet<Category> Categories { get; set; }
+
     }
 }

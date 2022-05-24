@@ -3,6 +3,8 @@ using BlogApp.Application.Utilities.Results;
 using BlogApp.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace BlogApp.Application.Features.AppUsers.Commands
 {
@@ -37,6 +39,9 @@ namespace BlogApp.Application.Features.AppUsers.Commands
                 {
                     return new ErrorResult("Ekleme işlemi sırasında hata oluştu!");
                 }
+
+                //Oluşturulan her yeni kullanıcıya default olarak User rolü atanır.
+                await _userManager.AddToRoleAsync(user, "User");
 
                 return new SuccessResult("Kullanıcı bilgisi başarıyla eklendi.");
             }

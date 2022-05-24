@@ -13,6 +13,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddConfigurePersistenceServices(builder.Configuration);
 builder.Services.AddConfigureApplicationServices();
 
+builder.Services.AddHttpContextAccessor();
+
 // Adding Authentication
 builder.Services.AddAuthentication(options =>
 {
