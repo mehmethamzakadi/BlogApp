@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BlogApp.Application.Constants;
 using BlogApp.Application.Utilities.Results;
 using BlogApp.Domain.Entities;
 using MediatR;
@@ -41,7 +42,7 @@ namespace BlogApp.Application.Features.AppUsers.Commands
                 }
 
                 //Oluşturulan her yeni kullanıcıya default olarak User rolü atanır.
-                await _userManager.AddToRoleAsync(user, "User");
+                await _userManager.AddToRoleAsync(user, UserRoles.User);
 
                 return new SuccessResult("Kullanıcı bilgisi başarıyla eklendi.");
             }
