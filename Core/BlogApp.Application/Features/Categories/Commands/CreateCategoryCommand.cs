@@ -1,4 +1,5 @@
-﻿using BlogApp.Application.Interfaces.Persistence;
+﻿using BlogApp.Application.Features.Categories.ValidationRules;
+using BlogApp.Application.Interfaces.Persistence;
 using BlogApp.Application.Utilities.Results;
 using BlogApp.Domain.Entities;
 using MediatR;
@@ -26,7 +27,7 @@ namespace BlogApp.Application.Features.Categories.Commands
                     await _unitOfWork.SaveAsync();
                     return new SuccessResult("Kategori bilgsi başarıyla eklendi.");
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     return new ErrorResult("Kategori bilgsi eklerken hata oluştu!");
                 }

@@ -1,10 +1,12 @@
 ﻿using BlogApp.Application.Utilities.Results;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using IResult = BlogApp.Application.Utilities.Results.IResult;
 
 namespace BlogApp.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class BaseApiController : ControllerBase

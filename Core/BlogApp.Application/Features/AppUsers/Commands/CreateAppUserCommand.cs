@@ -30,16 +30,12 @@ namespace BlogApp.Application.Features.AppUsers.Commands
             {
                 var userExists = await _userManager.FindByEmailAsync(request.Email);
                 if (userExists != null)
-                {
                     return new ErrorResult("Böyle bir kullanıcı zaten sistemde mevcut!");
-                }
 
                 var user = _mapper.Map<AppUser>(request);
                 var response = await _userManager.CreateAsync(user, request.Password);
                 if (!response.Succeeded)
-                {
                     return new ErrorResult("Ekleme işlemi sırasında hata oluştu!");
-                }
 
                 //Oluşturulan her yeni kullanıcıya default olarak User rolü atanır.
                 await _userManager.AddToRoleAsync(user, UserRoles.User);

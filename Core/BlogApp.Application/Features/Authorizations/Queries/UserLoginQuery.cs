@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using BlogApp.Application.DTOs.AppUsers;
+﻿using BlogApp.Application.DTOs.AppUsers;
 using BlogApp.Application.Utilities.Results;
 using BlogApp.Domain.Entities;
 using MediatR;
@@ -10,7 +9,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace BlogApp.Application.Features.AppUsers.Queries
+namespace BlogApp.Application.Features.Authorizations.Queries
 {
     public class UserLoginQuery : IRequest<IDataResult<TokenInfo>>
     {
@@ -22,13 +21,11 @@ namespace BlogApp.Application.Features.AppUsers.Queries
             private readonly UserManager<AppUser> _userManager;
             private readonly SignInManager<AppUser> _signInManager;
 
-            private readonly IMapper _mapper;
             private readonly IConfiguration Configuration;
 
-            public RegisterQueryHandler(UserManager<AppUser> userManager, IMapper mapper, IConfiguration configuration, SignInManager<AppUser> signInManager)
+            public RegisterQueryHandler(UserManager<AppUser> userManager, IConfiguration configuration, SignInManager<AppUser> signInManager)
             {
                 _userManager = userManager;
-                _mapper = mapper;
                 Configuration = configuration;
                 _signInManager = signInManager;
             }

@@ -9,10 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-
 builder.Services.AddConfigurePersistenceServices(builder.Configuration);
 builder.Services.AddConfigureApplicationServices();
-
 builder.Services.AddHttpContextAccessor();
 
 // Adding Authentication
@@ -68,7 +66,6 @@ builder.Services.AddSwaggerGen(option =>
     });
 });
 
-
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie = new CookieBuilder
@@ -84,7 +81,6 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
     options.SlidingExpiration = true;
 });
-
 
 var app = builder.Build();
 

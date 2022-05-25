@@ -22,9 +22,7 @@ namespace BlogApp.Application.Features.Categories.Commands
             {
                 var category = await _unitOfWork.CategoryRepository.GetByIdAsync(request.Id);
                 if (category == null)
-                {
                     return new ErrorResult("Kategori bilgisi bulunamadı!");
-                }
 
                 category.Name = request.Name;
 

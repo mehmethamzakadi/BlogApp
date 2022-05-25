@@ -26,6 +26,10 @@ namespace BlogApp.Application.Features.AppUsers.Queries
             public async Task<IDataResult<AppUserResponseDto>> Handle(GetByIdUserQuery request, CancellationToken cancellationToken)
             {
                 var user = _userManager.Users.Where(x => x.Id == request.Id).FirstOrDefault();
+                if (user == null)
+                {
+                    return new ErrorDataResult<AppUserResponseDto>("Kullanıcı bulunamadı!");
+                }
                 var userDto = _mapper.Map<AppUserResponseDto>(user);
                 return new SuccessDataResult<AppUserResponseDto>(userDto);
             }

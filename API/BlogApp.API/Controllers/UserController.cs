@@ -25,22 +25,15 @@ namespace BlogApp.API.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> Put(UpdateAppUserCommand user)
+        public async Task<IActionResult> Put(UpdateAppUserCommand updateUser)
         {
-            return GetResponseOnlyResultMessage(await Mediator.Send(user));
+            return GetResponseOnlyResultMessage(await Mediator.Send(updateUser));
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [HttpDelete]
+        public async Task<IActionResult> Delete(DeleteAppUserCommand deleteUser)
         {
-            return GetResponseOnlyResultMessage(await Mediator.Send(new DeleteAppUserCommand { Id = id }));
-        }
-
-        [HttpPost]
-        [Route("login")]
-        public async Task<IActionResult> Login([FromBody] UserLoginQuery userLogin)
-        {
-            return GetResponseOnlyResultData(await Mediator.Send(new UserLoginQuery { Email = userLogin.Email, Password = userLogin.Password }));
+            return GetResponseOnlyResultMessage(await Mediator.Send(deleteUser));
         }
     }
 }

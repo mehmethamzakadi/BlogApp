@@ -22,14 +22,11 @@ namespace BlogApp.Application.Features.AppUsers.Commands
             {
                 var user = _userManager.Users.Where(x => x.Id == request.Id).FirstOrDefault();
                 if (user == null)
-                {
                     return new ErrorResult("Kullanıcı bilgisi bulunamadı!");
-                }
+
                 var response = await _userManager.DeleteAsync(user);
                 if (!response.Succeeded)
-                {
                     return new ErrorResult("Silme işlemi sırasında hata oluştu!");
-                }
 
                 return new SuccessResult("Kullanıcı bilgisi başarıyla silindi.");
             }
