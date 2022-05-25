@@ -11,12 +11,12 @@ using System.Text;
 
 namespace BlogApp.Application.Features.Authorizations.Queries
 {
-    public class UserLoginQuery : IRequest<IDataResult<TokenInfo>>
+    public class UserLoginQuery : IRequest<IDataResult<TokenResponse>>
     {
         public string? Email { get; set; }
         public string? Password { get; set; }
 
-        public class RegisterQueryHandler : IRequestHandler<UserLoginQuery, IDataResult<TokenInfo>>
+        public class RegisterQueryHandler : IRequestHandler<UserLoginQuery, IDataResult<TokenResponse>>
         {
             private readonly UserManager<AppUser> _userManager;
             private readonly SignInManager<AppUser> _signInManager;
@@ -30,7 +30,7 @@ namespace BlogApp.Application.Features.Authorizations.Queries
                 _signInManager = signInManager;
             }
 
-            public async Task<IDataResult<TokenInfo>> Handle(UserLoginQuery request, CancellationToken cancellationToken)
+            public async Task<IDataResult<TokenResponse>> Handle(UserLoginQuery request, CancellationToken cancellationToken)
             {
                 var user = await _userManager.FindByEmailAsync(request.Email);
 
@@ -52,15 +52,15 @@ namespace BlogApp.Application.Features.Authorizations.Queries
                     await _signInManager.SignInWithClaimsAsync(user, false, authClaims);
 
                     var token = GetToken(authClaims);
-                    var result = new TokenInfo
+                    var result = new TokenResponse
                     {
                         Token = new JwtSecurityTokenHandler().WriteToken(token),
                         Expiration = token.ValidTo
                     };
 
-                    return new SuccessDataResult<TokenInfo>(result, "Giriş Başarılı");
+                    return new SuccessDataResult<TokenResponse>(result, "Giriş Başarılı");
                 }
-                return new ErrorDataResult<TokenInfo>("E-Mail veya şifre hatalı!");
+                return new ErrorDataResult<TokenResponse>("E-Mail veya şifre hatalı!");
             }
 
 

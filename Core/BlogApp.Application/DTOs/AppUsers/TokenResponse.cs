@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BlogApp.Application.DTOs.AppUsers
 {
-    public class TokenInfo
+    public class TokenResponse
     {
         public DateTime Expiration { get; set; }
         public string? Token { get; set; }
