@@ -20,7 +20,6 @@ namespace BlogApp.Application.Features.Authorizations.Queries
         {
             private readonly UserManager<AppUser> _userManager;
             private readonly SignInManager<AppUser> _signInManager;
-
             private readonly IConfiguration Configuration;
 
             public RegisterQueryHandler(UserManager<AppUser> userManager, IConfiguration configuration, SignInManager<AppUser> signInManager)
@@ -66,12 +65,15 @@ namespace BlogApp.Application.Features.Authorizations.Queries
 
             private JwtSecurityToken GetToken(List<Claim> authClaims)
             {
-                var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWT:Secret"]));
+                var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["TokenOptions:SecurityKey"]));
+                var issuer = Configuration["TokenOptions:Issuer"];
+                var audience = Configuration["TokenOptions:Audience"];
+                var expires = Convert.ToInt32(Configuration["TokenOptions:AccessTokenExpiration"]);
 
                 var token = new JwtSecurityToken(
-                    issuer: Configuration["JWT:ValidIssuer"],
-                    audience: Configuration["JWT:ValidAudience"],
-                    expires: DateTime.Now.AddHours(3),
+                    issuer: issuer,
+                    audience: audience,
+                    expires: DateTime.Now.AddMinutes(expires),
                     claims: authClaims,
                     signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
                     );
