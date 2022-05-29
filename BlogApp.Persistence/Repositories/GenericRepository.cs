@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 
 namespace BlogApp.Persistence.Repositories
 {
-    public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
+    public class GenericRepository<T> : IGenericRepository<T> where T : class, new()
     {
         private readonly BlogAppDbContext _dbContext;
 
@@ -33,9 +33,7 @@ namespace BlogApp.Persistence.Repositories
 
         public async Task<IReadOnlyList<T>> GetAllAsync()
         {
-            return await _dbContext.Set<T>()
-                .OrderBy(x => x.Id)
-                .ToListAsync();
+            return await _dbContext.Set<T>().ToListAsync();
         }
 
         public async Task<T?> GetByIdAsync(int id)

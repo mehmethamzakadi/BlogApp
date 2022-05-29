@@ -15,6 +15,8 @@ namespace BlogApp.Persistence.Contexts
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(BlogAppDbContext).Assembly);
         }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<AppUserToken> AppUserTokens { get; set; }
+
 
     }
 }

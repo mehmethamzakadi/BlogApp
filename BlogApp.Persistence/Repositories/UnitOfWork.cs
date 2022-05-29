@@ -7,6 +7,7 @@ namespace BlogApp.Persistence.Repositories
     {
         private readonly BlogAppDbContext _dbContext;
         private ICategoryRepository _categoryRepository;
+        private IAppUserTokenRepository _appUserTokenRepository;
 
         public UnitOfWork(BlogAppDbContext dbContext)
         {
@@ -15,6 +16,9 @@ namespace BlogApp.Persistence.Repositories
 
         public ICategoryRepository CategoryRepository =>
            _categoryRepository ??= new CategoryRepository(_dbContext);
+
+        public IAppUserTokenRepository AppUserTokenRepository =>
+           _appUserTokenRepository ??= new AppUserTokenRepository(_dbContext);
 
 
         public void Dispose()

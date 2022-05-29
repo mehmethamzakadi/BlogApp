@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 
 namespace BlogApp.Application.Interfaces.Persistence
 {
-    public interface IGenericRepository<T> where T : BaseEntity
+    public interface IGenericRepository<T> where T : class, new()
     {
         Task<T?> GetByIdAsync(int id);
         Task<IReadOnlyList<T>> GetAllAsync();

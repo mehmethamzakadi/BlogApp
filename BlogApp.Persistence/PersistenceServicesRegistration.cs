@@ -41,6 +41,8 @@ namespace BlogApp.Persistence
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddScoped<IAppUserTokenRepository, AppUserTokenRepository>();
+
 
             return services;
         }

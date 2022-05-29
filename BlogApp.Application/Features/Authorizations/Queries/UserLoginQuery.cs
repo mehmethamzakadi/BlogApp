@@ -1,4 +1,5 @@
 ﻿using BlogApp.Application.DTOs.AppUsers;
+using BlogApp.Application.Interfaces.Persistence;
 using BlogApp.Application.Utilities.Results;
 using BlogApp.Domain.Entities;
 using MediatR;
@@ -18,15 +19,17 @@ namespace BlogApp.Application.Features.Authorizations.Queries
 
         public class RegisterQueryHandler : IRequestHandler<UserLoginQuery, IDataResult<TokenResponse>>
         {
+            private readonly IUnitOfWork _unitOfWork;
             private readonly UserManager<AppUser> _userManager;
             private readonly SignInManager<AppUser> _signInManager;
             private readonly IConfiguration Configuration;
 
-            public RegisterQueryHandler(UserManager<AppUser> userManager, IConfiguration configuration, SignInManager<AppUser> signInManager)
+            public RegisterQueryHandler(UserManager<AppUser> userManager, IConfiguration configuration, SignInManager<AppUser> signInManager, IUnitOfWork unitOfWork)
             {
                 _userManager = userManager;
                 Configuration = configuration;
                 _signInManager = signInManager;
+                _unitOfWork = unitOfWork;
             }
 
             public async Task<IDataResult<TokenResponse>> Handle(UserLoginQuery request, CancellationToken cancellationToken)
@@ -56,6 +59,10 @@ namespace BlogApp.Application.Features.Authorizations.Queries
                         Token = new JwtSecurityTokenHandler().WriteToken(token),
                         Expiration = token.ValidTo
                     };
+
+                    var appUserToken = new AppUserToken { UserId = user.Id, LoginProvider = "JWT", Value = result.Token, Name = "Test" };
+                    await _unitOfWork.AppUserTokenRepository.AddAsync(appUserToken);
+                    await _unitOfWork.SaveAsync();
 
                     return new SuccessDataResult<TokenResponse>(result, "Giriş Başarılı");
                 }
