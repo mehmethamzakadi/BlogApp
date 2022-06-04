@@ -17,7 +17,7 @@ namespace BlogApp.Persistence.Contexts
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            var userId = Convert.ToInt32(_httpContextAccessor?.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var userId = Convert.ToInt32(_httpContextAccessor?.HttpContext?.User?.FindFirst("Id")?.Value);
             foreach (var entry in base.ChangeTracker.Entries<BaseEntity>()
                .Where(q => q.State == EntityState.Added || q.State == EntityState.Modified || q.State == EntityState.Deleted))
             {
