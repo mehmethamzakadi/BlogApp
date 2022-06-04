@@ -1,4 +1,5 @@
 using BlogApp.Application;
+using BlogApp.Infrastructure;
 using BlogApp.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -11,6 +12,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddConfigurePersistenceServices(builder.Configuration);
 builder.Services.AddConfigureApplicationServices();
+builder.Services.AddConfigureInfrastructureServices();
+
 builder.Services.AddHttpContextAccessor();
 
 // Adding Authentication
