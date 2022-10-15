@@ -15,8 +15,11 @@ namespace BlogApp.Persistence.Contexts
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(BlogAppDbContext).Assembly);
         }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<Post> Posts { get; set; }
+        public DbSet<Image> Images { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<PostCategory> PostCategories { get; set; }
+        public DbSet<PostImage> PostImages { get; set; }
         public DbSet<AppUserToken> AppUserTokens { get; set; }
-
-
     }
 }

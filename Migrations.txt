@@ -1,0 +1,3 @@
+-Persistence
+add-migration MigName -context BlogAppDbContext
+update-database -context BlogAppDbContext
