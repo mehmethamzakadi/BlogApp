@@ -1,6 +1,5 @@
 using BlogApp.Application.Features.Categories.Commands;
 using BlogApp.Application.Features.Categories.Queries;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.API.Controllers
