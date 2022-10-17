@@ -1,11 +1,8 @@
-﻿using FluentValidation.AspNetCore;
+﻿using BlogApp.Application.Behaviors;
+using FluentValidation.AspNetCore;
 using MediatR;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
 using System.Reflection;
-using System.Text;
 
 
 namespace BlogApp.Application
@@ -16,6 +13,8 @@ namespace BlogApp.Application
         {
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
             services.AddMediatR(Assembly.GetExecutingAssembly());
+
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TransactionPipeline<,>));
 
             services.AddFluentValidation(options =>
                 {

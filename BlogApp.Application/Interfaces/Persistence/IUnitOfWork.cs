@@ -1,7 +1,7 @@
 ﻿
 namespace BlogApp.Application.Interfaces.Persistence
 {
-    public interface IUnitOfWork : IDisposable
+    public interface IUnitOfWork
     {
         ICategoryRepository CategoryRepository { get; }
         IPostRepository PostRepository { get; }
@@ -10,6 +10,9 @@ namespace BlogApp.Application.Interfaces.Persistence
         IPostImageRepository PostImageRepository { get; }
         IPostCategoryRepository PostCategoryRepository { get; }
         IAppUserTokenRepository AppUserTokenRepository { get; }
-        Task SaveAsync();
+        void SaveChanges();
+        Task SaveChangesAsync();
+        void Rollback();
+        Task RollbackAsync();
     }
 }

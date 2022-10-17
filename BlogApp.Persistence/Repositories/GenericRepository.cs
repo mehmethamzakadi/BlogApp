@@ -50,7 +50,5 @@ namespace BlogApp.Persistence.Repositories
         {
             _dbContext.Entry(entity).State = EntityState.Modified;
         }
-
-
     }
 }

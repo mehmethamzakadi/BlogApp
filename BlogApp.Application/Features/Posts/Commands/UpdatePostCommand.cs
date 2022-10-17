@@ -35,7 +35,7 @@ namespace BlogApp.Application.Features.Posts.Commands
                 post.IsPublished = request.IsPublished;
 
                 _unitOfWork.PostRepository.Update(post);
-                await _unitOfWork.SaveAsync();
+                await _unitOfWork.SaveChangesAsync();
 
                 return new SuccessResult("Post bilgisi başarıyla güncellendi.");
             }

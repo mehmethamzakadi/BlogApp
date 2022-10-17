@@ -23,7 +23,7 @@ namespace BlogApp.Application.Features.Categories.Commands
                     return new ErrorResult("Kategori bilgisi bulunamadı!");
 
                 _unitOfWork.CategoryRepository.Remove(category);
-                await _unitOfWork.SaveAsync();
+                await _unitOfWork.SaveChangesAsync();
 
                 return new SuccessResult("Kategori bilgisi başarıyla silindi.");
             }

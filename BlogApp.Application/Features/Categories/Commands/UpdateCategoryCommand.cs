@@ -27,7 +27,7 @@ namespace BlogApp.Application.Features.Categories.Commands
                 category.Name = request.Name;
 
                 _unitOfWork.CategoryRepository.Update(category);
-                await _unitOfWork.SaveAsync();
+                await _unitOfWork.SaveChangesAsync();
 
                 return new SuccessResult("Kategori bilgisi başarıyla güncellendi.");
             }

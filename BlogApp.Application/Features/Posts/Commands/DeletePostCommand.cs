@@ -30,7 +30,7 @@ namespace BlogApp.Application.Features.Posts.Commands
                     _unitOfWork.PostCategoryRepository.Remove(postCategory);
                 }
 
-                await _unitOfWork.SaveAsync();
+                await _unitOfWork.SaveChangesAsync();
 
                 return new SuccessResult("Post bilgisi başarıyla silindi.");
             }

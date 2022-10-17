@@ -29,13 +29,14 @@ namespace BlogApp.Application.Features.Posts.Commands
                 try
                 {
                     var post = await _unitOfWork.PostRepository.AddAsync(new Post { Title = request.Title, Body = request.Body, Summary = request.Summary, Thumbnail = request.Thumbnail, IsPublished = false });
+                    await _unitOfWork.SaveChangesAsync();
 
-                    foreach (var id in request.CategoriIds)
+                    foreach (int id in request.CategoriIds)
                     {
                         await _unitOfWork.PostCategoryRepository.AddAsync(new PostCategory { CategoryId = id, PostId = post.Id });
                     }
 
-                    await _unitOfWork.SaveAsync();
+                    await _unitOfWork.SaveChangesAsync();
                     return new SuccessResult("Post bilgsi başarıyla eklendi.");
                 }
                 catch (Exception)

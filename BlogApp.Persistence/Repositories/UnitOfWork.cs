@@ -12,7 +12,6 @@ namespace BlogApp.Persistence.Repositories
         private IImageRepository _imageRepository;
         private IPostImageRepository _postImageRepository;
         private IPostCategoryRepository _postCategoryRepository;
-
         private IAppUserTokenRepository _appUserTokenRepository;
 
         public UnitOfWork(BlogAppDbContext dbContext)
@@ -42,15 +41,26 @@ namespace BlogApp.Persistence.Repositories
            _appUserTokenRepository ??= new AppUserTokenRepository(_dbContext);
 
 
-        public void Dispose()
+        public void Rollback()
         {
             _dbContext.Dispose();
             GC.SuppressFinalize(this);
         }
 
-        public async Task SaveAsync()
+        public async Task RollbackAsync()
+        {
+            await _dbContext.DisposeAsync();
+            GC.SuppressFinalize(this);
+        }
+
+        public async Task SaveChangesAsync()
         {
             await _dbContext.SaveChangesAsync();
+        }
+
+        public void SaveChanges()
+        {
+            _dbContext.SaveChanges();
         }
     }
 }

@@ -24,7 +24,7 @@ namespace BlogApp.Application.Features.Categories.Commands
                 try
                 {
                     await _unitOfWork.CategoryRepository.AddAsync(new Category { Name = request.Name });
-                    await _unitOfWork.SaveAsync();
+                    await _unitOfWork.SaveChangesAsync();
                     return new SuccessResult("Kategori bilgsi başarıyla eklendi.");
                 }
                 catch (Exception)
