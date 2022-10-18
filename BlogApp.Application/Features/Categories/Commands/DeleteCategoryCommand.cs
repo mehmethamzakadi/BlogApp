@@ -18,9 +18,11 @@ namespace BlogApp.Application.Features.Categories.Commands
 
             public async Task<IResult> Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
             {
-                var category = await _unitOfWork.CategoryRepository.GetByIdAsync(request.Id);
-                if (category == null)
+                var exists = await _unitOfWork.CategoryRepository.ExistsAsync(x => x.Id == request.Id);
+                if (!exists)
                     return new ErrorResult("Kategori bilgisi bulunamadı!");
+
+                var category = await _unitOfWork.CategoryRepository.GetByIdAsync(request.Id);
 
                 _unitOfWork.CategoryRepository.Remove(category);
                 await _unitOfWork.SaveChangesAsync();

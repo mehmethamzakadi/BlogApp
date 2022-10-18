@@ -18,10 +18,14 @@ namespace BlogApp.Application.Features.Posts.Commands
 
             public async Task<IResult> Handle(DeletePostCommand request, CancellationToken cancellationToken)
             {
-                var post = await _unitOfWork.PostRepository.GetByIdAsync(request.Id);
-                if (post == null)
+
+                var exists = await _unitOfWork.PostRepository.ExistsAsync(x => x.Id == request.Id);
+                if (!exists)
                     return new ErrorResult("Post bilgisi bulunamadı!");
+
+                var post = await _unitOfWork.PostRepository.GetByIdAsync(request.Id);
                 _unitOfWork.PostRepository.Remove(post);
+                await _unitOfWork.SaveChangesAsync();
 
                 //Post Category bilgileri siliniyor.
                 var postCategories = _unitOfWork.PostCategoryRepository.GetWhere(x => x.PostId == request.Id).ToList();
@@ -29,7 +33,6 @@ namespace BlogApp.Application.Features.Posts.Commands
                 {
                     _unitOfWork.PostCategoryRepository.Remove(postCategory);
                 }
-
                 await _unitOfWork.SaveChangesAsync();
 
                 return new SuccessResult("Post bilgisi başarıyla silindi.");

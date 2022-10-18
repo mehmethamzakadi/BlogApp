@@ -10,6 +10,7 @@ namespace BlogApp.Application.Profiles
         public CategoryProfile()
         {
             CreateMap<Category, CategoryResponseDto>().ReverseMap();
+            CreateMap<Category, UpdateCategoryCommand>().ReverseMap();
         }
     }
 }

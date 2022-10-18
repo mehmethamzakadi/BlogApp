@@ -1,7 +1,5 @@
 ﻿using BlogApp.Domain.Common;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace BlogApp.Domain.Entities
 {
@@ -12,6 +10,6 @@ namespace BlogApp.Domain.Entities
         public string Summary { get; set; }
         public string Thumbnail { get; set; }
         public bool IsPublished { get; set; }
-        public virtual ICollection<Comment> Comments { get; set; }
+        public virtual ICollection<Comment>? Comments { get; set; }
     }
 }

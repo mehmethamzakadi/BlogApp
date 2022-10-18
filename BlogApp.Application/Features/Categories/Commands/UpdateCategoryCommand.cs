@@ -1,4 +1,5 @@
-﻿using BlogApp.Application.Interfaces.Persistence;
+﻿using AutoMapper;
+using BlogApp.Application.Interfaces.Persistence;
 using BlogApp.Application.Utilities.Results;
 using MediatR;
 
@@ -20,16 +21,24 @@ namespace BlogApp.Application.Features.Categories.Commands
 
             public async Task<IResult> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
             {
-                var category = await _unitOfWork.CategoryRepository.GetByIdAsync(request.Id);
-                if (category == null)
-                    return new ErrorResult("Kategori bilgisi bulunamadı!");
+                try
+                {
+                    var exists = await _unitOfWork.CategoryRepository.ExistsAsync(x => x.Id == request.Id);
+                    if (!exists)
+                        return new ErrorResult("Kategori bilgisi bulunamadı!");
 
-                category.Name = request.Name;
+                    var entity = await _unitOfWork.CategoryRepository.GetByIdAsync(request.Id);
+                    entity.Name = request.Name;
 
-                _unitOfWork.CategoryRepository.Update(category);
-                await _unitOfWork.SaveChangesAsync();
+                    _unitOfWork.CategoryRepository.Update(entity);
+                    await _unitOfWork.SaveChangesAsync();
 
-                return new SuccessResult("Kategori bilgisi başarıyla güncellendi.");
+                    return new SuccessResult("Kategori bilgisi başarıyla güncellendi.");
+                }
+                catch (Exception)
+                {
+                    return new ErrorResult("Kategori bilgisi güncellenirken hata oluştu.");
+                }
             }
         }
     }
