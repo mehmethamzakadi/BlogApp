@@ -16,6 +16,8 @@ namespace BlogApp.Application
             services.AddMediatR(Assembly.GetExecutingAssembly());
 
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TransactionBehavior<,>));
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehaviour<,>));
 
             services.AddFluentValidationAutoValidation();
             services.AddFluentValidationClientsideAdapters();
