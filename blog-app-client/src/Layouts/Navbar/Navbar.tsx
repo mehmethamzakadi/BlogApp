@@ -14,6 +14,7 @@ import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
 import DesktopNav from "./Desktop/DesktopNav";
 import MobileNav from "./Mobile/MobileNav";
 import { ColorModeSwitcher } from "../../Features/ColorModeSwitcher/ColorModeSwitcher";
+import NotificationButton from "../../Features/NotificationButton/NotificationButton";
 
 const Navbar = () => {
   const { isOpen, onToggle } = useDisclosure();
@@ -64,6 +65,7 @@ const Navbar = () => {
           direction={"row"}
           spacing={6}
         >
+          <NotificationButton />
           <ColorModeSwitcher />
           <Button
             as={"a"}
