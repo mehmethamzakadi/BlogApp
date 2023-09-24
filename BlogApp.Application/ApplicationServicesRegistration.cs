@@ -16,7 +16,6 @@ namespace BlogApp.Application
             services.AddMediatR(configuration =>
             {
                 configuration.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
-
                 configuration.AddOpenBehavior(typeof(TransactionScopeBehavior<,>));
             });
 
