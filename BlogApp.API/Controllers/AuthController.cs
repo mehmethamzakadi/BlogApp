@@ -1,5 +1,4 @@
-using BlogApp.Application.Features.AppUsers.Commands;
-using BlogApp.Application.Features.Authorizations.Queries;
+using BlogApp.Application.Features.Authorizations.Queries.UserLogin;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

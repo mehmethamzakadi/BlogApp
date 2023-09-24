@@ -1,19 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="DTOs\ParamsDTOs\**" />
-    <Compile Remove="DTOs\ResultDTOs\**" />
-    <EmbeddedResource Remove="DTOs\ParamsDTOs\**" />
-    <EmbeddedResource Remove="DTOs\ResultDTOs\**" />
-    <None Remove="DTOs\ParamsDTOs\**" />
-    <None Remove="DTOs\ResultDTOs\**" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\BlogApp.Domain\BlogApp.Domain.csproj" />
@@ -21,16 +12,19 @@
 
   <ItemGroup>
     <Folder Include="Exceptions\" />
+    <Folder Include="Features\AppUsers\Rules\" />
     <Folder Include="Features\Authorizations\Commands\" />
+    <Folder Include="Features\Authorizations\Profiles\" />
+    <Folder Include="Features\Authorizations\Rules\" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
-    <PackageReference Include="FluentValidation.AspNetCore" Version="11.2.2" />
-    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.10" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+    <PackageReference Include="MediatR" Version="12.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.1" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,8 @@
-using BlogApp.Application.Features.AppUsers.Commands;
-using BlogApp.Application.Features.AppUsers.Queries;
+using BlogApp.Application.Features.AppUsers.Commands.Create;
+using BlogApp.Application.Features.AppUsers.Commands.Delete;
+using BlogApp.Application.Features.AppUsers.Commands.Update;
+using BlogApp.Application.Features.AppUsers.Queries.GetById;
+using BlogApp.Application.Features.AppUsers.Queries.GetList;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.API.Controllers
@@ -9,13 +12,13 @@ namespace BlogApp.API.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            return GetResponseOnlyResultData(await Mediator.Send(new GetAllUsersQuery()));
+            return GetResponseOnlyResultData(await Mediator.Send(new GetListAppUsersQuery()));
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
-            return GetResponseOnlyResultData(await Mediator.Send(new GetByIdUserQuery { Id = id }));
+            return GetResponseOnlyResultData(await Mediator.Send(new GetByIdAppUserQuery { Id = id }));
         }
 
         [HttpPost]

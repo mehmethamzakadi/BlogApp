@@ -1,5 +1,8 @@
-using BlogApp.Application.Features.Posts.Commands;
-using BlogApp.Application.Features.Posts.Queries;
+using BlogApp.Application.Features.Posts.Commands.Create;
+using BlogApp.Application.Features.Posts.Commands.Delete;
+using BlogApp.Application.Features.Posts.Commands.Update;
+using BlogApp.Application.Features.Posts.Queries.GetById;
+using BlogApp.Application.Features.Posts.Queries.GetList;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.API.Controllers
@@ -9,7 +12,7 @@ namespace BlogApp.API.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            return GetResponseOnlyResultData(await Mediator.Send(new GetAllPostsQuery()));
+            return GetResponseOnlyResultData(await Mediator.Send(new GetListPostQuery()));
         }
 
         [HttpGet("{id}")]

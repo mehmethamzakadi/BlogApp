@@ -9,10 +9,10 @@ namespace BlogApp.API.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class BaseApiController : ControllerBase
+    public abstract class BaseApiController : ControllerBase
     {
         private IMediator _mediator;
-        protected IMediator Mediator => _mediator ??= HttpContext.RequestServices.GetService<IMediator>();
+        protected IMediator Mediator => _mediator = HttpContext.RequestServices.GetService<IMediator>();
 
         [ApiExplorerSettings(IgnoreApi = true)]
         public IActionResult GetResponse<T>(IDataResult<T> result)
