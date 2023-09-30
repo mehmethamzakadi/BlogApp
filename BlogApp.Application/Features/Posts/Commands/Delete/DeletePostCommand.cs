@@ -1,4 +1,5 @@
-﻿using BlogApp.Application.Interfaces.Persistence;
+﻿using BlogApp.Application.Behaviors.Transaction;
+using BlogApp.Application.Interfaces.Persistence;
 using BlogApp.Application.Utilities.Results;
 using MediatR;
 
@@ -8,32 +9,33 @@ namespace BlogApp.Application.Features.Posts.Commands.Delete
     {
         public int Id { get; set; }
 
-        public class DeletePostCommandHandler : IRequestHandler<DeletePostCommand, IResult>
+        public class DeletePostCommandHandler : IRequestHandler<DeletePostCommand, IResult>, ITransactionalRequest
         {
-            private readonly IUnitOfWork _unitOfWork;
-            public DeletePostCommandHandler(IUnitOfWork unitOfWork)
+            private readonly IPostRepository _postRepository;
+            private readonly IPostCategoryRepository _postCategoryRepository;
+
+            public DeletePostCommandHandler(IPostRepository postRepository, IPostCategoryRepository postCategoryRepository)
             {
-                _unitOfWork = unitOfWork;
+                _postRepository = postRepository;
+                _postCategoryRepository = postCategoryRepository;
             }
 
             public async Task<IResult> Handle(DeletePostCommand request, CancellationToken cancellationToken)
             {
 
-                var exists = await _unitOfWork.PostRepository.ExistsAsync(x => x.Id == request.Id);
+                var exists = await _postRepository.AnyAsync(x => x.Id == request.Id);
                 if (!exists)
                     return new ErrorResult("Post bilgisi bulunamadı!");
 
-                var post = await _unitOfWork.PostRepository.GetByIdAsync(request.Id);
-                _unitOfWork.PostRepository.Remove(post);
-                await _unitOfWork.SaveChangesAsync();
+                var post = await _postRepository.GetAsync(x => x.Id == request.Id);
+                await _postRepository.DeleteAsync(post);
 
                 //Post Category bilgileri siliniyor.
-                var postCategories = _unitOfWork.PostCategoryRepository.GetWhere(x => x.PostId == request.Id).ToList();
-                foreach (var postCategory in postCategories)
+                var postCategories = await _postCategoryRepository.GetListAsync(x => x.PostId == request.Id);
+                foreach (var postCategory in postCategories.Items)
                 {
-                    _unitOfWork.PostCategoryRepository.Remove(postCategory);
+                    await _postCategoryRepository.DeleteAsync(postCategory);
                 }
-                await _unitOfWork.SaveChangesAsync();
 
                 return new SuccessResult("Post bilgisi başarıyla silindi.");
             }

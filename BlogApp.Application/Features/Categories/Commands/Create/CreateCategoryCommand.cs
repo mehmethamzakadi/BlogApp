@@ -11,20 +11,19 @@ namespace BlogApp.Application.Features.Categories.Commands.Create
 
         public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryCommand, IResult>
         {
-            private readonly IUnitOfWork _unitOfWork;
+            private readonly ICategoryRepository _categoryRepository;
 
-            public CreateCategoryCommandHandler(IUnitOfWork unitOfWork)
+            public CreateCategoryCommandHandler(ICategoryRepository categoryRepository)
             {
-                _unitOfWork = unitOfWork;
+                _categoryRepository = categoryRepository;
             }
 
             public async Task<IResult> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
             {
                 try
                 {
-                    await _unitOfWork.CategoryRepository.AddAsync(new Category { Name = request.Name });
+                    await _categoryRepository.AddAsync(new Category { Name = request.Name });
 
-                    await _unitOfWork.SaveChangesAsync();
                     return new SuccessResult("Kategori bilgsi başarıyla eklendi.");
                 }
                 catch (Exception)

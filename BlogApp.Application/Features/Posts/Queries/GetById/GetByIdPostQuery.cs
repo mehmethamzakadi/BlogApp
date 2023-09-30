@@ -1,30 +1,33 @@
 ﻿using AutoMapper;
 using BlogApp.Application.Interfaces.Persistence;
-using BlogApp.Application.Utilities.Results;
+using BlogApp.Domain.Entities;
 using MediatR;
 
 namespace BlogApp.Application.Features.Posts.Queries.GetById
 {
-    public class GetByIdPostQuery : IRequest<IDataResult<GetByIdPostResponse>>
+    public class GetByIdPostQuery : IRequest<GetByIdPostResponse>
     {
         public int Id { get; set; }
 
-        public class GetPostByIdQueryHandler : IRequestHandler<GetByIdPostQuery, IDataResult<GetByIdPostResponse>>
+        public class GetPostByIdQueryHandler : IRequestHandler<GetByIdPostQuery, GetByIdPostResponse>
         {
-            private readonly IUnitOfWork _unitOfWork;
+
+            private readonly IPostRepository _postRepository;
             private readonly IMapper _mapper;
 
-            public GetPostByIdQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+            public GetPostByIdQueryHandler(IPostRepository postRepository, IMapper mapper)
             {
-                _unitOfWork = unitOfWork;
+                _postRepository = postRepository;
                 _mapper = mapper;
+
             }
 
-            public async Task<IDataResult<GetByIdPostResponse>> Handle(GetByIdPostQuery request, CancellationToken cancellationToken)
+            public async Task<GetByIdPostResponse> Handle(GetByIdPostQuery request, CancellationToken cancellationToken)
             {
-                var post = await _unitOfWork.PostRepository.GetByIdAsync(request.Id);
-                var response = _mapper.Map<GetByIdPostResponse>(post);
-                return new SuccessDataResult<GetByIdPostResponse>(response);
+                Post? post = await _postRepository.GetAsync(predicate: b => b.Id == request.Id, cancellationToken: cancellationToken);
+                GetByIdPostResponse response = _mapper.Map<GetByIdPostResponse>(post);
+
+                return response;
             }
         }
     }

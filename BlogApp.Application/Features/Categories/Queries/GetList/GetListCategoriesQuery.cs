@@ -1,28 +1,37 @@
 ﻿using AutoMapper;
 using BlogApp.Application.Interfaces.Persistence;
-using BlogApp.Application.Utilities.Results;
+using BlogApp.Application.Interfaces.Persistence.Paging;
+using BlogApp.Application.Utilities.Requests;
+using BlogApp.Application.Utilities.Responses;
+using BlogApp.Domain.Entities;
 using MediatR;
 
 namespace BlogApp.Application.Features.Categories.Queries.GetList
 {
-    public class GetListCategoriesQuery : IRequest<IDataResult<IReadOnlyList<GetListCategoryResponse>>>
+    public class GetListCategoriesQuery : IRequest<GetListResponse<GetListCategoryResponse>>
     {
-        public class GetAllCategoriesQueryHandler : IRequestHandler<GetListCategoriesQuery, IDataResult<IReadOnlyList<GetListCategoryResponse>>>
+        public PageRequest PageRequest { get; set; }
+        public class GetAllCategoriesQueryHandler : IRequestHandler<GetListCategoriesQuery, GetListResponse<GetListCategoryResponse>>
         {
-            private readonly IUnitOfWork _unitOfWork;
+            private readonly ICategoryRepository _categoryRepository;
             private readonly IMapper _mapper;
 
-            public GetAllCategoriesQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+            public GetAllCategoriesQueryHandler(ICategoryRepository categoryRepository, IMapper mapper)
             {
-                _unitOfWork = unitOfWork;
+                _categoryRepository = categoryRepository;
                 _mapper = mapper;
             }
 
-            public async Task<IDataResult<IReadOnlyList<GetListCategoryResponse>>> Handle(GetListCategoriesQuery request, CancellationToken cancellationToken)
+            public async Task<GetListResponse<GetListCategoryResponse>> Handle(GetListCategoriesQuery request, CancellationToken cancellationToken)
             {
-                var categoryList = await _unitOfWork.CategoryRepository.GetAllAsync();
-                List<GetListCategoryResponse> response = _mapper.Map<IReadOnlyList<GetListCategoryResponse>>(categoryList).ToList();
-                return new SuccessDataResult<IReadOnlyList<GetListCategoryResponse>>(response);
+                Paginate<Category> categories = await _categoryRepository.GetListAsync(
+                index: request.PageRequest.PageIndex,
+                size: request.PageRequest.PageSize,
+                cancellationToken: cancellationToken
+                );
+
+                GetListResponse<GetListCategoryResponse> response = _mapper.Map<GetListResponse<GetListCategoryResponse>>(categories);
+                return response;
             }
         }
     }

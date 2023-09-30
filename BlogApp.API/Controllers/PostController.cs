@@ -3,6 +3,8 @@ using BlogApp.Application.Features.Posts.Commands.Delete;
 using BlogApp.Application.Features.Posts.Commands.Update;
 using BlogApp.Application.Features.Posts.Queries.GetById;
 using BlogApp.Application.Features.Posts.Queries.GetList;
+using BlogApp.Application.Utilities.Requests;
+using BlogApp.Application.Utilities.Responses;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.API.Controllers
@@ -10,15 +12,19 @@ namespace BlogApp.API.Controllers
     public class PostController : BaseApiController
     {
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> GetList([FromQuery] PageRequest pageRequest)
         {
-            return GetResponseOnlyResultData(await Mediator.Send(new GetListPostQuery()));
+            GetListPostQuery getListPostQuery = new() { PageRequest = pageRequest };
+            GetListResponse<GetListPostResponse> response = await Mediator.Send(getListPostQuery);
+            return Ok(response);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id)
+        public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            return GetResponseOnlyResultData(await Mediator.Send(new GetByIdPostQuery { Id = id }));
+            GetByIdPostQuery getByIdPostQuery = new() { Id = id };
+            GetByIdPostResponse response = await Mediator.Send(getByIdPostQuery);
+            return Ok(response);
         }
 
         [HttpPost]

@@ -1,8 +1,9 @@
-﻿using BlogApp.Domain.Entities;
+﻿using BlogApp.Application.Interfaces.Persistence.Common;
+using BlogApp.Domain.Entities;
 
 namespace BlogApp.Application.Interfaces.Persistence
 {
-    public interface IImageRepository : IGenericRepository<Image>
+    public interface IImageRepository : IAsyncRepository<Image>, IRepository<Image>
     {
     }
 }

@@ -3,7 +3,6 @@ using BlogApp.Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
 namespace BlogApp.Persistence.Contexts
 {
@@ -31,14 +30,6 @@ namespace BlogApp.Persistence.Contexts
                 {
                     entry.Entity.UpdatedDate = DateTime.UtcNow;
                     entry.Entity.UpdatedById = userId;
-                }
-
-                if (entry.State == EntityState.Deleted)
-                {
-                    entry.State = EntityState.Modified;
-                    entry.Entity.IsDeleted = true;
-                    entry.Entity.UpdatedById = userId;
-                    entry.Entity.UpdatedDate = DateTime.UtcNow;
                 }
             }
 

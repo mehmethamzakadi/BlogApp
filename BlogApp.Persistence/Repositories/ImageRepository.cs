@@ -4,13 +4,10 @@ using BlogApp.Persistence.Contexts;
 
 namespace BlogApp.Persistence.Repositories
 {
-    public class ImageRepository : GenericRepository<Image>, IImageRepository
+    public class ImageRepository : EfRepositoryBase<Image, BlogAppDbContext>, IImageRepository
     {
-        private readonly BlogAppDbContext _dbContext;
-
         public ImageRepository(BlogAppDbContext dbContext) : base(dbContext)
         {
-            _dbContext = dbContext;
         }
     }
 }

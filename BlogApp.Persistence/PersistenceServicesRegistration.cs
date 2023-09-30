@@ -2,13 +2,10 @@
 using BlogApp.Domain.Entities;
 using BlogApp.Persistence.Contexts;
 using BlogApp.Persistence.Repositories;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 
 namespace BlogApp.Persistence
 {
@@ -37,12 +34,15 @@ namespace BlogApp.Persistence
                 .AddEntityFrameworkStores<BlogAppDbContext>()
                 .AddDefaultTokenProviders();
 
-            services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            //services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepositoryBase<,>));
+            //services.AddScoped(typeof(IRepository<>), typeof(EfRepositoryBase<,>));
 
             services.AddScoped<ICategoryRepository, CategoryRepository>();
-            services.AddScoped<IAppUserTokenRepository, AppUserTokenRepository>();
-
+            services.AddScoped<ICommentRepository, CommentRepository>();
+            services.AddScoped<IImageRepository, ImageRepository>();
+            services.AddScoped<IPostCategoryRepository, PostCategoryRepository>();
+            services.AddScoped<IPostImageRepository, PostImageRepository>();
+            services.AddScoped<IPostRepository, PostRepository>();
 
             return services;
         }

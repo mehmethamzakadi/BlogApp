@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+﻿using BlogApp.Application.Behaviors.Transaction;
 using BlogApp.Application.Interfaces.Persistence;
 using BlogApp.Application.Utilities.Results;
 using BlogApp.Domain.Entities;
@@ -16,49 +16,46 @@ namespace BlogApp.Application.Features.Posts.Commands.Update
         public bool IsPublished { get; set; }
         public virtual List<int> CategoriIds { get; set; }
 
-        public class UpdatePostCommandHandler : IRequestHandler<UpdatePostCommand, IResult>
+        public class UpdatePostCommandHandler : IRequestHandler<UpdatePostCommand, IResult>, ITransactionalRequest
         {
-            private readonly IUnitOfWork _unitOfWork;
-            private readonly IMapper _mapper;
+            private readonly IPostRepository _postRepository;
+            private readonly IPostCategoryRepository _postCategoryRepository;
 
-            public UpdatePostCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+            public UpdatePostCommandHandler(IPostRepository postRepository, IPostCategoryRepository postCategoryRepository)
             {
-                _unitOfWork = unitOfWork;
-                _mapper = mapper;
+                _postRepository = postRepository;
+                _postCategoryRepository = postCategoryRepository;
             }
 
             public async Task<IResult> Handle(UpdatePostCommand request, CancellationToken cancellationToken)
             {
                 try
                 {
-                    var exists = await _unitOfWork.PostRepository.ExistsAsync(x => x.Id == request.Id);
+                    var exists = await _postRepository.AnyAsync(x => x.Id == request.Id);
                     if (!exists)
                         return new ErrorResult("Post bilgisi bulunamadı!");
 
-                    var entity = await _unitOfWork.PostRepository.GetByIdAsync(request.Id);
+                    var entity = await _postRepository.GetAsync(x => x.Id == request.Id);
                     entity.Title = request.Title;
                     entity.Body = request.Body;
                     entity.Summary = request.Summary;
                     entity.Thumbnail = request.Thumbnail;
                     entity.IsPublished = request.IsPublished;
 
-                    _unitOfWork.PostRepository.Update(entity);
-                    await _unitOfWork.SaveChangesAsync();
+                    await _postRepository.UpdateAsync(entity);
 
                     //Önce eski postCategories verileri siliniyor
-                    var postCategories = _unitOfWork.PostCategoryRepository.GetWhere(x => x.PostId == request.Id).ToList();
-                    foreach (var postCategory in postCategories)
+                    var postCategories = await _postCategoryRepository.GetListAsync(x => x.PostId == request.Id);
+                    foreach (var postCategory in postCategories.Items)
                     {
-                        _unitOfWork.PostCategoryRepository.Remove(postCategory);
+                        await _postCategoryRepository.DeleteAsync(postCategory);
                     }
-                    await _unitOfWork.SaveChangesAsync();
 
                     //Sonra yeni postCategories verileri ekleniyor.
                     foreach (var categoryId in request.CategoriIds)
                     {
-                        await _unitOfWork.PostCategoryRepository.AddAsync(new PostCategory { CategoryId = categoryId, PostId = request.Id });
+                        await _postCategoryRepository.AddAsync(new PostCategory { CategoryId = categoryId, PostId = request.Id });
                     }
-                    await _unitOfWork.SaveChangesAsync();
 
                     return new SuccessResult("Post bilgisi başarıyla güncellendi.");
                 }

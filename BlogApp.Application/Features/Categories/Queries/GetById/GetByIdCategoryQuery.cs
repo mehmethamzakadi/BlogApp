@@ -1,30 +1,32 @@
 ﻿using AutoMapper;
 using BlogApp.Application.Interfaces.Persistence;
-using BlogApp.Application.Utilities.Results;
+using BlogApp.Domain.Entities;
 using MediatR;
 
 namespace BlogApp.Application.Features.Categories.Queries.GetById
 {
-    public class GetByIdCategoryQuery : IRequest<IDataResult<GetByIdCategoryResponse>>
+    public class GetByIdCategoryQuery : IRequest<GetByIdCategoryResponse>
     {
         public int Id { get; set; }
 
-        public class GetCategoryByIdQueryHandler : IRequestHandler<GetByIdCategoryQuery, IDataResult<GetByIdCategoryResponse>>
+        public class GetCategoryByIdQueryHandler : IRequestHandler<GetByIdCategoryQuery, GetByIdCategoryResponse>
         {
-            private readonly IUnitOfWork _unitOfWork;
+            private readonly ICategoryRepository _categoryRepository;
             private readonly IMapper _mapper;
 
-            public GetCategoryByIdQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+            public GetCategoryByIdQueryHandler(ICategoryRepository categoryRepository, IMapper mapper)
             {
-                _unitOfWork = unitOfWork;
+                _categoryRepository = categoryRepository;
                 _mapper = mapper;
             }
 
-            public async Task<IDataResult<GetByIdCategoryResponse>> Handle(GetByIdCategoryQuery request, CancellationToken cancellationToken)
+            public async Task<GetByIdCategoryResponse> Handle(GetByIdCategoryQuery request, CancellationToken cancellationToken)
             {
-                var category = await _unitOfWork.CategoryRepository.GetByIdAsync(request.Id);
-                var categoryDto = _mapper.Map<GetByIdCategoryResponse>(category);
-                return new SuccessDataResult<GetByIdCategoryResponse>(categoryDto);
+                Category? category = await _categoryRepository.GetAsync(predicate: b => b.Id == request.Id, cancellationToken: cancellationToken);
+
+                GetByIdCategoryResponse response = _mapper.Map<GetByIdCategoryResponse>(category);
+
+                return response;
             }
         }
     }

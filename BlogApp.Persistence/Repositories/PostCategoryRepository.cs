@@ -4,13 +4,10 @@ using BlogApp.Persistence.Contexts;
 
 namespace BlogApp.Persistence.Repositories
 {
-    public class PostCategoryRepository : GenericRepository<PostCategory>, IPostCategoryRepository
+    public class PostCategoryRepository : EfRepositoryBase<PostCategory, BlogAppDbContext>, IPostCategoryRepository
     {
-        private readonly BlogAppDbContext _dbContext;
-
         public PostCategoryRepository(BlogAppDbContext dbContext) : base(dbContext)
         {
-            _dbContext = dbContext;
         }
     }
 }

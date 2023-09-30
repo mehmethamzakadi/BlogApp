@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using BlogApp.Application.Interfaces.Persistence;
+﻿using BlogApp.Application.Interfaces.Persistence;
 using BlogApp.Application.Utilities.Results;
 using MediatR;
 
@@ -12,26 +11,25 @@ namespace BlogApp.Application.Features.Categories.Commands.Update
 
         public class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategoryCommand, IResult>
         {
-            private readonly IUnitOfWork _unitOfWork;
+            private readonly ICategoryRepository _categoryRepository;
 
-            public UpdateCategoryCommandHandler(IUnitOfWork unitOfWork)
+            public UpdateCategoryCommandHandler(ICategoryRepository categoryRepository)
             {
-                _unitOfWork = unitOfWork;
+                _categoryRepository = categoryRepository;
             }
 
             public async Task<IResult> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
             {
                 try
                 {
-                    var exists = await _unitOfWork.CategoryRepository.ExistsAsync(x => x.Id == request.Id);
+                    var exists = await _categoryRepository.AnyAsync(predicate: x => x.Id == request.Id, cancellationToken: cancellationToken);
                     if (!exists)
                         return new ErrorResult("Kategori bilgisi bulunamadı!");
 
-                    var entity = await _unitOfWork.CategoryRepository.GetByIdAsync(request.Id);
+                    var entity = await _categoryRepository.GetAsync(predicate: x => x.Id == request.Id, cancellationToken: cancellationToken);
                     entity.Name = request.Name;
 
-                    _unitOfWork.CategoryRepository.Update(entity);
-                    await _unitOfWork.SaveChangesAsync();
+                    await _categoryRepository.UpdateAsync(entity);
 
                     return new SuccessResult("Kategori bilgisi başarıyla güncellendi.");
                 }

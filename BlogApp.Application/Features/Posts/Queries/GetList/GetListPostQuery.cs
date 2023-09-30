@@ -1,28 +1,38 @@
 ﻿using AutoMapper;
 using BlogApp.Application.Interfaces.Persistence;
-using BlogApp.Application.Utilities.Results;
+using BlogApp.Application.Interfaces.Persistence.Paging;
+using BlogApp.Application.Utilities.Requests;
+using BlogApp.Application.Utilities.Responses;
+using BlogApp.Domain.Entities;
 using MediatR;
 
 namespace BlogApp.Application.Features.Posts.Queries.GetList
 {
-    public class GetListPostQuery : IRequest<IDataResult<IReadOnlyList<GetListPostResponse>>>
+    public class GetListPostQuery : IRequest<GetListResponse<GetListPostResponse>>
     {
-        public class GetListPostQueryHandler : IRequestHandler<GetListPostQuery, IDataResult<IReadOnlyList<GetListPostResponse>>>
+        public PageRequest PageRequest { get; set; }
+        public class GetListPostQueryHandler : IRequestHandler<GetListPostQuery, GetListResponse<GetListPostResponse>>
         {
-            private readonly IUnitOfWork _unitOfWork;
+            private readonly IPostRepository _postRepository;
             private readonly IMapper _mapper;
 
-            public GetListPostQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+            public GetListPostQueryHandler(IPostRepository postRepository, IMapper mapper)
             {
-                _unitOfWork = unitOfWork;
+                _postRepository = postRepository;
                 _mapper = mapper;
+
             }
 
-            public async Task<IDataResult<IReadOnlyList<GetListPostResponse>>> Handle(GetListPostQuery request, CancellationToken cancellationToken)
+            public async Task<GetListResponse<GetListPostResponse>> Handle(GetListPostQuery request, CancellationToken cancellationToken)
             {
-                var postList = await _unitOfWork.PostRepository.GetAllAsync();
-                List<GetListPostResponse> response = _mapper.Map<IReadOnlyList<GetListPostResponse>>(postList).ToList();
-                return new SuccessDataResult<IReadOnlyList<GetListPostResponse>>(response);
+                Paginate<Post> posts = await _postRepository.GetListAsync(
+                    index: request.PageRequest.PageIndex,
+                    size: request.PageRequest.PageSize,
+                    cancellationToken: cancellationToken
+               );
+
+                GetListResponse<GetListPostResponse> response = _mapper.Map<GetListResponse<GetListPostResponse>>(posts);
+                return response;
             }
         }
     }

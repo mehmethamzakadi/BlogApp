@@ -4,13 +4,10 @@ using BlogApp.Persistence.Contexts;
 
 namespace BlogApp.Persistence.Repositories
 {
-    public class CommentRepository : GenericRepository<Comment>, ICommentRepository
+    public class CommentRepository : EfRepositoryBase<Comment, BlogAppDbContext>, ICommentRepository
     {
-        private readonly BlogAppDbContext _dbContext;
-
         public CommentRepository(BlogAppDbContext dbContext) : base(dbContext)
         {
-            _dbContext = dbContext;
         }
     }
 }

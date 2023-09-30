@@ -15,13 +15,15 @@ namespace BlogApp.Application.Features.Posts.Commands.Create
         public bool IsPublished { get; set; }
         public virtual List<int> CategoriIds { get; set; }
 
-        public class CreatePostCommandHandler : IRequestHandler<CreatePostCommand, IResult>
+        public class CreatePostCommandHandler : IRequestHandler<CreatePostCommand, IResult>, ITransactionalRequest
         {
-            private readonly IUnitOfWork _unitOfWork;
+            private readonly IPostRepository _postRepository;
+            private readonly IPostCategoryRepository _postCategoryRepository;
 
-            public CreatePostCommandHandler(IUnitOfWork unitOfWork)
+            public CreatePostCommandHandler(IPostRepository postRepository, IPostCategoryRepository postCategoryRepository)
             {
-                _unitOfWork = unitOfWork;
+                _postRepository = postRepository;
+                _postCategoryRepository = postCategoryRepository;
             }
 
             public async Task<IResult> Handle(CreatePostCommand request, CancellationToken cancellationToken)
@@ -29,15 +31,13 @@ namespace BlogApp.Application.Features.Posts.Commands.Create
                 try
                 {
                     var postItem = new Post { Title = request.Title, Body = request.Body, Summary = request.Summary, Thumbnail = request.Thumbnail, IsPublished = false };
-                    var post = await _unitOfWork.PostRepository.AddAsync(postItem);
-                    //await _unitOfWork.SaveChangesAsync();
+                    var post = await _postRepository.AddAsync(postItem);
 
                     foreach (int id in request.CategoriIds)
                     {
-                        await _unitOfWork.PostCategoryRepository.AddAsync(new PostCategory { CategoryId = id, PostId = post.Id });
+                        await _postCategoryRepository.AddAsync(new PostCategory { CategoryId = id, PostId = post.Id });
                     }
 
-                    await _unitOfWork.SaveChangesAsync();
                     return new SuccessResult("Post bilgsi başarıyla eklendi.");
                 }
                 catch (Exception)

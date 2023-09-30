@@ -1,8 +1,12 @@
 ﻿
 using AutoMapper;
+using BlogApp.Application.Features.Categories.Commands.Create;
+using BlogApp.Application.Features.Categories.Commands.Delete;
 using BlogApp.Application.Features.Categories.Commands.Update;
 using BlogApp.Application.Features.Categories.Queries.GetById;
 using BlogApp.Application.Features.Categories.Queries.GetList;
+using BlogApp.Application.Interfaces.Persistence.Paging;
+using BlogApp.Application.Utilities.Responses;
 using BlogApp.Domain.Entities;
 
 namespace BlogApp.Application.Features.Categories.Profiles
@@ -11,9 +15,14 @@ namespace BlogApp.Application.Features.Categories.Profiles
     {
         public CategoryProfile()
         {
-            CreateMap<Category, GetByIdCategoryResponse>().ReverseMap();
-            CreateMap<Category, GetListCategoryResponse>().ReverseMap();
+            CreateMap<Category, CreateCategoryCommand>().ReverseMap();
             CreateMap<Category, UpdateCategoryCommand>().ReverseMap();
+            CreateMap<Category, DeleteCategoryCommand>().ReverseMap();
+
+            CreateMap<Category, GetListCategoryResponse>().ReverseMap();
+            CreateMap<Category, GetByIdCategoryResponse>().ReverseMap();
+            CreateMap<Paginate<Category>, GetListResponse<GetListCategoryResponse>>().ReverseMap();
+
         }
     }
 }

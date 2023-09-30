@@ -1,5 +1,6 @@
 ﻿using BlogApp.Application.Interfaces.Persistence;
 using BlogApp.Application.Utilities.Results;
+using BlogApp.Domain.Entities;
 using MediatR;
 
 namespace BlogApp.Application.Features.Categories.Commands.Delete
@@ -10,22 +11,22 @@ namespace BlogApp.Application.Features.Categories.Commands.Delete
 
         public class DeleteCategoryCommandHandler : IRequestHandler<DeleteCategoryCommand, IResult>
         {
-            private readonly IUnitOfWork _unitOfWork;
-            public DeleteCategoryCommandHandler(IUnitOfWork unitOfWork)
+            private readonly ICategoryRepository _categoryRepository;
+
+            public DeleteCategoryCommandHandler(ICategoryRepository categoryRepository)
             {
-                _unitOfWork = unitOfWork;
+                _categoryRepository = categoryRepository;
             }
 
             public async Task<IResult> Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
             {
-                var exists = await _unitOfWork.CategoryRepository.ExistsAsync(x => x.Id == request.Id);
+                var exists = await _categoryRepository.AnyAsync(predicate: x => x.Id == request.Id, cancellationToken: cancellationToken);
                 if (!exists)
                     return new ErrorResult("Kategori bilgisi bulunamadı!");
 
-                var category = await _unitOfWork.CategoryRepository.GetByIdAsync(request.Id);
+                Category? category = await _categoryRepository.GetAsync(predicate: x => x.Id == request.Id, cancellationToken: cancellationToken);
 
-                _unitOfWork.CategoryRepository.Remove(category);
-                await _unitOfWork.SaveChangesAsync();
+                await _categoryRepository.DeleteAsync(category);
 
                 return new SuccessResult("Kategori bilgisi başarıyla silindi.");
             }

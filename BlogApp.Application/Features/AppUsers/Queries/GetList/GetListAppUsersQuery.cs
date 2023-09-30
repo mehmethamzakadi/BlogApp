@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BlogApp.Application.DTOs.AppUsers;
+using BlogApp.Application.Utilities.Requests;
 using BlogApp.Application.Utilities.Results;
 using BlogApp.Domain.Entities;
 using MediatR;
@@ -9,6 +10,8 @@ namespace BlogApp.Application.Features.AppUsers.Queries.GetList
 {
     public class GetListAppUsersQuery : IRequest<IDataResult<IReadOnlyList<GetListAppUserResponse>>>
     {
+        public PageRequest PageRequest { get; set; }
+
 
         public class GetAllUserQueryHandler : IRequestHandler<GetListAppUsersQuery, IDataResult<IReadOnlyList<GetListAppUserResponse>>>
         {

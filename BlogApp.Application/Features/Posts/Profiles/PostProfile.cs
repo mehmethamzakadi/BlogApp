@@ -1,7 +1,11 @@
 ﻿using AutoMapper;
+using BlogApp.Application.Features.Posts.Commands.Create;
+using BlogApp.Application.Features.Posts.Commands.Delete;
 using BlogApp.Application.Features.Posts.Commands.Update;
 using BlogApp.Application.Features.Posts.Queries.GetById;
 using BlogApp.Application.Features.Posts.Queries.GetList;
+using BlogApp.Application.Interfaces.Persistence.Paging;
+using BlogApp.Application.Utilities.Responses;
 using BlogApp.Domain.Entities;
 
 namespace BlogApp.Application.Features.Posts.Profiles
@@ -10,9 +14,13 @@ namespace BlogApp.Application.Features.Posts.Profiles
     {
         public PostProfile()
         {
-            CreateMap<Post, GetByIdPostResponse>().ReverseMap();
-            CreateMap<Post, GetListPostResponse>().ReverseMap();
+            CreateMap<Post, CreatePostCommand>().ReverseMap();
             CreateMap<Post, UpdatePostCommand>().ReverseMap();
+            CreateMap<Post, DeletePostCommand>().ReverseMap();
+
+            CreateMap<Post, GetListPostResponse>().ReverseMap();
+            CreateMap<Post, GetByIdPostResponse>().ReverseMap();
+            CreateMap<Paginate<Post>, GetListResponse<GetListPostResponse>>().ReverseMap();
         }
     }
 }
