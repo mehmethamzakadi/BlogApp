@@ -125,13 +125,25 @@ namespace BlogApp.Persistence.Repositories
             return entities;
         }
 
-
         protected async Task SetEntityAsDeletedAsync(TEntity entity, bool permanent)
         {
             if (!permanent)
             {
                 CheckHasEntityHaveOneToOneRelation(entity);
                 await setEntityAsSoftDeletedAsync(entity);
+            }
+            else
+            {
+                Context.Remove(entity);
+            }
+        }
+
+        protected void SetEntityAsDeleted(TEntity entity, bool permanent)
+        {
+            if (!permanent)
+            {
+                CheckHasEntityHaveOneToOneRelation(entity);
+                setEntityAsSoftDeleted(entity);
             }
             else
             {
@@ -208,6 +220,57 @@ namespace BlogApp.Persistence.Repositories
             Context.Update(entity);
         }
 
+        private void setEntityAsSoftDeleted(BaseEntity entity)
+        {
+            if (entity.DeletedDate.HasValue)
+                return;
+            entity.DeletedDate = DateTime.UtcNow;
+            entity.IsDeleted = true;
+
+            var navigations = Context
+                .Entry(entity)
+                .Metadata.GetNavigations()
+                .Where(x => x is { IsOnDependent: false, ForeignKey.DeleteBehavior: DeleteBehavior.ClientCascade or DeleteBehavior.Cascade })
+                .ToList();
+            foreach (INavigation? navigation in navigations)
+            {
+                if (navigation.TargetEntityType.IsOwned())
+                    continue;
+                if (navigation.PropertyInfo == null)
+                    continue;
+
+                object? navValue = navigation.PropertyInfo.GetValue(entity);
+                if (navigation.IsCollection)
+                {
+                    if (navValue == null)
+                    {
+                        IQueryable query = Context.Entry(entity).Collection(navigation.PropertyInfo.Name).Query();
+                        navValue = GetRelationLoaderQuery(query, navigationPropertyType: navigation.PropertyInfo.GetType()).ToList();
+                        if (navValue == null)
+                            continue;
+                    }
+
+                    foreach (BaseEntity navValueItem in (IEnumerable)navValue)
+                        setEntityAsSoftDeleted(navValueItem);
+                }
+                else
+                {
+                    if (navValue == null)
+                    {
+                        IQueryable query = Context.Entry(entity).Reference(navigation.PropertyInfo.Name).Query();
+                        navValue = GetRelationLoaderQuery(query, navigationPropertyType: navigation.PropertyInfo.GetType())
+                            .FirstOrDefault();
+                        if (navValue == null)
+                            continue;
+                    }
+
+                    setEntityAsSoftDeleted((BaseEntity)navValue);
+                }
+            }
+
+            Context.Update(entity);
+        }
+
         protected IQueryable<object> GetRelationLoaderQuery(IQueryable query, Type navigationPropertyType)
         {
             Type queryProviderType = query.Provider.GetType();
@@ -230,52 +293,106 @@ namespace BlogApp.Persistence.Repositories
 
         public TEntity? Get(Expression<Func<TEntity, bool>> predicate, Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null, bool withDeleted = false, bool enableTracking = true)
         {
-            throw new NotImplementedException();
+            IQueryable<TEntity> queryable = Query();
+            if (!enableTracking)
+                queryable = queryable.AsNoTracking();
+            if (include != null)
+                queryable = include(queryable);
+            if (withDeleted)
+                queryable = queryable.IgnoreQueryFilters();
+            return queryable.FirstOrDefault(predicate);
         }
 
         public Paginate<TEntity> GetList(Expression<Func<TEntity, bool>>? predicate = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null, Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null, int index = 0, int size = 10, bool withDeleted = false, bool enableTracking = true)
         {
-            throw new NotImplementedException();
+            IQueryable<TEntity> queryable = Query();
+            if (!enableTracking)
+                queryable = queryable.AsNoTracking();
+            if (include != null)
+                queryable = include(queryable);
+            if (withDeleted)
+                queryable = queryable.IgnoreQueryFilters();
+            if (predicate != null)
+                queryable = queryable.Where(predicate);
+            if (orderBy != null)
+                return orderBy(queryable).ToPaginate(index, size);
+            return queryable.ToPaginate(index, size);
         }
 
         public Paginate<TEntity> GetListByDynamic(DynamicQuery dynamic, Expression<Func<TEntity, bool>>? predicate = null, Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null, int index = 0, int size = 10, bool withDeleted = false, bool enableTracking = true)
         {
-            throw new NotImplementedException();
+            IQueryable<TEntity> queryable = Query().ToDynamic(dynamic);
+            if (!enableTracking)
+                queryable = queryable.AsNoTracking();
+            if (include != null)
+                queryable = include(queryable);
+            if (withDeleted)
+                queryable = queryable.IgnoreQueryFilters();
+            if (predicate != null)
+                queryable = queryable.Where(predicate);
+            return queryable.ToPaginate(index, size);
         }
 
         public bool Any(Expression<Func<TEntity, bool>>? predicate = null, bool withDeleted = false, bool enableTracking = true)
         {
-            throw new NotImplementedException();
+            IQueryable<TEntity> queryable = Query();
+            if (!enableTracking)
+                queryable = queryable.AsNoTracking();
+            if (withDeleted)
+                queryable = queryable.IgnoreQueryFilters();
+            if (predicate != null)
+                queryable = queryable.Where(predicate);
+            return queryable.Any();
         }
 
         public TEntity Add(TEntity entity)
         {
-            throw new NotImplementedException();
+            entity.CreatedDate = DateTime.UtcNow;
+            Context.Add(entity);
+            Context.SaveChanges();
+            return entity;
         }
 
         public ICollection<TEntity> AddRange(ICollection<TEntity> entities)
         {
-            throw new NotImplementedException();
+            foreach (TEntity entity in entities)
+                entity.CreatedDate = DateTime.UtcNow;
+            Context.AddRange(entities);
+            Context.SaveChanges();
+            return entities;
         }
 
         public TEntity Update(TEntity entity)
         {
-            throw new NotImplementedException();
+            entity.UpdatedDate = DateTime.UtcNow;
+            Context.Update(entity);
+            Context.SaveChanges();
+            return entity;
         }
 
         public ICollection<TEntity> UpdateRange(ICollection<TEntity> entities)
         {
-            throw new NotImplementedException();
+            foreach (TEntity entity in entities)
+                entity.UpdatedDate = DateTime.UtcNow;
+            Context.UpdateRange(entities);
+            Context.SaveChanges();
+            return entities;
         }
 
         public TEntity Delete(TEntity entity, bool permanent = false)
         {
-            throw new NotImplementedException();
+            SetEntityAsDeleted(entity, permanent);
+            Context.SaveChanges();
+            return entity;
         }
 
-        public ICollection<TEntity> DeleteRange(ICollection<TEntity> entity, bool permanent = false)
+        public ICollection<TEntity> DeleteRange(ICollection<TEntity> entities, bool permanent = false)
         {
-            throw new NotImplementedException();
+            foreach (TEntity entity in entities)
+                entity.UpdatedDate = DateTime.UtcNow;
+            Context.UpdateRange(entities);
+            Context.SaveChanges();
+            return entities;
         }
     }
 }
