@@ -34,14 +34,9 @@ namespace BlogApp.Persistence
                 .AddEntityFrameworkStores<BlogAppDbContext>()
                 .AddDefaultTokenProviders();
 
-            //services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepositoryBase<,>));
-            //services.AddScoped(typeof(IRepository<>), typeof(EfRepositoryBase<,>));
-
             services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddScoped<ICommentRepository, CommentRepository>();
             services.AddScoped<IImageRepository, ImageRepository>();
-            services.AddScoped<IPostCategoryRepository, PostCategoryRepository>();
-            services.AddScoped<IPostImageRepository, PostImageRepository>();
             services.AddScoped<IPostRepository, PostRepository>();
 
             return services;

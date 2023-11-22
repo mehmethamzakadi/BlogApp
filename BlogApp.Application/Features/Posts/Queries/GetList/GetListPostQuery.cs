@@ -5,6 +5,7 @@ using BlogApp.Application.Utilities.Requests;
 using BlogApp.Application.Utilities.Responses;
 using BlogApp.Domain.Entities;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlogApp.Application.Features.Posts.Queries.GetList
 {
@@ -27,6 +28,7 @@ namespace BlogApp.Application.Features.Posts.Queries.GetList
             {
                 Paginate<Post> posts = await _postRepository.GetListAsync(
                     index: request.PageRequest.PageIndex,
+                    include: p => p.Include(p => p.Category),
                     size: request.PageRequest.PageSize,
                     cancellationToken: cancellationToken
                );

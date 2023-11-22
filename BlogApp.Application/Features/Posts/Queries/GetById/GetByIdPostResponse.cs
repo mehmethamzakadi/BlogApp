@@ -8,5 +8,7 @@
         public string Summary { get; set; }
         public string Thumbnail { get; set; }
         public bool IsPublished { get; set; }
+        public string CategoryName { get; set; }
+        public int CategoryId { get; set; }
     }
 }

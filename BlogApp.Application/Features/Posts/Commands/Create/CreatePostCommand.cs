@@ -13,30 +13,31 @@ namespace BlogApp.Application.Features.Posts.Commands.Create
         public string Summary { get; set; }
         public string Thumbnail { get; set; }
         public bool IsPublished { get; set; }
-        public virtual List<int> CategoriIds { get; set; }
+        public int CategoriId { get; set; }
 
         public class CreatePostCommandHandler : IRequestHandler<CreatePostCommand, IResult>, ITransactionalRequest
         {
             private readonly IPostRepository _postRepository;
-            private readonly IPostCategoryRepository _postCategoryRepository;
 
-            public CreatePostCommandHandler(IPostRepository postRepository, IPostCategoryRepository postCategoryRepository)
+            public CreatePostCommandHandler(IPostRepository postRepository)
             {
                 _postRepository = postRepository;
-                _postCategoryRepository = postCategoryRepository;
             }
 
             public async Task<IResult> Handle(CreatePostCommand request, CancellationToken cancellationToken)
             {
                 try
                 {
-                    var postItem = new Post { Title = request.Title, Body = request.Body, Summary = request.Summary, Thumbnail = request.Thumbnail, IsPublished = false };
-                    var post = await _postRepository.AddAsync(postItem);
-
-                    foreach (int id in request.CategoriIds)
+                    var postItem = new Post
                     {
-                        await _postCategoryRepository.AddAsync(new PostCategory { CategoryId = id, PostId = post.Id });
-                    }
+                        CategoryId = request.CategoriId,
+                        Title = request.Title,
+                        Body = request.Body,
+                        Summary = request.Summary,
+                        Thumbnail = request.Thumbnail,
+                        IsPublished = false
+                    };
+                    var post = await _postRepository.AddAsync(postItem);
 
                     return new SuccessResult("Post bilgsi başarıyla eklendi.");
                 }
