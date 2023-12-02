@@ -3,6 +3,7 @@ using BlogApp.Application.Features.AppUsers.Commands.Delete;
 using BlogApp.Application.Features.AppUsers.Commands.Update;
 using BlogApp.Application.Features.AppUsers.Queries.GetById;
 using BlogApp.Application.Features.AppUsers.Queries.GetList;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.API.Controllers
@@ -21,6 +22,7 @@ namespace BlogApp.API.Controllers
             return GetResponseOnlyResultData(await Mediator.Send(new GetByIdAppUserQuery { Id = id }));
         }
 
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Post(CreateAppUserCommand user)
         {
