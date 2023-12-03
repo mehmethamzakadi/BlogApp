@@ -14,9 +14,10 @@ namespace BlogApp.Persistence
         public static IServiceCollection AddConfigurePersistenceServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<BlogAppDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("BlogAppMsSqlConnectionString"))
-                                  /* options.UseNpgsql(
-                                       configuration.GetConnectionString("BlogAppPostgreConnectionString"))*/);
+              options.UseSqlServer(configuration.GetConnectionString("BlogAppMsSqlConnectionString"))
+            /*options.UseNpgsql(configuration.GetConnectionString("BlogAppPostgreConnectionString"))*/
+            );
+
 
             services.AddIdentity<AppUser, AppRole>(options =>
             {

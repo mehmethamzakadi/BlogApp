@@ -59,14 +59,19 @@ namespace BlogApp.Application.Features.Authorizations.Queries.UserLogin
                         Expiration = token.ValidTo
                     };
 
-                    var chatId = Convert.ToInt64(Configuration["TelegramBotConfiguration:ChatId"]);
-                    await _telegramBotManager.SendTextMessage($"{user.UserName} Kullanıcısı Sisteme Giriş Yaptı.", chatId);
+                    await SendTelegramMessage(user);
 
                     return new SuccessDataResult<TokenResponse>(result, "Giriş Başarılı");
                 }
                 return new ErrorDataResult<TokenResponse>("E-Mail veya şifre hatalı!");
             }
 
+            private async Task SendTelegramMessage(AppUser? user)
+            {
+                var chatId = Convert.ToInt64(Configuration["TelegramBotConfiguration:ChatId"]);
+                var message = $"{user.UserName} Kullanıcısı Sisteme Giriş Yaptı.";
+                await _telegramBotManager.SendTextMessage(message, chatId);
+            }
 
             private JwtSecurityToken GetToken(List<Claim> authClaims)
             {
