@@ -12,7 +12,7 @@ var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 // Add services to the container.
 
 builder.Services.AddConfigurePersistenceServices(builder.Configuration);
-builder.Services.AddConfigureApplicationServices();
+builder.Services.AddConfigureApplicationServices(builder.Configuration);
 builder.Services.AddConfigureInfrastructureServices();
 
 builder.Services.AddHttpContextAccessor();
