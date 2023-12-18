@@ -56,7 +56,9 @@ namespace BlogApp.Application.Features.Authorizations.Queries.UserLogin
                     var result = new TokenResponse
                     {
                         Token = new JwtSecurityTokenHandler().WriteToken(token),
-                        Expiration = token.ValidTo
+                        Expiration = token.ValidTo,
+                        UserId = user.Id,
+                        UserName = user.UserName,
                     };
 
                     await SendTelegramMessage(user);
