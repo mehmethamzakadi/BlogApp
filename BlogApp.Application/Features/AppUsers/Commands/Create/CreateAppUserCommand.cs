@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using BlogApp.Application.Constants;
 using BlogApp.Application.Utilities.Results;
+using BlogApp.Domain.Constants;
 using BlogApp.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
