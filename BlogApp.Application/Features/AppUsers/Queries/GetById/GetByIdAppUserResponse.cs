@@ -1,4 +1,4 @@
-﻿namespace BlogApp.Application.DTOs.AppUsers
+﻿namespace BlogApp.Application.Features.AppUsers.Queries.GetById
 {
     public class GetByIdAppUserResponse
     {
