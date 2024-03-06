@@ -1,11 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace BlogApp.Domain.Entities
+namespace BlogApp.Domain.Entities;
+
+public class AppRoleClaim : IdentityRoleClaim<int>
 {
-    public class AppRoleClaim : IdentityRoleClaim<int>
-    {
-    }
 }

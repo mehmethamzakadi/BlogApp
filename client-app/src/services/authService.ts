@@ -4,13 +4,17 @@ import { BaseResponse } from "@/types/common/baseResponse";
 import axios, { AxiosError } from "axios";
 
 export async function login(params: SignIn) {
-  debugger;
   try {
     const result = await axios.post<BaseResponse<TokenResponse>>(
       "https://localhost:7285/api/auth/login",
       params
     );
-    localStorage.setItem("jwt", JSON.stringify(result.data));
+
+    if (!result.data.success) {
+      return { error: result.data.success, message: result.data.message };
+    }
+
+    localStorage.setItem("jwt", JSON.stringify(result.data.data.token));
 
     return result.data;
   } catch (e) {

@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using BlogApp.Application.Interfaces.Persistence;
 using BlogApp.Domain.Entities;
+using BlogApp.Domain.Repositories;
 using MediatR;
 
 namespace BlogApp.Application.Features.Posts.Queries.GetById

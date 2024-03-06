@@ -1,10 +1,12 @@
-﻿using BlogApp.Application.Interfaces.Persistence.Dynamic;
-using BlogApp.Application.Interfaces.Persistence.Paging;
-using BlogApp.Domain.Common;
+﻿using BlogApp.Domain.Common.Dynamic;
+using BlogApp.Domain.Common.Paging;
 using Microsoft.EntityFrameworkCore.Query;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 
-namespace BlogApp.Application.Interfaces.Persistence.Common;
+namespace BlogApp.Domain.Common;
 
 public interface IRepository<TEntity> : IQuery<TEntity>
     where TEntity : BaseEntity

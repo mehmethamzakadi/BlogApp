@@ -1,6 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace BlogApp.Application.Interfaces.Persistence.Paging;
+namespace BlogApp.Domain.Common.Paging;
 
 public static class IQueryablePaginateExtensions
 {

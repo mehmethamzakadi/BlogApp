@@ -1,4 +1,4 @@
-﻿namespace BlogApp.Application.Interfaces.Persistence.Paging;
+﻿namespace BlogApp.Domain.Common.Paging;
 
 public abstract class BasePageableModel
 {

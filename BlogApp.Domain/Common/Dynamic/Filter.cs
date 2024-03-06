@@ -1,4 +1,6 @@
-﻿namespace BlogApp.Application.Interfaces.Persistence.Dynamic;
+﻿using System.Collections.Generic;
+
+namespace BlogApp.Domain.Common.Dynamic;
 
 public class Filter
 {

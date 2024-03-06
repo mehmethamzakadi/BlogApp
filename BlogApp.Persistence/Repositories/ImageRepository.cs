@@ -1,13 +1,12 @@
-﻿using BlogApp.Application.Interfaces.Persistence;
-using BlogApp.Domain.Entities;
+﻿using BlogApp.Domain.Entities;
+using BlogApp.Domain.Repositories;
 using BlogApp.Persistence.Contexts;
 
-namespace BlogApp.Persistence.Repositories
+namespace BlogApp.Persistence.Repositories;
+
+public class ImageRepository : EfRepositoryBase<Image, BlogAppDbContext>, IImageRepository
 {
-    public class ImageRepository : EfRepositoryBase<Image, BlogAppDbContext>, IImageRepository
+    public ImageRepository(BlogAppDbContext dbContext) : base(dbContext)
     {
-        public ImageRepository(BlogAppDbContext dbContext) : base(dbContext)
-        {
-        }
     }
 }

@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace BlogApp.Domain.Entities
+namespace BlogApp.Domain.Entities;
+
+public class AppUserToken : IdentityUserToken<int>
 {
-    public class AppUserToken : IdentityUserToken<int>
-    {
-    }
 }

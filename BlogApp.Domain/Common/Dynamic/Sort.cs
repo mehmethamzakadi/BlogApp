@@ -1,4 +1,4 @@
-﻿namespace BlogApp.Application.Interfaces.Persistence.Dynamic;
+﻿namespace BlogApp.Domain.Common.Dynamic;
 
 public class Sort
 {

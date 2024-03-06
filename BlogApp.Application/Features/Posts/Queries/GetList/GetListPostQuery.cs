@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
-using BlogApp.Application.Interfaces.Persistence;
-using BlogApp.Application.Interfaces.Persistence.Paging;
 using BlogApp.Application.Utilities.Requests;
 using BlogApp.Application.Utilities.Responses;
+using BlogApp.Domain.Common.Paging;
 using BlogApp.Domain.Entities;
+using BlogApp.Domain.Repositories;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 

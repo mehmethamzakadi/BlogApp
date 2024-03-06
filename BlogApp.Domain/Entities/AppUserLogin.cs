@@ -1,11 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace BlogApp.Domain.Entities
+namespace BlogApp.Domain.Entities;
+
+public class AppUserLogin : IdentityUserLogin<int>
 {
-    public class AppUserLogin : IdentityUserLogin<int>
-    {
-    }
 }

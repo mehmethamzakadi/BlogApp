@@ -1,13 +1,12 @@
-﻿using BlogApp.Application.Interfaces.Persistence;
-using BlogApp.Domain.Entities;
+﻿using BlogApp.Domain.Entities;
+using BlogApp.Domain.Repositories;
 using BlogApp.Persistence.Contexts;
 
-namespace BlogApp.Persistence.Repositories
+namespace BlogApp.Persistence.Repositories;
+
+public class CommentRepository : EfRepositoryBase<Comment, BlogAppDbContext>, ICommentRepository
 {
-    public class CommentRepository : EfRepositoryBase<Comment, BlogAppDbContext>, ICommentRepository
+    public CommentRepository(BlogAppDbContext dbContext) : base(dbContext)
     {
-        public CommentRepository(BlogAppDbContext dbContext) : base(dbContext)
-        {
-        }
     }
 }

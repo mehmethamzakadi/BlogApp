@@ -1,4 +1,4 @@
-﻿using BlogApp.Application.Interfaces.Persistence.Paging;
+﻿using BlogApp.Domain.Common.Paging;
 
 namespace BlogApp.Application.Utilities.Responses;
 

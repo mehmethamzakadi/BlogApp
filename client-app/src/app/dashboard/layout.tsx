@@ -22,7 +22,6 @@ export default function DashboardLayout({
 
   useEffect(() => {
     const jwt = localStorage.getItem("jwt");
-    debugger;
     if (jwt === null) {
       push("/auth/signin");
     }

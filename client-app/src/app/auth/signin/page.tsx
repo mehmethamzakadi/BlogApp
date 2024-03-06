@@ -13,7 +13,6 @@ function SignInPage() {
     event.preventDefault();
     const email: string = event.target.elements.email.value;
     const password: string = event.target.elements.password.value;
-    debugger;
     const result = (await login({
       email: email,
       password: password,

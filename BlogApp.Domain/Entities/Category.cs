@@ -1,9 +1,8 @@
 ﻿using BlogApp.Domain.Common;
 
-namespace BlogApp.Domain.Entities
+namespace BlogApp.Domain.Entities;
+
+public class Category : BaseEntity
 {
-    public class Category : BaseEntity
-    {
-        public string Name { get; set; }
-    }
+    public string Name { get; set; }
 }

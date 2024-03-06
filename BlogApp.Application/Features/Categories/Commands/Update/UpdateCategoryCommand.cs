@@ -1,5 +1,5 @@
-﻿using BlogApp.Application.Interfaces.Persistence;
-using BlogApp.Application.Utilities.Results;
+﻿using BlogApp.Application.Utilities.Results;
+using BlogApp.Domain.Repositories;
 using MediatR;
 
 namespace BlogApp.Application.Features.Categories.Commands.Update

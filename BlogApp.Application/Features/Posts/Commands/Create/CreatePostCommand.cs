@@ -1,7 +1,7 @@
 ﻿using BlogApp.Application.Behaviors.Transaction;
-using BlogApp.Application.Interfaces.Persistence;
 using BlogApp.Application.Utilities.Results;
 using BlogApp.Domain.Entities;
+using BlogApp.Domain.Repositories;
 using MediatR;
 
 namespace BlogApp.Application.Features.Posts.Commands.Create

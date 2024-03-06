@@ -188,7 +188,18 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                                 pathname === "/dashboard" && "text-white"
                               } `}
                             >
-                              eCommerce
+                              Panel
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              href="/dashboard/categories"
+                              className={`group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ${
+                                pathname === "/dashboard/categories" &&
+                                "text-white"
+                              } `}
+                            >
+                              Kategoriler
                             </Link>
                           </li>
                         </ul>

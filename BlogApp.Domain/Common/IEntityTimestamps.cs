@@ -1,13 +1,12 @@
 ﻿using System;
 
-namespace BlogApp.Domain.Common
+namespace BlogApp.Domain.Common;
+
+public interface IEntityTimestamps
 {
-    public interface IEntityTimestamps
-    {
-        DateTime CreatedDate { get; set; }
-        DateTime? UpdatedDate { get; set; }
-        DateTime? DeletedDate { get; set; }
-    }
+    DateTime CreatedDate { get; set; }
+    DateTime? UpdatedDate { get; set; }
+    DateTime? DeletedDate { get; set; }
 }
 
 

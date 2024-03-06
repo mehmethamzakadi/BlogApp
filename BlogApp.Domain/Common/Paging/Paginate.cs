@@ -1,4 +1,7 @@
-﻿namespace BlogApp.Application.Interfaces.Persistence.Paging;
+﻿using System;
+using System.Collections.Generic;
+
+namespace BlogApp.Domain.Common.Paging;
 
 public class Paginate<T>
 {
