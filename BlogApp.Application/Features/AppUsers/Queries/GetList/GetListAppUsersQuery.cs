@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using BlogApp.Application.DTOs.AppUsers;
 using BlogApp.Application.Utilities.Requests;
 using BlogApp.Application.Utilities.Results;
 using BlogApp.Domain.Entities;

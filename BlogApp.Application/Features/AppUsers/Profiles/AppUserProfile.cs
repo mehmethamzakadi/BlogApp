@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
-using BlogApp.Application.DTOs.AppUsers;
 using BlogApp.Application.Features.AppUsers.Commands.Create;
+using BlogApp.Application.Features.AppUsers.Queries.GetById;
+using BlogApp.Application.Features.AppUsers.Queries.GetList;
 using BlogApp.Domain.Entities;
 
 namespace BlogApp.Application.Features.AppUsers.Profiles
