@@ -3,8 +3,8 @@ using BlogApp.Application.Features.Posts.Commands.Delete;
 using BlogApp.Application.Features.Posts.Commands.Update;
 using BlogApp.Application.Features.Posts.Queries.GetById;
 using BlogApp.Application.Features.Posts.Queries.GetList;
-using BlogApp.Application.Utilities.Requests;
-using BlogApp.Application.Utilities.Responses;
+using BlogApp.Domain.Common.Requests;
+using BlogApp.Domain.Common.Responses;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.API.Controllers

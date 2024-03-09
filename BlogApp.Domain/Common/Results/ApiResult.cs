@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace BlogApp.Application.Utilities.Results
+namespace BlogApp.Domain.Common.Results
 {
     public class ApiResult<T>
     {

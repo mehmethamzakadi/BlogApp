@@ -1,6 +1,7 @@
 ﻿using BlogApp.Domain.Common.Paging;
+using System.Collections.Generic;
 
-namespace BlogApp.Application.Utilities.Responses;
+namespace BlogApp.Domain.Common.Responses;
 
 public class GetListResponse<T> : BasePageableModel
 {

@@ -3,8 +3,8 @@ using BlogApp.Application.Features.AppUsers.Commands.Delete;
 using BlogApp.Application.Features.AppUsers.Commands.Update;
 using BlogApp.Application.Features.AppUsers.Queries.GetById;
 using BlogApp.Application.Features.AppUsers.Queries.GetList;
-using BlogApp.Application.Utilities.Requests;
-using BlogApp.Application.Utilities.Responses;
+using BlogApp.Domain.Common.Requests;
+using BlogApp.Domain.Common.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

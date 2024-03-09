@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
-using BlogApp.Application.Utilities.Requests;
-using BlogApp.Application.Utilities.Responses;
 using BlogApp.Domain.Common.Paging;
+using BlogApp.Domain.Common.Requests;
+using BlogApp.Domain.Common.Responses;
 using BlogApp.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Identity;

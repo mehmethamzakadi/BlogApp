@@ -1,8 +1,8 @@
-﻿using BlogApp.Application.Utilities.Results;
+﻿using BlogApp.Domain.Common.Results;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using IResult = BlogApp.Application.Utilities.Results.IResult;
+using IResult = BlogApp.Domain.Common.Results.IResult;
 
 namespace BlogApp.API.Controllers
 {
