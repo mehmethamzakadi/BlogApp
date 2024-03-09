@@ -8,8 +8,8 @@ namespace BlogApp.Application.Features.AppUsers.Commands.Update
     public class UpdateAppUserCommand : IRequest<IResult>
     {
         public int Id { get; set; }
-        public string UserName { get; set; }
-        public string Email { get; set; }
+        public string UserName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
 
         public class UpdateUserCommandHandler : IRequestHandler<UpdateAppUserCommand, IResult>
         {

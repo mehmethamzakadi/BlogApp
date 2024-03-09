@@ -1,18 +1,19 @@
 ﻿using AutoMapper;
 using BlogApp.Application.Utilities.Requests;
-using BlogApp.Application.Utilities.Results;
+using BlogApp.Application.Utilities.Responses;
+using BlogApp.Domain.Common.Paging;
 using BlogApp.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 
 namespace BlogApp.Application.Features.AppUsers.Queries.GetList
 {
-    public class GetListAppUsersQuery : IRequest<IDataResult<IReadOnlyList<GetListAppUserResponse>>>
+    public class GetListAppUsersQuery : IRequest<GetListResponse<GetListAppUserResponse>>
     {
         public PageRequest PageRequest { get; set; }
 
 
-        public class GetAllUserQueryHandler : IRequestHandler<GetListAppUsersQuery, IDataResult<IReadOnlyList<GetListAppUserResponse>>>
+        public class GetAllUserQueryHandler : IRequestHandler<GetListAppUsersQuery, GetListResponse<GetListAppUserResponse>>
         {
             private readonly UserManager<AppUser> _userManager;
             private readonly IMapper _mapper;
@@ -23,11 +24,18 @@ namespace BlogApp.Application.Features.AppUsers.Queries.GetList
                 _mapper = mapper;
             }
 
-            public async Task<IDataResult<IReadOnlyList<GetListAppUserResponse>>> Handle(GetListAppUsersQuery request, CancellationToken cancellationToken)
+            public async Task<GetListResponse<GetListAppUserResponse>> Handle(GetListAppUsersQuery request, CancellationToken cancellationToken)
             {
-                var userList = _userManager.Users;
-                var response = _mapper.Map<IReadOnlyList<GetListAppUserResponse>>(userList).ToList();
-                return new SuccessDataResult<IReadOnlyList<GetListAppUserResponse>>(response);
+
+                Paginate<AppUser> userList = await _userManager.Users.ToPaginateAsync(
+                index: request.PageRequest.PageIndex,
+                size: request.PageRequest.PageSize,
+                cancellationToken: cancellationToken
+                );
+
+                GetListResponse<GetListAppUserResponse> response = _mapper.Map<GetListResponse<GetListAppUserResponse>>(userList);
+
+                return response;
             }
         }
     }

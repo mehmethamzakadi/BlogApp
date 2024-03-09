@@ -10,7 +10,7 @@ namespace BlogApp.Application.Features.Categories.Queries.GetList
 {
     public class GetListCategoriesQuery : IRequest<GetListResponse<GetListCategoryResponse>>
     {
-        public PageRequest PageRequest { get; set; }
+        public PageRequest PageRequest { get; set; } = new();
         public class GetAllCategoriesQueryHandler : IRequestHandler<GetListCategoriesQuery, GetListResponse<GetListCategoryResponse>>
         {
             private readonly ICategoryRepository _categoryRepository;

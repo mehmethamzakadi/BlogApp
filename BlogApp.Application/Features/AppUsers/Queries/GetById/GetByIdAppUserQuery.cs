@@ -24,11 +24,10 @@ namespace BlogApp.Application.Features.AppUsers.Queries.GetById
 
             public async Task<IDataResult<GetByIdAppUserResponse>> Handle(GetByIdAppUserQuery request, CancellationToken cancellationToken)
             {
-                var user = _userManager.Users.Where(x => x.Id == request.Id).FirstOrDefault();
-                if (user == null)
-                {
+                AppUser? user = _userManager.Users.Where(x => x.Id == request.Id).FirstOrDefault();
+                if (user is null)
                     return new ErrorDataResult<GetByIdAppUserResponse>("Kullanıcı bulunamadı!");
-                }
+
                 var userDto = _mapper.Map<GetByIdAppUserResponse>(user);
                 return new SuccessDataResult<GetByIdAppUserResponse>(userDto);
             }
