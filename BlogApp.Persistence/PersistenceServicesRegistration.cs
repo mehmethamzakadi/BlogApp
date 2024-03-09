@@ -13,11 +13,13 @@ public static class PersistenceServicesRegistration
 {
     public static IServiceCollection AddConfigurePersistenceServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<BlogAppDbContext>(options =>
-          options.UseSqlServer(configuration.GetConnectionString("BlogAppMsSqlConnectionString"))
-        /*options.UseNpgsql(configuration.GetConnectionString("BlogAppPostgreConnectionString"))*/
-        );
+        var mssqlConnectionString = configuration.GetConnectionString("BlogAppMsSqlConnectionString");
+        var postgreSqlConnectionString = configuration.GetConnectionString("BlogAppPostgreConnectionString");
 
+        services.AddDbContext<BlogAppDbContext>(options =>
+         options.UseSqlServer(mssqlConnectionString)
+         /*options.UseNpgsql(postgreSqlConnectionString)*/
+         );
 
         services.AddIdentity<AppUser, AppRole>(options =>
         {
