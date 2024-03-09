@@ -17,7 +17,7 @@ namespace BlogApp.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("ProductVersion", "8.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -162,15 +162,15 @@ namespace BlogApp.Persistence.Migrations
                         {
                             Id = 1,
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "e72982ed-16aa-4e9b-bcde-4470c86a3389",
+                            ConcurrencyStamp = "f3e5c038-cff6-44e8-ba15-aa4a284c48df",
                             Email = "admin@admin.com",
                             EmailConfirmed = false,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@ADMIN.COM",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEAXiN1jPe7uoVWibOxGcFWb/GKxLGGOZzEQ2mDZEJVWzx4+mbx7Dm+YRVrWUuisltA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEB5pDWAjj4BQsfGHNnHiKQz7TStMm4Jr9P1eiHi1Cz2eqlRinx4QQdTORHzhp+5MpQ==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "266b0a5e-8167-4b70-907c-cb7ee80a48be",
+                            SecurityStamp = "343a2a70-e26c-41af-ae7c-051d002210c5",
                             TwoFactorEnabled = false,
                             UserName = "admin"
                         });

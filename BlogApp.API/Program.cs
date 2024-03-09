@@ -1,3 +1,4 @@
+using BlogApp.API.Middlewares;
 using BlogApp.Application;
 using BlogApp.Infrastructure;
 using BlogApp.Persistence;
@@ -107,6 +108,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseDbMigrator(builder.Configuration);
 
 app.UseHttpsRedirection();
 
