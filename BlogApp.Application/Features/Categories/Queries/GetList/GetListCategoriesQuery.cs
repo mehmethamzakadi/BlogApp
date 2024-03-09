@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
-using BlogApp.Application.Utilities.Requests;
-using BlogApp.Application.Utilities.Responses;
 using BlogApp.Domain.Common.Paging;
+using BlogApp.Domain.Common.Requests;
+using BlogApp.Domain.Common.Responses;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Repositories;
 using MediatR;
@@ -10,7 +10,7 @@ namespace BlogApp.Application.Features.Categories.Queries.GetList
 {
     public class GetListCategoriesQuery : IRequest<GetListResponse<GetListCategoryResponse>>
     {
-        public PageRequest PageRequest { get; set; }
+        public PageRequest PageRequest { get; set; } = new();
         public class GetAllCategoriesQueryHandler : IRequestHandler<GetListCategoriesQuery, GetListResponse<GetListCategoryResponse>>
         {
             private readonly ICategoryRepository _categoryRepository;

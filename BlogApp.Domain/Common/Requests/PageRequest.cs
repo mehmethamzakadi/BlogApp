@@ -1,4 +1,4 @@
-﻿namespace BlogApp.Application.Utilities.Requests;
+﻿namespace BlogApp.Domain.Common.Requests;
 public class PageRequest
 {
     public int PageIndex { get; set; }

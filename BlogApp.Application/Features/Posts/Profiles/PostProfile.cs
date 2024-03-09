@@ -4,8 +4,8 @@ using BlogApp.Application.Features.Posts.Commands.Delete;
 using BlogApp.Application.Features.Posts.Commands.Update;
 using BlogApp.Application.Features.Posts.Queries.GetById;
 using BlogApp.Application.Features.Posts.Queries.GetList;
-using BlogApp.Application.Utilities.Responses;
 using BlogApp.Domain.Common.Paging;
+using BlogApp.Domain.Common.Responses;
 using BlogApp.Domain.Entities;
 
 namespace BlogApp.Application.Features.Posts.Profiles

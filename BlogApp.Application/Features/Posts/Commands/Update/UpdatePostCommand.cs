@@ -1,5 +1,5 @@
 ﻿using BlogApp.Application.Behaviors.Transaction;
-using BlogApp.Application.Utilities.Results;
+using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Repositories;
 using MediatR;

@@ -3,6 +3,8 @@ using BlogApp.Application.Features.AppUsers.Commands.Delete;
 using BlogApp.Application.Features.AppUsers.Commands.Update;
 using BlogApp.Application.Features.AppUsers.Queries.GetById;
 using BlogApp.Application.Features.AppUsers.Queries.GetList;
+using BlogApp.Domain.Common.Requests;
+using BlogApp.Domain.Common.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,13 +13,15 @@ namespace BlogApp.API.Controllers
     public class UserController : BaseApiController
     {
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> GetList([FromQuery] PageRequest pageRequest)
         {
-            return GetResponseOnlyResultData(await Mediator.Send(new GetListAppUsersQuery()));
+            GetListAppUsersQuery getListAppUserQuery = new() { PageRequest = pageRequest };
+            GetListResponse<GetListAppUserResponse> response = await Mediator.Send(getListAppUserQuery);
+            return Ok(response);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id)
+        public async Task<IActionResult> GetById(int id)
         {
             return GetResponseOnlyResultData(await Mediator.Send(new GetByIdAppUserQuery { Id = id }));
         }
