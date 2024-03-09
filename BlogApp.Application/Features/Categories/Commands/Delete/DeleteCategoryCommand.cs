@@ -20,11 +20,9 @@ namespace BlogApp.Application.Features.Categories.Commands.Delete
 
             public async Task<IResult> Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
             {
-                var exists = await _categoryRepository.AnyAsync(predicate: x => x.Id == request.Id, cancellationToken: cancellationToken);
-                if (!exists)
-                    return new ErrorResult("Kategori bilgisi bulunamadı!");
-
                 Category? category = await _categoryRepository.GetAsync(predicate: x => x.Id == request.Id, cancellationToken: cancellationToken);
+                if (category is null)
+                    return new ErrorResult("Kategori bilgisi bulunamadı!");
 
                 await _categoryRepository.DeleteAsync(category);
 

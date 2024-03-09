@@ -33,17 +33,21 @@ namespace BlogApp.Application.Features.Authorizations.Queries.UserLogin
 
             public async Task<IDataResult<TokenResponse>> Handle(UserLoginQuery request, CancellationToken cancellationToken)
             {
-                var user = await _userManager.FindByEmailAsync(request.Email);
+                AppUser? user = await _userManager.FindByEmailAsync(request.Email);
 
-                if (user != null && await _userManager.CheckPasswordAsync(user, request.Password))
+                if (user is not null)
                 {
+                    bool checkPassword = await _userManager.CheckPasswordAsync(user, request.Password);
+                    if (!checkPassword)
+                        return new ErrorDataResult<TokenResponse>("E-Mail veya şifre hatalı!");
+
                     var userRoles = await _userManager.GetRolesAsync(user);
                     var authClaims = new List<Claim>
                     {
-                        new Claim(ClaimTypes.Email, user.Email),
-                        new Claim(ClaimTypes.Name, user.UserName),
-                        new Claim("Id", user.Id.ToString()),
-                        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                        new (ClaimTypes.Email, user.Email ?? string.Empty),
+                        new (ClaimTypes.Name, user.UserName ?? string.Empty),
+                        new ("Id", user.Id.ToString()),
+                        new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                     };
 
                     foreach (var userRole in userRoles)
@@ -58,7 +62,7 @@ namespace BlogApp.Application.Features.Authorizations.Queries.UserLogin
                         Token = new JwtSecurityTokenHandler().WriteToken(token),
                         Expiration = token.ValidTo,
                         UserId = user.Id,
-                        UserName = user.UserName,
+                        UserName = user.UserName ?? string.Empty,
                     };
 
                     await SendTelegramMessage(user);
@@ -68,7 +72,7 @@ namespace BlogApp.Application.Features.Authorizations.Queries.UserLogin
                 return new ErrorDataResult<TokenResponse>("E-Mail veya şifre hatalı!");
             }
 
-            private async Task SendTelegramMessage(AppUser? user)
+            private async Task SendTelegramMessage(AppUser user)
             {
                 var chatId = Convert.ToInt64(Configuration["TelegramBotConfiguration:ChatId"]);
                 var message = $"{user.UserName} Kullanıcısı Sisteme Giriş Yaptı.";
@@ -77,7 +81,7 @@ namespace BlogApp.Application.Features.Authorizations.Queries.UserLogin
 
             private JwtSecurityToken GetToken(List<Claim> authClaims)
             {
-                var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["TokenOptions:SecurityKey"]));
+                var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["TokenOptions:SecurityKey"] ?? string.Empty));
                 var issuer = Configuration["TokenOptions:Issuer"];
                 var audience = Configuration["TokenOptions:Audience"];
                 var expires = Convert.ToInt32(Configuration["TokenOptions:AccessTokenExpiration"]);
