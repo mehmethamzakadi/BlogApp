@@ -9,9 +9,9 @@ using Serilog.Sinks.PostgreSQL.ColumnWriters;
 
 namespace BlogApp.API.Middlewares
 {
-    public static class MigratorMiddleware
+    public static class DatabaseMigrateMiddleware
     {
-        public static IApplicationBuilder UseDbMigrator(this IApplicationBuilder app, IConfiguration configuration)
+        public static IApplicationBuilder DatabaseInitializer(this IApplicationBuilder app, IConfiguration configuration)
         {
             #region Database Migrate Ediliyor
             using (var scope = app.ApplicationServices.CreateScope())
@@ -21,13 +21,13 @@ namespace BlogApp.API.Middlewares
             }
             #endregion
 
-            UseMsSqlSeriLog(configuration);
-            //UsePostgreSqlSeriLog(configuration);
+            CreateMsSqlSeriLogTable(configuration);
+            //CreatePostgreSqlSeriLogTable(configuration);
 
             return app;
         }
 
-        private static void UseMsSqlSeriLog(IConfiguration configuration)
+        private static void CreateMsSqlSeriLogTable(IConfiguration configuration)
         {
             var mssqlConnectionString = configuration.GetConnectionString("BlogAppMsSqlConnectionString");
             Log.Logger = new LoggerConfiguration()
@@ -38,7 +38,7 @@ namespace BlogApp.API.Middlewares
                 .CreateLogger();
         }
 
-        private static void UsePostgreSqlSeriLog(IConfiguration configuration)
+        private static void CreatePostgreSqlSeriLogTable(IConfiguration configuration)
         {
             var postgreSqlConnectionString = configuration.GetConnectionString("BlogAppPostgreConnectionString");
             IDictionary<string, ColumnWriterBase> columnWriters = new Dictionary<string, ColumnWriterBase>
@@ -59,13 +59,11 @@ namespace BlogApp.API.Middlewares
                     connectionString: postgreSqlConnectionString,
                     tableName: "Logs",
                     columnOptions: columnWriters,
-                    restrictedToMinimumLevel: LogEventLevel.Error,
+                    restrictedToMinimumLevel: LogEventLevel.Information,
                     needAutoCreateTable: true,
                     useCopy: false
                     )
                 .CreateLogger();
         }
     }
-
-
 }

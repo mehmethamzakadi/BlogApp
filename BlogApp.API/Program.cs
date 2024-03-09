@@ -109,7 +109,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseDbMigrator(builder.Configuration);
+//Uygulama sýfýrdan docker ile ayaða kalkarken database migrate saðlanýyor.
+app.DatabaseInitializer(builder.Configuration);
 
 app.UseHttpsRedirection();
 
