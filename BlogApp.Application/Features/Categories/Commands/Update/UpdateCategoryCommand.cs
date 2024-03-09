@@ -22,14 +22,13 @@ namespace BlogApp.Application.Features.Categories.Commands.Update
             {
                 try
                 {
-                    var exists = await _categoryRepository.AnyAsync(predicate: x => x.Id == request.Id, cancellationToken: cancellationToken);
-                    if (!exists)
+                    var category = await _categoryRepository.GetAsync(predicate: x => x.Id == request.Id, cancellationToken: cancellationToken);
+                    if (category is null)
                         return new ErrorResult("Kategori bilgisi bulunamadı!");
 
-                    var entity = await _categoryRepository.GetAsync(predicate: x => x.Id == request.Id, cancellationToken: cancellationToken);
-                    entity.Name = request.Name;
+                    category.Name = request.Name;
 
-                    await _categoryRepository.UpdateAsync(entity);
+                    await _categoryRepository.UpdateAsync(category);
 
                     return new SuccessResult("Kategori bilgisi başarıyla güncellendi.");
                 }

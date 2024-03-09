@@ -22,8 +22,8 @@ namespace BlogApp.Application.Features.AppUsers.Commands.Update
 
             public async Task<IResult> Handle(UpdateAppUserCommand request, CancellationToken cancellationToken)
             {
-                var user = _userManager.Users.Where(x => x.Id == request.Id).FirstOrDefault();
-                if (user == null)
+                AppUser? user = _userManager.Users.Where(x => x.Id == request.Id).FirstOrDefault();
+                if (user is null)
                     return new ErrorResult("Kullanıcı Bilgisi Bulunamadı!");
 
                 user.Email = request.Email;

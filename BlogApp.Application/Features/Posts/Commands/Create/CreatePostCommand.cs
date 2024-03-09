@@ -28,7 +28,7 @@ namespace BlogApp.Application.Features.Posts.Commands.Create
             {
                 try
                 {
-                    var postItem = new Post
+                    var post = new Post
                     {
                         CategoryId = request.CategoriId,
                         Title = request.Title,
@@ -37,7 +37,7 @@ namespace BlogApp.Application.Features.Posts.Commands.Create
                         Thumbnail = request.Thumbnail,
                         IsPublished = false
                     };
-                    var post = await _postRepository.AddAsync(postItem);
+                    await _postRepository.AddAsync(post);
 
                     return new SuccessResult("Post bilgsi başarıyla eklendi.");
                 }
