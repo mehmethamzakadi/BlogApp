@@ -1,5 +1,4 @@
-﻿using BlogApp.Application.Interfaces.Infrastructure;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 

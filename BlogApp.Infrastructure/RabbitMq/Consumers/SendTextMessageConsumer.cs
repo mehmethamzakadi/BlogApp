@@ -1,5 +1,5 @@
-﻿using BlogApp.Application.Interfaces.Infrastructure;
-using BlogApp.Domain.Events.Telegram;
+﻿using BlogApp.Domain.Events.Telegram;
+using BlogApp.Infrastructure.TelegramBot;
 using MassTransit;
 
 namespace BlogApp.Infrastructure.RabbitMq.Consumers
