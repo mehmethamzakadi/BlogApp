@@ -1,6 +1,7 @@
-﻿using BlogApp.Application.Interfaces.Infrastructure;
-using BlogApp.Domain.Common.Results;
+﻿using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
+using BlogApp.Domain.Events.Telegram;
+using MassTransit;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -21,14 +22,14 @@ namespace BlogApp.Application.Features.Authorizations.Queries.UserLogin
             private readonly UserManager<AppUser> _userManager;
             private readonly SignInManager<AppUser> _signInManager;
             private readonly IConfiguration Configuration;
-            private readonly ITelegramBotManager _telegramBotManager;
+            private readonly IPublishEndpoint _publishEndpoint;
 
-            public RegisterQueryHandler(UserManager<AppUser> userManager, IConfiguration configuration, SignInManager<AppUser> signInManager, ITelegramBotManager telegramBotManager)
+            public RegisterQueryHandler(UserManager<AppUser> userManager, IConfiguration configuration, SignInManager<AppUser> signInManager, IPublishEndpoint publishEndpoint)
             {
                 _userManager = userManager;
                 Configuration = configuration;
                 _signInManager = signInManager;
-                _telegramBotManager = telegramBotManager;
+                _publishEndpoint = publishEndpoint;
             }
 
             public async Task<IDataResult<TokenResponse>> Handle(UserLoginQuery request, CancellationToken cancellationToken)
@@ -76,7 +77,8 @@ namespace BlogApp.Application.Features.Authorizations.Queries.UserLogin
             {
                 var chatId = Convert.ToInt64(Configuration["TelegramBotConfiguration:ChatId"]);
                 var message = $"{user.UserName} Kullanıcısı Sisteme Giriş Yaptı.";
-                await _telegramBotManager.SendTextMessage(message, chatId);
+                //await _telegramBotManager.SendTextMessage(message, chatId);
+                await _publishEndpoint.Publish(new SendTextMessageEvent(message: message, chatId: chatId));
             }
 
             private JwtSecurityToken GetToken(List<Claim> authClaims)

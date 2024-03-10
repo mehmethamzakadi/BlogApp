@@ -14,7 +14,7 @@ var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 builder.Services.AddConfigurePersistenceServices(builder.Configuration);
 builder.Services.AddConfigureApplicationServices(builder.Configuration);
-builder.Services.AddConfigureInfrastructureServices();
+builder.Services.AddConfigureInfrastructureServices(builder.Configuration);
 
 builder.Services.AddHttpContextAccessor();
 
