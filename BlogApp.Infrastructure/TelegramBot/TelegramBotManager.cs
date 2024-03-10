@@ -10,7 +10,7 @@ namespace BlogApp.Infrastructure.TelegramBot
         private readonly TelegramBotClient TelegramBot;
         public TelegramBotManager(IConfiguration configuration)
         {
-            TelegramBot = new TelegramBotClient(configuration["TelegramBotConfiguration:TelegramBotToken"]);
+            TelegramBot = new TelegramBotClient(configuration["TelegramBotConfiguration:TelegramBotToken"] ?? string.Empty);
         }
         public async Task SendTextMessage(string message, long chatId)
         {
