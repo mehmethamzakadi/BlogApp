@@ -1,5 +1,4 @@
-﻿using BlogApp.Application.Interfaces.Infrastructure;
-using BlogApp.Domain.Constants;
+﻿using BlogApp.Domain.Constants;
 using BlogApp.Infrastructure.RabbitMq.Consumers;
 using BlogApp.Infrastructure.TelegramBot;
 using MassTransit;
