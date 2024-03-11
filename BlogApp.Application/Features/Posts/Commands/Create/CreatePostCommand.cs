@@ -15,15 +15,8 @@ namespace BlogApp.Application.Features.Posts.Commands.Create
         public bool IsPublished { get; set; }
         public int CategoriId { get; set; }
 
-        public class CreatePostCommandHandler : IRequestHandler<CreatePostCommand, IResult>, ITransactionalRequest
+        public class CreatePostCommandHandler(IPostRepository postRepository) : IRequestHandler<CreatePostCommand, IResult>, ITransactionalRequest
         {
-            private readonly IPostRepository _postRepository;
-
-            public CreatePostCommandHandler(IPostRepository postRepository)
-            {
-                _postRepository = postRepository;
-            }
-
             public async Task<IResult> Handle(CreatePostCommand request, CancellationToken cancellationToken)
             {
                 try
@@ -37,7 +30,7 @@ namespace BlogApp.Application.Features.Posts.Commands.Create
                         Thumbnail = request.Thumbnail,
                         IsPublished = false
                     };
-                    await _postRepository.AddAsync(post);
+                    await postRepository.AddAsync(post);
 
                     return new SuccessResult("Post bilgsi başarıyla eklendi.");
                 }

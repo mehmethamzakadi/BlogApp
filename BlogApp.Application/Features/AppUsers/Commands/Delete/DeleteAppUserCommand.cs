@@ -9,22 +9,15 @@ namespace BlogApp.Application.Features.AppUsers.Commands.Delete
     {
         public int Id { get; set; }
 
-        public class DeleteUserCommandHandler : IRequestHandler<DeleteAppUserCommand, IResult>
+        public class DeleteUserCommandHandler(UserManager<AppUser> userManager) : IRequestHandler<DeleteAppUserCommand, IResult>
         {
-            private readonly UserManager<AppUser> _userManager;
-
-            public DeleteUserCommandHandler(UserManager<AppUser> userManager)
-            {
-                _userManager = userManager;
-            }
-
             public async Task<IResult> Handle(DeleteAppUserCommand request, CancellationToken cancellationToken)
             {
-                var user = _userManager.Users.Where(x => x.Id == request.Id).FirstOrDefault();
+                var user = userManager.Users.Where(x => x.Id == request.Id).FirstOrDefault();
                 if (user == null)
                     return new ErrorResult("Kullanıcı bilgisi bulunamadı!");
 
-                var response = await _userManager.DeleteAsync(user);
+                var response = await userManager.DeleteAsync(user);
                 if (!response.Succeeded)
                     return new ErrorResult("Silme işlemi sırasında hata oluştu!");
 

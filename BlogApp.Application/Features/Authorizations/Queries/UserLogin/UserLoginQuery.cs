@@ -17,32 +17,20 @@ namespace BlogApp.Application.Features.Authorizations.Queries.UserLogin
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
 
-        public class RegisterQueryHandler : IRequestHandler<UserLoginQuery, IDataResult<TokenResponse>>
+        public class RegisterQueryHandler(UserManager<AppUser> userManager, IConfiguration configuration, SignInManager<AppUser> signInManager, IPublishEndpoint publishEndpoint)
+            : IRequestHandler<UserLoginQuery, IDataResult<TokenResponse>>
         {
-            private readonly UserManager<AppUser> _userManager;
-            private readonly SignInManager<AppUser> _signInManager;
-            private readonly IConfiguration Configuration;
-            private readonly IPublishEndpoint _publishEndpoint;
-
-            public RegisterQueryHandler(UserManager<AppUser> userManager, IConfiguration configuration, SignInManager<AppUser> signInManager, IPublishEndpoint publishEndpoint)
-            {
-                _userManager = userManager;
-                Configuration = configuration;
-                _signInManager = signInManager;
-                _publishEndpoint = publishEndpoint;
-            }
-
             public async Task<IDataResult<TokenResponse>> Handle(UserLoginQuery request, CancellationToken cancellationToken)
             {
-                AppUser? user = await _userManager.FindByEmailAsync(request.Email);
+                AppUser? user = await userManager.FindByEmailAsync(request.Email);
 
                 if (user is not null)
                 {
-                    bool checkPassword = await _userManager.CheckPasswordAsync(user, request.Password);
+                    bool checkPassword = await userManager.CheckPasswordAsync(user, request.Password);
                     if (!checkPassword)
                         return new ErrorDataResult<TokenResponse>("E-Mail veya şifre hatalı!");
 
-                    var userRoles = await _userManager.GetRolesAsync(user);
+                    var userRoles = await userManager.GetRolesAsync(user);
                     var authClaims = new List<Claim>
                     {
                         new (ClaimTypes.Email, user.Email ?? string.Empty),
@@ -55,7 +43,7 @@ namespace BlogApp.Application.Features.Authorizations.Queries.UserLogin
                     {
                         authClaims.Add(new Claim(ClaimTypes.Role, userRole));
                     }
-                    await _signInManager.SignInWithClaimsAsync(user, false, authClaims);
+                    await signInManager.SignInWithClaimsAsync(user, false, authClaims);
 
                     var token = GetToken(authClaims);
                     var result = new TokenResponse
@@ -75,18 +63,18 @@ namespace BlogApp.Application.Features.Authorizations.Queries.UserLogin
 
             private async Task SendTelegramMessage(AppUser user)
             {
-                var chatId = Convert.ToInt64(Configuration["TelegramBotConfiguration:ChatId"]);
+                var chatId = Convert.ToInt64(configuration["TelegramBotConfiguration:ChatId"]);
                 var message = $"{user.UserName} Kullanıcısı Sisteme Giriş Yaptı.";
                 //await _telegramBotManager.SendTextMessage(message, chatId);
-                await _publishEndpoint.Publish(new SendTextMessageEvent(message: message, chatId: chatId));
+                await publishEndpoint.Publish(new SendTextMessageEvent(message: message, chatId: chatId));
             }
 
             private JwtSecurityToken GetToken(List<Claim> authClaims)
             {
-                var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["TokenOptions:SecurityKey"] ?? string.Empty));
-                var issuer = Configuration["TokenOptions:Issuer"];
-                var audience = Configuration["TokenOptions:Audience"];
-                var expires = Convert.ToInt32(Configuration["TokenOptions:AccessTokenExpiration"]);
+                var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["TokenOptions:SecurityKey"] ?? string.Empty));
+                var issuer = configuration["TokenOptions:Issuer"];
+                var audience = configuration["TokenOptions:Audience"];
+                var expires = Convert.ToInt32(configuration["TokenOptions:AccessTokenExpiration"]);
 
                 var token = new JwtSecurityToken(
                     issuer: issuer,

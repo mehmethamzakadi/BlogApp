@@ -10,22 +10,15 @@ namespace BlogApp.Application.Features.Posts.Commands.Delete
     {
         public int Id { get; set; }
 
-        public class DeletePostCommandHandler : IRequestHandler<DeletePostCommand, IResult>, ITransactionalRequest
+        public class DeletePostCommandHandler(IPostRepository postRepository) : IRequestHandler<DeletePostCommand, IResult>, ITransactionalRequest
         {
-            private readonly IPostRepository _postRepository;
-
-            public DeletePostCommandHandler(IPostRepository postRepository)
-            {
-                _postRepository = postRepository;
-            }
-
             public async Task<IResult> Handle(DeletePostCommand request, CancellationToken cancellationToken)
             {
-                Post? post = await _postRepository.GetAsync(x => x.Id == request.Id);
+                Post? post = await postRepository.GetAsync(x => x.Id == request.Id);
                 if (post is null)
                     return new ErrorResult("Post bilgisi bulunamadı!");
 
-                await _postRepository.DeleteAsync(post);
+                await postRepository.DeleteAsync(post);
 
                 return new SuccessResult("Post bilgisi başarıyla silindi.");
             }
