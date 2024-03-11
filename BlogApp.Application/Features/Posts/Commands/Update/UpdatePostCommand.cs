@@ -16,20 +16,13 @@ namespace BlogApp.Application.Features.Posts.Commands.Update
         public bool IsPublished { get; set; }
         public int CategoriId { get; set; }
 
-        public class UpdatePostCommandHandler : IRequestHandler<UpdatePostCommand, IResult>, ITransactionalRequest
+        public class UpdatePostCommandHandler(IPostRepository postRepository) : IRequestHandler<UpdatePostCommand, IResult>, ITransactionalRequest
         {
-            private readonly IPostRepository _postRepository;
-
-            public UpdatePostCommandHandler(IPostRepository postRepository)
-            {
-                _postRepository = postRepository;
-            }
-
             public async Task<IResult> Handle(UpdatePostCommand request, CancellationToken cancellationToken)
             {
                 try
                 {
-                    Post? entity = await _postRepository.GetAsync(x => x.Id == request.Id);
+                    Post? entity = await postRepository.GetAsync(x => x.Id == request.Id);
                     if (entity is null)
                         return new ErrorResult("Post bilgisi bulunamadı!");
 
@@ -40,7 +33,7 @@ namespace BlogApp.Application.Features.Posts.Commands.Update
                     entity.IsPublished = request.IsPublished;
                     entity.CategoryId = request.CategoriId;
 
-                    await _postRepository.UpdateAsync(entity);
+                    await postRepository.UpdateAsync(entity);
 
                     return new SuccessResult("Post bilgisi başarıyla güncellendi.");
                 }

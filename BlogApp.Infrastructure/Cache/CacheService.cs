@@ -5,18 +5,11 @@ using System.Text;
 
 namespace BlogApp.Infrastructure.Cache
 {
-    public class CacheService : ICacheService
+    public class CacheService(IDistributedCache distributedCache) : ICacheService
     {
-        private readonly IDistributedCache _distributedCache;
-
-        public CacheService(IDistributedCache distributedCache)
-        {
-            _distributedCache = distributedCache;
-        }
-
         public async Task<T> GetDataAsync<T>(string key)
         {
-            var result = await _distributedCache.GetAsync(key);
+            var result = await distributedCache.GetAsync(key);
             if (result is not null)
             {
                 var json = Encoding.UTF8.GetString(result);
@@ -28,7 +21,7 @@ namespace BlogApp.Infrastructure.Cache
 
         public async Task RemoveDataAsync(string key)
         {
-            await _distributedCache.RemoveAsync(key);
+            await distributedCache.RemoveAsync(key);
         }
 
         public async Task<bool> SetDataAsync<T>(string key, T value, DateTimeOffset expirationTime)
@@ -38,7 +31,7 @@ namespace BlogApp.Infrastructure.Cache
             var options = new DistributedCacheEntryOptions()
                     //.SetSlidingExpiration(TimeSpan.FromDays(1)) // belirli bir süre erişilmemiş ise expire eder
                     .SetAbsoluteExpiration(expirationTime); // belirli bir süre sonra expire eder.
-            await _distributedCache.SetAsync(key, valueFromCache, options);
+            await distributedCache.SetAsync(key, valueFromCache, options);
 
             return true;
         }

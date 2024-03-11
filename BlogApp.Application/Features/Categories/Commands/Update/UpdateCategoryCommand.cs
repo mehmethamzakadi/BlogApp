@@ -9,26 +9,19 @@ namespace BlogApp.Application.Features.Categories.Commands.Update
         public int Id { get; set; }
         public string Name { get; set; }
 
-        public class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategoryCommand, IResult>
+        public class UpdateCategoryCommandHandler(ICategoryRepository categoryRepository) : IRequestHandler<UpdateCategoryCommand, IResult>
         {
-            private readonly ICategoryRepository _categoryRepository;
-
-            public UpdateCategoryCommandHandler(ICategoryRepository categoryRepository)
-            {
-                _categoryRepository = categoryRepository;
-            }
-
             public async Task<IResult> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
             {
                 try
                 {
-                    var category = await _categoryRepository.GetAsync(predicate: x => x.Id == request.Id, cancellationToken: cancellationToken);
+                    var category = await categoryRepository.GetAsync(predicate: x => x.Id == request.Id, cancellationToken: cancellationToken);
                     if (category is null)
                         return new ErrorResult("Kategori bilgisi bulunamadı!");
 
                     category.Name = request.Name;
 
-                    await _categoryRepository.UpdateAsync(category);
+                    await categoryRepository.UpdateAsync(category);
 
                     return new SuccessResult("Kategori bilgisi başarıyla güncellendi.");
                 }

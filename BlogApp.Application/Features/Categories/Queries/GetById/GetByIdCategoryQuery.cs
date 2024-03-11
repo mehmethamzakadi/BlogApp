@@ -11,30 +11,20 @@ namespace BlogApp.Application.Features.Categories.Queries.GetById
     {
         public int Id { get; set; }
 
-        public class GetCategoryByIdQueryHandler : IRequestHandler<GetByIdCategoryQuery, IDataResult<GetByIdCategoryResponse>>
+        public class GetCategoryByIdQueryHandler(ICategoryRepository categoryRepository, IMapper mapper, ICacheService cacheService)
+            : IRequestHandler<GetByIdCategoryQuery, IDataResult<GetByIdCategoryResponse>>
         {
-            private readonly ICategoryRepository _categoryRepository;
-            private readonly IMapper _mapper;
-            private readonly ICacheService _cacheService;
-
-            public GetCategoryByIdQueryHandler(ICategoryRepository categoryRepository, IMapper mapper, ICacheService cacheService)
-            {
-                _categoryRepository = categoryRepository;
-                _mapper = mapper;
-                _cacheService = cacheService;
-            }
-
             public async Task<IDataResult<GetByIdCategoryResponse>> Handle(GetByIdCategoryQuery request, CancellationToken cancellationToken)
             {
-                var cacheValue = await _cacheService.GetDataAsync<GetByIdCategoryResponse>($"category-{request.Id}");
+                var cacheValue = await cacheService.GetDataAsync<GetByIdCategoryResponse>($"category-{request.Id}");
                 if (cacheValue is not null)
                     return new SuccessDataResult<GetByIdCategoryResponse>(cacheValue);
 
-                Category? category = await _categoryRepository.GetAsync(predicate: b => b.Id == request.Id, cancellationToken: cancellationToken);
+                Category? category = await categoryRepository.GetAsync(predicate: b => b.Id == request.Id, cancellationToken: cancellationToken);
                 if (category is null)
                     return new ErrorDataResult<GetByIdCategoryResponse>("Kategori bilgisi bulunamadı.");
 
-                GetByIdCategoryResponse response = _mapper.Map<GetByIdCategoryResponse>(category);
+                GetByIdCategoryResponse response = mapper.Map<GetByIdCategoryResponse>(category);
 
                 return new SuccessDataResult<GetByIdCategoryResponse>(response);
             }
