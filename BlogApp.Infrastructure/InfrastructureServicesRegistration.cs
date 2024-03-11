@@ -1,4 +1,6 @@
-﻿using BlogApp.Domain.Constants;
+﻿using BlogApp.Domain.Common;
+using BlogApp.Domain.Constants;
+using BlogApp.Infrastructure.Cache;
 using BlogApp.Infrastructure.RabbitMq.Consumers;
 using BlogApp.Infrastructure.TelegramBot;
 using MassTransit;
@@ -12,6 +14,11 @@ namespace BlogApp.Infrastructure
         public static IServiceCollection AddConfigureInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddSingleton<ITelegramBotManager, TelegramBotManager>();
+            services.AddSingleton<ICacheService, CacheService>();
+
+            services.AddStackExchangeRedisCache(options =>
+                options.Configuration = configuration.GetConnectionString("RedisCache"));
+
 
             services.AddMassTransit(x =>
             {
