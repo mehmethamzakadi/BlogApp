@@ -33,6 +33,13 @@ services:
      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/mnesia/
      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
     restart: always  
+  
+  redis.cache:
+    image: redis:latest
+    container_name: redis_server
+    restart: always
+    ports:
+      - "6379:6379"  
 
   blogapp.api:
     environment:
@@ -44,3 +51,4 @@ services:
     depends_on:
             - sqlserverdb
             # - postgresdb
+            - rabbitmq
