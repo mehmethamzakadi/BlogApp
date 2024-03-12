@@ -1,5 +1,4 @@
-﻿using BlogApp.Application.Behaviors.Transaction;
-using BlogApp.Domain.Common.Results;
+﻿using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Repositories;
 using MediatR;
@@ -10,7 +9,7 @@ namespace BlogApp.Application.Features.Posts.Commands.Delete
     {
         public int Id { get; set; }
 
-        public class DeletePostCommandHandler(IPostRepository postRepository) : IRequestHandler<DeletePostCommand, IResult>, ITransactionalRequest
+        public class DeletePostCommandHandler(IPostRepository postRepository) : IRequestHandler<DeletePostCommand, IResult>
         {
             public async Task<IResult> Handle(DeletePostCommand request, CancellationToken cancellationToken)
             {

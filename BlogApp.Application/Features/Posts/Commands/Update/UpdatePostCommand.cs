@@ -1,5 +1,4 @@
-﻿using BlogApp.Application.Behaviors.Transaction;
-using BlogApp.Domain.Common.Results;
+﻿using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Repositories;
 using MediatR;
@@ -16,7 +15,7 @@ namespace BlogApp.Application.Features.Posts.Commands.Update
         public bool IsPublished { get; set; }
         public int CategoriId { get; set; }
 
-        public class UpdatePostCommandHandler(IPostRepository postRepository) : IRequestHandler<UpdatePostCommand, IResult>, ITransactionalRequest
+        public class UpdatePostCommandHandler(IPostRepository postRepository) : IRequestHandler<UpdatePostCommand, IResult>
         {
             public async Task<IResult> Handle(UpdatePostCommand request, CancellationToken cancellationToken)
             {

@@ -1,21 +1,20 @@
-﻿using BlogApp.Application.Behaviors.Transaction;
-using BlogApp.Domain.Common.Results;
+﻿using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Repositories;
 using MediatR;
 
 namespace BlogApp.Application.Features.Posts.Commands.Create
 {
-    public class CreatePostCommand : IRequest<IResult>, ITransactionalRequest
+    public class CreatePostCommand : IRequest<IResult>
     {
         public string Title { get; set; }
-        public string Body { get; set; }
-        public string Summary { get; set; }
-        public string Thumbnail { get; set; }
+        public string Body { get; set; } = string.Empty;
+        public string Summary { get; set; } = string.Empty;
+        public string Thumbnail { get; set; } = string.Empty;
         public bool IsPublished { get; set; }
         public int CategoriId { get; set; }
 
-        public class CreatePostCommandHandler(IPostRepository postRepository) : IRequestHandler<CreatePostCommand, IResult>, ITransactionalRequest
+        public class CreatePostCommandHandler(IPostRepository postRepository) : IRequestHandler<CreatePostCommand, IResult>
         {
             public async Task<IResult> Handle(CreatePostCommand request, CancellationToken cancellationToken)
             {
