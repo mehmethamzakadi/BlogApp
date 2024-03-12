@@ -16,7 +16,7 @@ namespace BlogApp.Application.Features.Categories.Queries.GetById
         {
             public async Task<IDataResult<GetByIdCategoryResponse>> Handle(GetByIdCategoryQuery request, CancellationToken cancellationToken)
             {
-                var cacheValue = await cacheService.GetDataAsync<GetByIdCategoryResponse>($"category-{request.Id}");
+                var cacheValue = await cacheService.Get<GetByIdCategoryResponse>($"category-{request.Id}");
                 if (cacheValue is not null)
                     return new SuccessDataResult<GetByIdCategoryResponse>(cacheValue);
 

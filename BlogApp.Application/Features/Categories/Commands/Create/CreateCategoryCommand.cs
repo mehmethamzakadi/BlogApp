@@ -9,7 +9,7 @@ namespace BlogApp.Application.Features.Categories.Commands.Create
 {
     public class CreateCategoryCommand : IRequest<IResult>
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         public class CreateCategoryCommandHandler(ICategoryRepository categoryRepository, ICacheService cache) : IRequestHandler<CreateCategoryCommand, IResult>
         {
@@ -19,7 +19,7 @@ namespace BlogApp.Application.Features.Categories.Commands.Create
                 {
                     var category = await categoryRepository.AddAsync(new Category { Name = request.Name });
 
-                    await cache.SetDataAsync($"category-{category.Id}", new GetByIdCategoryResponse { Id = category.Id, Name = category.Name }, DateTime.Now.AddMonths(1));
+                    await cache.Add($"category-{category.Id}", new GetByIdCategoryResponse { Id = category.Id, Name = category.Name }, DateTime.Now.AddMonths(1), null);
 
                     return new SuccessResult("Kategori bilgsi başarıyla eklendi.");
                 }
