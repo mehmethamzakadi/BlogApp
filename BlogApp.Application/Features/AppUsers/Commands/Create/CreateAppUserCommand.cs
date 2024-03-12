@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BlogApp.Application.Behaviors.Transaction;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Constants;
 using BlogApp.Domain.Entities;
@@ -7,7 +8,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace BlogApp.Application.Features.AppUsers.Commands.Create
 {
-    public class CreateAppUserCommand : IRequest<IResult>
+    public class CreateAppUserCommand : IRequest<IResult>, ITransactionalRequest
     {
         public string UserName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;

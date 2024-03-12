@@ -19,7 +19,11 @@ namespace BlogApp.Application.Features.Categories.Commands.Create
                 {
                     var category = await categoryRepository.AddAsync(new Category { Name = request.Name });
 
-                    await cache.Add($"category-{category.Id}", new GetByIdCategoryResponse { Id = category.Id, Name = category.Name }, DateTime.Now.AddMonths(1), null);
+                    await cache.Add(
+                        $"category-{category.Id}",
+                        new GetByIdCategoryResponse { Id = category.Id, Name = category.Name },
+                        DateTime.Now.AddMonths(1),
+                        null);
 
                     return new SuccessResult("Kategori bilgsi başarıyla eklendi.");
                 }

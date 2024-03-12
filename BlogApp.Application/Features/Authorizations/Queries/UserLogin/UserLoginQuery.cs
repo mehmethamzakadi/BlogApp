@@ -1,4 +1,5 @@
-﻿using BlogApp.Domain.Common.Results;
+﻿using BlogApp.Application.Behaviors.Transaction;
+using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Events.Telegram;
 using MassTransit;
@@ -12,7 +13,7 @@ using System.Text;
 
 namespace BlogApp.Application.Features.Authorizations.Queries.UserLogin
 {
-    public class UserLoginQuery : IRequest<IDataResult<TokenResponse>>
+    public class UserLoginQuery : IRequest<IDataResult<TokenResponse>>, ITransactionalRequest
     {
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;

@@ -23,7 +23,7 @@ namespace BlogApp.API.Controllers
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
             GetByIdPostQuery getByIdPostQuery = new() { Id = id };
-            GetByIdPostResponse response = await Mediator.Send(getByIdPostQuery);
+            var response = await Mediator.Send(getByIdPostQuery);
             return Ok(response);
         }
 
