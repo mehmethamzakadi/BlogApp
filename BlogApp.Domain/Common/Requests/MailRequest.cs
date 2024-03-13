@@ -1,11 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace BlogApp.Infrastructure.Email.Models
+namespace BlogApp.Domain.Common.Requests
 {
     public class MailRequest
     {

@@ -1,6 +1,7 @@
 ﻿using BlogApp.Domain.Common;
 using BlogApp.Domain.Constants;
 using BlogApp.Infrastructure.Cache;
+using BlogApp.Infrastructure.Email;
 using BlogApp.Infrastructure.RabbitMq.Consumers;
 using BlogApp.Infrastructure.TelegramBot;
 using MassTransit;
@@ -15,10 +16,14 @@ namespace BlogApp.Infrastructure
         {
             services.AddSingleton<ITelegramBotManager, TelegramBotManager>();
             services.AddSingleton<ICacheService, CacheService>();
+            services.AddScoped<IMailService, EmailSenderManagerTest>();
 
             services.AddStackExchangeRedisCache(options =>
                 options.Configuration = configuration.GetConnectionString("RedisCache"));
 
+            services
+                .AddFluentEmail("mehmet@localhost")
+                .AddSmtpSender("localhost", 25);
 
             services.AddMassTransit(x =>
             {
