@@ -15,7 +15,6 @@
     <Folder Include="Features\Authorizations\Commands\" />
     <Folder Include="Features\Authorizations\Profiles\" />
     <Folder Include="Features\Authorizations\Rules\" />
-    <Folder Include="Interfaces\" />
   </ItemGroup>
 
   <ItemGroup>
