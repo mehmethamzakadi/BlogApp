@@ -1,4 +1,4 @@
-﻿using BlogApp.Domain.Common;
+﻿using BlogApp.Application.Abstractions;
 using BlogApp.Domain.Constants;
 using BlogApp.Infrastructure.Cache;
 using BlogApp.Infrastructure.Email;
@@ -16,7 +16,7 @@ namespace BlogApp.Infrastructure
         {
             services.AddSingleton<ITelegramBotManager, TelegramBotManager>();
             services.AddSingleton<ICacheService, CacheService>();
-            services.AddScoped<IMailService, EmailSenderManagerTest>();
+            services.AddScoped<IEmailService, EmailSenderService>();
 
             services.AddStackExchangeRedisCache(options =>
                 options.Configuration = configuration.GetConnectionString("RedisCache"));
