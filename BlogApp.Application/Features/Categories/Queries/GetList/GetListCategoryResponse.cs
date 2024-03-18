@@ -1,8 +1,3 @@
-﻿namespace BlogApp.Application.Features.Categories.Queries.GetList
-{
-    public class GetListCategoryResponse
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-    }
-}
+﻿namespace BlogApp.Application.Features.Categories.Queries.GetList;
+
+public sealed record GetListCategoryResponse(int Id, string Name);

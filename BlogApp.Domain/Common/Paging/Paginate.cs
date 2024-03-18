@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace BlogApp.Domain.Common.Paging;
 
-public class Paginate<T>
+public sealed class Paginate<T>
 {
     public Paginate()
     {

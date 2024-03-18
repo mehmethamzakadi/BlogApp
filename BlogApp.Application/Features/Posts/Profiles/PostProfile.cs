@@ -8,19 +8,18 @@ using BlogApp.Domain.Common.Paging;
 using BlogApp.Domain.Common.Responses;
 using BlogApp.Domain.Entities;
 
-namespace BlogApp.Application.Features.Posts.Profiles
-{
-    public class PostProfile : Profile
-    {
-        public PostProfile()
-        {
-            CreateMap<Post, CreatePostCommand>().ReverseMap();
-            CreateMap<Post, UpdatePostCommand>().ReverseMap();
-            CreateMap<Post, DeletePostCommand>().ReverseMap();
+namespace BlogApp.Application.Features.Posts.Profiles;
 
-            CreateMap<Post, GetListPostResponse>().ReverseMap();
-            CreateMap<Post, GetByIdPostResponse>().ReverseMap();
-            CreateMap<Paginate<Post>, GetListResponse<GetListPostResponse>>().ReverseMap();
-        }
+public sealed class PostProfile : Profile
+{
+    public PostProfile()
+    {
+        CreateMap<Post, CreatePostCommand>().ReverseMap();
+        CreateMap<Post, UpdatePostCommand>().ReverseMap();
+        CreateMap<Post, DeletePostCommand>().ReverseMap();
+
+        CreateMap<Post, GetListPostResponse>().ReverseMap();
+        CreateMap<Post, GetByIdPostResponse>().ReverseMap();
+        CreateMap<Paginate<Post>, GetListResponse<GetListPostResponse>>().ReverseMap();
     }
 }

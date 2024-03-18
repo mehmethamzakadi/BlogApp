@@ -2,7 +2,7 @@
 
 namespace BlogApp.Application.Features.Posts.Commands.Create
 {
-    public class CreatePostValidator : AbstractValidator<CreatePostCommand>
+    public sealed class CreatePostValidator : AbstractValidator<CreatePostCommand>
     {
         public CreatePostValidator()
         {

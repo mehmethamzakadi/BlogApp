@@ -7,15 +7,23 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Features\AppUsers\Rules\**" />
+    <Compile Remove="Features\Authorizations\Profiles\**" />
+    <Compile Remove="Features\Authorizations\Rules\**" />
+    <EmbeddedResource Remove="Features\AppUsers\Rules\**" />
+    <EmbeddedResource Remove="Features\Authorizations\Profiles\**" />
+    <EmbeddedResource Remove="Features\Authorizations\Rules\**" />
+    <None Remove="Features\AppUsers\Rules\**" />
+    <None Remove="Features\Authorizations\Profiles\**" />
+    <None Remove="Features\Authorizations\Rules\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\BlogApp.Domain\BlogApp.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\AppUsers\Rules\" />
-    <Folder Include="Features\Authorizations\Commands\" />
-    <Folder Include="Features\Authorizations\Profiles\" />
-    <Folder Include="Features\Authorizations\Rules\" />
-    <Folder Include="Interfaces\" />
+    <Folder Include="Features\Authorizations\Queries\" />
   </ItemGroup>
 
   <ItemGroup>

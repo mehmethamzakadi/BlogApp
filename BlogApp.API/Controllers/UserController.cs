@@ -5,7 +5,6 @@ using BlogApp.Application.Features.AppUsers.Queries.GetById;
 using BlogApp.Application.Features.AppUsers.Queries.GetList;
 using BlogApp.Domain.Common.Requests;
 using BlogApp.Domain.Common.Responses;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.API.Controllers
@@ -15,18 +14,16 @@ namespace BlogApp.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetList([FromQuery] PageRequest pageRequest)
         {
-            GetListAppUsersQuery getListAppUserQuery = new() { PageRequest = pageRequest };
-            GetListResponse<GetListAppUserResponse> response = await Mediator.Send(getListAppUserQuery);
+            GetListResponse<GetListAppUserResponse> response = await Mediator.Send(new GetListAppUsersQuery(pageRequest));
             return Ok(response);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            return GetResponseOnlyResultData(await Mediator.Send(new GetByIdAppUserQuery { Id = id }));
+            return GetResponseOnlyResultData(await Mediator.Send(new GetByIdAppUserQuery(id)));
         }
 
-        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Post(CreateAppUserCommand user)
         {

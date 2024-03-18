@@ -1,35 +1,6 @@
 ﻿using BlogApp.Domain.Common.Results;
-using BlogApp.Domain.Repositories;
 using MediatR;
 
-namespace BlogApp.Application.Features.Categories.Commands.Update
-{
-    public class UpdateCategoryCommand : IRequest<IResult>
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
+namespace BlogApp.Application.Features.Categories.Commands.Update;
 
-        public class UpdateCategoryCommandHandler(ICategoryRepository categoryRepository) : IRequestHandler<UpdateCategoryCommand, IResult>
-        {
-            public async Task<IResult> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
-            {
-                try
-                {
-                    var category = await categoryRepository.GetAsync(predicate: x => x.Id == request.Id, cancellationToken: cancellationToken);
-                    if (category is null)
-                        return new ErrorResult("Kategori bilgisi bulunamadı!");
-
-                    category.Name = request.Name;
-
-                    await categoryRepository.UpdateAsync(category);
-
-                    return new SuccessResult("Kategori bilgisi başarıyla güncellendi.");
-                }
-                catch (Exception)
-                {
-                    return new ErrorResult("Kategori bilgisi güncellenirken hata oluştu.");
-                }
-            }
-        }
-    }
-}
+public sealed record UpdateCategoryCommand(int Id, string Name) : IRequest<IResult>;

@@ -1,16 +1,4 @@
-﻿namespace BlogApp.Application.Features.AppUsers.Queries.GetById
-{
-    public class GetByIdAppUserResponse
-    {
-        public int Id { get; set; }
-        public string UserName { get; set; } = string.Empty;
+﻿namespace BlogApp.Application.Features.AppUsers.Queries.GetById;
 
-        public string Email { get; set; } = string.Empty;
+public sealed record GetByIdAppUserResponse(int Id, string UserName, string Email, DateTimeOffset? LockoutEnd, bool LockoutEnabled, int AccessFailedCount);
 
-        public DateTimeOffset? LockoutEnd { get; set; }
-
-        public bool LockoutEnabled { get; set; }
-
-        public int AccessFailedCount { get; set; }
-    }
-}

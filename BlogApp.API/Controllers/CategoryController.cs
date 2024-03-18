@@ -14,16 +14,14 @@ namespace BlogApp.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetList([FromQuery] PageRequest pageRequest)
         {
-            GetListCategoriesQuery getListCategoryQuery = new() { PageRequest = pageRequest };
-            GetListResponse<GetListCategoryResponse> response = await Mediator.Send(getListCategoryQuery);
+            GetListResponse<GetListCategoryResponse> response = await Mediator.Send(new GetListCategoriesQuery(pageRequest));
             return Ok(response);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            GetByIdCategoryQuery getByIdCategoryQuery = new() { Id = id };
-            var response = await Mediator.Send(getByIdCategoryQuery);
+            var response = await Mediator.Send(new GetByIdCategoryQuery(id));
             return Ok(response);
         }
 
@@ -42,7 +40,7 @@ namespace BlogApp.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            return GetResponseOnlyResultMessage(await Mediator.Send(new DeleteCategoryCommand { Id = id }));
+            return GetResponseOnlyResultMessage(await Mediator.Send(new DeleteCategoryCommand(id)));
         }
     }
 }

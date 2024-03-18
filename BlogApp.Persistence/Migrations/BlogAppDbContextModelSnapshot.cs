@@ -162,15 +162,15 @@ namespace BlogApp.Persistence.Migrations
                         {
                             Id = 1,
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "f3e5c038-cff6-44e8-ba15-aa4a284c48df",
+                            ConcurrencyStamp = "61f853c4-6114-4190-aa16-aa34ab168165",
                             Email = "admin@admin.com",
                             EmailConfirmed = false,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@ADMIN.COM",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEB5pDWAjj4BQsfGHNnHiKQz7TStMm4Jr9P1eiHi1Cz2eqlRinx4QQdTORHzhp+5MpQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEM8qtw3WHy46YCWaFRt1yitKqCADsGSU5g6outt7dqSp3X+mgLQVt/RHwrLvXNte0g==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "343a2a70-e26c-41af-ae7c-051d002210c5",
+                            SecurityStamp = "3fbadfc2-2e17-4c69-98bc-5a666fcc43d2",
                             TwoFactorEnabled = false,
                             UserName = "admin"
                         });

@@ -2,7 +2,7 @@
 
 namespace BlogApp.Application.Features.Categories.Commands.Update
 {
-    public class UpdateCategoryValidator : AbstractValidator<UpdateCategoryCommand>
+    public sealed class UpdateCategoryValidator : AbstractValidator<UpdateCategoryCommand>
     {
         public UpdateCategoryValidator()
         {

@@ -11,7 +11,7 @@ using BlogApp.Domain.Entities;
 
 namespace BlogApp.Application.Features.Categories.Profiles
 {
-    public class CategoryProfile : Profile
+    public sealed class CategoryProfile : Profile
     {
         public CategoryProfile()
         {

@@ -1,5 +1,5 @@
 ﻿namespace BlogApp.Application.Features.Posts.Rules;
 
-public class PostBusinessRules
+public sealed class PostBusinessRules
 {
 }
