@@ -16,9 +16,12 @@ namespace BlogApp.Infrastructure
             services.AddSingleton<ITelegramService, TelegramService>();
             services.AddSingleton<ICacheService, CacheService>();
 
+            #region Redis Configurations
             services.AddStackExchangeRedisCache(options =>
-                options.Configuration = configuration.GetConnectionString("RedisCache"));
+              options.Configuration = configuration.GetConnectionString("RedisCache"));
+            #endregion
 
+            #region MassTransit RabbitMq Configurations
             services.AddMassTransit(x =>
             {
                 x.AddConsumer<SendTextMessageConsumer>();
@@ -46,6 +49,7 @@ namespace BlogApp.Infrastructure
             });
 
             services.AddScoped<SendTextMessageConsumer>();
+            #endregion
 
             return services;
         }
