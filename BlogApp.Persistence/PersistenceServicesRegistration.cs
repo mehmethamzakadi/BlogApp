@@ -16,6 +16,7 @@ public static class PersistenceServicesRegistration
 {
     public static IServiceCollection AddConfigurePersistenceServices(this IServiceCollection services, IConfiguration configuration)
     {
+        #region DbContext Configuration
         var mssqlConnectionString = configuration.GetConnectionString("BlogAppMsSqlConnectionString");
         var postgreSqlConnectionString = configuration.GetConnectionString("BlogAppPostgreConnectionString");
 
@@ -23,7 +24,9 @@ public static class PersistenceServicesRegistration
          options.UseSqlServer(mssqlConnectionString)
          /*options.UseNpgsql(postgreSqlConnectionString)*/
          );
+        #endregion
 
+        #region Identity Configurtaion
         services.AddIdentity<AppUser, AppRole>(options =>
         {
             //User Şifre Ayarları
@@ -41,8 +44,9 @@ public static class PersistenceServicesRegistration
             .AddRoleManager<RoleManager<AppRole>>()
             .AddEntityFrameworkStores<BlogAppDbContext>()
             .AddDefaultTokenProviders();
+        #endregion
 
-        // Adding Authentication
+        #region Authentication With Jwt
         services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -65,6 +69,7 @@ public static class PersistenceServicesRegistration
                 ClockSkew = TimeSpan.Zero
             };
         });
+        #endregion
 
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<ICommentRepository, CommentRepository>();
