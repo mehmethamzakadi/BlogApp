@@ -3,7 +3,7 @@ using Serilog;
 
 namespace BlogApp.Application.Behaviors.Logging
 {
-    public sealed class LoggingScopeBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+    public sealed class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
     {
         public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)

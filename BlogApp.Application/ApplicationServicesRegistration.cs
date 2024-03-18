@@ -23,7 +23,7 @@ namespace BlogApp.Application
             {
                 configuration.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
                 configuration.AddOpenBehavior(typeof(TransactionScopeBehavior<,>));
-                configuration.AddOpenBehavior(typeof(LoggingScopeBehavior<,>));
+                configuration.AddOpenBehavior(typeof(LoggingBehavior<,>));
             });
 
             services.AddFluentValidationAutoValidation();
