@@ -6,17 +6,16 @@ using BlogApp.Domain.Common.Paging;
 using BlogApp.Domain.Common.Responses;
 using BlogApp.Domain.Entities;
 
-namespace BlogApp.Application.Features.AppUsers.Profiles
-{
-    public class AppUserProfile : Profile
-    {
-        public AppUserProfile()
-        {
-            CreateMap<AppUser, GetByIdAppUserResponse>().ReverseMap();
-            CreateMap<AppUser, GetListAppUserResponse>().ReverseMap();
-            CreateMap<AppUser, CreateAppUserCommand>().ReverseMap();
+namespace BlogApp.Application.Features.AppUsers.Profiles;
 
-            CreateMap<Paginate<AppUser>, GetListResponse<GetListAppUserResponse>>().ReverseMap();
-        }
+public sealed class AppUserProfile : Profile
+{
+    public AppUserProfile()
+    {
+        CreateMap<AppUser, GetByIdAppUserResponse>().ReverseMap();
+        CreateMap<AppUser, GetListAppUserResponse>().ReverseMap();
+        CreateMap<AppUser, CreateAppUserCommand>().ReverseMap();
+
+        CreateMap<Paginate<AppUser>, GetListResponse<GetListAppUserResponse>>().ReverseMap();
     }
 }

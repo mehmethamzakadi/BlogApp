@@ -1,5 +1,7 @@
-﻿using BlogApp.Application.Behaviors.Logging;
+﻿using BlogApp.Application.Abstractions;
+using BlogApp.Application.Behaviors.Logging;
 using BlogApp.Application.Behaviors.Transaction;
+using BlogApp.Application.Services;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.Extensions.Configuration;
@@ -13,6 +15,8 @@ namespace BlogApp.Application
     {
         public static IServiceCollection AddConfigureApplicationServices(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddTransient<ITokenService, TokenService>();
+
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
             services.AddMediatR(configuration =>

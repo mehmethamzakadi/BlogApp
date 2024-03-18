@@ -2,6 +2,6 @@
 
 namespace BlogApp.Domain.Entities;
 
-public class AppUserToken : IdentityUserToken<int>
+public sealed class AppUserToken : IdentityUserToken<int>
 {
 }

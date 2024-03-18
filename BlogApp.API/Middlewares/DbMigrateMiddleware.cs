@@ -9,7 +9,7 @@ using Serilog.Sinks.PostgreSQL.ColumnWriters;
 
 namespace BlogApp.API.Middlewares
 {
-    public static class DatabaseMigrateMiddleware
+    public static class DbMigrateMiddleware
     {
         public static IApplicationBuilder DatabaseInitializer(this IApplicationBuilder app, IConfiguration configuration)
         {

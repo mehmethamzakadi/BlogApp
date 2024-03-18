@@ -2,6 +2,6 @@
 
 namespace BlogApp.Domain.Entities;
 
-public class AppUserLogin : IdentityUserLogin<int>
+public sealed class AppUserLogin : IdentityUserLogin<int>
 {
 }

@@ -1,6 +1,6 @@
 ﻿namespace BlogApp.Domain.Common.Dynamic;
 
-public class Sort
+public sealed class Sort
 {
     public string Field { get; set; }
     public string Dir { get; set; }

@@ -1,14 +1,3 @@
-﻿namespace BlogApp.Application.Features.Posts.Queries.GetList
-{
-    public class GetListPostResponse
-    {
-        public int Id { get; set; }
-        public string Title { get; set; }
-        public string Body { get; set; }
-        public string Summary { get; set; }
-        public string Thumbnail { get; set; }
-        public bool IsPublished { get; set; }
-        public string CategoryName { get; set; }
-        public int CategoryId { get; set; }
-    }
-}
+﻿namespace BlogApp.Application.Features.Posts.Queries.GetList;
+
+public sealed record GetListPostResponse(int Id, string Title, string Body, string Summary, string Thumbnail, bool IsPublished, string CategoryName, int CategoryId);

@@ -2,6 +2,6 @@
 
 namespace BlogApp.Domain.Entities;
 
-public class AppRole : IdentityRole<int>
+public sealed class AppRole : IdentityRole<int>
 {
 }

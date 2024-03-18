@@ -2,7 +2,7 @@
 
 namespace BlogApp.Domain.Common.Dynamic;
 
-public class Filter
+public sealed class Filter
 {
     public string Field { get; set; }
     public string? Value { get; set; }

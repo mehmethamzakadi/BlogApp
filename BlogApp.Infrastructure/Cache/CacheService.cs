@@ -5,7 +5,7 @@ using System.Text;
 
 namespace BlogApp.Infrastructure.Cache;
 
-public class CacheService(IDistributedCache distributedCache) : ICacheService
+public sealed class CacheService(IDistributedCache distributedCache) : ICacheService
 {
     public async Task Add(string key, object data, DateTimeOffset? absExpr, TimeSpan? sldExpr)
     {

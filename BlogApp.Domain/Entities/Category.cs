@@ -2,7 +2,7 @@
 
 namespace BlogApp.Domain.Entities;
 
-public class Category : BaseEntity
+public sealed class Category : BaseEntity
 {
-    public string Name { get; set; }
+    public string Name { get; set; } = default!;
 }

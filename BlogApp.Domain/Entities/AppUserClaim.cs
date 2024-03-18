@@ -2,6 +2,6 @@
 
 namespace BlogApp.Domain.Entities;
 
-public class AppUserClaim : IdentityUserClaim<int>
+public sealed class AppUserClaim : IdentityUserClaim<int>
 {
 }

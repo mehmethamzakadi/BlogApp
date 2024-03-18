@@ -2,10 +2,7 @@ using BlogApp.API.Middlewares;
 using BlogApp.Application;
 using BlogApp.Infrastructure;
 using BlogApp.Persistence;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -17,30 +14,6 @@ builder.Services.AddConfigureApplicationServices(builder.Configuration);
 builder.Services.AddConfigureInfrastructureServices(builder.Configuration);
 
 builder.Services.AddHttpContextAccessor();
-
-// Adding Authentication
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.SaveToken = true;
-    options.RequireHttpsMetadata = false;
-    options.TokenValidationParameters = new TokenValidationParameters()
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidAudience = builder.Configuration["TokenOptions:Audience"],
-        ValidIssuer = builder.Configuration["TokenOptions:Issuer"],
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["TokenOptions:SecurityKey"])),
-        ClockSkew = TimeSpan.Zero
-    };
-});
 
 builder.Services.AddCors(options =>
 {
