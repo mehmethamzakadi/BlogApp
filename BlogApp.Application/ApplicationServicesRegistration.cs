@@ -15,6 +15,9 @@ namespace BlogApp.Application
     {
         public static IServiceCollection AddConfigureApplicationServices(this IServiceCollection services, IConfiguration configuration)
         {
+            // Yapılandırma ayarlarını okumak için
+            services.Configure<TokenOptions>(configuration.GetSection("TokenOptions"));
+
             services.AddTransient<ITokenService, TokenService>();
 
             services.AddAutoMapper(Assembly.GetExecutingAssembly());

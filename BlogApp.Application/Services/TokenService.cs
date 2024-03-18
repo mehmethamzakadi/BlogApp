@@ -3,6 +3,7 @@ using BlogApp.Application.Features.Authorizations.Commands.UserLogin;
 using BlogApp.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -11,21 +12,17 @@ using System.Text;
 
 namespace BlogApp.Application.Services;
 
-public sealed class TokenService(UserManager<AppUser> userManager, IConfiguration configuration) : ITokenService
+public sealed class TokenService(UserManager<AppUser> userManager, IConfiguration configuration, IOptions<TokenOptions> tokenOptions) : ITokenService
 {
     public TokenResponse GenerateAccessToken(IEnumerable<Claim> claims, AppUser user)
     {
         var signingCredentials = new SigningCredentials(
-            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["TokenOptions:SecurityKey"] ?? string.Empty)), SecurityAlgorithms.HmacSha256);
-
-        var issuer = configuration["TokenOptions:Issuer"];
-        var audience = configuration["TokenOptions:Audience"];
-        var expires = Convert.ToInt32(configuration["TokenOptions:AccessTokenExpiration"]);
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenOptions.Value.SecurityKey)), SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
-            issuer: issuer,
-            audience: audience,
-            expires: DateTime.Now.AddMinutes(expires),
+            issuer: tokenOptions.Value.Issuer,
+            audience: tokenOptions.Value.Audience,
+            expires: DateTime.Now.AddDays(tokenOptions.Value.AccessTokenExpiration),
             claims: claims,
             signingCredentials: signingCredentials
             );

@@ -28,10 +28,10 @@ namespace BlogApp.Infrastructure
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
-                    var host = configuration.GetSection("RabbitMQ")["HostName"];
-                    var userName = configuration.GetSection("RabbitMQ")["Username"];
-                    var password = configuration.GetSection("RabbitMQ")["Password"];
-                    var retryLimit = Convert.ToInt32(configuration.GetSection("RabbitMQ")["RetryLimit"]);
+                    var host = configuration.GetSection("RabbitMQOptions")["HostName"];
+                    var userName = configuration.GetSection("RabbitMQOptions")["Username"];
+                    var password = configuration.GetSection("RabbitMQOptions")["Password"];
+                    var retryLimit = Convert.ToInt32(configuration.GetSection("RabbitMQOptions")["RetryLimit"]);
 
                     cfg.Host(host, "/", conf =>
                     {

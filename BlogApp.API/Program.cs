@@ -13,6 +13,8 @@ builder.Services.AddConfigurePersistenceServices(builder.Configuration);
 builder.Services.AddConfigureApplicationServices(builder.Configuration);
 builder.Services.AddConfigureInfrastructureServices(builder.Configuration);
 
+builder.Services.AddOptions();
+
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddCors(options =>
