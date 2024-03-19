@@ -6,7 +6,7 @@ import axios, { AxiosError } from "axios";
 export async function login(params: SignIn) {
   try {
     const result = await axios.post<BaseResponse<TokenResponse>>(
-      "https://localhost:7285/api/auth/login",
+      "https://localhost:5001/api/auth/login",
       params
     );
 

@@ -5,8 +5,6 @@ import axiosApiInstance from "@/utils/axiosApiInstance";
 
 export async function getCategories(params: BaseRequest) {
   try {
-    debugger;
-
     const categoryList = await axiosApiInstance.get<BaseListResponse<Category>>(
       "api/category",
       {
