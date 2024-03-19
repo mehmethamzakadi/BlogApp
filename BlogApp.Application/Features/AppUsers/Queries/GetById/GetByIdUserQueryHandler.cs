@@ -16,7 +16,7 @@ public sealed class GetByIdUserQueryHandler(
         if (user is null)
             return new ErrorDataResult<GetByIdAppUserResponse>("Kullanıcı bulunamadı!");
 
-        var userDto = mapper.Map<GetByIdAppUserResponse>(user);
-        return new SuccessDataResult<GetByIdAppUserResponse>(userDto);
+        var userResponse = mapper.Map<GetByIdAppUserResponse>(user);
+        return new SuccessDataResult<GetByIdAppUserResponse>(userResponse);
     }
 }
