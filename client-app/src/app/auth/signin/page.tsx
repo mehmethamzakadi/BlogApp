@@ -1,16 +1,40 @@
 "use client";
-import { login } from "@/services/authService";
+import { SignIn } from "@/types/auth/signin";
 import { TokenResponse } from "@/types/auth/tokenResponse";
 import { BaseResponse } from "@/types/common/baseResponse";
+import axios, { AxiosError } from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
+
+async function login(params: SignIn) {
+  try {
+    const result = await axios.post<BaseResponse<TokenResponse>>(
+      "https://localhost:5001/api/auth/login",
+      params
+    );
+
+    if (!result.data.success) {
+      return { error: result.data.success, message: result.data.message };
+    }
+    const token = result.data.data.token;
+    localStorage.setItem("jwt", token);
+
+    return result.data;
+  } catch (e) {
+    const error = e as AxiosError;
+    return {
+      error,
+    };
+  }
+}
 
 function SignInPage() {
   const { push } = useRouter();
 
   async function onSubmit(event: any) {
     event.preventDefault();
+
     const email: string = event.target.elements.email.value;
     const password: string = event.target.elements.password.value;
     const result = (await login({

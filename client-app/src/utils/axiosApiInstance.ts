@@ -3,7 +3,7 @@ import axios from "axios";
 const fetchClient = () => {
   const defaultOptions = {
     baseURL: "https://localhost:5001/",
-    // method: "get",
+    method: "get",
     headers: {
       "Content-Type": "application/json",
     },

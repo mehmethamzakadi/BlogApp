@@ -5,7 +5,6 @@ import "../satoshi.css";
 import Script from "next/script";
 import { useState, useEffect } from "react";
 import Loader from "@/components/common/Loader";
-import { cookies } from "next/headers";
 
 import Sidebar from "@/components/Others/Sidebar";
 import Header from "@/components/Others/Header";
