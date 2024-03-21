@@ -1,14 +1,15 @@
 import axios from "axios";
 
 const fetchClient = () => {
+
   const defaultOptions = {
     baseURL: "https://localhost:5001/",
-    method: "get",
     headers: {
       "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*"
     },
   };
-
+  
   // Create instance
   let instance = axios.create(defaultOptions);
 

@@ -1,4 +1,4 @@
-using BlogApp.API.Middlewares;
+using BlogApp.API.Extentions;
 using BlogApp.Application;
 using BlogApp.Infrastructure;
 using BlogApp.Persistence;
@@ -23,11 +23,13 @@ builder.Services.AddCors(options =>
                       builder =>
                       {
                           builder
-                          .WithOrigins("http://localhost:3000")
                           .AllowAnyHeader()
-                          .AllowAnyMethod();
+                          .AllowAnyMethod()
+                          .WithOrigins("http://localhost:3000", "https://localhost:3000", "https://localhost", "http://localhost")
+                          .AllowCredentials();
                       });
 });
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
@@ -89,11 +91,11 @@ app.DatabaseInitializer(builder.Configuration);
 
 app.UseHttpsRedirection();
 
+app.UseCors(MyAllowSpecificOrigins);
+
 app.UseAuthentication(); //Kimlik doðrulamasý.
 
 app.UseRouting();
-
-app.UseCors(MyAllowSpecificOrigins);
 
 app.UseAuthorization(); //Yetki kontrolü.
 

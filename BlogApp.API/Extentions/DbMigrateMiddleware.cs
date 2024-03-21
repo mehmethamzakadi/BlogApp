@@ -7,7 +7,7 @@ using Serilog.Sinks.MSSqlServer;
 using Serilog.Sinks.PostgreSQL;
 using Serilog.Sinks.PostgreSQL.ColumnWriters;
 
-namespace BlogApp.API.Middlewares
+namespace BlogApp.API.Extentions
 {
     public static class DbMigrateMiddleware
     {

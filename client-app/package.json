@@ -13,6 +13,7 @@
     "@react-jvectormap/unitedstates": "^1.0.1",
     "autoprefixer": "10.4.14",
     "axios": "^1.6.2",
+    "cors": "^2.8.5",
     "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
     "jsvectormap": "^1.5.3",

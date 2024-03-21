@@ -4,7 +4,7 @@ using MassTransit;
 
 namespace BlogApp.Infrastructure.RabbitMq.Consumers;
 
-public sealed class SendTextMessageConsumer(ITelegramService telegramService) : IConsumer<SendTextMessageEvent>
+public class SendTextMessageConsumer(ITelegramService telegramService) : IConsumer<SendTextMessageEvent>
 {
     public async Task Consume(ConsumeContext<SendTextMessageEvent> context)
     {
