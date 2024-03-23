@@ -3,7 +3,6 @@ import Head from 'next/head'
 import { Router } from 'next/router'
 import type { NextPage } from 'next'
 import type { AppProps } from 'next/app'
-
 // ** Loader Import
 import NProgress from 'nprogress'
 
@@ -69,7 +68,6 @@ const App = (props: ExtendedAppProps) => {
         <meta name='keywords' content='Material Design, MUI, Admin Template, React Admin Template' />
         <meta name='viewport' content='initial-scale=1, width=device-width' />
       </Head>
-
       <SettingsProvider>
         <SettingsConsumer>
           {({ settings }) => {

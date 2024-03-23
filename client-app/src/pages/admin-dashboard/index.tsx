@@ -21,8 +21,6 @@ import StatisticsCard from 'src/views/dashboard/StatisticsCard'
 import WeeklyOverview from 'src/views/dashboard/WeeklyOverview'
 import DepositWithdraw from 'src/views/dashboard/DepositWithdraw'
 import SalesByCountries from 'src/views/dashboard/SalesByCountries'
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/router'
 
 export default function Dashboard() {
   return (

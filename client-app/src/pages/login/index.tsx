@@ -21,7 +21,8 @@ import { styled, useTheme } from '@mui/material/styles'
 import MuiCard, { CardProps } from '@mui/material/Card'
 import InputAdornment from '@mui/material/InputAdornment'
 import MuiFormControlLabel, { FormControlLabelProps } from '@mui/material/FormControlLabel'
-
+import Snackbar, { SnackbarOrigin } from '@mui/material/Snackbar'
+import Alert, { AlertColor } from '@mui/material/Alert'
 // ** Icons Imports
 import Google from 'mdi-material-ui/Google'
 import Github from 'mdi-material-ui/Github'
@@ -75,16 +76,24 @@ const login = async (params: SignIn) => {
     if (!result.data.success) {
       return { error: result.data.success, message: result.data.message }
     }
-    const token = result.data.data.token
+    const token = result.data.data?.token!
     localStorage.setItem('jwt', token)
-
     return result.data
   } catch (e) {
     const error = e as AxiosError
-    return {
-      error
+    const res: BaseResponse<TokenResponse> = {
+      data: null,
+      success: false,
+      message: error.response?.data!.toString()
     }
+    return res
   }
+}
+
+interface State extends SnackbarOrigin {
+  open: boolean
+  message: string
+  alertColor?: AlertColor
 }
 
 const LoginPage = () => {
@@ -117,17 +126,27 @@ const LoginPage = () => {
       email: formState.email,
       password: formState.password
     })) as BaseResponse<TokenResponse>
+    debugger
     if (!result.success) {
-      await router.push('/login')
+      setState({ vertical: 'bottom', horizontal: 'right', open: true, message: result.message, alertColor: 'error' })
+      return
     }
     await router.push('/admin-dashboard')
   }
+
+  const [state, setState] = useState<State>({
+    open: false,
+    vertical: 'bottom',
+    horizontal: 'right',
+    message: ''
+  })
+  const { vertical, horizontal, open, message, alertColor } = state
 
   return (
     <Box className='content-center'>
       <Card sx={{ zIndex: 1 }}>
         <CardContent sx={{ padding: theme => `${theme.spacing(12, 9, 7)} !important` }}>
-          <Box sx={{ mb: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {/* <Box sx={{ mb: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg
               width={35}
               height={29}
@@ -199,12 +218,13 @@ const LoginPage = () => {
             >
               {themeConfig.templateName}
             </Typography>
-          </Box>
+          </Box> */}
           <Box sx={{ mb: 6 }}>
             <Typography variant='h5' sx={{ fontWeight: 600, marginBottom: 1.5 }}>
-              Welcome to {themeConfig.templateName}! 👋🏻
+              {/* Welcome to {themeConfig.templateName}! 👋🏻 */}
+              Hoşgeldiniz 👋🏻
             </Typography>
-            <Typography variant='body2'>Please sign-in to your account and start the adventure</Typography>
+            <Typography variant='body2'>Lütfen hesabınıza giriş yapın</Typography>
           </Box>
           <form noValidate autoComplete='off' onSubmit={onSubmit}>
             <TextField
@@ -217,7 +237,7 @@ const LoginPage = () => {
               sx={{ marginBottom: 4 }}
             />
             <FormControl fullWidth>
-              <InputLabel htmlFor='password'>Password</InputLabel>
+              <InputLabel htmlFor='password'>Şifre</InputLabel>
               <OutlinedInput
                 label='Password'
                 value={formState.password}
@@ -241,9 +261,9 @@ const LoginPage = () => {
             <Box
               sx={{ mb: 4, display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'space-between' }}
             >
-              <FormControlLabel control={<Checkbox />} label='Remember Me' />
+              <FormControlLabel control={<Checkbox />} label='Beni Hatırla' />
               <Link passHref href='/'>
-                <LinkStyled onClick={e => e.preventDefault()}>Forgot Password?</LinkStyled>
+                <LinkStyled onClick={e => e.preventDefault()}>Şifrenizi mi unuttunuz ?</LinkStyled>
               </Link>
             </Box>
             <Button
@@ -254,19 +274,27 @@ const LoginPage = () => {
               type='submit'
               // onClick={() => router.push('/')}
             >
-              Login
+              GİRİŞ
             </Button>
             <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
               <Typography variant='body2' sx={{ marginRight: 2 }}>
-                New on our platform?
+                Platformumuzda yeni misiniz?
               </Typography>
               <Typography variant='body2'>
                 <Link passHref href='/pages/register'>
-                  <LinkStyled>Create an account</LinkStyled>
+                  <LinkStyled>Bir hesap oluşturun</LinkStyled>
                 </Link>
               </Typography>
             </Box>
-            <Divider sx={{ my: 5 }}>or</Divider>
+            <Box sx={{ width: 500 }}>
+              {/* <Button onClick={handleClick({ vertical: 'bottom', horizontal: 'right' })}>Bottom-Right</Button> */}
+              <Snackbar open={open} autoHideDuration={400} anchorOrigin={{ vertical, horizontal }}>
+                <Alert severity={alertColor} variant='filled' sx={{ width: '100%' }}>
+                  {message}
+                </Alert>
+              </Snackbar>
+            </Box>
+            {/* <Divider sx={{ my: 5 }}>or</Divider>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Link href='/' passHref>
                 <IconButton component='a' onClick={(e: MouseEvent<HTMLElement>) => e.preventDefault()}>
@@ -290,7 +318,7 @@ const LoginPage = () => {
                   <Google sx={{ color: '#db4437' }} />
                 </IconButton>
               </Link>
-            </Box>
+            </Box> */}
           </form>
         </CardContent>
       </Card>

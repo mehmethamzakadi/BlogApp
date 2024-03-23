@@ -1,6 +1,5 @@
 // ** React Imports
 import { ReactNode, useEffect, useState } from 'react'
-
 // ** MUI Imports
 import Box from '@mui/material/Box'
 import { Theme } from '@mui/material/styles'
@@ -84,6 +83,7 @@ const UserLayout = ({ children }: Props) => {
       )}
     >
       {children}
+
       {/* <UpgradeToProButton /> */}
     </VerticalLayout>
   )
