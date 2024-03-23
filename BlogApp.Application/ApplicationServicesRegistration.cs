@@ -2,6 +2,7 @@
 using BlogApp.Application.Behaviors.Logging;
 using BlogApp.Application.Behaviors.Transaction;
 using BlogApp.Application.Services;
+using BlogApp.Domain.AppSettingsOptions;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.Extensions.Configuration;

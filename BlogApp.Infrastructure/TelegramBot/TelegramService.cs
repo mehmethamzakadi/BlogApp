@@ -7,7 +7,7 @@ namespace BlogApp.Infrastructure.TelegramBot;
 
 public sealed class TelegramService(IConfiguration configuration) : ITelegramService
 {
-    private readonly TelegramBotClient TelegramBot = new TelegramBotClient(configuration["TelegramBotOptions:TelegramBotToken"] ?? string.Empty);
+    private readonly TelegramBotClient TelegramBot = new(configuration["TelegramBotOptions:TelegramBotToken"] ?? string.Empty);
 
     public async Task SendTextMessage(string message, long chatId)
     {

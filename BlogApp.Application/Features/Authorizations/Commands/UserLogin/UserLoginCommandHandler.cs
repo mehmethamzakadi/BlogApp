@@ -1,18 +1,19 @@
 ﻿using BlogApp.Application.Abstractions;
+using BlogApp.Domain.AppSettingsOptions;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Events.Telegram;
 using MassTransit;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace BlogApp.Application.Features.Authorizations.Commands.UserLogin;
 
 public sealed class UserLoginCommandHandler(
          ITokenService tokenService,
          UserManager<AppUser> userManager,
-         IConfiguration configuration,
+         IOptions<TelegramOptions> telegramOptions,
          SignInManager<AppUser> signInManager,
          IPublishEndpoint publishEndpoint) : IRequestHandler<UserLoginCommand, IDataResult<TokenResponse>>
 {
@@ -41,9 +42,8 @@ public sealed class UserLoginCommandHandler(
 
     private async Task SendTelegramMessage(AppUser user)
     {
-        var chatId = Convert.ToInt64(configuration["TelegramBotConfiguration:ChatId"]);
         var message = $"{user.UserName} Kullanıcısı Sisteme Giriş Yaptı.";
-        await publishEndpoint.Publish(new SendTextMessageEvent(message: message, chatId: chatId));
+        await publishEndpoint.Publish(
+            new SendTextMessageEvent(message: message, chatId: telegramOptions.Value.ChatId));
     }
-
 }

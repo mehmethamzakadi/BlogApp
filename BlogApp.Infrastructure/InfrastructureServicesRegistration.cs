@@ -1,4 +1,5 @@
 ﻿using BlogApp.Application.Abstractions;
+using BlogApp.Domain.AppSettingsOptions;
 using BlogApp.Domain.Constants;
 using BlogApp.Infrastructure.Cache;
 using BlogApp.Infrastructure.RabbitMq.Consumers;
@@ -13,6 +14,9 @@ namespace BlogApp.Infrastructure
     {
         public static IServiceCollection AddConfigureInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
+            // Yapılandırma ayarlarını okumak için
+            services.Configure<TelegramOptions>(configuration.GetSection("TelegramBotOptions"));
+
             services.AddSingleton<ITelegramService, TelegramService>();
             services.AddSingleton<ICacheService, CacheService>();
 
