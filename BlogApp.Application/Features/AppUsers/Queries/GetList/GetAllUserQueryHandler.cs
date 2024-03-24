@@ -1,17 +1,17 @@
 ﻿using AutoMapper;
+using BlogApp.Application.Abstractions;
 using BlogApp.Domain.Common.Paging;
 using BlogApp.Domain.Common.Responses;
 using BlogApp.Domain.Entities;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 
 namespace BlogApp.Application.Features.AppUsers.Queries.GetList;
 
-public sealed class GetAllUserQueryHandler(UserManager<AppUser> userManager, IMapper mapper) : IRequestHandler<GetListAppUsersQuery, GetListResponse<GetListAppUserResponse>>
+public sealed class GetAllUserQueryHandler(IUserService userManager, IMapper mapper) : IRequestHandler<GetListAppUsersQuery, GetListResponse<GetListAppUserResponse>>
 {
     public async Task<GetListResponse<GetListAppUserResponse>> Handle(GetListAppUsersQuery request, CancellationToken cancellationToken)
     {
-        Paginate<AppUser> userList = await userManager.Users.ToPaginateAsync(
+        Paginate<AppUser> userList = await userManager.GetUsers(
         index: request.PageRequest.PageIndex,
         size: request.PageRequest.PageSize,
         cancellationToken: cancellationToken

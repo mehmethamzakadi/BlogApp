@@ -1,9 +1,8 @@
 ﻿using BlogApp.Application.Abstractions;
 using BlogApp.Domain.AppSettingsOptions;
 using BlogApp.Domain.Constants;
-using BlogApp.Infrastructure.Cache;
 using BlogApp.Infrastructure.RabbitMq.Consumers;
-using BlogApp.Infrastructure.TelegramBot;
+using BlogApp.Infrastructure.Services;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,7 +17,8 @@ namespace BlogApp.Infrastructure
             services.Configure<TelegramOptions>(configuration.GetSection("TelegramBotOptions"));
 
             services.AddSingleton<ITelegramService, TelegramService>();
-            services.AddSingleton<ICacheService, CacheService>();
+            services.AddSingleton<ICacheService, RedisCacheService>();
+            services.AddTransient<ITokenService, JwtTokenService>();
 
             #region Redis Configurations
             services.AddStackExchangeRedisCache(options =>

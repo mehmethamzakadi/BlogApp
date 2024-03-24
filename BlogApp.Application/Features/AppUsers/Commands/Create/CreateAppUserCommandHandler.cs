@@ -1,28 +1,35 @@
 ﻿using AutoMapper;
+using BlogApp.Application.Abstractions;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Constants;
 using BlogApp.Domain.Entities;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 
 namespace BlogApp.Application.Features.AppUsers.Commands.Create;
 
-public sealed class CreateUserCommandHandler(IMapper mapper, UserManager<AppUser> userManager) : IRequestHandler<CreateAppUserCommand, IResult>
+public sealed class CreateUserCommandHandler(IMapper mapper, IUserService userService) : IRequestHandler<CreateAppUserCommand, IResult>
 {
     public async Task<IResult> Handle(CreateAppUserCommand request, CancellationToken cancellationToken)
     {
-        var userExists = await userManager.FindByEmailAsync(request.Email);
-        if (userExists != null)
+        AppUser? user = await userService.FindByEmailAsync(request.Email);
+        if (user != null)
             return new ErrorResult("Böyle bir kullanıcı zaten sistemde mevcut!");
 
-        var user = mapper.Map<AppUser>(request);
-        var response = await userManager.CreateAsync(user, request.Password);
-        if (!response.Succeeded)
-            return new ErrorResult("Ekleme işlemi sırasında hata oluştu!");
-
-        //Oluşturulan her yeni kullanıcıya default olarak User rolü atanır.
-        await userManager.AddToRoleAsync(user, UserRoles.User);
-
-        return new SuccessResult("Kullanıcı bilgisi başarıyla eklendi.");
+        string message = "Kullanıcı bilgisi başarıyla eklendi.";
+        var result = await userService.CreateAsync(user!, request.Password);
+        if (result.Succeeded)
+        {
+            //Oluşturulan her yeni kullanıcıya default olarak User rolü atanır.
+            await userService.AddToRoleAsync(user!, UserRoles.User);
+            return new SuccessResult(message);
+        }
+        else
+        {
+            foreach (var error in result.Errors)
+            {
+                message += $"{error.Code}-{error.Description}";
+            }
+            return new ErrorResult(message);
+        }
     }
 }
