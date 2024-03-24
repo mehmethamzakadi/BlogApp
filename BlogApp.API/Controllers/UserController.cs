@@ -1,6 +1,7 @@
 using BlogApp.Application.Features.AppUsers.Commands.Create;
 using BlogApp.Application.Features.AppUsers.Commands.Delete;
 using BlogApp.Application.Features.AppUsers.Commands.Update;
+using BlogApp.Application.Features.AppUsers.Commands.UpdatePassword;
 using BlogApp.Application.Features.AppUsers.Queries.GetById;
 using BlogApp.Application.Features.AppUsers.Queries.GetList;
 using BlogApp.Domain.Common.Requests;
@@ -40,6 +41,13 @@ namespace BlogApp.API.Controllers
         public async Task<IActionResult> Delete(DeleteAppUserCommand deleteUser)
         {
             return GetResponseOnlyResultMessage(await Mediator.Send(deleteUser));
+        }
+
+        [HttpPost("UpdatePassword")]
+        public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordCommand updatePasswordCommandRequest)
+        {
+            UpdatePasswordResponse response = await Mediator.Send(updatePasswordCommandRequest);
+            return Ok(response);
         }
     }
 }

@@ -6,14 +6,15 @@ using MassTransit;
 using MediatR;
 using Microsoft.Extensions.Options;
 
-namespace BlogApp.Application.Features.Authorizations.Commands.UserLogin;
+namespace BlogApp.Application.Features.AppUsers.Commands.Login;
 
-public sealed class UserLoginCommandHandler(
+public sealed class LoginCommandHandler(
          IAuthService authService,
          IOptions<TelegramOptions> telegramOptions,
-         IPublishEndpoint publishEndpoint) : IRequestHandler<UserLoginCommand, IDataResult<TokenResponse>>
+         IMailService mailService,
+         IPublishEndpoint publishEndpoint) : IRequestHandler<LoginCommand, IDataResult<LoginResponse>>
 {
-    public async Task<IDataResult<TokenResponse>> Handle(UserLoginCommand request, CancellationToken cancellationToken)
+    public async Task<IDataResult<LoginResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
         var response = await authService.LoginAsync(request.Email, request.Password);
         if (response.Success)
@@ -24,6 +25,8 @@ public sealed class UserLoginCommandHandler(
 
     private async Task SendTelegramMessage(string userName)
     {
+        await mailService.SendMailAsync("mehmethamzakadi@hotmail.com", "Deneme Mail", "Deneme içerik");
+
         var message = $"{userName} Kullanıcısı Sisteme Giriş Yaptı.";
         await publishEndpoint.Publish(
             new SendTextMessageEvent(message: message, chatId: telegramOptions.Value.ChatId));

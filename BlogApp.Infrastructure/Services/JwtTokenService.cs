@@ -1,5 +1,5 @@
 ﻿using BlogApp.Application.Abstractions;
-using BlogApp.Application.Features.Authorizations.Commands.UserLogin;
+using BlogApp.Application.Features.AppUsers.Commands.Login;
 using BlogApp.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -15,7 +15,7 @@ namespace BlogApp.Infrastructure.Services;
 
 public sealed class JwtTokenService(UserManager<AppUser> userManager, IConfiguration configuration, IOptions<TokenOptions> tokenOptions) : ITokenService
 {
-    public TokenResponse GenerateAccessToken(IEnumerable<Claim> claims, AppUser user)
+    public LoginResponse GenerateAccessToken(IEnumerable<Claim> claims, AppUser user)
     {
         var signingCredentials = new SigningCredentials(
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenOptions.Value.SecurityKey)), SecurityAlgorithms.HmacSha256);
@@ -29,7 +29,7 @@ public sealed class JwtTokenService(UserManager<AppUser> userManager, IConfigura
             );
 
         var refreshToken = GenerateRefreshToken();
-        var tokenResponse = new TokenResponse(
+        var tokenResponse = new LoginResponse(
             UserId: user.Id,
             UserName: user.UserName ?? string.Empty,
             Expiration: token.ValidTo,

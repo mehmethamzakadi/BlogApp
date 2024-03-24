@@ -1,11 +1,11 @@
 ﻿using FluentValidation;
 using FluentValidation.Validators;
 
-namespace BlogApp.Application.Features.Authorizations.Commands.UserLogin;
+namespace BlogApp.Application.Features.AppUsers.Commands.Login;
 
-public sealed class UserLoginValidator : AbstractValidator<UserLoginCommand>
+public sealed class LoginValidator : AbstractValidator<LoginCommand>
 {
-    public UserLoginValidator()
+    public LoginValidator()
     {
         RuleFor(u => u.Email).EmailAddress(EmailValidationMode.AspNetCoreCompatible).WithMessage("Email adresi geçersiz!");
     }

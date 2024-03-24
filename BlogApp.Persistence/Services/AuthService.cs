@@ -1,5 +1,5 @@
 ﻿using BlogApp.Application.Abstractions;
-using BlogApp.Application.Features.Authorizations.Commands.UserLogin;
+using BlogApp.Application.Features.AppUsers.Commands.Login;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Exceptions;
@@ -8,9 +8,9 @@ using Microsoft.AspNetCore.Identity;
 
 namespace BlogApp.Persistence.Services;
 
-public sealed class AuthService(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ITokenService tokenService) : IAuthService
+public sealed class AuthService(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ITokenService tokenService, IMailService mailService) : IAuthService
 {
-    public async Task<IDataResult<TokenResponse>> LoginAsync(string email, string password)
+    public async Task<IDataResult<LoginResponse>> LoginAsync(string email, string password)
     {
         AppUser? user = await userManager.FindByEmailAsync(email);
         if (user is not null)
@@ -26,7 +26,7 @@ public sealed class AuthService(UserManager<AppUser> userManager, SignInManager<
             await userManager.RemoveAuthenticationTokenAsync(user, "BlogApp", "RefreshToken");
             await userManager.SetAuthenticationTokenAsync(user, "BlogApp", "RefreshToken", tokenResponse.RefreshToken);
 
-            return new SuccessDataResult<TokenResponse>(tokenResponse, "Giriş Başarılı");
+            return new SuccessDataResult<LoginResponse>(tokenResponse, "Giriş Başarılı");
         }
         throw new AuthenticationErrorException();
     }
@@ -38,7 +38,7 @@ public sealed class AuthService(UserManager<AppUser> userManager, SignInManager<
         {
             string resetToken = await userManager.GeneratePasswordResetTokenAsync(user);
             resetToken = resetToken.UrlEncode();
-            //await _mailService.SendPasswordResetMailAsync(email, user.Id, resetToken);
+            await mailService.SendPasswordResetMailAsync(email, user.Id, resetToken);
         }
     }
 

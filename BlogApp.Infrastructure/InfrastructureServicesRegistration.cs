@@ -19,6 +19,9 @@ namespace BlogApp.Infrastructure
             services.AddSingleton<ITelegramService, TelegramService>();
             services.AddSingleton<ICacheService, RedisCacheService>();
             services.AddTransient<ITokenService, JwtTokenService>();
+            services.AddTransient<IMailService, MailService>();
+
+
 
             #region Redis Configurations
             services.AddStackExchangeRedisCache(options =>

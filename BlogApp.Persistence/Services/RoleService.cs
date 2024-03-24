@@ -11,27 +11,26 @@ public sealed class RoleService(RoleManager<AppRole> roleManager) : IRoleService
         return roles;
     }
 
-    public async Task<(int id, string name)> GetRoleById(int id)
+    public async Task<string> GetRoleById(AppRole role)
     {
-        string role = await roleManager.GetRoleIdAsync(new() { Id = id });
-        return (id, role);
+        return await roleManager.GetRoleIdAsync(role);
     }
 
-    public async Task<bool> CreateRole(string name)
+    public async Task<bool> CreateRole(AppRole role)
     {
-        IdentityResult result = await roleManager.CreateAsync(new() { Name = name });
+        IdentityResult result = await roleManager.CreateAsync(role);
         return result.Succeeded;
     }
 
-    public async Task<bool> DeleteRole(string name)
+    public async Task<bool> DeleteRole(AppRole role)
     {
-        IdentityResult result = await roleManager.DeleteAsync(new() { Name = name });
+        IdentityResult result = await roleManager.DeleteAsync(role);
         return result.Succeeded;
     }
 
-    public async Task<bool> UpdateRole(int id, string name)
+    public async Task<bool> UpdateRole(AppRole role)
     {
-        IdentityResult result = await roleManager.UpdateAsync(new() { Id = id, Name = name });
+        IdentityResult result = await roleManager.UpdateAsync(role);
         return result.Succeeded;
     }
 }
