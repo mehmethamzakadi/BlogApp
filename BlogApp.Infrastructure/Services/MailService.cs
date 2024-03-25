@@ -1,7 +1,9 @@
 ﻿using BlogApp.Application.Abstractions;
+using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.Extensions.Configuration;
-using System.Net;
-using System.Net.Mail;
+using MimeKit;
+using MimeKit.Text;
 using System.Text;
 
 namespace BlogApp.Infrastructure.Services;
@@ -10,20 +12,23 @@ public sealed class MailService(IConfiguration configuration) : IMailService
 {
     public async Task SendMailAsync(string to, string subject, string body, bool isBodyHtml = true)
     {
-        MailMessage mail = new();
-        mail.IsBodyHtml = isBodyHtml;
-        mail.To.Add(to);
-        mail.Subject = subject;
-        mail.Body = body;
-        mail.From = new(configuration["EmailOptions:Username"] ?? throw new InvalidOperationException());
+        var email = new MimeMessage();
+        email.From.Add(MailboxAddress.Parse(configuration["EmailOptions:Username"] ?? throw new InvalidOperationException()));
+        email.To.Add(MailboxAddress.Parse(to));
+        email.Subject = subject;
+        email.Body = new TextPart(TextFormat.Html) { Text = body };
 
-        using var smtpClient = new SmtpClient();
-        smtpClient.Credentials = new NetworkCredential(configuration["EmailOptions:Username"],
-            configuration["EmailOptions:Password"]);
-        smtpClient.Port = Convert.ToInt32(configuration["EmailOptions:Port"]);
-        smtpClient.EnableSsl = true;
-        smtpClient.Host = configuration["EmailOptions:Host"] ?? string.Empty;
-        await smtpClient.SendMailAsync(mail);
+
+        var host = configuration["EmailOptions:Host"] ?? string.Empty;
+        var port = Convert.ToInt32(configuration["EmailOptions:Port"]);
+        var from = configuration["EmailOptions:Username"] ?? throw new InvalidOperationException();
+        var pass = configuration["EmailOptions:Password"];
+
+        using var smtp = new SmtpClient();
+        smtp.Connect(host, port, SecureSocketOptions.StartTls);
+        smtp.Authenticate(from, pass);
+        smtp.Send(email);
+        smtp.Disconnect(true);
 
     }
 
