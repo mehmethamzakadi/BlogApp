@@ -1,7 +1,7 @@
 ﻿using BlogApp.Application.Abstractions;
 using BlogApp.Domain.AppSettingsOptions;
 using BlogApp.Domain.Constants;
-using BlogApp.Infrastructure.RabbitMq.Consumers;
+using BlogApp.Infrastructure.Consumers;
 using BlogApp.Infrastructure.Services;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
@@ -31,7 +31,7 @@ namespace BlogApp.Infrastructure
             #region MassTransit RabbitMq Configurations
             services.AddMassTransit(x =>
             {
-                x.AddConsumer<SendTextMessageConsumer>();
+                x.AddConsumer<SendTelgeramMessageConsumer>();
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
@@ -48,14 +48,14 @@ namespace BlogApp.Infrastructure
                         cfg.ReceiveEndpoint(EventConstants.SendTelegramTextMessageQueue,
                             c =>
                             {
-                                c.ConfigureConsumer<SendTextMessageConsumer>(context);
+                                c.ConfigureConsumer<SendTelgeramMessageConsumer>(context);
                             });
                         cfg.UseMessageRetry(r => r.Immediate(retryLimit));
                     });
                 });
             });
 
-            services.AddScoped<SendTextMessageConsumer>();
+            services.AddScoped<SendTelgeramMessageConsumer>();
             #endregion
 
             return services;

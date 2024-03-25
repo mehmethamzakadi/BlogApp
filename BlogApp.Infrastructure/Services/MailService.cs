@@ -12,24 +12,22 @@ public sealed class MailService(IConfiguration configuration) : IMailService
 {
     public async Task SendMailAsync(string to, string subject, string body, bool isBodyHtml = true)
     {
+        var host = configuration["EmailOptions:Host"];
+        var port = Convert.ToInt32(configuration["EmailOptions:Port"]);
+        var from = configuration["EmailOptions:Username"];
+        var pass = configuration["EmailOptions:Password"];
+
         var email = new MimeMessage();
-        email.From.Add(MailboxAddress.Parse(configuration["EmailOptions:Username"] ?? throw new InvalidOperationException()));
+        email.From.Add(MailboxAddress.Parse(from));
         email.To.Add(MailboxAddress.Parse(to));
         email.Subject = subject;
         email.Body = new TextPart(TextFormat.Html) { Text = body };
 
-
-        var host = configuration["EmailOptions:Host"] ?? string.Empty;
-        var port = Convert.ToInt32(configuration["EmailOptions:Port"]);
-        var from = configuration["EmailOptions:Username"] ?? throw new InvalidOperationException();
-        var pass = configuration["EmailOptions:Password"];
-
         using var smtp = new SmtpClient();
-        smtp.Connect(host, port, SecureSocketOptions.StartTls);
-        smtp.Authenticate(from, pass);
-        smtp.Send(email);
-        smtp.Disconnect(true);
-
+        await smtp.ConnectAsync(host, port, SecureSocketOptions.StartTls);
+        await smtp.AuthenticateAsync(from, pass);
+        await smtp.SendAsync(email);
+        await smtp.DisconnectAsync(true);
     }
 
     public async Task SendPasswordResetMailAsync(string to, int userId, string resetToken)

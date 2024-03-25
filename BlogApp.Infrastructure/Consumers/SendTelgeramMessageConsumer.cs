@@ -2,9 +2,9 @@
 using BlogApp.Domain.Events.Telegram;
 using MassTransit;
 
-namespace BlogApp.Infrastructure.RabbitMq.Consumers;
+namespace BlogApp.Infrastructure.Consumers;
 
-public class SendTextMessageConsumer(ITelegramService telegramService) : IConsumer<SendTextMessageEvent>
+public class SendTelgeramMessageConsumer(ITelegramService telegramService) : IConsumer<SendTextMessageEvent>
 {
     public async Task Consume(ConsumeContext<SendTextMessageEvent> context)
     {
