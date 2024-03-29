@@ -32,7 +32,7 @@ namespace BlogApp.API.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> Put(UpdateCategoryCommand category)
+        public async Task<IActionResult> Put([FromBody] UpdateCategoryCommand category)
         {
             return GetResponseOnlyResultMessage(await Mediator.Send(category));
         }

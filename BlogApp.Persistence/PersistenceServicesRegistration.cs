@@ -1,7 +1,10 @@
-﻿using BlogApp.Domain.Entities;
+﻿using BlogApp.Application.Abstractions;
+using BlogApp.Domain.Entities;
 using BlogApp.Domain.Repositories;
 using BlogApp.Persistence.Contexts;
+using BlogApp.Persistence.DatabaseInitializer;
 using BlogApp.Persistence.Repositories;
+using BlogApp.Persistence.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -75,6 +78,13 @@ public static class PersistenceServicesRegistration
         services.AddScoped<ICommentRepository, CommentRepository>();
         services.AddScoped<IImageRepository, ImageRepository>();
         services.AddScoped<IPostRepository, PostRepository>();
+
+        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IRoleService, RoleService>();
+
+        services.AddScoped<IDbInitializer, DbInitializer>();
+
 
         return services;
     }

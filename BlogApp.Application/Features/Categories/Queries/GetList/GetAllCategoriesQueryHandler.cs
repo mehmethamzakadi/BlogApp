@@ -16,6 +16,7 @@ public sealed class GetAllCategoriesQueryHandler(
         Paginate<Category> categories = await categoryRepository.GetListAsync(
         index: request.PageRequest.PageIndex,
         size: request.PageRequest.PageSize,
+        orderBy: x => x.OrderByDescending(x => x.CreatedDate),
         cancellationToken: cancellationToken
         );
 

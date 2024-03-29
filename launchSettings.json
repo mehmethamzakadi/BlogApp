@@ -5,7 +5,9 @@
       "commandVersion": "1.0",
       "serviceActions": {
         "blogapp.api": "StartDebugging",
-        "sqlserverdb": "StartWithoutDebugging"
+        "sqlserverdb": "StartWithoutDebugging",
+        "rabbitmq": "StartWithoutDebugging",
+        "redis.cache": "StartWithoutDebugging"
       }
     }
   }

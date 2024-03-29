@@ -1,14 +1,13 @@
-using BlogApp.API.Middlewares;
 using BlogApp.Application;
 using BlogApp.Infrastructure;
 using BlogApp.Persistence;
+using BlogApp.Persistence.DatabaseInitializer;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 // Add services to the container.
-
 builder.Services.AddConfigurePersistenceServices(builder.Configuration);
 builder.Services.AddConfigureApplicationServices(builder.Configuration);
 builder.Services.AddConfigureInfrastructureServices(builder.Configuration);
@@ -28,6 +27,7 @@ builder.Services.AddCors(options =>
                           .AllowAnyMethod();
                       });
 });
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
@@ -85,15 +85,28 @@ if (app.Environment.IsDevelopment())
 }
 
 //Uygulama sýfýrdan docker ile ayaða kalkarken database migrate saðlanýyor.
-app.DatabaseInitializer(builder.Configuration);
+using (IServiceScope serviceScope = app.Services.CreateScope())
+{
+    var services = serviceScope.ServiceProvider;
+    var myDependency = services.GetRequiredService<IDbInitializer>();
+
+    //Veritabaný oluþturuluyor
+    await myDependency.DatabaseInitializer(app, builder.Configuration);
+
+    //Serilog için tablo yapýsý oluþturuluyor (MsSql)
+    await myDependency.CreateMsSqlSeriLogTable(builder.Configuration);
+
+    //Postgre için serilog
+    //await myDependency.CreatePostgreSqlSeriLogTable(builder.Configuration);
+}
 
 app.UseHttpsRedirection();
+
+app.UseCors(MyAllowSpecificOrigins);
 
 app.UseAuthentication(); //Kimlik doðrulamasý.
 
 app.UseRouting();
-
-app.UseCors(MyAllowSpecificOrigins);
 
 app.UseAuthorization(); //Yetki kontrolü.
 

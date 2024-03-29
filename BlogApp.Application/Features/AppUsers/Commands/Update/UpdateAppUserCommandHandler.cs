@@ -1,15 +1,15 @@
-﻿using BlogApp.Domain.Common.Results;
+﻿using BlogApp.Application.Abstractions;
+using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 
 namespace BlogApp.Application.Features.AppUsers.Commands.Update;
 
-public sealed class UpdateUserCommandHandler(UserManager<AppUser> userManager) : IRequestHandler<UpdateAppUserCommand, IResult>
+public sealed class UpdateUserCommandHandler(IUserService userManager) : IRequestHandler<UpdateAppUserCommand, IResult>
 {
     public async Task<IResult> Handle(UpdateAppUserCommand request, CancellationToken cancellationToken)
     {
-        AppUser? user = userManager.Users.Where(x => x.Id == request.Id).FirstOrDefault();
+        AppUser? user = userManager.FindById(request.Id);
         if (user is null)
             return new ErrorResult("Kullanıcı Bilgisi Bulunamadı!");
 

@@ -1,8 +1,8 @@
 ﻿using BlogApp.Application.Abstractions;
+using BlogApp.Domain.AppSettingsOptions;
 using BlogApp.Domain.Constants;
-using BlogApp.Infrastructure.Cache;
-using BlogApp.Infrastructure.RabbitMq.Consumers;
-using BlogApp.Infrastructure.TelegramBot;
+using BlogApp.Infrastructure.Consumers;
+using BlogApp.Infrastructure.Services;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,8 +13,15 @@ namespace BlogApp.Infrastructure
     {
         public static IServiceCollection AddConfigureInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
+            // Yapılandırma ayarlarını okumak için
+            services.Configure<TelegramOptions>(configuration.GetSection("TelegramBotOptions"));
+
             services.AddSingleton<ITelegramService, TelegramService>();
-            services.AddSingleton<ICacheService, CacheService>();
+            services.AddSingleton<ICacheService, RedisCacheService>();
+            services.AddTransient<ITokenService, JwtTokenService>();
+            services.AddTransient<IMailService, MailService>();
+
+
 
             #region Redis Configurations
             services.AddStackExchangeRedisCache(options =>
@@ -24,7 +31,7 @@ namespace BlogApp.Infrastructure
             #region MassTransit RabbitMq Configurations
             services.AddMassTransit(x =>
             {
-                x.AddConsumer<SendTextMessageConsumer>();
+                x.AddConsumer<SendTelgeramMessageConsumer>();
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
@@ -41,14 +48,14 @@ namespace BlogApp.Infrastructure
                         cfg.ReceiveEndpoint(EventConstants.SendTelegramTextMessageQueue,
                             c =>
                             {
-                                c.ConfigureConsumer<SendTextMessageConsumer>(context);
+                                c.ConfigureConsumer<SendTelgeramMessageConsumer>(context);
                             });
                         cfg.UseMessageRetry(r => r.Immediate(retryLimit));
                     });
                 });
             });
 
-            services.AddScoped<SendTextMessageConsumer>();
+            services.AddScoped<SendTelgeramMessageConsumer>();
             #endregion
 
             return services;

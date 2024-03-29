@@ -1,15 +1,14 @@
-﻿using BlogApp.Domain.Common.Results;
-using BlogApp.Domain.Entities;
+﻿using BlogApp.Application.Abstractions;
+using BlogApp.Domain.Common.Results;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 
 namespace BlogApp.Application.Features.AppUsers.Commands.Delete;
 
-public sealed class DeleteUserCommandHandler(UserManager<AppUser> userManager) : IRequestHandler<DeleteAppUserCommand, IResult>
+public sealed class DeleteUserCommandHandler(IUserService userManager) : IRequestHandler<DeleteAppUserCommand, IResult>
 {
     public async Task<IResult> Handle(DeleteAppUserCommand request, CancellationToken cancellationToken)
     {
-        var user = userManager.Users.Where(x => x.Id == request.Id).FirstOrDefault();
+        var user = userManager.FindById(request.Id);
         if (user == null)
             return new ErrorResult("Kullanıcı bilgisi bulunamadı!");
 

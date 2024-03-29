@@ -162,15 +162,15 @@ namespace BlogApp.Persistence.Migrations
                         {
                             Id = 1,
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "61f853c4-6114-4190-aa16-aa34ab168165",
+                            ConcurrencyStamp = "8d9ae91a-e7c0-43c2-9fb4-1e7c46d73243",
                             Email = "admin@admin.com",
                             EmailConfirmed = false,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@ADMIN.COM",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEM8qtw3WHy46YCWaFRt1yitKqCADsGSU5g6outt7dqSp3X+mgLQVt/RHwrLvXNte0g==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEC14nlHpTEloKJCNgwoSuG50FU4c4Tqri+FuVivLNiR/MKFKBiuc1vZX2dwUIdfhvQ==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "3fbadfc2-2e17-4c69-98bc-5a666fcc43d2",
+                            SecurityStamp = "3b3fd2c3-8fd1-4334-bd8e-4508facdca00",
                             TwoFactorEnabled = false,
                             UserName = "admin"
                         });
@@ -299,6 +299,56 @@ namespace BlogApp.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedById = 1,
+                            CreatedDate = new DateTime(2024, 3, 28, 22, 54, 35, 679, DateTimeKind.Local).AddTicks(9147),
+                            IsDeleted = false,
+                            Name = "ASP .NET Core"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedById = 1,
+                            CreatedDate = new DateTime(2024, 3, 28, 22, 54, 35, 679, DateTimeKind.Local).AddTicks(9163),
+                            IsDeleted = false,
+                            Name = "Entity Framework Core"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreatedById = 1,
+                            CreatedDate = new DateTime(2024, 3, 28, 22, 54, 35, 679, DateTimeKind.Local).AddTicks(9164),
+                            IsDeleted = false,
+                            Name = "Docker"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CreatedById = 1,
+                            CreatedDate = new DateTime(2024, 3, 28, 22, 54, 35, 679, DateTimeKind.Local).AddTicks(9165),
+                            IsDeleted = false,
+                            Name = "RabbitMQ"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            CreatedById = 1,
+                            CreatedDate = new DateTime(2024, 3, 28, 22, 54, 35, 679, DateTimeKind.Local).AddTicks(9166),
+                            IsDeleted = false,
+                            Name = "Redis"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            CreatedById = 1,
+                            CreatedDate = new DateTime(2024, 3, 28, 22, 54, 35, 679, DateTimeKind.Local).AddTicks(9168),
+                            IsDeleted = false,
+                            Name = "Clean Architecture"
+                        });
                 });
 
             modelBuilder.Entity("BlogApp.Domain.Entities.Comment", b =>

@@ -1,7 +1,6 @@
-﻿using BlogApp.Application.Abstractions;
-using BlogApp.Application.Behaviors.Logging;
+﻿using BlogApp.Application.Behaviors.Logging;
 using BlogApp.Application.Behaviors.Transaction;
-using BlogApp.Application.Services;
+using BlogApp.Domain.AppSettingsOptions;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.Extensions.Configuration;
@@ -17,8 +16,6 @@ namespace BlogApp.Application
         {
             // Yapılandırma ayarlarını okumak için
             services.Configure<TokenOptions>(configuration.GetSection("TokenOptions"));
-
-            services.AddTransient<ITokenService, TokenService>();
 
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
