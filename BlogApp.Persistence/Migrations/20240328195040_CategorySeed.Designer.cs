@@ -4,6 +4,7 @@ using BlogApp.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogApp.Persistence.Migrations
 {
     [DbContext(typeof(BlogAppDbContext))]
-    partial class BlogAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240328195040_CategorySeed")]
+    partial class CategorySeed
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -162,15 +165,15 @@ namespace BlogApp.Persistence.Migrations
                         {
                             Id = 1,
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "8d9ae91a-e7c0-43c2-9fb4-1e7c46d73243",
+                            ConcurrencyStamp = "d063598f-d9eb-482e-8e70-16bdab98f4b0",
                             Email = "admin@admin.com",
                             EmailConfirmed = false,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@ADMIN.COM",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEC14nlHpTEloKJCNgwoSuG50FU4c4Tqri+FuVivLNiR/MKFKBiuc1vZX2dwUIdfhvQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEMlrp/Z/dJ52OKdLaM8SCrZr44yfzseu2Ovzz7hPFqw7Cbw6XTQIkxJeebYiOpilIg==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "3b3fd2c3-8fd1-4334-bd8e-4508facdca00",
+                            SecurityStamp = "31f99456-7484-4a0a-a794-5375cf9901ce",
                             TwoFactorEnabled = false,
                             UserName = "admin"
                         });
@@ -305,7 +308,7 @@ namespace BlogApp.Persistence.Migrations
                         {
                             Id = 1,
                             CreatedById = 1,
-                            CreatedDate = new DateTime(2024, 3, 28, 22, 54, 35, 679, DateTimeKind.Local).AddTicks(9147),
+                            CreatedDate = new DateTime(2024, 3, 28, 22, 50, 40, 453, DateTimeKind.Local).AddTicks(5255),
                             IsDeleted = false,
                             Name = "ASP .NET Core"
                         },
@@ -313,7 +316,7 @@ namespace BlogApp.Persistence.Migrations
                         {
                             Id = 2,
                             CreatedById = 1,
-                            CreatedDate = new DateTime(2024, 3, 28, 22, 54, 35, 679, DateTimeKind.Local).AddTicks(9163),
+                            CreatedDate = new DateTime(2024, 3, 28, 22, 50, 40, 453, DateTimeKind.Local).AddTicks(5270),
                             IsDeleted = false,
                             Name = "Entity Framework Core"
                         },
@@ -321,7 +324,7 @@ namespace BlogApp.Persistence.Migrations
                         {
                             Id = 3,
                             CreatedById = 1,
-                            CreatedDate = new DateTime(2024, 3, 28, 22, 54, 35, 679, DateTimeKind.Local).AddTicks(9164),
+                            CreatedDate = new DateTime(2024, 3, 28, 22, 50, 40, 453, DateTimeKind.Local).AddTicks(5271),
                             IsDeleted = false,
                             Name = "Docker"
                         },
@@ -329,7 +332,7 @@ namespace BlogApp.Persistence.Migrations
                         {
                             Id = 4,
                             CreatedById = 1,
-                            CreatedDate = new DateTime(2024, 3, 28, 22, 54, 35, 679, DateTimeKind.Local).AddTicks(9165),
+                            CreatedDate = new DateTime(2024, 3, 28, 22, 50, 40, 453, DateTimeKind.Local).AddTicks(5272),
                             IsDeleted = false,
                             Name = "RabbitMQ"
                         },
@@ -337,17 +340,9 @@ namespace BlogApp.Persistence.Migrations
                         {
                             Id = 5,
                             CreatedById = 1,
-                            CreatedDate = new DateTime(2024, 3, 28, 22, 54, 35, 679, DateTimeKind.Local).AddTicks(9166),
+                            CreatedDate = new DateTime(2024, 3, 28, 22, 50, 40, 453, DateTimeKind.Local).AddTicks(5273),
                             IsDeleted = false,
                             Name = "Redis"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            CreatedById = 1,
-                            CreatedDate = new DateTime(2024, 3, 28, 22, 54, 35, 679, DateTimeKind.Local).AddTicks(9168),
-                            IsDeleted = false,
-                            Name = "Clean Architecture"
                         });
                 });
 

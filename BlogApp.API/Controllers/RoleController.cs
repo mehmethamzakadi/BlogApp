@@ -1,8 +1,10 @@
 using BlogApp.Application.Features.AppRoles.Commands.Create;
 using BlogApp.Application.Features.AppRoles.Commands.Delete;
 using BlogApp.Application.Features.AppRoles.Commands.Update;
-using BlogApp.Application.Features.AppRoles.Queries.GetAllRoles;
+using BlogApp.Application.Features.AppRoles.Queries.GetList;
 using BlogApp.Application.Features.AppRoles.Queries.GetRoleById;
+using BlogApp.Domain.Common.Requests;
+using BlogApp.Domain.Common.Responses;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.API.Controllers
@@ -10,16 +12,16 @@ namespace BlogApp.API.Controllers
     public class RoleController : BaseApiController
     {
         [HttpGet]
-        public async Task<IActionResult> GetAllRoles([FromQuery] GetAllRoleQueryRequest getAllRoleQueryRequest)
+        public async Task<IActionResult> GetList([FromQuery] PageRequest pageRequest)
         {
-            GetAllRoleQueryResponse response = await Mediator.Send(getAllRoleQueryRequest);
+            GetListResponse<GetListAppRoleResponse> response = await Mediator.Send(new GetListRoleQuery(pageRequest));
             return Ok(response);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetRoleById([FromRoute] int id)
         {
-            GetRoleByIdQueryResponse response = await Mediator.Send(new GetRoleByIdQueryRequest(id));
+            var response = await Mediator.Send(new GetRoleByIdRequest(id));
             return Ok(response);
         }
 

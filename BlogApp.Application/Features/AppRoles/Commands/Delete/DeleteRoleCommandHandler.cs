@@ -9,7 +9,8 @@ public class DeleteRoleCommandHandler(IRoleService roleService) : IRequestHandle
 {
     public async Task<IResult> Handle(DeleteRoleCommand request, CancellationToken cancellationToken)
     {
-        return await roleService.DeleteRole(new AppRole { Id = request.Id })
+        var result = await roleService.DeleteRole(new AppRole { Id = request.Id });
+        return result.Succeeded
             ? new SuccessResult("Rol silindi.")
             : new ErrorResult("Rol silme sýrasýnda hata oluþtu!");
     }

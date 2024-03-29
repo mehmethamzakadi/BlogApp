@@ -1,15 +1,20 @@
 using BlogApp.Application.Abstractions;
+using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
 using MediatR;
 
-
 namespace BlogApp.Application.Features.AppRoles.Queries.GetRoleById;
 
-public class GetRoleByIdQueryHandler(IRoleService roleService) : IRequestHandler<GetRoleByIdQueryRequest, GetRoleByIdQueryResponse>
+public class GetRoleByIdQueryHandler(IRoleService roleService) : IRequestHandler<GetRoleByIdRequest, IDataResult<GetRoleByIdQueryResponse>>
 {
-    public async Task<GetRoleByIdQueryResponse> Handle(GetRoleByIdQueryRequest request, CancellationToken cancellationToken)
+    public async Task<IDataResult<GetRoleByIdQueryResponse>> Handle(GetRoleByIdRequest request, CancellationToken cancellationToken)
     {
-        var roleName = await roleService.GetRoleById(new AppRole { Id = request.Id });
-        return new GetRoleByIdQueryResponse(Id: request.Id, Name: roleName);
+        AppRole? role = roleService.GetRoleById(request.Id);
+        if (role is null)
+            return new ErrorDataResult<GetRoleByIdQueryResponse>("Kullanýcý bulunamadý!");
+
+        GetRoleByIdQueryResponse result = new(Id: role.Id, Name: role.Name!);
+
+        return new SuccessDataResult<GetRoleByIdQueryResponse>(result);
     }
 }

@@ -9,8 +9,12 @@ public class UpdateRoleCommandHandler(IRoleService roleService) : IRequestHandle
 {
     public async Task<IResult> Handle(UpdateRoleCommand request, CancellationToken cancellationToken)
     {
-        return await roleService.UpdateRole(new AppRole { Id = request.Id, Name = request.Name })
-                    ? new SuccessResult("Rol güncellendi.")
-                    : new ErrorResult("Rol güncelleme sýrasýnda hata oluþtu!");
+        var checkRole = roleService.AnyRole(request.Name);
+        if (checkRole)
+            return new ErrorResult($"Güncellemek istediðiniz {request.Name} rolü sistemde mevcut!");
+
+        var result = await roleService.UpdateRole(new AppRole { Id = request.Id, Name = request.Name });
+
+        return result.Succeeded ? new SuccessResult("Rol güncellendi.") : new ErrorResult("Ýþlem sýrasýnda bir hata oluþtu");
     }
 }

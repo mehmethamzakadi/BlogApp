@@ -2,6 +2,7 @@
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Repositories;
 using BlogApp.Persistence.Contexts;
+using BlogApp.Persistence.DatabaseInitializer;
 using BlogApp.Persistence.Repositories;
 using BlogApp.Persistence.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -80,8 +81,10 @@ public static class PersistenceServicesRegistration
 
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthService, AuthService>();
-        //services.AddScoped<IMailService, MailService>();
         services.AddScoped<IRoleService, RoleService>();
+
+        services.AddScoped<IDbInitializer, DbInitializer>();
+
 
         return services;
     }

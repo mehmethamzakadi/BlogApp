@@ -7,7 +7,7 @@ using MediatR;
 
 namespace BlogApp.Application.Features.AppUsers.Queries.GetList;
 
-public sealed class GetAllUserQueryHandler(IUserService userManager, IMapper mapper) : IRequestHandler<GetListAppUsersQuery, GetListResponse<GetListAppUserResponse>>
+public sealed class GetListUserQueryHandler(IUserService userManager, IMapper mapper) : IRequestHandler<GetListAppUsersQuery, GetListResponse<GetListAppUserResponse>>
 {
     public async Task<GetListResponse<GetListAppUserResponse>> Handle(GetListAppUsersQuery request, CancellationToken cancellationToken)
     {

@@ -25,8 +25,6 @@ public sealed class LoginCommandHandler(
 
     private async Task SendTelegramMessage(string userName)
     {
-        await mailService.SendMailAsync("mehmethamzakadi@hotmail.com", "Deneme Mail", "Deneme içerik");
-
         var message = $"{userName} Kullanıcısı Sisteme Giriş Yaptı.";
         await publishEndpoint.Publish(
             new SendTextMessageEvent(message: message, chatId: telegramOptions.Value.ChatId));
