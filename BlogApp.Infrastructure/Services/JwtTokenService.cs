@@ -52,15 +52,15 @@ public sealed class JwtTokenService(UserManager<AppUser> userManager, IConfigura
         var userRoles = await userManager.GetRolesAsync(user);
         var authClaims = new List<Claim>
                     {
-                        new (JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                        new (ClaimTypes.Email, user.Email ?? string.Empty),
-                        new (ClaimTypes.Name, user.UserName ?? string.Empty),
-                        new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                        new ("UserId", user.Id.ToString()),
+                        new ("Email", user.Email ?? string.Empty),
+                        new ("Name", user.UserName ?? string.Empty),
+                        new ("IsAuthenticated", "true"),
                     };
 
         foreach (var userRole in userRoles)
         {
-            authClaims.Add(new Claim(ClaimTypes.Role, userRole));
+            authClaims.Add(new Claim("Roles", userRole));
         }
 
         return authClaims;
