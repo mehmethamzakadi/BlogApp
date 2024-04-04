@@ -42,7 +42,7 @@ function Copyright(props: any) {
 
 async function login(params: SignIn) {
   const result = await apiUtil.post<BaseResponse<TokenResponse>>(
-    'api/auth/login',
+    'auth/login',
     params
   );
   const token = result.data.data.token;

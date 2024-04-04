@@ -10,26 +10,30 @@ const AuthContext = createContext({
   onLogin: (token: string) => {},
   onLogout: () => {}
 });
+
 const AuthProvider = ({ children }: IAuthProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [token, setToken] = useState(getToken() || '');
+
   const handleLogout = () => {
     setToken('');
     setTokenToCookie('');
   };
+
   const handleLogin = (token: string) => {
     setToken(token);
     setTokenToCookie(token);
     var returnPath = Object.values(location.state as Location);
     navigate(returnPath[0].pathname || '/home');
   };
+
   const value = {
     token,
     onLogout: handleLogout,
     onLogin: handleLogin
   };
-
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
+
 export { AuthContext, AuthProvider };

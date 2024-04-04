@@ -6,7 +6,7 @@ import SidebarLayout from 'src/layouts/SidebarLayout';
 import BaseLayout from 'src/layouts/BaseLayout';
 
 import SuspenseLoader from 'src/components/SuspenseLoader';
-import PrivateRoute from './privateRoute';
+import PrivateRoute from './content/pages/Status/Unauthorized';
 
 const Loader = (Component) => (props) =>
   (

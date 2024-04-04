@@ -1,5 +1,5 @@
 import { Navigate, useLocation } from 'react-router-dom';
-import useAuth from './hooks/useAuth';
+import useAuth from '../../../../hooks/useAuth';
 
 interface IPrivateProps {
   children?: React.ReactNode;
@@ -13,7 +13,7 @@ const PrivateRoute = ({ children, roles }: IPrivateProps) => {
   }
   return (
     <>
-      {isAllow ? children : <div>You are not allowed to access this page</div>}
+      {isAllow ? children : <div>Bu sayfaya erişmenize izin verilmiyor.</div>}
     </>
   );
 };
