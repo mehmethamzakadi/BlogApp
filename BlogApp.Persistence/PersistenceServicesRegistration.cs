@@ -23,10 +23,9 @@ public static class PersistenceServicesRegistration
         var mssqlConnectionString = configuration.GetConnectionString("BlogAppMsSqlConnectionString");
         var postgreSqlConnectionString = configuration.GetConnectionString("BlogAppPostgreConnectionString");
 
-        services.AddDbContext<BlogAppDbContext>(options =>
-         options.UseSqlServer(mssqlConnectionString)
-         /*options.UseNpgsql(postgreSqlConnectionString)*/
-         );
+        services.AddDbContext<BlogAppDbContext>(options => options.UseSqlServer(mssqlConnectionString));
+        //services.AddDbContext<BlogAppDbContext>(options => options.UseNpgsql(postgreSqlConnectionString));
+
         #endregion
 
         #region Identity Configurtaion

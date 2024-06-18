@@ -3,4 +3,4 @@ using MediatR;
 
 namespace BlogApp.Application.Features.AppRoles.Queries.GetRoleById;
 
-public sealed record GetRoleByIdRequest(int Id) : IRequest<IDataResult<GetRoleByIdQueryResponse>>;
+public sealed record GetRoleByIdRequest(int Id) : IRequest<Result<GetRoleByIdQueryResponse>>;

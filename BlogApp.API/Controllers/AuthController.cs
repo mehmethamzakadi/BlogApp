@@ -13,22 +13,19 @@ namespace BlogApp.API.Controllers
         [Route("Login")]
         public async Task<IActionResult> Login([FromBody] LoginCommand userLogin)
         {
-            var result = await Mediator.Send(userLogin);
-            return result.Success ? Ok(result) : Unauthorized(result.Message);
+            return GetResponse(await Mediator.Send(userLogin));
         }
 
         [HttpPost("PasswordReset")]
         public async Task<IActionResult> PasswordReset(PasswordResetCommand passwordResetCommandRequest)
         {
-            var response = await Mediator.Send(passwordResetCommandRequest);
-            return Ok(response);
+            return GetResponse(await Mediator.Send(passwordResetCommandRequest));
         }
 
         [HttpPost("PasswordVerify")]
         public async Task<IActionResult> PasswordVerify(PasswordVerifyCommand passwordVerifyCommandRequestCommandRequest)
         {
-            var response = await Mediator.Send(passwordVerifyCommandRequestCommandRequest);
-            return Ok(response);
+            return GetResponse(await Mediator.Send(passwordVerifyCommandRequestCommandRequest));
         }
     }
 }

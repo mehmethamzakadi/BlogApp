@@ -1,7 +1,6 @@
 ﻿using BlogApp.Application.Abstractions;
 using BlogApp.Domain.Common.Paging;
 using BlogApp.Domain.Entities;
-using BlogApp.Domain.Exceptions;
 using BlogApp.Domain.Extentions;
 using Microsoft.AspNetCore.Identity;
 
@@ -47,7 +46,7 @@ public sealed class UserService(UserManager<AppUser> userManager) : IUserService
         return response;
     }
 
-    public async Task UpdatePasswordAsync(string userId, string resetToken, string newPassword)
+    public async Task<IdentityResult> UpdatePasswordAsync(string userId, string resetToken, string newPassword)
     {
         AppUser? user = await userManager.FindByIdAsync(userId);
 
@@ -55,11 +54,14 @@ public sealed class UserService(UserManager<AppUser> userManager) : IUserService
         {
             resetToken = resetToken.UrlDecode();
             IdentityResult result = await userManager.ResetPasswordAsync(user, resetToken, newPassword);
+
             if (result.Succeeded)
                 await userManager.UpdateSecurityStampAsync(user);
-            else
-                throw new PasswordChangeFailedException();
+
+            return result;
 
         }
+
+        return new IdentityResult();
     }
 }

@@ -3,4 +3,4 @@ using MediatR;
 
 namespace BlogApp.Application.Features.AppRoles.Commands.Update;
 
-public sealed record UpdateRoleCommand(int Id, string Name) : IRequest<IResult>;
+public sealed record UpdateRoleCommand(int Id, string Name) : IRequest<Result<string>>;

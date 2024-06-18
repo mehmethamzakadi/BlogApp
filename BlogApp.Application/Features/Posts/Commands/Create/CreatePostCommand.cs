@@ -3,4 +3,4 @@ using MediatR;
 
 namespace BlogApp.Application.Features.Posts.Commands.Create;
 
-public sealed record CreatePostCommand(string Title, string Body, string Summary, string Thumbnail, bool IsPublished, int CategoriId) : IRequest<IResult>;
+public sealed record CreatePostCommand(string Title, string Body, string Summary, string Thumbnail, bool IsPublished, int CategoriId) : IRequest<Result<string>>;

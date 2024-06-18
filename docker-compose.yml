@@ -16,7 +16,7 @@ services:
             # - postgresdb
             - rabbitmq
             - redis.cache
-
+            
   sqlserverdb:
         container_name: sqlserverdb
         image: mcr.microsoft.com/mssql/server

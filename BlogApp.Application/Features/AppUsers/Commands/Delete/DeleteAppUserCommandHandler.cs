@@ -4,18 +4,18 @@ using MediatR;
 
 namespace BlogApp.Application.Features.AppUsers.Commands.Delete;
 
-public sealed class DeleteUserCommandHandler(IUserService userManager) : IRequestHandler<DeleteAppUserCommand, IResult>
+public sealed class DeleteUserCommandHandler(IUserService userManager) : IRequestHandler<DeleteAppUserCommand, Result<string>>
 {
-    public async Task<IResult> Handle(DeleteAppUserCommand request, CancellationToken cancellationToken)
+    public async Task<Result<string>> Handle(DeleteAppUserCommand request, CancellationToken cancellationToken)
     {
         var user = userManager.FindById(request.Id);
         if (user == null)
-            return new ErrorResult("Kullanıcı bilgisi bulunamadı!");
+            return Result<string>.FailureResult("Kullanıcı bilgisi bulunamadı!");
 
         var response = await userManager.DeleteAsync(user);
         if (!response.Succeeded)
-            return new ErrorResult("Silme işlemi sırasında hata oluştu!");
+            return Result<string>.FailureResult("Silme işlemi sırasında hata oluştu!");
 
-        return new SuccessResult("Kullanıcı bilgisi başarıyla silindi.");
+        return Result<string>.SuccessResult("Kullanıcı bilgisi başarıyla silindi.");
     }
 }

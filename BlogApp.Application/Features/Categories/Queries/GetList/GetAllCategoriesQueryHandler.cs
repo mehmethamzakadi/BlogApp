@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BlogApp.Domain.Common.Paging;
 using BlogApp.Domain.Common.Responses;
+using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Repositories;
 using MediatR;
@@ -9,9 +10,9 @@ namespace BlogApp.Application.Features.Categories.Queries.GetList;
 
 public sealed class GetAllCategoriesQueryHandler(
     ICategoryRepository categoryRepository,
-    IMapper mapper) : IRequestHandler<GetListCategoriesQuery, GetListResponse<GetListCategoryResponse>>
+    IMapper mapper) : IRequestHandler<GetListCategoriesQuery, Result<GetListResponse<GetListCategoryResponse>>>
 {
-    public async Task<GetListResponse<GetListCategoryResponse>> Handle(GetListCategoriesQuery request, CancellationToken cancellationToken)
+    public async Task<Result<GetListResponse<GetListCategoryResponse>>> Handle(GetListCategoriesQuery request, CancellationToken cancellationToken)
     {
         Paginate<Category> categories = await categoryRepository.GetListAsync(
         index: request.PageRequest.PageIndex,
@@ -21,6 +22,6 @@ public sealed class GetAllCategoriesQueryHandler(
         );
 
         GetListResponse<GetListCategoryResponse> response = mapper.Map<GetListResponse<GetListCategoryResponse>>(categories);
-        return response;
+        return Result<GetListResponse<GetListCategoryResponse>>.SuccessResult(response);
     }
 }

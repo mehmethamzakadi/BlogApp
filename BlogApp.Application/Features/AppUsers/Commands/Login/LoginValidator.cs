@@ -7,6 +7,8 @@ public sealed class LoginValidator : AbstractValidator<LoginCommand>
 {
     public LoginValidator()
     {
-        RuleFor(u => u.Email).EmailAddress(EmailValidationMode.AspNetCoreCompatible).WithMessage("Email adresi geçersiz!");
+        RuleFor(u => u.Email)
+            .EmailAddress(EmailValidationMode.AspNetCoreCompatible)
+            .WithMessage("Email adresi geçersiz!");
     }
 }

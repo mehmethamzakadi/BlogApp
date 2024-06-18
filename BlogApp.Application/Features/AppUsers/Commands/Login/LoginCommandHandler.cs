@@ -11,10 +11,9 @@ namespace BlogApp.Application.Features.AppUsers.Commands.Login;
 public sealed class LoginCommandHandler(
          IAuthService authService,
          IOptions<TelegramOptions> telegramOptions,
-         IMailService mailService,
-         IPublishEndpoint publishEndpoint) : IRequestHandler<LoginCommand, IDataResult<LoginResponse>>
+         IPublishEndpoint publishEndpoint) : IRequestHandler<LoginCommand, Result<LoginResponse>>
 {
-    public async Task<IDataResult<LoginResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)
+    public async Task<Result<LoginResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
         var response = await authService.LoginAsync(request.Email, request.Password);
         if (response.Success)

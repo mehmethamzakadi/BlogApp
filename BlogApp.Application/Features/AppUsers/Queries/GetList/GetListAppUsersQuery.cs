@@ -1,7 +1,8 @@
 ﻿using BlogApp.Domain.Common.Requests;
 using BlogApp.Domain.Common.Responses;
+using BlogApp.Domain.Common.Results;
 using MediatR;
 
 namespace BlogApp.Application.Features.AppUsers.Queries.GetList;
 
-public sealed record GetListAppUsersQuery(PageRequest PageRequest) : IRequest<GetListResponse<GetListAppUserResponse>>;
+public sealed record GetListAppUsersQuery(PageRequest PageRequest) : IRequest<Result<GetListResponse<GetListAppUserResponse>>>;

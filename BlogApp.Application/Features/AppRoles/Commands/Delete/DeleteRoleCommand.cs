@@ -4,4 +4,4 @@ using MediatR;
 namespace BlogApp.Application.Features.AppRoles.Commands.Delete;
 
 
-public sealed record DeleteRoleCommand(int Id) : IRequest<IResult>;
+public sealed record DeleteRoleCommand(int Id) : IRequest<Result<string>>;

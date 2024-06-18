@@ -5,16 +5,18 @@ using MediatR;
 
 namespace BlogApp.Application.Features.AppRoles.Commands.Update;
 
-public class UpdateRoleCommandHandler(IRoleService roleService) : IRequestHandler<UpdateRoleCommand, IResult>
+public class UpdateRoleCommandHandler(IRoleService roleService) : IRequestHandler<UpdateRoleCommand, Result<string>>
 {
-    public async Task<IResult> Handle(UpdateRoleCommand request, CancellationToken cancellationToken)
+    public async Task<Result<string>> Handle(UpdateRoleCommand request, CancellationToken cancellationToken)
     {
         var checkRole = roleService.AnyRole(request.Name);
         if (checkRole)
-            return new ErrorResult($"Güncellemek istediðiniz {request.Name} rolü sistemde mevcut!");
+            return Result<string>.FailureResult($"Güncellemek istediðiniz {request.Name} rolü sistemde mevcut!");
 
         var result = await roleService.UpdateRole(new AppRole { Id = request.Id, Name = request.Name });
 
-        return result.Succeeded ? new SuccessResult("Rol güncellendi.") : new ErrorResult("Ýþlem sýrasýnda bir hata oluþtu");
+        return result.Succeeded
+            ? Result<string>.SuccessResult("Rol güncellendi.")
+            : Result<string>.FailureResult("Ýþlem sýrasýnda bir hata oluþtu");
     }
 }

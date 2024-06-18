@@ -5,9 +5,9 @@ using MediatR;
 
 namespace BlogApp.Application.Features.Posts.Commands.Create;
 
-public sealed class CreatePostCommandHandler(IPostRepository postRepository) : IRequestHandler<CreatePostCommand, IResult>
+public sealed class CreatePostCommandHandler(IPostRepository postRepository) : IRequestHandler<CreatePostCommand, Result<string>>
 {
-    public async Task<IResult> Handle(CreatePostCommand request, CancellationToken cancellationToken)
+    public async Task<Result<string>> Handle(CreatePostCommand request, CancellationToken cancellationToken)
     {
         try
         {
@@ -22,11 +22,11 @@ public sealed class CreatePostCommandHandler(IPostRepository postRepository) : I
             };
             await postRepository.AddAsync(post);
 
-            return new SuccessResult("Post bilgsi başarıyla eklendi.");
+            return Result<string>.SuccessResult("Post bilgsi başarıyla eklendi.");
         }
         catch (Exception)
         {
-            return new ErrorResult("Post bilgsi eklerken hata oluştu!");
+            return Result<string>.FailureResult("Post bilgsi eklerken hata oluştu!");
         }
     }
 }

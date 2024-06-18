@@ -7,9 +7,9 @@ using MediatR;
 
 namespace BlogApp.Application.Features.Categories.Commands.Create
 {
-    public sealed class CreateCategoryCommandHandler(ICategoryRepository categoryRepository, ICacheService cache) : IRequestHandler<CreateCategoryCommand, IResult>
+    public sealed class CreateCategoryCommandHandler(ICategoryRepository categoryRepository, ICacheService cache) : IRequestHandler<CreateCategoryCommand, Result<string>>
     {
-        public async Task<IResult> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
+        public async Task<Result<string>> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
         {
             try
             {
@@ -21,11 +21,11 @@ namespace BlogApp.Application.Features.Categories.Commands.Create
                     DateTime.Now.AddMonths(1),
                     null);
 
-                return new SuccessResult("Kategori bilgsi başarıyla eklendi.");
+                return Result<string>.SuccessResult("Kategori bilgsi başarıyla eklendi.");
             }
             catch (Exception)
             {
-                return new ErrorResult("Kategori bilgsi eklerken hata oluştu!");
+                return Result<string>.FailureResult("Kategori bilgsi eklerken hata oluştu!");
             }
         }
     }

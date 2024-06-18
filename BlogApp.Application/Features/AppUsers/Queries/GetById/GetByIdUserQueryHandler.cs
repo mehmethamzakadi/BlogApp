@@ -8,15 +8,15 @@ namespace BlogApp.Application.Features.AppUsers.Queries.GetById;
 
 public sealed class GetByIdUserQueryHandler(
     IUserService userManager,
-    IMapper mapper) : IRequestHandler<GetByIdAppUserQuery, IDataResult<GetByIdAppUserResponse>>
+    IMapper mapper) : IRequestHandler<GetByIdAppUserQuery, Result<GetByIdAppUserResponse>>
 {
-    public async Task<IDataResult<GetByIdAppUserResponse>> Handle(GetByIdAppUserQuery request, CancellationToken cancellationToken)
+    public async Task<Result<GetByIdAppUserResponse>> Handle(GetByIdAppUserQuery request, CancellationToken cancellationToken)
     {
         AppUser? user = userManager.FindById(request.Id);
         if (user is null)
-            return new ErrorDataResult<GetByIdAppUserResponse>("Kullanıcı bulunamadı!");
+            return Result<GetByIdAppUserResponse>.FailureResult("Kullanıcı bulunamadı!");
 
         var userResponse = mapper.Map<GetByIdAppUserResponse>(user);
-        return new SuccessDataResult<GetByIdAppUserResponse>(userResponse);
+        return Result<GetByIdAppUserResponse>.SuccessResult(userResponse);
     }
 }

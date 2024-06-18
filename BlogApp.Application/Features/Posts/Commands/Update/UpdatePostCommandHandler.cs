@@ -5,15 +5,15 @@ using MediatR;
 
 namespace BlogApp.Application.Features.Posts.Commands.Update;
 
-public sealed class UpdatePostCommandHandler(IPostRepository postRepository) : IRequestHandler<UpdatePostCommand, IResult>
+public sealed class UpdatePostCommandHandler(IPostRepository postRepository) : IRequestHandler<UpdatePostCommand, Result<string>>
 {
-    public async Task<IResult> Handle(UpdatePostCommand request, CancellationToken cancellationToken)
+    public async Task<Result<string>> Handle(UpdatePostCommand request, CancellationToken cancellationToken)
     {
         try
         {
             Post? entity = await postRepository.GetAsync(x => x.Id == request.Id);
             if (entity is null)
-                return new ErrorResult("Post bilgisi bulunamadı!");
+                return Result<string>.FailureResult("Post bilgisi bulunamadı!");
 
             entity.Title = request.Title;
             entity.Body = request.Body;
@@ -24,11 +24,11 @@ public sealed class UpdatePostCommandHandler(IPostRepository postRepository) : I
 
             await postRepository.UpdateAsync(entity);
 
-            return new SuccessResult("Post bilgisi başarıyla güncellendi.");
+            return Result<string>.SuccessResult("Post bilgisi başarıyla güncellendi.");
         }
         catch (Exception)
         {
-            return new ErrorResult("Post bilgisi güncellenirken hata oluştu.");
+            return Result<string>.FailureResult("Post bilgisi güncellenirken hata oluştu.");
         }
     }
 }

@@ -1,5 +1,7 @@
-﻿using MediatR;
+﻿using BlogApp.Domain.Common.Results;
+using MediatR;
 
 namespace BlogApp.Application.Features.AppUsers.Commands.UpdatePassword;
 
-public sealed record UpdatePasswordCommand(string UserId, string ResetToken, string Password, string PasswordConfirm) : IRequest<UpdatePasswordResponse>;
+public sealed record UpdatePasswordCommand(
+    string UserId, string ResetToken, string Password, string PasswordConfirm) : IRequest<Result<string>>;

@@ -4,12 +4,12 @@ using MediatR;
 
 namespace BlogApp.Application.Features.AppUsers.Commands.PasswordReset;
 
-public sealed class PasswordResetCommandHandler(IAuthService authService) : IRequestHandler<PasswordResetCommand, IResult>
+public sealed class PasswordResetCommandHandler(IAuthService authService) : IRequestHandler<PasswordResetCommand, Result<string>>
 {
 
-    public async Task<IResult> Handle(PasswordResetCommand request, CancellationToken cancellationToken)
+    public async Task<Result<string>> Handle(PasswordResetCommand request, CancellationToken cancellationToken)
     {
         await authService.PasswordResetAsync(request.Email);
-        return new SuccessResult("Şifre yenileme işlemleri için mail gönderildi.");
+        return Result<string>.SuccessResult("Şifre yenileme işlemleri için mail gönderildi.");
     }
 }

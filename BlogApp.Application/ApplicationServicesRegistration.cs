@@ -24,6 +24,7 @@ namespace BlogApp.Application
                 configuration.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
                 configuration.AddOpenBehavior(typeof(TransactionScopeBehavior<,>));
                 configuration.AddOpenBehavior(typeof(LoggingBehavior<,>));
+
             });
 
             services.AddFluentValidationAutoValidation();

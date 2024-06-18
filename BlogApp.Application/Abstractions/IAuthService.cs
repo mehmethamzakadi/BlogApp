@@ -5,7 +5,7 @@ namespace BlogApp.Application.Abstractions;
 
 public interface IAuthService
 {
-    Task<IDataResult<LoginResponse>> LoginAsync(string email, string password);
+    Task<Result<LoginResponse>> LoginAsync(string email, string password);
     Task PasswordResetAsync(string email);
-    Task<IDataResult<bool>> PasswordVerify(string resetToken, string userId);
+    Task<Result<bool>> PasswordVerify(string resetToken, string userId);
 }

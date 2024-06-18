@@ -4,15 +4,18 @@ using BlogApp.Domain.Entities;
 using MediatR;
 
 namespace BlogApp.Application.Features.AppRoles.Commands.Create;
-public class CreateRoleCommandHandler(IRoleService roleService) : IRequestHandler<CreateRoleCommand, IResult>
+public class CreateRoleCommandHandler(IRoleService roleService) : IRequestHandler<CreateRoleCommand, Result<string>>
 {
-    public async Task<IResult> Handle(CreateRoleCommand request, CancellationToken cancellationToken)
+    public async Task<Result<string>> Handle(CreateRoleCommand request, CancellationToken cancellationToken)
     {
         var checkRole = roleService.AnyRole(request.Name);
         if (checkRole)
-            return new ErrorResult("Eklemek istediðiniz Rol sistemde mevcut!");
+            return Result<string>.FailureResult("Eklemek istediðiniz Rol sistemde mevcut!");
 
         var result = await roleService.CreateRole(new AppRole { Name = request.Name });
-        return result.Succeeded ? new SuccessResult("Rol oluþturuldu.") : new ErrorResult("Ýþlem sýrasýnda hata oluþtu!");
+
+        return result.Succeeded
+            ? Result<string>.SuccessResult("Rol oluþturuldu.")
+            : Result<string>.FailureResult("Ýþlem sýrasýnda hata oluþtu!");
     }
 }
