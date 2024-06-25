@@ -43,6 +43,7 @@ public static class PersistenceServicesRegistration
             options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@"; //Bu karakterler dışında kullanım yapılamaz.
             options.User.RequireUniqueEmail = true; //Tek mail adresi ile kayıt olabilme.
         })
+            .AddSignInManager()
             .AddRoleManager<RoleManager<AppRole>>()
             .AddEntityFrameworkStores<BlogAppDbContext>()
             .AddDefaultTokenProviders();

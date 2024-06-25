@@ -53,14 +53,14 @@ public sealed class JwtTokenService(UserManager<AppUser> userManager, IConfigura
         var authClaims = new List<Claim>
                     {
                         new ("UserId", user.Id.ToString()),
-                        new ("Email", user.Email ?? string.Empty),
-                        new ("Name", user.UserName ?? string.Empty),
+                        new (ClaimTypes.Email, user.Email ?? string.Empty),
+                        new (ClaimTypes.Name, user.UserName ?? string.Empty),
                         new ("IsAuthenticated", "true"),
                     };
 
         foreach (var userRole in userRoles)
         {
-            authClaims.Add(new Claim("Roles", userRole));
+            authClaims.Add(new Claim(ClaimTypes.Role, userRole));
         }
 
         return authClaims;
