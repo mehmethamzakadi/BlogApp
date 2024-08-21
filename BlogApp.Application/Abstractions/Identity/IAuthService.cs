@@ -1,7 +1,7 @@
 ﻿using BlogApp.Application.Features.AppUsers.Commands.Login;
 using BlogApp.Domain.Common.Results;
 
-namespace BlogApp.Application.Abstractions;
+namespace BlogApp.Application.Abstractions.Identity;
 
 public interface IAuthService
 {

@@ -2,7 +2,7 @@
 using BlogApp.Domain.Entities;
 using System.Security.Claims;
 
-namespace BlogApp.Application.Abstractions;
+namespace BlogApp.Application.Abstractions.Identity;
 
 public interface ITokenService
 {

@@ -1,11 +1,11 @@
-﻿using BlogApp.Application.Abstractions;
+﻿using BlogApp.Application.Abstractions.Identity;
 using BlogApp.Domain.Common.Paging;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Exceptions;
 using BlogApp.Domain.Extentions;
 using Microsoft.AspNetCore.Identity;
 
-namespace BlogApp.Persistence.Services;
+namespace BlogApp.Infrastructure.Services.Identity;
 
 public sealed class UserService(UserManager<AppUser> userManager) : IUserService
 {

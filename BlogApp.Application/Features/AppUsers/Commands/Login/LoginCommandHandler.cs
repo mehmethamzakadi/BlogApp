@@ -1,4 +1,5 @@
 ﻿using BlogApp.Application.Abstractions;
+using BlogApp.Application.Abstractions.Identity;
 using BlogApp.Domain.AppSettingsOptions;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Events.Telegram;
@@ -11,7 +12,6 @@ namespace BlogApp.Application.Features.AppUsers.Commands.Login;
 public sealed class LoginCommandHandler(
          IAuthService authService,
          IOptions<TelegramOptions> telegramOptions,
-         IMailService mailService,
          IPublishEndpoint publishEndpoint) : IRequestHandler<LoginCommand, IDataResult<LoginResponse>>
 {
     public async Task<IDataResult<LoginResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)

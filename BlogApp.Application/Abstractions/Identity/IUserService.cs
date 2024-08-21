@@ -2,7 +2,7 @@
 using BlogApp.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 
-namespace BlogApp.Application.Abstractions;
+namespace BlogApp.Application.Abstractions.Identity;
 
 public interface IUserService
 {

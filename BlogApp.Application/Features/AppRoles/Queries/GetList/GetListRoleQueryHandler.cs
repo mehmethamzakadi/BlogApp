@@ -1,5 +1,5 @@
 using AutoMapper;
-using BlogApp.Application.Abstractions;
+using BlogApp.Application.Abstractions.Identity;
 using BlogApp.Domain.Common.Responses;
 using MediatR;
 

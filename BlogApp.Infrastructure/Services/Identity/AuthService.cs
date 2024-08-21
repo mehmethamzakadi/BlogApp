@@ -1,4 +1,5 @@
 ﻿using BlogApp.Application.Abstractions;
+using BlogApp.Application.Abstractions.Identity;
 using BlogApp.Application.Features.AppUsers.Commands.Login;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
@@ -6,7 +7,7 @@ using BlogApp.Domain.Exceptions;
 using BlogApp.Domain.Extentions;
 using Microsoft.AspNetCore.Identity;
 
-namespace BlogApp.Persistence.Services;
+namespace BlogApp.Infrastructure.Services.Identity;
 
 public sealed class AuthService(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ITokenService tokenService, IMailService mailService) : IAuthService
 {

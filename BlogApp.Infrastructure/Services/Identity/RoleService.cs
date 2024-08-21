@@ -1,8 +1,8 @@
-﻿using BlogApp.Application.Abstractions;
+﻿using BlogApp.Application.Abstractions.Identity;
 using BlogApp.Domain.Common.Paging;
 using BlogApp.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
-namespace BlogApp.Persistence.Services;
+namespace BlogApp.Infrastructure.Services.Identity;
 
 public sealed class RoleService(RoleManager<AppRole> roleManager) : IRoleService
 {
