@@ -1,6 +1,5 @@
 ﻿using BlogApp.Application.Abstractions;
 using BlogApp.Application.Abstractions.Identity;
-using BlogApp.Domain.AppSettingsOptions;
 using BlogApp.Domain.Constants;
 using BlogApp.Domain.Entities;
 using BlogApp.Infrastructure.Consumers;
@@ -21,7 +20,6 @@ namespace BlogApp.Infrastructure
     {
         public static IServiceCollection AddConfigureInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
-
             #region Identity Configurtaion
             services.AddIdentity<AppUser, AppRole>(options =>
             {
@@ -67,17 +65,6 @@ namespace BlogApp.Infrastructure
             });
             #endregion
 
-            // Yapılandırma ayarlarını okumak için
-            services.Configure<TelegramOptions>(configuration.GetSection("TelegramBotOptions"));
-
-            services.AddSingleton<ITelegramService, TelegramService>();
-            services.AddSingleton<ICacheService, RedisCacheService>();
-            services.AddTransient<ITokenService, JwtTokenService>();
-            services.AddTransient<IMailService, MailService>();
-            services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IAuthService, AuthService>();
-            services.AddScoped<IRoleService, RoleService>();
-
             #region Redis Configurations
             services.AddStackExchangeRedisCache(options =>
               options.Configuration = configuration.GetConnectionString("RedisCache"));
@@ -112,6 +99,14 @@ namespace BlogApp.Infrastructure
 
             services.AddScoped<SendTelgeramMessageConsumer>();
             #endregion
+
+            services.AddSingleton<ITelegramService, TelegramService>();
+            services.AddSingleton<ICacheService, RedisCacheService>();
+            services.AddTransient<ITokenService, JwtTokenService>();
+            services.AddTransient<IMailService, MailService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IRoleService, RoleService>();
 
             return services;
         }

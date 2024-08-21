@@ -1,4 +1,4 @@
-﻿namespace BlogApp.Domain.AppSettingsOptions;
+﻿namespace BlogApp.API.Options;
 
 public sealed class TokenOptions
 {
