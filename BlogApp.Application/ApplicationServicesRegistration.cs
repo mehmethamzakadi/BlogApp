@@ -1,5 +1,6 @@
 ﻿using BlogApp.Application.Behaviors.Logging;
 using BlogApp.Application.Behaviors.Transaction;
+using BlogApp.Domain.Options;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.Extensions.Configuration;
@@ -13,6 +14,9 @@ namespace BlogApp.Application
     {
         public static IServiceCollection AddConfigureApplicationServices(this IServiceCollection services, IConfiguration configuration)
         {
+            services.Configure<TelegramOptions>(configuration.GetSection("TelegramBotOptions"));
+            services.Configure<TokenOptions>(configuration.GetSection("TokenOptions"));
+
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
             services.AddMediatR(configuration =>
             {

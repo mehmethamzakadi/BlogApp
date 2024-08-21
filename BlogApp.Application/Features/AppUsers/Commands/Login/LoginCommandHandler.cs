@@ -1,8 +1,8 @@
 ﻿using BlogApp.Application.Abstractions;
 using BlogApp.Application.Abstractions.Identity;
-using BlogApp.Domain.AppSettingsOptions;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Events.Telegram;
+using BlogApp.Domain.Options;
 using MassTransit;
 using MediatR;
 using Microsoft.Extensions.Options;

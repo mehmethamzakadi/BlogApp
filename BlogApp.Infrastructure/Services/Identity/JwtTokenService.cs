@@ -9,7 +9,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using TokenOptions = BlogApp.Domain.AppSettingsOptions.TokenOptions;
+using TokenOptions = BlogApp.Domain.Options.TokenOptions;
 
 namespace BlogApp.Infrastructure.Services.Identity;
 

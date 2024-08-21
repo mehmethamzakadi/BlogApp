@@ -1,4 +1,4 @@
-﻿namespace BlogApp.API.Options;
+﻿namespace BlogApp.Domain.Options;
 public sealed class TelegramOptions
 {
     public string TelegramBotToken { get; set; } = default!;

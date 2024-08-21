@@ -1,4 +1,3 @@
-using BlogApp.API.Options;
 using BlogApp.Application;
 using BlogApp.Infrastructure;
 using BlogApp.Persistence;
@@ -32,8 +31,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.Configure<TelegramOptions>(builder.Configuration.GetSection("TelegramBotOptions"));
-builder.Services.Configure<TokenOptions>(builder.Configuration.GetSection("TokenOptions"));
+
 
 builder.Services.AddSwaggerGen(option =>
 {
