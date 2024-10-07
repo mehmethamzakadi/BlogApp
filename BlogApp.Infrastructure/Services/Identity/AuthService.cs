@@ -1,6 +1,6 @@
 ﻿using BlogApp.Application.Abstractions;
 using BlogApp.Application.Abstractions.Identity;
-using BlogApp.Application.Features.AppUsers.Commands.Login;
+using BlogApp.Application.Features.Auths.Login;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Exceptions;

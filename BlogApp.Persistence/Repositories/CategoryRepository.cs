@@ -4,10 +4,6 @@ using BlogApp.Persistence.Contexts;
 
 namespace BlogApp.Persistence.Repositories;
 
-public class CategoryRepository : EfRepositoryBase<Category, BlogAppDbContext>, ICategoryRepository
+public class CategoryRepository(BlogAppDbContext dbContext) : EfRepositoryBase<Category, BlogAppDbContext>(dbContext), ICategoryRepository
 {
-
-    public CategoryRepository(BlogAppDbContext dbContext) : base(dbContext)
-    {
-    }
 }

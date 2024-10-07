@@ -10,15 +10,11 @@ using System.Reflection;
 
 namespace BlogApp.Persistence.Repositories;
 
-public class EfRepositoryBase<TEntity, TContext> : IAsyncRepository<TEntity>, IRepository<TEntity>
+public class EfRepositoryBase<TEntity, TContext>(TContext context) : IAsyncRepository<TEntity>, IRepository<TEntity>
 where TEntity : BaseEntity
 where TContext : DbContext
 {
-    protected readonly TContext Context;
-    public EfRepositoryBase(TContext context)
-    {
-        Context = context;
-    }
+    protected readonly TContext Context = context;
 
     public async Task<TEntity> AddAsync(TEntity entity)
     {

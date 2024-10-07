@@ -1,6 +1,6 @@
-using BlogApp.Application.Features.AppUsers.Commands.Login;
-using BlogApp.Application.Features.AppUsers.Commands.PasswordReset;
-using BlogApp.Application.Features.AppUsers.Commands.PasswordVerify;
+using BlogApp.Application.Features.Auths.Login;
+using BlogApp.Application.Features.Auths.PasswordReset;
+using BlogApp.Application.Features.Auths.PasswordVerify;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

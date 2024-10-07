@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using NpgsqlTypes;
 using Serilog;
 using Serilog.Events;
-using Serilog.Sinks.MSSqlServer;
 using Serilog.Sinks.PostgreSQL;
 using Serilog.Sinks.PostgreSQL.ColumnWriters;
 

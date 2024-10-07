@@ -4,9 +4,6 @@ using BlogApp.Persistence.Contexts;
 
 namespace BlogApp.Persistence.Repositories;
 
-public class ImageRepository : EfRepositoryBase<Image, BlogAppDbContext>, IImageRepository
+public class ImageRepository(BlogAppDbContext dbContext) : EfRepositoryBase<Image, BlogAppDbContext>(dbContext), IImageRepository
 {
-    public ImageRepository(BlogAppDbContext dbContext) : base(dbContext)
-    {
-    }
 }

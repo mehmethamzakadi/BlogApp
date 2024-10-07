@@ -4,9 +4,6 @@ using BlogApp.Persistence.Contexts;
 
 namespace BlogApp.Persistence.Repositories;
 
-public class CommentRepository : EfRepositoryBase<Comment, BlogAppDbContext>, ICommentRepository
+public class CommentRepository(BlogAppDbContext dbContext) : EfRepositoryBase<Comment, BlogAppDbContext>(dbContext), ICommentRepository
 {
-    public CommentRepository(BlogAppDbContext dbContext) : base(dbContext)
-    {
-    }
 }

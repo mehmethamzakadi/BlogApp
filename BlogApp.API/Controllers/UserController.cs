@@ -1,9 +1,9 @@
 using BlogApp.Application.Features.AppUsers.Commands.Create;
 using BlogApp.Application.Features.AppUsers.Commands.Delete;
 using BlogApp.Application.Features.AppUsers.Commands.Update;
-using BlogApp.Application.Features.AppUsers.Commands.UpdatePassword;
 using BlogApp.Application.Features.AppUsers.Queries.GetById;
 using BlogApp.Application.Features.AppUsers.Queries.GetList;
+using BlogApp.Application.Features.Auths.UpdatePassword;
 using BlogApp.Domain.Common.Requests;
 using BlogApp.Domain.Common.Responses;
 using Microsoft.AspNetCore.Mvc;

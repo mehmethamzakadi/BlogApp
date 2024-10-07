@@ -1,4 +1,4 @@
-﻿using BlogApp.Application.Features.AppUsers.Commands.Login;
+﻿using BlogApp.Application.Features.Auths.Login;
 using BlogApp.Domain.Common.Results;
 
 namespace BlogApp.Application.Abstractions.Identity;

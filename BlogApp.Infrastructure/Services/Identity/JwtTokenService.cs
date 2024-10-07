@@ -1,5 +1,5 @@
 ﻿using BlogApp.Application.Abstractions.Identity;
-using BlogApp.Application.Features.AppUsers.Commands.Login;
+using BlogApp.Application.Features.Auths.Login;
 using BlogApp.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
