@@ -11,35 +11,22 @@ services:
     build:
       context: .
       dockerfile: BlogApp.API/Dockerfile
-    depends_on:
-            - sqlserverdb
-            # - postgresdb
+    depends_on:            
+            - postgresdb
             - rabbitmq
             - redis.cache
-
-  sqlserverdb:
-        container_name: sqlserverdb
-        image: mcr.microsoft.com/mssql/server
-        ports:
-            - "1445:1433"
-        environment:
-            - ACCEPT_EULA=Y
-            - MSSQL_SA_PASSWORD=Sa123456
-        volumes:
-            - ./sqlserverdb/data:/var/opt/mssql/data
-            - ./sqlserverdb/log:/var/opt/mssql/log
-            - ./sqlserverdb/secrets:/var/opt/mssql/secrets
-  # postgresdb:
-  #   container_name: postgresdb
-  #   image: postgres:14
-  #   environment:
-  #     - POSTGRES_DB=BlogAppDb
-  #     - POSTGRES_USER=sa
-  #     - POSTGRES_PASSWORD=Sa123456          
-  #   volumes:
-  #     - ./postgresdb:/var/lib/postgresql/data
-  #   ports:
-  #     - 5435:5432
+ 
+  postgresdb:
+    container_name: postgresdb
+    image: postgres:14
+    environment:
+      - POSTGRES_DB=BlogAppDb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres          
+    volumes:
+      - ./postgresdb:/var/lib/postgresql/data
+    ports:
+      - 5435:5432
   
   rabbitmq:
     image: rabbitmq:3-management
@@ -60,7 +47,6 @@ services:
     restart: always
     ports:
       - "6379:6379"  
-
 
 networks:
   rabbitmq:

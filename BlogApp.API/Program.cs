@@ -95,11 +95,8 @@ using (IServiceScope serviceScope = app.Services.CreateScope())
     //Veritabaný oluþturuluyor
     await myDependency.DatabaseInitializer(app, builder.Configuration);
 
-    //Serilog için tablo yapýsý oluþturuluyor (MsSql)
-    await myDependency.CreateMsSqlSeriLogTable(builder.Configuration);
-
-    //Postgre için serilog
-    //await myDependency.CreatePostgreSqlSeriLogTable(builder.Configuration);
+    //Serilog için tablo yapýsý oluþturuluyor.
+    await myDependency.CreatePostgreSqlSeriLogTable(builder.Configuration);
 }
 
 app.UseHttpsRedirection();

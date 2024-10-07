@@ -24,19 +24,6 @@ public sealed class DbInitializer : IDbInitializer
         return Task.CompletedTask;
     }
 
-    public Task CreateMsSqlSeriLogTable(IConfiguration configuration)
-    {
-        var mssqlConnectionString = configuration.GetConnectionString("BlogAppMsSqlConnectionString");
-        Log.Logger = new LoggerConfiguration()
-            .WriteTo
-            .MSSqlServer(
-                connectionString: mssqlConnectionString,
-                sinkOptions: new MSSqlServerSinkOptions { TableName = "Logs", AutoCreateSqlTable = true, })
-            .CreateLogger();
-
-        return Task.CompletedTask;
-    }
-
     public Task CreatePostgreSqlSeriLogTable(IConfiguration configuration)
     {
         var postgreSqlConnectionString = configuration.GetConnectionString("BlogAppPostgreConnectionString") ?? string.Empty;
