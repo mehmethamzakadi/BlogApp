@@ -1,3 +1,3 @@
--Persistence
-add-migration MigName -context BlogAppDbContext -o Migrations
-update-database -context BlogAppDbContext
+1- Package Manager Console üzerinde Default Project -src\BlogApp.Persistence seçili olmalýdýr.
+2- add-migration Init -C BlogAppDbContext -O Migrations/PostgreSql
+3- update-database -C BlogAppDbContext
