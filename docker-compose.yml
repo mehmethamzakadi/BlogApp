@@ -10,7 +10,7 @@ services:
     image: ${DOCKER_REGISTRY-}blogappapi
     build:
       context: .
-      dockerfile: BlogApp.API/Dockerfile
+      dockerfile: src/BlogApp.API/Dockerfile
     depends_on:            
             - postgresdb
             - rabbitmq
