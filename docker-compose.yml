@@ -24,7 +24,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres          
     volumes:
-      - ./postgresdb:/var/lib/postgresql/data
+      - ./Docker Compose/postgresdb:/var/lib/postgresql/data
     ports:
       - 5435:5432
   
@@ -36,7 +36,7 @@ services:
       - "5672:5672"
       - "15672:15672"
     volumes:
-     - ./rabbitmq:/var/lib/rabbitmq/mnesia/
+     - ./Docker Compose/rabbitmq:/var/lib/rabbitmq/mnesia/
     networks:
       - rabbitmq
     restart: always  
