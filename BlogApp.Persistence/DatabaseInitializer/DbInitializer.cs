@@ -14,18 +14,17 @@ namespace BlogApp.Persistence.DatabaseInitializer;
 
 public sealed class DbInitializer : IDbInitializer
 {
-    public Task DatabaseInitializer(IApplicationBuilder app, IConfiguration configuration)
+    public async Task DatabaseInitializer(IApplicationBuilder app, IConfiguration configuration)
     {
         using var scope = app.ApplicationServices.CreateScope();
         var dataContext = scope.ServiceProvider.GetRequiredService<BlogAppDbContext>();
-        dataContext.Database.Migrate();
-
-        return Task.CompletedTask;
+        await dataContext.Database.MigrateAsync();
     }
 
     public Task CreatePostgreSqlSeriLogTable(IConfiguration configuration)
     {
         var postgreSqlConnectionString = configuration.GetConnectionString("BlogAppPostgreConnectionString") ?? string.Empty;
+
         IDictionary<string, ColumnWriterBase> columnWriters = new Dictionary<string, ColumnWriterBase>
         {
             { "message", new RenderedMessageColumnWriter(NpgsqlDbType.Text) },
