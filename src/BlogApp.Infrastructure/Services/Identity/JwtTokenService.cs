@@ -52,10 +52,9 @@ public sealed class JwtTokenService(UserManager<AppUser> userManager, IConfigura
         var userRoles = await userManager.GetRolesAsync(user);
         var authClaims = new List<Claim>
                     {
-                        new ("UserId", user.Id.ToString()),
-                        new ("Email", user.Email ?? string.Empty),
-                        new ("Name", user.UserName ?? string.Empty),
-                        new ("IsAuthenticated", "true"),
+                        new (ClaimTypes.NameIdentifier, user.Id.ToString()),
+                        new (ClaimTypes.Email, user.Email ?? string.Empty),
+                        new (ClaimTypes.Name, user.UserName ?? string.Empty),
                     };
 
         foreach (var userRole in userRoles)
