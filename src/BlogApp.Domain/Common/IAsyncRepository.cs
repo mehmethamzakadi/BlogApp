@@ -20,7 +20,7 @@ public interface IAsyncRepository<TEntity> : IQuery<TEntity>
         bool enableTracking = true,
         CancellationToken cancellationToken = default);
 
-    Task<Paginate<TEntity>> GetListAsync(
+    Task<Paginate<TEntity>> GetPaginatedListAsync(
         Expression<Func<TEntity, bool>>? predicate = null,
         Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
         Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null,
@@ -31,7 +31,7 @@ public interface IAsyncRepository<TEntity> : IQuery<TEntity>
         CancellationToken cancellationToken = default
     );
 
-    Task<Paginate<TEntity>> GetListByDynamicAsync(
+    Task<Paginate<TEntity>> GetPaginatedListByDynamicAsync(
         DynamicQuery dynamic,
         Expression<Func<TEntity, bool>>? predicate = null,
         Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null,

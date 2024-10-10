@@ -12,9 +12,9 @@ namespace BlogApp.API.Controllers
     public class RoleController : BaseApiController
     {
         [HttpGet]
-        public async Task<IActionResult> GetList([FromQuery] PageRequest pageRequest)
+        public async Task<IActionResult> GetList([FromQuery] PaginatedRequest pageRequest)
         {
-            GetListResponse<GetListAppRoleResponse> response = await Mediator.Send(new GetListRoleQuery(pageRequest));
+            PaginatedListResponse<GetListAppRoleResponse> response = await Mediator.Send(new GetListRoleQuery(pageRequest));
             return Ok(response);
         }
 

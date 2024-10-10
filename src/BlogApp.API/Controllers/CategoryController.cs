@@ -1,8 +1,9 @@
 using BlogApp.Application.Features.Categories.Commands.Create;
 using BlogApp.Application.Features.Categories.Commands.Delete;
 using BlogApp.Application.Features.Categories.Commands.Update;
+using BlogApp.Application.Features.Categories.Queries.GetAll;
 using BlogApp.Application.Features.Categories.Queries.GetById;
-using BlogApp.Application.Features.Categories.Queries.GetList;
+using BlogApp.Application.Features.Categories.Queries.GetPaginatedListByDynamic;
 using BlogApp.Domain.Common.Requests;
 using BlogApp.Domain.Common.Responses;
 using Microsoft.AspNetCore.Mvc;
@@ -11,10 +12,17 @@ namespace BlogApp.API.Controllers
 {
     public class CategoryController : BaseApiController
     {
-        [HttpGet]
-        public async Task<IActionResult> GetList([FromQuery] PageRequest pageRequest)
+        [HttpGet("GetPaginatedListByDynamic")]
+        public async Task<IActionResult> GetPaginatedListByDynamic([FromQuery] PaginatedRequest pageRequest)
         {
-            GetListResponse<GetListCategoryResponse> response = await Mediator.Send(new GetListCategoriesQuery(pageRequest));
+            PaginatedListResponse<GetPaginatedListByDynamicCategoriesResponse> response = await Mediator.Send(new GetPaginatedListByDynamicCategoriesQuery(pageRequest));
+            return Ok(response);
+        }
+
+        [HttpGet("GetAll")]
+        public async Task<IActionResult> GetAll()
+        {
+            IQueryable response = await Mediator.Send(new GetAllListCategoriesQuery());
             return Ok(response);
         }
 

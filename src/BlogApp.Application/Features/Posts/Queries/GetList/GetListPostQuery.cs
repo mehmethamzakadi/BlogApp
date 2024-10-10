@@ -4,4 +4,4 @@ using MediatR;
 
 namespace BlogApp.Application.Features.Posts.Queries.GetList;
 
-public sealed record GetListPostQuery(PageRequest PageRequest) : IRequest<GetListResponse<GetListPostResponse>>;
+public sealed record GetListPostQuery(PaginatedRequest PageRequest) : IRequest<PaginatedListResponse<GetListPostResponse>>;

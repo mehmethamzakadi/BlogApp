@@ -14,7 +14,7 @@ namespace BlogApp.Application.Features.AppRoles.Profiles
             CreateMap<AppRole, GetListAppRoleResponse>().ReverseMap();
             CreateMap<AppRole, GetRoleByIdQueryResponse>().ReverseMap();
 
-            CreateMap<Paginate<AppRole>, GetListResponse<GetListAppRoleResponse>>().ReverseMap();
+            CreateMap<Paginate<AppRole>, PaginatedListResponse<GetListAppRoleResponse>>().ReverseMap();
         }
     }
 }

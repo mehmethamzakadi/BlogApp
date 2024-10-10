@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace BlogApp.Domain.Common.Responses;
 
-public class GetListResponse<T> : BasePageableModel
+public class PaginatedListResponse<T> : BasePageableModel
 {
     private IList<T> _items;
 

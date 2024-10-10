@@ -12,9 +12,9 @@ namespace BlogApp.API.Controllers
     public class PostController : BaseApiController
     {
         [HttpGet]
-        public async Task<IActionResult> GetList([FromQuery] PageRequest pageRequest)
+        public async Task<IActionResult> GetList([FromQuery] PaginatedRequest pageRequest)
         {
-            GetListResponse<GetListPostResponse> response = await Mediator.Send(new GetListPostQuery(pageRequest));
+            PaginatedListResponse<GetListPostResponse> response = await Mediator.Send(new GetListPostQuery(pageRequest));
             return Ok(response);
         }
 

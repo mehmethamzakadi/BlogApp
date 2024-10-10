@@ -4,5 +4,5 @@ using MediatR;
 
 namespace BlogApp.Application.Features.AppRoles.Queries.GetList;
 
-public sealed record GetListRoleQuery(PageRequest PageRequest) : IRequest<GetListResponse<GetListAppRoleResponse>>;
+public sealed record GetListRoleQuery(PaginatedRequest PageRequest) : IRequest<PaginatedListResponse<GetListAppRoleResponse>>;
 

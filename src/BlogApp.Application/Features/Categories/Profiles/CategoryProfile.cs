@@ -3,8 +3,9 @@ using AutoMapper;
 using BlogApp.Application.Features.Categories.Commands.Create;
 using BlogApp.Application.Features.Categories.Commands.Delete;
 using BlogApp.Application.Features.Categories.Commands.Update;
+using BlogApp.Application.Features.Categories.Queries.GetAll;
 using BlogApp.Application.Features.Categories.Queries.GetById;
-using BlogApp.Application.Features.Categories.Queries.GetList;
+using BlogApp.Application.Features.Categories.Queries.GetPaginatedListByDynamic;
 using BlogApp.Domain.Common.Paging;
 using BlogApp.Domain.Common.Responses;
 using BlogApp.Domain.Entities;
@@ -19,9 +20,12 @@ namespace BlogApp.Application.Features.Categories.Profiles
             CreateMap<Category, UpdateCategoryCommand>().ReverseMap();
             CreateMap<Category, DeleteCategoryCommand>().ReverseMap();
 
-            CreateMap<Category, GetListCategoryResponse>().ReverseMap();
+            CreateMap<Category, GetPaginatedListByDynamicCategoriesResponse>().ReverseMap();
+            CreateMap<Category, GetAllListCategoriesResponse>().ReverseMap();
+
             CreateMap<Category, GetByIdCategoryResponse>().ReverseMap();
-            CreateMap<Paginate<Category>, GetListResponse<GetListCategoryResponse>>().ReverseMap();
+            CreateMap<Paginate<Category>, PaginatedListResponse<GetPaginatedListByDynamicCategoriesResponse>>().ReverseMap();
+
 
         }
     }

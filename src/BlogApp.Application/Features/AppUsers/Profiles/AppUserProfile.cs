@@ -16,6 +16,6 @@ public sealed class AppUserProfile : Profile
         CreateMap<AppUser, GetListAppUserResponse>().ReverseMap();
         CreateMap<AppUser, CreateAppUserCommand>().ReverseMap();
 
-        CreateMap<Paginate<AppUser>, GetListResponse<GetListAppUserResponse>>().ReverseMap();
+        CreateMap<Paginate<AppUser>, PaginatedListResponse<GetListAppUserResponse>>().ReverseMap();
     }
 }

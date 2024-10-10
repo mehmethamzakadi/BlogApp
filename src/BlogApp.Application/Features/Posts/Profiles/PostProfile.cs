@@ -20,6 +20,6 @@ public sealed class PostProfile : Profile
 
         CreateMap<Post, GetListPostResponse>().ReverseMap();
         CreateMap<Post, GetByIdPostResponse>().ReverseMap();
-        CreateMap<Paginate<Post>, GetListResponse<GetListPostResponse>>().ReverseMap();
+        CreateMap<Paginate<Post>, PaginatedListResponse<GetListPostResponse>>().ReverseMap();
     }
 }

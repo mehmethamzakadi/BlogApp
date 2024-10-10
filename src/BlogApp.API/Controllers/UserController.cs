@@ -13,9 +13,9 @@ namespace BlogApp.API.Controllers
     public class UserController : BaseApiController
     {
         [HttpGet]
-        public async Task<IActionResult> GetList([FromQuery] PageRequest pageRequest)
+        public async Task<IActionResult> GetList([FromQuery] PaginatedRequest pageRequest)
         {
-            GetListResponse<GetListAppUserResponse> response = await Mediator.Send(new GetListAppUsersQuery(pageRequest));
+            PaginatedListResponse<GetListAppUserResponse> response = await Mediator.Send(new GetListAppUsersQuery(pageRequest));
             return Ok(response);
         }
 

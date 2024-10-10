@@ -7,9 +7,9 @@ using MediatR;
 
 namespace BlogApp.Application.Features.AppUsers.Queries.GetList;
 
-public sealed class GetListUserQueryHandler(IUserService userManager, IMapper mapper) : IRequestHandler<GetListAppUsersQuery, GetListResponse<GetListAppUserResponse>>
+public sealed class GetListUserQueryHandler(IUserService userManager, IMapper mapper) : IRequestHandler<GetListAppUsersQuery, PaginatedListResponse<GetListAppUserResponse>>
 {
-    public async Task<GetListResponse<GetListAppUserResponse>> Handle(GetListAppUsersQuery request, CancellationToken cancellationToken)
+    public async Task<PaginatedListResponse<GetListAppUserResponse>> Handle(GetListAppUsersQuery request, CancellationToken cancellationToken)
     {
         Paginate<AppUser> userList = await userManager.GetUsers(
         index: request.PageRequest.PageIndex,
@@ -17,7 +17,7 @@ public sealed class GetListUserQueryHandler(IUserService userManager, IMapper ma
         cancellationToken: cancellationToken
         );
 
-        GetListResponse<GetListAppUserResponse> response = mapper.Map<GetListResponse<GetListAppUserResponse>>(userList);
+        PaginatedListResponse<GetListAppUserResponse> response = mapper.Map<PaginatedListResponse<GetListAppUserResponse>>(userList);
         return response;
     }
 }
