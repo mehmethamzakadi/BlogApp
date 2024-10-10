@@ -1,14 +1,15 @@
 ﻿using BlogApp.Domain.Common.Dynamic;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BlogApp.Domain.Common.Requests;
 
 public class DataGridRequest
 {
-    public PaginatedRequest? PageRequest { get; set; }
+    public PaginatedRequest PaginatedRequest { get; set; }
     public DynamicQuery? DynamicQuery { get; set; }
+
+    public DataGridRequest(PaginatedRequest paginatedRequest, DynamicQuery dynamicQuery)
+    {
+        PaginatedRequest = paginatedRequest;
+        DynamicQuery = dynamicQuery;
+    }
 }

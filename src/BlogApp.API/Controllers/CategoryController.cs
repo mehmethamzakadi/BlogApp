@@ -12,10 +12,10 @@ namespace BlogApp.API.Controllers
 {
     public class CategoryController : BaseApiController
     {
-        [HttpGet("GetPaginatedListByDynamic")]
-        public async Task<IActionResult> GetPaginatedListByDynamic([FromQuery] PaginatedRequest pageRequest)
+        [HttpPost("GetPaginatedList")]
+        public async Task<IActionResult> GetPaginatedListByDynamic(DataGridRequest dataGridRequest)
         {
-            PaginatedListResponse<GetPaginatedListByDynamicCategoriesResponse> response = await Mediator.Send(new GetPaginatedListByDynamicCategoriesQuery(pageRequest));
+            PaginatedListResponse<GetPaginatedListByDynamicCategoriesResponse> response = await Mediator.Send(new GetPaginatedListByDynamicCategoriesQuery(dataGridRequest));
             return Ok(response);
         }
 

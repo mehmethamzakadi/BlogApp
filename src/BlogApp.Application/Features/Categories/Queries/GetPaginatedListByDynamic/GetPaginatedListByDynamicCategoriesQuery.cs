@@ -4,4 +4,4 @@ using MediatR;
 
 namespace BlogApp.Application.Features.Categories.Queries.GetPaginatedListByDynamic;
 
-public sealed record GetPaginatedListByDynamicCategoriesQuery(PaginatedRequest PageRequest) : IRequest<PaginatedListResponse<GetPaginatedListByDynamicCategoriesResponse>>;
+public sealed record GetPaginatedListByDynamicCategoriesQuery(DataGridRequest DataGridRequest) : IRequest<PaginatedListResponse<GetPaginatedListByDynamicCategoriesResponse>>;

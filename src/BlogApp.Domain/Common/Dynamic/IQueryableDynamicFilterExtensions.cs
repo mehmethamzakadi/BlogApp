@@ -8,7 +8,7 @@ namespace BlogApp.Domain.Common.Dynamic;
 
 public static class IQueryableDynamicFilterExtensions
 {
-    private static readonly string[] _orders = { "asc", "desc" };
+    private static readonly string[] _orders = { "asc", "Ascending", "desc", "Descending" };
     private static readonly string[] _logics = { "and", "or" };
 
     private static readonly IDictionary<string, string> _operators = new Dictionary<string, string>
@@ -27,11 +27,11 @@ public static class IQueryableDynamicFilterExtensions
         { "doesnotcontain", "Contains" }
     };
 
-    public static IQueryable<T> ToDynamic<T>(this IQueryable<T> query, DynamicQuery dynamicQuery)
+    public static IQueryable<T> ToDynamic<T>(this IQueryable<T> query, DynamicQuery? dynamicQuery)
     {
-        if (dynamicQuery.Filter is not null)
+        if (dynamicQuery?.Filter is not null)
             query = Filter(query, dynamicQuery.Filter);
-        if (dynamicQuery.Sort is not null && dynamicQuery.Sort.Any())
+        if (dynamicQuery?.Sort is not null && dynamicQuery.Sort.Any())
             query = Sort(query, dynamicQuery.Sort);
         return query;
     }
@@ -83,6 +83,7 @@ public static class IQueryableDynamicFilterExtensions
 
     public static string Transform(Filter filter, IList<Filter> filters)
     {
+        filter.Operator = filter.Operator.ToLower();
         if (string.IsNullOrEmpty(filter.Field))
             throw new ArgumentException("Invalid Field");
         if (string.IsNullOrEmpty(filter.Operator) || !_operators.ContainsKey(filter.Operator))

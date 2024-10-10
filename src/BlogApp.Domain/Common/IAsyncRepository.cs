@@ -32,7 +32,7 @@ public interface IAsyncRepository<TEntity> : IQuery<TEntity>
     );
 
     Task<Paginate<TEntity>> GetPaginatedListByDynamicAsync(
-        DynamicQuery dynamic,
+        DynamicQuery? dynamic,
         Expression<Func<TEntity, bool>>? predicate = null,
         Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null,
         int index = 0,
