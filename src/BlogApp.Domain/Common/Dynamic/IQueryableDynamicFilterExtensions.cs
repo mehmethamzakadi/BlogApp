@@ -9,7 +9,7 @@ namespace BlogApp.Domain.Common.Dynamic;
 public static class IQueryableDynamicFilterExtensions
 {
     private static readonly string[] _orders = { "asc", "Ascending", "desc", "Descending" };
-    private static readonly string[] _logics = { "and", "or" };
+    private static readonly string[] _logics = { "and", "or", "And", "Or" };
 
     private static readonly IDictionary<string, string> _operators = new Dictionary<string, string>
     {
@@ -104,9 +104,9 @@ public static class IQueryableDynamicFilterExtensions
         if (!string.IsNullOrEmpty(filter.Value))
         {
             if (filter.Operator == "doesnotcontain")
-                where.Append($"(!np({filter.Field}).{comparison}(@{index.ToString()}))");
+                where.Append($"(!np({filter.Field}).ToLower().{comparison}(@{index.ToString()}))");
             else if (comparison is "StartsWith" or "EndsWith" or "Contains")
-                where.Append($"(np({filter.Field}).{comparison}(@{index.ToString()}))");
+                where.Append($"(np({filter.Field}).ToLower().{comparison}(@{index.ToString()}))");
             else
                 where.Append($"np({filter.Field}) {comparison} @{index.ToString()}");
         }
