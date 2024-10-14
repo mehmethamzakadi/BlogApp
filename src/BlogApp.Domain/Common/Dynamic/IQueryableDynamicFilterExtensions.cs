@@ -14,11 +14,17 @@ public static class IQueryableDynamicFilterExtensions
     private static readonly IDictionary<string, string> _operators = new Dictionary<string, string>
     {
         { "eq", "=" },
+        { "equals", "=" },
         { "neq", "!=" },
+        { "notequals", "!=" },
         { "lt", "<" },
+        { "lessthan", "<" },
         { "lte", "<=" },
+        { "lessthanOrequals", "<=" },
         { "gt", ">" },
+        { "greaterthan", ">" },
         { "gte", ">=" },
+        { "greaterthanorequals", ">=" },
         { "isnull", "== null" },
         { "isnotnull", "!= null" },
         { "startswith", "StartsWith" },
@@ -83,7 +89,9 @@ public static class IQueryableDynamicFilterExtensions
 
     public static string Transform(Filter filter, IList<Filter> filters)
     {
+        //tüm harfleri küçüğe çevir.
         filter.Operator = filter.Operator.ToLower();
+
         if (string.IsNullOrEmpty(filter.Field))
             throw new ArgumentException("Invalid Field");
         if (string.IsNullOrEmpty(filter.Operator) || !_operators.ContainsKey(filter.Operator))
@@ -109,6 +117,9 @@ public static class IQueryableDynamicFilterExtensions
 
         if (filter.Logic is not null && filter.Filters is not null && filter.Filters.Any())
         {
+            //tüm harfleri küçüğe çevir.
+            filter.Logic = filter.Logic.ToLower();
+
             if (!_logics.Contains(filter.Logic))
                 throw new ArgumentException("Invalid Logic");
             return $"{where} {filter.Logic} ({string.Join(separator: $" {filter.Logic} ", value: filter.Filters.Select(f => Transform(f, filters)).ToArray())})";
