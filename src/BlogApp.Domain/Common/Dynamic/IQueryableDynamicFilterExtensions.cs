@@ -20,7 +20,7 @@ public static class IQueryableDynamicFilterExtensions
         { "lt", "<" },
         { "lessthan", "<" },
         { "lte", "<=" },
-        { "lessthanOrequals", "<=" },
+        { "lessthanorequals", "<=" },
         { "gt", ">" },
         { "greaterthan", ">" },
         { "gte", ">=" },

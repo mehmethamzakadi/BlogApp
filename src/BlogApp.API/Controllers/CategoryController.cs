@@ -33,22 +33,25 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
-        [HttpPost]
+        [HttpPost("Create")]
         public async Task<IActionResult> Post(CreateCategoryCommand category)
         {
-            return GetResponseOnlyResultMessage(await Mediator.Send(category));
+            var response = await Mediator.Send(category);
+            return Ok(response);
         }
 
-        [HttpPut]
+        [HttpPut("Update")]
         public async Task<IActionResult> Put([FromBody] UpdateCategoryCommand category)
         {
-            return GetResponseOnlyResultMessage(await Mediator.Send(category));
+            var response = await Mediator.Send(category);
+            return Ok(response);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("Delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            return GetResponseOnlyResultMessage(await Mediator.Send(new DeleteCategoryCommand(id)));
+            var response = await Mediator.Send(new DeleteCategoryCommand(id));
+            return Ok(response);
         }
     }
 }
