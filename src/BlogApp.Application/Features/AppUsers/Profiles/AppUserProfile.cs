@@ -2,6 +2,8 @@
 using BlogApp.Application.Features.AppUsers.Commands.Create;
 using BlogApp.Application.Features.AppUsers.Queries.GetById;
 using BlogApp.Application.Features.AppUsers.Queries.GetList;
+using BlogApp.Application.Features.AppUsers.Queries.GetPaginatedListByDynamic;
+using BlogApp.Application.Features.Categories.Queries.GetPaginatedListByDynamic;
 using BlogApp.Domain.Common.Paging;
 using BlogApp.Domain.Common.Responses;
 using BlogApp.Domain.Entities;
@@ -17,5 +19,8 @@ public sealed class AppUserProfile : Profile
         CreateMap<AppUser, CreateAppUserCommand>().ReverseMap();
 
         CreateMap<Paginate<AppUser>, PaginatedListResponse<GetListAppUserResponse>>().ReverseMap();
+
+        CreateMap<AppUser, GetPaginatedListByDynamicUsersResponse>().ReverseMap();
+        CreateMap<Paginate<AppUser>, PaginatedListResponse<GetPaginatedListByDynamicUsersResponse>>().ReverseMap();
     }
 }

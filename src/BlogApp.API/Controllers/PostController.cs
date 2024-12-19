@@ -11,8 +11,8 @@ namespace BlogApp.API.Controllers
 {
     public class PostController : BaseApiController
     {
-        [HttpGet]
-        public async Task<IActionResult> GetList([FromQuery] PaginatedRequest pageRequest)
+        [HttpPost("GetPaginatedList")]
+        public async Task<IActionResult> GetPaginatedListByDynamic([FromQuery] PaginatedRequest pageRequest)
         {
             PaginatedListResponse<GetListPostResponse> response = await Mediator.Send(new GetListPostQuery(pageRequest));
             return Ok(response);
@@ -25,19 +25,19 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
-        [HttpPost]
+        [HttpPost("Create")]
         public async Task<IActionResult> Post(CreatePostCommand category)
         {
             return GetResponseOnlyResultMessage(await Mediator.Send(category));
         }
 
-        [HttpPut]
+        [HttpPut("Update")]
         public async Task<IActionResult> Put(UpdatePostCommand category)
         {
             return GetResponseOnlyResultMessage(await Mediator.Send(category));
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("Delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             return GetResponseOnlyResultMessage(await Mediator.Send(new DeletePostCommand(id)));

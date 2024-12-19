@@ -11,8 +11,8 @@ namespace BlogApp.API.Controllers
 {
     public class RoleController : BaseApiController
     {
-        [HttpGet]
-        public async Task<IActionResult> GetList([FromQuery] PaginatedRequest pageRequest)
+        [HttpPost("GetPaginatedList")]
+        public async Task<IActionResult> GetPaginatedListByDynamic([FromQuery] PaginatedRequest pageRequest)
         {
             PaginatedListResponse<GetListAppRoleResponse> response = await Mediator.Send(new GetListRoleQuery(pageRequest));
             return Ok(response);
@@ -25,21 +25,21 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
-        [HttpPost("CreateRole")]
+        [HttpPost("Create")]
         public async Task<IActionResult> CreateRole([FromBody] CreateRoleCommand createRoleCommandRequest)
         {
             var addRole = await Mediator.Send(createRoleCommandRequest);
             return Ok(addRole);
         }
 
-        [HttpPut]
+        [HttpPut("Update")]
         public async Task<IActionResult> UpdateRole([FromBody] UpdateRoleCommand updateRoleCommandRequest)
         {
             var updateRole = await Mediator.Send(updateRoleCommandRequest);
             return Ok(updateRole);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("Delete/{id}")]
         public async Task<IActionResult> DeleteRole([FromRoute] int id)
         {
             var deleteRole = await Mediator.Send(new DeleteRoleCommand(id));
