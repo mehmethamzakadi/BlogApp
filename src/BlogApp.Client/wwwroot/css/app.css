@@ -73,6 +73,13 @@ app, app ::deep .rz-layout {
     border-top: 3px solid var(--rz-primary);
 }
 
+.metric-card .rz-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+}
+
 .metric-icon {
     display: flex;
     justify-content: center;
@@ -93,6 +100,9 @@ app, app ::deep .rz-layout {
 
 .metric-trend {
     font-weight: 600;
+    margin-top: auto;
+    display: inline-flex;
+    align-items: center;
 }
 
 .metric-trend.up {
