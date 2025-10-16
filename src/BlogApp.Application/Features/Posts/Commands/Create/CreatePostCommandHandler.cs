@@ -18,7 +18,7 @@ public sealed class CreatePostCommandHandler(IPostRepository postRepository) : I
                 Body = request.Body,
                 Summary = request.Summary,
                 Thumbnail = request.Thumbnail,
-                IsPublished = false
+                IsPublished = request.IsPublished
             };
             await postRepository.AddAsync(post);
 
