@@ -112,6 +112,11 @@ app, app ::deep .rz-layout {
     font-size: 0.9rem;
 }
 
+.comment-list {
+    max-height: 320px;
+    overflow-y: auto;
+}
+
 .comment-item {
     display: flex;
     padding: 0.75rem 0;

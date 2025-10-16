@@ -21,20 +21,22 @@
     {
         <RadzenColumn Size="12" SizeMd="6" SizeLg="4">
             <RadzenCard Style="height: 100%;">
-                <div class="post-header">
-                    <span class="category-tag">@post.Category</span>
-                    <span class="post-date">@post.PublishedAt.ToString("dd MMM yyyy")</span>
-                </div>
-                <h3>@post.Title</h3>
-                <p>@post.Summary</p>
-                <div class="post-footer">
-                    <RadzenAvatar Text="@post.AuthorInitials" Style="margin-right: 0.5rem;" />
-                    <div>
-                        <strong>@post.Author</strong>
-                        <div class="post-meta">@post.ReadTime dakika okuma</div>
+                <ChildContent>
+                    <div class="post-header">
+                        <span class="category-tag">@post.Category</span>
+                        <span class="post-date">@post.PublishedAt.ToString("dd MMM yyyy")</span>
                     </div>
-                    <RadzenButton Icon="chevron_right" Text="Devamını Oku" ButtonStyle="ButtonStyle.Primary" Style="margin-left:auto" />
-                </div>
+                    <h3>@post.Title</h3>
+                    <p>@post.Summary</p>
+                    <div class="post-footer">
+                        <RadzenAvatar Text="@post.AuthorInitials" Style="margin-right: 0.5rem;" />
+                        <div>
+                            <strong>@post.Author</strong>
+                            <div class="post-meta">@post.ReadTime dakika okuma</div>
+                        </div>
+                        <RadzenButton Icon="chevron_right" Text="Devamını Oku" ButtonStyle="ButtonStyle.Primary" Style="margin-left:auto" />
+                    </div>
+                </ChildContent>
             </RadzenCard>
         </RadzenColumn>
     }
