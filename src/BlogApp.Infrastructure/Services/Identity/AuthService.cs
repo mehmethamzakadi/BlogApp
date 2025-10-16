@@ -14,22 +14,35 @@ public sealed class AuthService(UserManager<AppUser> userManager, SignInManager<
     public async Task<IDataResult<LoginResponse>> LoginAsync(string email, string password)
     {
         AppUser? user = await userManager.FindByEmailAsync(email);
-        if (user is not null)
+        if (user is null)
         {
-            bool checkPassword = await userManager.CheckPasswordAsync(user, password);
-            if (!checkPassword)
-                throw new AuthenticationErrorException();
-
-            var authClaims = await tokenService.GetAuthClaims(user);
-            var tokenResponse = tokenService.GenerateAccessToken(authClaims, user);
-            await signInManager.SignInWithClaimsAsync(user, false, authClaims);
-
-            await userManager.RemoveAuthenticationTokenAsync(user, "BlogApp", "RefreshToken");
-            await userManager.SetAuthenticationTokenAsync(user, "BlogApp", "RefreshToken", tokenResponse.RefreshToken);
-
-            return new SuccessDataResult<LoginResponse>(tokenResponse, "Giriş Başarılı");
+            throw new AuthenticationErrorException();
         }
-        throw new AuthenticationErrorException();
+
+        var signInResult = await signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: true);
+        if (signInResult.IsLockedOut)
+        {
+            throw new AuthenticationErrorException("Hesabınız çok sayıda hatalı giriş nedeniyle kilitlendi.");
+        }
+
+        if (signInResult.RequiresTwoFactor)
+        {
+            throw new AuthenticationErrorException("İki faktörlü doğrulama gereklidir.");
+        }
+
+        if (!signInResult.Succeeded)
+        {
+            throw new AuthenticationErrorException();
+        }
+
+        var authClaims = await tokenService.GetAuthClaims(user);
+        var tokenResponse = tokenService.GenerateAccessToken(authClaims, user);
+        await signInManager.SignInWithClaimsAsync(user, false, authClaims);
+
+        await userManager.RemoveAuthenticationTokenAsync(user, "BlogApp", "RefreshToken");
+        await userManager.SetAuthenticationTokenAsync(user, "BlogApp", "RefreshToken", tokenResponse.RefreshToken);
+
+        return new SuccessDataResult<LoginResponse>(tokenResponse, "Giriş Başarılı");
     }
 
     public async Task PasswordResetAsync(string email)

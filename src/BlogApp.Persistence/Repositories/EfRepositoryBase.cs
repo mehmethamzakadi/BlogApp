@@ -384,8 +384,10 @@ where TContext : DbContext
     public ICollection<TEntity> DeleteRange(ICollection<TEntity> entities, bool permanent = false)
     {
         foreach (TEntity entity in entities)
-            entity.UpdatedDate = DateTime.UtcNow;
-        Context.UpdateRange(entities);
+        {
+            SetEntityAsDeleted(entity, permanent);
+        }
+
         Context.SaveChanges();
         return entities;
     }

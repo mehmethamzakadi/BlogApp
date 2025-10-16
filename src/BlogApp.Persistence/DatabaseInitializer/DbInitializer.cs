@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NpgsqlTypes;
 using Serilog;
+using Serilog.Core;
 using Serilog.Events;
 using Serilog.Sinks.PostgreSQL;
 using Serilog.Sinks.PostgreSQL.ColumnWriters;
@@ -43,7 +44,7 @@ public sealed class DbInitializer : IDbInitializer
             { "machine_name", new SinglePropertyColumnWriter("MachineName", PropertyWriteMethod.ToString, NpgsqlDbType.Text, "log") }
         };
 
-        Log.Logger = new LoggerConfiguration()
+        using Logger logger = new LoggerConfiguration()
             .WriteTo
             .PostgreSQL(
                 connectionString: postgreSqlConnectionString,
@@ -54,7 +55,7 @@ public sealed class DbInitializer : IDbInitializer
                 useCopy: false)
             .CreateLogger();
 
-        Log.Logger.Information("Serilog PostgreSQL tablosu doğrulandı.");
+        logger.Information("Serilog PostgreSQL tablosu doğrulandı.");
         return Task.CompletedTask;
     }
 }

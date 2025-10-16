@@ -5,12 +5,18 @@ using BlogApp.Application.Features.Posts.Queries.GetById;
 using BlogApp.Application.Features.Posts.Queries.GetList;
 using BlogApp.Domain.Common.Requests;
 using BlogApp.Domain.Common.Responses;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.API.Controllers
 {
     public class PostController : BaseApiController
     {
+        public PostController(IMediator mediator)
+            : base(mediator)
+        {
+        }
+
         [HttpPost("GetPaginatedList")]
         public async Task<IActionResult> GetPaginatedListByDynamic([FromQuery] PaginatedRequest pageRequest)
         {

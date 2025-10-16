@@ -65,7 +65,7 @@ public sealed class JwtTokenService(UserManager<AppUser> userManager, IOptions<T
 
         foreach (var userRole in userRoles)
         {
-            authClaims.Add(new Claim("Roles", userRole));
+            authClaims.Add(new Claim(ClaimTypes.Role, userRole));
         }
 
         return authClaims;

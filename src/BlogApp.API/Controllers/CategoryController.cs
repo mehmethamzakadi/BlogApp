@@ -6,12 +6,18 @@ using BlogApp.Application.Features.Categories.Queries.GetById;
 using BlogApp.Application.Features.Categories.Queries.GetPaginatedListByDynamic;
 using BlogApp.Domain.Common.Requests;
 using BlogApp.Domain.Common.Responses;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.API.Controllers
 {
     public class CategoryController : BaseApiController
     {
+        public CategoryController(IMediator mediator)
+            : base(mediator)
+        {
+        }
+
         [HttpPost("GetPaginatedList")]
         public async Task<IActionResult> GetPaginatedListByDynamic(DataGridRequest dataGridRequest)
         {
