@@ -5,6 +5,7 @@ using BlogApp.Infrastructure;
 using BlogApp.Persistence;
 using BlogApp.Persistence.DatabaseInitializer;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -92,8 +93,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-var dbInitializer = app.Services.GetRequiredService<IDbInitializer>();
-await dbInitializer.InitializeAsync(app.Services, app.Lifetime.ApplicationStopping);
+await using AsyncServiceScope scope = app.Services.CreateAsyncScope();
+var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+await dbInitializer.InitializeAsync(scope.ServiceProvider, app.Lifetime.ApplicationStopping);
 await dbInitializer.EnsurePostgreSqlSerilogTableAsync(builder.Configuration, app.Lifetime.ApplicationStopping);
 
 app.UseHttpsRedirection();
