@@ -2,7 +2,7 @@
 
 public class PaginatedRequest
 {
-    public const int DefaultPageIndex = 1;
+    public const int DefaultPageIndex = 0;
     public const int DefaultPageSize = 20;
     public const int MaxPageSize = 100;
 
