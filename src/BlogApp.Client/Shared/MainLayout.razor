@@ -1,0 +1,33 @@
+@inherits LayoutComponentBase
+
+<RadzenLayout Style="min-height: 100vh;">
+    <RadzenSidebar @bind-Expanded="sidebarExpanded" Style="width: 250px;">
+        <div class="sidebar-header">
+            <img src="images/logo.svg" alt="BlogApp" class="brand-logo" />
+            <h3>BlogApp</h3>
+        </div>
+        <NavMenu />
+    </RadzenSidebar>
+
+    <RadzenHeader>
+        <div class="topbar">
+            <RadzenSidebarToggle Click="ToggleSidebar" Icon="menu" ButtonStyle="ButtonStyle.Light" />
+            <h1>Blog Yönetimi</h1>
+        </div>
+    </RadzenHeader>
+
+    <RadzenBody>
+        <RadzenContent ContainerStyle="padding: 1.5rem;">
+            @Body
+        </RadzenContent>
+    </RadzenBody>
+</RadzenLayout>
+
+@code {
+    private bool sidebarExpanded = true;
+
+    private void ToggleSidebar()
+    {
+        sidebarExpanded = !sidebarExpanded;
+    }
+}
