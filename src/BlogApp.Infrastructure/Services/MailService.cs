@@ -63,7 +63,7 @@ public sealed class MailService : IMailService
 
         StringBuilder mail = new();
         mail.AppendLine("<br>Merhaba <br> Yeni şifre talebinde bulunduysanız aşağıdaki linkten şifrenizi yenileyebilirsiniz.<br>");
-        mail.AppendLine($"<a target="_blank" href="{resetUri}">Yeni şifre talebi için tıklayınız...</a></strong><br><br><small>NOT: Eğer bu talep tarafınızca gerçekleştirilmemişse lütfen bu maili ciddiye almayınız.</small><br><br><hr><br>BLOG APP<br> ");
+        mail.AppendLine($"<a target='_blank' href='{resetUri}'>Yeni şifre talebi için tıklayınız...</a></strong><br><br><small>NOT: Eğer bu talep tarafınızca gerçekleştirilmemişse lütfen bu maili ciddiye almayınız.</small><br><br><hr><br>BLOG APP<br>");
 
         await SendMailAsync(to, "Şifre Yenileme Talebi", mail.ToString(), true).ConfigureAwait(false);
     }

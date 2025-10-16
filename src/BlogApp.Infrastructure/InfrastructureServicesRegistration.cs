@@ -17,6 +17,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using TokenOptions = BlogApp.Domain.Options.TokenOptions;
 
 namespace BlogApp.Infrastructure
 {

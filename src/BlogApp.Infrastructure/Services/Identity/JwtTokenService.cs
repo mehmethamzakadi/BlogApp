@@ -8,10 +8,10 @@ using System.Text;
 using BlogApp.Application.Abstractions.Identity;
 using BlogApp.Application.Features.Auths.Login;
 using BlogApp.Domain.Entities;
-using BlogApp.Domain.Options;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using TokenOptions = BlogApp.Domain.Options.TokenOptions;
 
 namespace BlogApp.Infrastructure.Services.Identity;
 
