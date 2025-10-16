@@ -43,8 +43,9 @@
                 <h3>Son Yorumlar</h3>
                 <span class="card-subtitle">Topluluk tarafından yapılan en yeni yorumlar</span>
             </div>
-            <RadzenListView Data="@recentComments" Style="max-height: 320px; overflow-y: auto;">
-                <Template Context="comment">
+            <div style="max-height: 320px; overflow-y: auto;">
+                @foreach (var comment in recentComments)
+                {
                     <div class="comment-item">
                         <RadzenAvatar Text="@comment.AuthorInitials" Style="margin-right: 0.75rem;" />
                         <div>
@@ -53,8 +54,8 @@
                             <p>@comment.Content</p>
                         </div>
                     </div>
-                </Template>
-            </RadzenListView>
+                }
+            </div>
         </RadzenCard>
     </RadzenColumn>
 </RadzenRow>

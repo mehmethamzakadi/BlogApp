@@ -7,11 +7,10 @@
         <p>Topluluğumuzdan en yeni güncellemeleri ve içerikleri keşfedin.</p>
     </RadzenColumn>
     <RadzenColumn Size="12" SizeMd="4" Class="filter-panel">
-        <RadzenTextBox Placeholder="Arama" Style="width: 100%;" @bind-Value="searchTerm">
-            <Suffix>
-                <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Light" />
-            </Suffix>
-        </RadzenTextBox>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="8px" AlignItems="AlignItems.Stretch">
+            <RadzenTextBox Placeholder="Arama" Style="flex: 1 1 auto;" @bind-Value="searchTerm" />
+            <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Light" />
+        </RadzenStack>
         <RadzenDropDown Data="@categories" TextProperty="Name" ValueProperty="Id" @bind-Value="selectedCategory" Style="width: 100%; margin-top: 0.75rem;" Placeholder="Kategori seçin" />
     </RadzenColumn>
 </RadzenRow>
