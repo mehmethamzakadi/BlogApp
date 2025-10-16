@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Builder;
+
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 
 namespace BlogApp.Persistence.DatabaseInitializer;
 
 public interface IDbInitializer
 {
-    Task CreatePostgreSqlSeriLogTable(IConfiguration configuration);
-    Task DatabaseInitializer(IApplicationBuilder app, IConfiguration configuration);
+    Task EnsurePostgreSqlSerilogTableAsync(IConfiguration configuration, CancellationToken cancellationToken = default);
+    Task InitializeAsync(IServiceProvider serviceProvider, CancellationToken cancellationToken = default);
 }

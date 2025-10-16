@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+
+using FluentValidation;
 
 namespace BlogApp.Application.Features.Posts.Commands.Update;
 
@@ -19,5 +20,8 @@ public sealed class UpdatePostValidator : AbstractValidator<UpdatePostCommand>
         RuleFor(c => c.Summary)
            .NotEmpty().WithMessage("Özet bilgisi boş olmamalıdır!")
            .MaximumLength(400).WithMessage("Özet bilgisi 400 karakterden fazla olmamalıdır!");
+
+        RuleFor(c => c.CategoryId)
+            .GreaterThan(0).WithMessage("Geçerli bir kategori seçilmelidir!");
     }
 }

@@ -1,4 +1,5 @@
-﻿using BlogApp.Domain.Common.Results;
+
+using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Repositories;
 using MediatR;
@@ -9,24 +10,18 @@ public sealed class CreatePostCommandHandler(IPostRepository postRepository) : I
 {
     public async Task<IResult> Handle(CreatePostCommand request, CancellationToken cancellationToken)
     {
-        try
+        var post = new Post
         {
-            var post = new Post
-            {
-                CategoryId = request.CategoriId,
-                Title = request.Title,
-                Body = request.Body,
-                Summary = request.Summary,
-                Thumbnail = request.Thumbnail,
-                IsPublished = request.IsPublished
-            };
-            await postRepository.AddAsync(post);
+            CategoryId = request.CategoryId,
+            Title = request.Title,
+            Body = request.Body,
+            Summary = request.Summary,
+            Thumbnail = request.Thumbnail,
+            IsPublished = request.IsPublished
+        };
 
-            return new SuccessResult("Post bilgsi başarıyla eklendi.");
-        }
-        catch (Exception)
-        {
-            return new ErrorResult("Post bilgsi eklerken hata oluştu!");
-        }
+        await postRepository.AddAsync(post);
+
+        return new SuccessResult("Post bilgisi başarıyla eklendi.");
     }
 }

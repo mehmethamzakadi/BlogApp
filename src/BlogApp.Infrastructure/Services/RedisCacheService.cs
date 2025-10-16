@@ -1,22 +1,36 @@
-﻿using BlogApp.Application.Abstractions;
+
+using System;
+using System.Text.Json;
+using BlogApp.Application.Abstractions;
 using Microsoft.Extensions.Caching.Distributed;
-using Newtonsoft.Json;
-using System.Text;
 
 namespace BlogApp.Infrastructure.Services;
 
 public sealed class RedisCacheService(IDistributedCache distributedCache) : ICacheService
 {
+    private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerOptions.Default)
+    {
+        PropertyNamingPolicy = null,
+        WriteIndented = false
+    };
+
     public async Task Add(string key, object data, DateTimeOffset? absExpr, TimeSpan? sldExpr)
     {
-        var json = JsonConvert.SerializeObject(data);
+        if (data is null)
+        {
+            return;
+        }
 
-        await distributedCache.SetStringAsync(key, json, new DistributedCacheEntryOptions() { AbsoluteExpiration = absExpr, SlidingExpiration = sldExpr });
+        var cacheEntryOptions = new DistributedCacheEntryOptions
+        {
+            AbsoluteExpiration = absExpr,
+            SlidingExpiration = sldExpr
+        };
+
+        string json = JsonSerializer.Serialize(data, SerializerOptions);
+        await distributedCache.SetStringAsync(key, json, cacheEntryOptions);
     }
-    public async Task Add(string key, byte[] data, DateTimeOffset? absExpr, TimeSpan? sldExpr)
-    {
-        await distributedCache.SetAsync(key, data, new DistributedCacheEntryOptions() { AbsoluteExpiration = absExpr, SlidingExpiration = sldExpr });
-    }
+
     public bool Any(string key)
     {
         return !string.IsNullOrEmpty(distributedCache.GetString(key));
@@ -24,12 +38,13 @@ public sealed class RedisCacheService(IDistributedCache distributedCache) : ICac
 
     public async Task<T?> Get<T>(string key)
     {
-        if (Any(key))
+        var data = await distributedCache.GetStringAsync(key);
+        if (string.IsNullOrEmpty(data))
         {
-            var data = await distributedCache.GetStringAsync(key) ?? string.Empty;
-            return JsonConvert.DeserializeObject<T>(data);
+            return default;
         }
-        return default;
+
+        return JsonSerializer.Deserialize<T>(data, SerializerOptions);
     }
 
     public async Task Remove(string key)
