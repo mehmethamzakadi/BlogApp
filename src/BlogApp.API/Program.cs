@@ -11,6 +11,10 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 var corsPolicyName = "_dynamicCorsPolicy";
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+if (allowedOrigins.Length == 0)
+{
+    throw new InvalidOperationException("At least one allowed CORS origin must be configured under Cors:AllowedOrigins.");
+}
 
 builder.Services.AddConfigurePersistenceServices(builder.Configuration);
 builder.Services.AddConfigureApplicationServices(builder.Configuration);
@@ -23,16 +27,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: corsPolicyName, policyBuilder =>
     {
-        if (allowedOrigins.Length == 0)
-        {
-            policyBuilder.AllowAnyOrigin();
-        }
-        else
-        {
-            policyBuilder.WithOrigins(allowedOrigins);
-        }
-
-        policyBuilder.AllowAnyHeader().AllowAnyMethod();
+        policyBuilder.WithOrigins(allowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod();
     });
 });
 
@@ -100,11 +97,11 @@ await dbInitializer.EnsurePostgreSqlSerilogTableAsync(builder.Configuration, app
 
 app.UseHttpsRedirection();
 
+app.UseRouting();
+
 app.UseCors(corsPolicyName);
 
 app.UseAuthentication();
-
-app.UseRouting();
 
 app.UseAuthorization();
 
