@@ -8,12 +8,18 @@ using BlogApp.Application.Features.Auths.UpdatePassword;
 using BlogApp.Application.Features.Categories.Queries.GetPaginatedListByDynamic;
 using BlogApp.Domain.Common.Requests;
 using BlogApp.Domain.Common.Responses;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.API.Controllers
 {
     public class UserController : BaseApiController
     {
+        public UserController(IMediator mediator)
+            : base(mediator)
+        {
+        }
+
         [HttpPost("GetPaginatedList")]
         public async Task<IActionResult> GetPaginatedListByDynamic(DataGridRequest dataGridRequest)
         {

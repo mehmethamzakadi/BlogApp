@@ -1,4 +1,5 @@
-﻿using BlogApp.Domain.Common;
+﻿using System.Security.Claims;
+using BlogApp.Domain.Common;
 using BlogApp.Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -16,7 +17,8 @@ namespace BlogApp.Persistence.Contexts
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            var userId = Convert.ToInt32(_httpContextAccessor?.HttpContext?.User?.FindFirst("Id")?.Value);
+            var userIdClaim = _httpContextAccessor?.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = int.TryParse(userIdClaim, out var parsedUserId) ? parsedUserId : 0;
             foreach (var entry in base.ChangeTracker.Entries<BaseEntity>()
                .Where(q => q.State == EntityState.Added || q.State == EntityState.Modified || q.State == EntityState.Deleted))
             {

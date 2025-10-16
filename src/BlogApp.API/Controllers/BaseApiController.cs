@@ -1,4 +1,5 @@
-﻿using BlogApp.Domain.Common.Results;
+﻿using System;
+using BlogApp.Domain.Common.Results;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,8 +12,12 @@ namespace BlogApp.API.Controllers
     [Route("api/[controller]")]
     public abstract class BaseApiController : ControllerBase
     {
-        private IMediator _mediator;
-        protected IMediator Mediator => _mediator = HttpContext.RequestServices.GetService<IMediator>();
+        protected BaseApiController(IMediator mediator)
+        {
+            Mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+        }
+
+        protected IMediator Mediator { get; }
 
         [ApiExplorerSettings(IgnoreApi = true)]
         public IActionResult GetResponse<T>(IDataResult<T> result)

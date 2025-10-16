@@ -43,7 +43,7 @@ public sealed class DbInitializer : IDbInitializer
             { "machine_name", new SinglePropertyColumnWriter("MachineName", PropertyWriteMethod.ToString, NpgsqlDbType.Text, "log") }
         };
 
-        Log.Logger = new LoggerConfiguration()
+        using ILogger logger = new LoggerConfiguration()
             .WriteTo
             .PostgreSQL(
                 connectionString: postgreSqlConnectionString,
@@ -54,7 +54,7 @@ public sealed class DbInitializer : IDbInitializer
                 useCopy: false)
             .CreateLogger();
 
-        Log.Logger.Information("Serilog PostgreSQL tablosu doğrulandı.");
+        logger.Information("Serilog PostgreSQL tablosu doğrulandı.");
         return Task.CompletedTask;
     }
 }
