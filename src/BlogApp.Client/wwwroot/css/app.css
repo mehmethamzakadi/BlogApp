@@ -71,6 +71,10 @@ app, app ::deep .rz-layout {
 
 .metric-card {
     border-top: 3px solid var(--rz-primary);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1.25rem;
 }
 
 .metric-icon {
@@ -93,6 +97,7 @@ app, app ::deep .rz-layout {
 
 .metric-trend {
     font-weight: 600;
+    margin-top: auto;
 }
 
 .metric-trend.up {
@@ -103,6 +108,13 @@ app, app ::deep .rz-layout {
     color: #dc2626;
 }
 
+.card-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-bottom: 1rem;
+}
+
 .card-header h3 {
     margin: 0;
 }
@@ -110,11 +122,6 @@ app, app ::deep .rz-layout {
 .card-subtitle {
     color: #6b7280;
     font-size: 0.9rem;
-}
-
-.comment-list {
-    max-height: 320px;
-    overflow-y: auto;
 }
 
 .comment-item {

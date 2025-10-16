@@ -13,14 +13,12 @@
     {
         <RadzenColumn Size="12" SizeMd="6" SizeLg="3">
             <RadzenCard Style="height: 100%;" Class="metric-card">
-                <ChildContent>
-                    <div class="metric-icon">
-                        <RadzenIcon Icon="@metric.Icon" />
-                    </div>
-                    <div class="metric-value">@metric.Value</div>
-                    <div class="metric-title">@metric.Title</div>
-                    <span class="metric-trend @metric.TrendClass">@metric.Trend</span>
-                </ChildContent>
+                <div class="metric-icon">
+                    <RadzenIcon Icon="@metric.Icon" />
+                </div>
+                <div class="metric-value">@metric.Value</div>
+                <div class="metric-title">@metric.Title</div>
+                <span class="metric-trend @metric.TrendClass">@metric.Trend</span>
             </RadzenCard>
         </RadzenColumn>
     }
@@ -29,64 +27,57 @@
 <RadzenRow ColumnGap="16px" RowGap="16px" Style="margin-top: 1rem;">
     <RadzenColumn Size="12" SizeLg="7">
         <RadzenCard>
-            <ChildContent>
-                <div class="card-header">
-                    <h3>Haftalık Trafik</h3>
-                    <span class="card-subtitle">Günlük ziyaretçi ve etkileşim trendleri</span>
-                </div>
-                <RadzenChart Style="height: 320px;" Data="traffic">
-                    <RadzenAreaSeries TItem="TrafficPoint" CategoryProperty="Day" ValueProperty="Visitors" Title="Ziyaretçiler" />
-                    <RadzenLineSeries TItem="TrafficPoint" CategoryProperty="Day" ValueProperty="Interactions" Title="Etkileşimler" Stroke="var(--rz-primary)" />
-                </RadzenChart>
-            </ChildContent>
+            <div class="card-header">
+                <h3>Haftalık Trafik</h3>
+                <span class="card-subtitle">Günlük ziyaretçi ve etkileşim trendleri</span>
+            </div>
+            <RadzenChart Style="height: 320px;" Data="@traffic">
+                <RadzenAreaSeries TItem="TrafficPoint" CategoryProperty="Day" ValueProperty="Visitors" Title="Ziyaretçiler" />
+                <RadzenLineSeries TItem="TrafficPoint" CategoryProperty="Day" ValueProperty="Interactions" Title="Etkileşimler" Stroke="var(--rz-primary)" />
+            </RadzenChart>
         </RadzenCard>
     </RadzenColumn>
     <RadzenColumn Size="12" SizeLg="5">
         <RadzenCard>
-            <ChildContent>
-                <div class="card-header">
-                    <h3>Son Yorumlar</h3>
-                    <span class="card-subtitle">Topluluk tarafından yapılan en yeni yorumlar</span>
-                </div>
-                <div class="comment-list">
-                    @foreach (var comment in recentComments)
-                    {
-                        <div class="comment-item">
-                            <RadzenAvatar Text="@comment.AuthorInitials" Style="margin-right: 0.75rem;" />
-                            <div>
-                                <strong>@comment.Author</strong>
-                                <div class="comment-meta">@comment.PostTitle · @comment.CreatedAt.ToString("dd MMM")</div>
-                                <p>@comment.Content</p>
-                            </div>
+            <div class="card-header">
+                <h3>Son Yorumlar</h3>
+                <span class="card-subtitle">Topluluk tarafından yapılan en yeni yorumlar</span>
+            </div>
+            <RadzenListView Data="@recentComments" Style="max-height: 320px; overflow-y: auto;">
+                <Template Context="comment">
+                    <div class="comment-item">
+                        <RadzenAvatar Text="@comment.AuthorInitials" Style="margin-right: 0.75rem;" />
+                        <div>
+                            <strong>@comment.Author</strong>
+                            <div class="comment-meta">@comment.PostTitle · @comment.CreatedAt.ToString("dd MMM")</div>
+                            <p>@comment.Content</p>
                         </div>
-                    }
-                </div>
-            </ChildContent>
+                    </div>
+                </Template>
+            </RadzenListView>
         </RadzenCard>
     </RadzenColumn>
 </RadzenRow>
 
 <RadzenCard Style="margin-top: 1.5rem;">
-    <ChildContent>
-        <div class="card-header">
-            <h3>İçerik Listesi</h3>
-            <span class="card-subtitle">Planlanan ve yayınlanan gönderileri yönetin</span>
-        </div>
-        <RadzenDataGrid Data="posts" TItem="AdminPost" AllowPaging="true" PageSize="5" ShowPagingSummary="true" Responsive="true">
-            <Columns>
-                <RadzenDataGridColumn TItem="AdminPost" Property="Title" Title="Başlık" />
-                <RadzenDataGridColumn TItem="AdminPost" Property="Author" Title="Yazar" />
-                <RadzenDataGridColumn TItem="AdminPost" Property="Status" Title="Durum" />
-                <RadzenDataGridColumn TItem="AdminPost" Property="ScheduledAt" Title="Yayın Tarihi" FormatString="{0:dd.MM.yyyy}" />
-                <RadzenDataGridColumn TItem="AdminPost" Title="İşlemler">
-                    <Template Context="post">
-                        <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small" Style="margin-right: 0.5rem;" />
-                        <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" />
-                    </Template>
-                </RadzenDataGridColumn>
-            </Columns>
-        </RadzenDataGrid>
-    </ChildContent>
+    <div class="card-header">
+        <h3>İçerik Listesi</h3>
+        <span class="card-subtitle">Planlanan ve yayınlanan gönderileri yönetin</span>
+    </div>
+    <RadzenDataGrid Data="@posts" TItem="AdminPost" AllowPaging="true" PageSize="5" ShowPagingSummary="true" Responsive="true">
+        <Columns>
+            <RadzenDataGridColumn TItem="AdminPost" Property="Title" Title="Başlık" />
+            <RadzenDataGridColumn TItem="AdminPost" Property="Author" Title="Yazar" />
+            <RadzenDataGridColumn TItem="AdminPost" Property="Status" Title="Durum" />
+            <RadzenDataGridColumn TItem="AdminPost" Property="ScheduledAt" Title="Yayın Tarihi" FormatString="{0:dd.MM.yyyy}" />
+            <RadzenDataGridColumn TItem="AdminPost" Title="İşlemler">
+                <Template Context="post">
+                    <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small" Style="margin-right: 0.5rem;" />
+                    <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" />
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
 </RadzenCard>
 
 @code {
