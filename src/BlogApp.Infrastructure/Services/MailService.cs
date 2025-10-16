@@ -1,47 +1,70 @@
-﻿using BlogApp.Application.Abstractions;
+
+using System;
+using System.Net;
+using System.Text;
+using BlogApp.Application.Abstractions;
+using BlogApp.Domain.Options;
 using MailKit.Net.Smtp;
 using MailKit.Security;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using MimeKit;
 using MimeKit.Text;
-using System.Text;
 
 namespace BlogApp.Infrastructure.Services;
 
-public sealed class MailService(IConfiguration configuration) : IMailService
+public sealed class MailService : IMailService
 {
+    private readonly EmailOptions emailOptions;
+    private readonly PasswordResetOptions passwordResetOptions;
+
+    public MailService(IOptions<EmailOptions> emailOptions, IOptions<PasswordResetOptions> passwordResetOptions)
+    {
+        this.emailOptions = emailOptions.Value;
+        this.passwordResetOptions = passwordResetOptions.Value;
+    }
+
     public async Task SendMailAsync(string to, string subject, string body, bool isBodyHtml = true)
     {
-        var host = configuration["EmailOptions:Host"];
-        var port = Convert.ToInt32(configuration["EmailOptions:Port"]);
-        var from = configuration["EmailOptions:Username"];
-        var pass = configuration["EmailOptions:Password"];
+        if (string.IsNullOrWhiteSpace(emailOptions.Host) ||
+            string.IsNullOrWhiteSpace(emailOptions.Username) ||
+            string.IsNullOrWhiteSpace(emailOptions.Password) ||
+            emailOptions.Port <= 0)
+        {
+            throw new InvalidOperationException("Email ayarları eksik veya hatalı yapılandırıldı.");
+        }
 
         var email = new MimeMessage();
-        email.From.Add(MailboxAddress.Parse(from));
+        email.From.Add(MailboxAddress.Parse(emailOptions.Username));
         email.To.Add(MailboxAddress.Parse(to));
         email.Subject = subject;
-        email.Body = new TextPart(TextFormat.Html) { Text = body };
+        email.Body = isBodyHtml ? new TextPart(TextFormat.Html) { Text = body } : new TextPart(TextFormat.Text) { Text = body };
 
         using var smtp = new SmtpClient();
-        await smtp.ConnectAsync(host, port, SecureSocketOptions.StartTls);
-        await smtp.AuthenticateAsync(from, pass);
-        await smtp.SendAsync(email);
-        await smtp.DisconnectAsync(true);
+        await smtp.ConnectAsync(emailOptions.Host, emailOptions.Port, SecureSocketOptions.StartTls).ConfigureAwait(false);
+        await smtp.AuthenticateAsync(emailOptions.Username, emailOptions.Password).ConfigureAwait(false);
+        await smtp.SendAsync(email).ConfigureAwait(false);
+        await smtp.DisconnectAsync(true).ConfigureAwait(false);
     }
 
     public async Task SendPasswordResetMailAsync(string to, int userId, string resetToken)
     {
-        StringBuilder mail = new();
-        mail.AppendLine(
-            "<br>Merhaba <br> Yeni şifre talebinde bulunduysanız aşağıdaki linkten şifrenizi yenileyebilirsiniz.<br><a target=\"_blank\" href=\"");
-        mail.AppendLine("http://localhost:5001");
-        mail.AppendLine("/UpdatePassword/");
-        mail.AppendLine(userId.ToString());
-        mail.AppendLine("/");
-        mail.AppendLine(resetToken);
-        mail.AppendLine("\"> Yeni şifre talebi için tıklayınız...</a></strong><br><br><small>NOT: Eğer bu talep tarafınızca gerçekleştirilmemişse lütfen bu maili ciddiye almayınız. </small><br><br><hr><br>BLOG APP<br> ");
+        if (string.IsNullOrWhiteSpace(passwordResetOptions.BaseUrl))
+        {
+            throw new InvalidOperationException("Şifre sıfırlama bağlantısı için temel adres yapılandırılmadı.");
+        }
 
-        await SendMailAsync(to, "Şİfre Yenileme Talebi", mail.ToString(), true);
+        if (!Uri.TryCreate(passwordResetOptions.BaseUrl, UriKind.Absolute, out var baseUri))
+        {
+            throw new InvalidOperationException("Şifre sıfırlama temel adresi geçerli bir URI değil.");
+        }
+
+        string encodedToken = WebUtility.UrlEncode(resetToken);
+        var resetUri = new Uri(baseUri, $"UpdatePassword/{userId}/{encodedToken}");
+
+        StringBuilder mail = new();
+        mail.AppendLine("<br>Merhaba <br> Yeni şifre talebinde bulunduysanız aşağıdaki linkten şifrenizi yenileyebilirsiniz.<br>");
+        mail.AppendLine($"<a target="_blank" href="{resetUri}">Yeni şifre talebi için tıklayınız...</a></strong><br><br><small>NOT: Eğer bu talep tarafınızca gerçekleştirilmemişse lütfen bu maili ciddiye almayınız.</small><br><br><hr><br>BLOG APP<br> ");
+
+        await SendMailAsync(to, "Şifre Yenileme Talebi", mail.ToString(), true).ConfigureAwait(false);
     }
 }

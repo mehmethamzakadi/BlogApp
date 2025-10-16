@@ -1,53 +1,49 @@
+
 version: '3.4'
 
 services:
   blogapp.api:
-    environment:
-    - ASPNETCORE_ENVIRONMENT=Development
-    ports:
-    - "5000:5000"
-    - "5001:5001"
     image: ${DOCKER_REGISTRY-}blogappapi
     build:
       context: .
       dockerfile: src/BlogApp.API/Dockerfile
-    depends_on:            
-            - postgresdb
-            - rabbitmq
-            - redis.cache
- 
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://0.0.0.0:5000;https://0.0.0.0:5001
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+    depends_on:
+      - postgresdb
+      - rabbitmq
+      - redis.cache
+
   postgresdb:
     container_name: postgresdb
     image: postgres:14
     environment:
-      - POSTGRES_DB=BlogAppDb
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres          
+      POSTGRES_DB: BlogAppDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     volumes:
       - ./postgresdb:/var/lib/postgresql/data
     ports:
-      - 5435:5432
-  
+      - "5435:5432"
+
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
-    hostname: 'rabbitmq'
+    hostname: rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
     volumes:
-     - ./rabbitmq:/var/lib/rabbitmq/mnesia/
-    networks:
-      - rabbitmq
-    restart: always  
-    
+      - ./rabbitmq:/var/lib/rabbitmq/mnesia/
+    restart: always
+
   redis.cache:
     image: redis:latest
     container_name: redis_server
     restart: always
     ports:
-      - "6379:6379"  
-      
-networks:
-  rabbitmq:
-    driver: bridge
+      - "6379:6379"

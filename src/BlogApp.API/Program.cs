@@ -1,37 +1,42 @@
+
+using System;
 using BlogApp.Application;
 using BlogApp.Infrastructure;
 using BlogApp.Persistence;
 using BlogApp.Persistence.DatabaseInitializer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
-var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+var corsPolicyName = "_dynamicCorsPolicy";
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
 
-// Add services to the container.
 builder.Services.AddConfigurePersistenceServices(builder.Configuration);
 builder.Services.AddConfigureApplicationServices(builder.Configuration);
 builder.Services.AddConfigureInfrastructureServices(builder.Configuration);
 
 builder.Services.AddOptions();
-
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: MyAllowSpecificOrigins,
-                      builder =>
-                      {
-                          builder
-                          .WithOrigins("https://localhost:7040")
-                          .AllowAnyHeader()
-                          .AllowAnyMethod();
-                      });
+    options.AddPolicy(name: corsPolicyName, policyBuilder =>
+    {
+        if (allowedOrigins.Length == 0)
+        {
+            policyBuilder.AllowAnyOrigin();
+        }
+        else
+        {
+            policyBuilder.WithOrigins(allowedOrigins);
+        }
+
+        policyBuilder.AllowAnyHeader().AllowAnyMethod();
+    });
 });
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-
-
 
 builder.Services.AddSwaggerGen(option =>
 {
@@ -52,14 +57,16 @@ builder.Services.AddSwaggerGen(option =>
             {
                 Reference = new OpenApiReference
                 {
-                    Type=ReferenceType.SecurityScheme,
-                    Id="Bearer"
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer",
                 }
             },
             Array.Empty<string>()
         }
     });
 });
+
+var isDevelopment = builder.Environment.IsDevelopment();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -68,7 +75,7 @@ builder.Services.ConfigureApplicationCookie(options =>
         Name = "BlogApp",
         HttpOnly = true,
         SameSite = SameSiteMode.Strict,
-        SecurePolicy = CookieSecurePolicy.SameAsRequest //Canlýda Always olmalýdýr.,
+        SecurePolicy = isDevelopment ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always,
     };
     options.LoginPath = "/Identity/Account/Login";
     options.LogoutPath = "/Identity/Account/Logout";
@@ -79,35 +86,25 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-//Uygulama sýfýrdan docker ile ayaða kalkarken database migrate saðlanýyor.
-using (IServiceScope serviceScope = app.Services.CreateScope())
-{
-    var services = serviceScope.ServiceProvider;
-    var myDependency = services.GetRequiredService<IDbInitializer>();
-
-    //Veritabaný oluþturuluyor
-    await myDependency.DatabaseInitializer(app, builder.Configuration);
-
-    //Serilog için tablo yapýsý oluþturuluyor.
-    await myDependency.CreatePostgreSqlSeriLogTable(builder.Configuration);
-}
+var dbInitializer = app.Services.GetRequiredService<IDbInitializer>();
+await dbInitializer.InitializeAsync(app.Services, app.Lifetime.ApplicationStopping);
+await dbInitializer.EnsurePostgreSqlSerilogTableAsync(builder.Configuration, app.Lifetime.ApplicationStopping);
 
 app.UseHttpsRedirection();
 
-app.UseCors(MyAllowSpecificOrigins);
+app.UseCors(corsPolicyName);
 
-app.UseAuthentication(); //Kimlik doðrulamasý.
+app.UseAuthentication();
 
 app.UseRouting();
 
-app.UseAuthorization(); //Yetki kontrolü.
+app.UseAuthorization();
 
 app.MapControllers();
 

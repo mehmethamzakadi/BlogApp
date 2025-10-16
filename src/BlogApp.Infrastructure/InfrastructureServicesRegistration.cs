@@ -1,7 +1,11 @@
-﻿using BlogApp.Application.Abstractions;
+
+using System;
+using System.Text;
+using BlogApp.Application.Abstractions;
 using BlogApp.Application.Abstractions.Identity;
 using BlogApp.Domain.Constants;
 using BlogApp.Domain.Entities;
+using BlogApp.Domain.Options;
 using BlogApp.Infrastructure.Consumers;
 using BlogApp.Infrastructure.Services;
 using BlogApp.Infrastructure.Services.Identity;
@@ -11,8 +15,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 
 namespace BlogApp.Infrastructure
 {
@@ -20,27 +24,31 @@ namespace BlogApp.Infrastructure
     {
         public static IServiceCollection AddConfigureInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
-            #region Identity Configurtaion
+            services.Configure<TokenOptions>(configuration.GetSection(TokenOptions.SectionName));
+            services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
+            services.Configure<PasswordResetOptions>(configuration.GetSection(PasswordResetOptions.SectionName));
+            services.Configure<TelegramOptions>(configuration.GetSection(TelegramOptions.SectionName));
+            services.Configure<RabbitMqOptions>(configuration.GetSection(RabbitMqOptions.SectionName));
+
             services.AddIdentity<AppUser, AppRole>(options =>
             {
-                //User Şifre Ayarları
-                options.Password.RequireDigit = true; //Sayı girme zorunluluğu
-                options.Password.RequiredLength = 6; //Minimum şifre uzunluğu.
-                options.Password.RequiredUniqueChars = 0; //Özel karakter bulundurma sayısı.
-                options.Password.RequireNonAlphanumeric = false; //Özel karakter bulundurma zorunluluğu.
-                options.Password.RequireLowercase = false; //Küçük harf bulundurma zorunluluğu.
-                options.Password.RequireUppercase = false; //Büyük harf bulundurma zorunluluğu.
+                options.Password.RequireDigit = true;
+                options.Password.RequiredLength = 6;
+                options.Password.RequiredUniqueChars = 0;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireUppercase = false;
 
-                //User Ayarları
-                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@"; //Bu karakterler dışında kullanım yapılamaz.
-                options.User.RequireUniqueEmail = true; //Tek mail adresi ile kayıt olabilme.
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@";
+                options.User.RequireUniqueEmail = true;
             })
                 .AddRoleManager<RoleManager<AppRole>>()
                 .AddEntityFrameworkStores<BlogAppDbContext>()
                 .AddDefaultTokenProviders();
-            #endregion
 
-            #region Authentication With Jwt
+            TokenOptions tokenOptions = configuration.GetSection(TokenOptions.SectionName).Get<TokenOptions>()
+                ?? throw new InvalidOperationException("Token ayarları yapılandırılmalıdır.");
+
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -51,54 +59,49 @@ namespace BlogApp.Infrastructure
             {
                 options.SaveToken = true;
                 options.RequireHttpsMetadata = false;
-                options.TokenValidationParameters = new TokenValidationParameters()
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateLifetime = true,
-                    ValidAudience = configuration["TokenOptions:Audience"],
-                    ValidIssuer = configuration["TokenOptions:Issuer"],
+                    ValidAudience = tokenOptions.Audience,
+                    ValidIssuer = tokenOptions.Issuer,
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["TokenOptions:SecurityKey"] ?? string.Empty)),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenOptions.SecurityKey)),
                     ClockSkew = TimeSpan.Zero
                 };
             });
-            #endregion
 
-            #region Redis Configurations
             services.AddStackExchangeRedisCache(options =>
-              options.Configuration = configuration.GetConnectionString("RedisCache"));
-            #endregion
+                options.Configuration = configuration.GetConnectionString("RedisCache"));
 
-            #region MassTransit RabbitMq Configurations
             services.AddMassTransit(x =>
             {
                 x.AddConsumer<SendTelgeramMessageConsumer>();
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
-                    var host = configuration.GetSection("RabbitMQOptions")["HostName"];
-                    var userName = configuration.GetSection("RabbitMQOptions")["Username"]!;
-                    var password = configuration.GetSection("RabbitMQOptions")["Password"]!;
-                    var retryLimit = Convert.ToInt32(configuration.GetSection("RabbitMQOptions")["RetryLimit"]);
+                    var rabbitOptions = context.GetRequiredService<IOptions<RabbitMqOptions>>().Value;
 
-                    cfg.Host(host, "/", conf =>
+                    cfg.Host(rabbitOptions.HostName, "/", hostConfigurator =>
                     {
-                        conf.Username(userName);
-                        conf.Password(password);
-
-                        cfg.ReceiveEndpoint(EventConstants.SendTelegramTextMessageQueue,
-                            c =>
-                            {
-                                c.ConfigureConsumer<SendTelgeramMessageConsumer>(context);
-                            });
-                        cfg.UseMessageRetry(r => r.Immediate(retryLimit));
+                        hostConfigurator.Username(rabbitOptions.UserName);
+                        hostConfigurator.Password(rabbitOptions.Password);
                     });
+
+                    cfg.ReceiveEndpoint(EventConstants.SendTelegramTextMessageQueue, endpointConfigurator =>
+                    {
+                        endpointConfigurator.ConfigureConsumer<SendTelgeramMessageConsumer>(context);
+                    });
+
+                    if (rabbitOptions.RetryLimit > 0)
+                    {
+                        cfg.UseMessageRetry(retryConfigurator => retryConfigurator.Immediate(rabbitOptions.RetryLimit));
+                    }
                 });
             });
 
             services.AddScoped<SendTelgeramMessageConsumer>();
-            #endregion
 
             services.AddSingleton<ITelegramService, TelegramService>();
             services.AddSingleton<ICacheService, RedisCacheService>();

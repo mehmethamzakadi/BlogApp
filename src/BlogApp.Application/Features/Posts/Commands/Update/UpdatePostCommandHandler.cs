@@ -1,5 +1,5 @@
-﻿using BlogApp.Domain.Common.Results;
-using BlogApp.Domain.Entities;
+
+using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Repositories;
 using MediatR;
 
@@ -9,26 +9,21 @@ public sealed class UpdatePostCommandHandler(IPostRepository postRepository) : I
 {
     public async Task<IResult> Handle(UpdatePostCommand request, CancellationToken cancellationToken)
     {
-        try
+        var entity = await postRepository.GetAsync(x => x.Id == request.Id, cancellationToken: cancellationToken);
+        if (entity is null)
         {
-            Post? entity = await postRepository.GetAsync(x => x.Id == request.Id);
-            if (entity is null)
-                return new ErrorResult("Post bilgisi bulunamadı!");
-
-            entity.Title = request.Title;
-            entity.Body = request.Body;
-            entity.Summary = request.Summary;
-            entity.Thumbnail = request.Thumbnail;
-            entity.IsPublished = request.IsPublished;
-            entity.CategoryId = request.CategoriId;
-
-            await postRepository.UpdateAsync(entity);
-
-            return new SuccessResult("Post bilgisi başarıyla güncellendi.");
+            return new ErrorResult("Post bilgisi bulunamadı!");
         }
-        catch (Exception)
-        {
-            return new ErrorResult("Post bilgisi güncellenirken hata oluştu.");
-        }
+
+        entity.Title = request.Title;
+        entity.Body = request.Body;
+        entity.Summary = request.Summary;
+        entity.Thumbnail = request.Thumbnail;
+        entity.IsPublished = request.IsPublished;
+        entity.CategoryId = request.CategoryId;
+
+        await postRepository.UpdateAsync(entity);
+
+        return new SuccessResult("Post bilgisi başarıyla güncellendi.");
     }
 }

@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+
+using AutoMapper;
 using BlogApp.Application.Features.Posts.Commands.Create;
 using BlogApp.Application.Features.Posts.Commands.Delete;
 using BlogApp.Application.Features.Posts.Commands.Update;
@@ -18,8 +19,13 @@ public sealed class PostProfile : Profile
         CreateMap<Post, UpdatePostCommand>().ReverseMap();
         CreateMap<Post, DeletePostCommand>().ReverseMap();
 
-        CreateMap<Post, GetListPostResponse>().ReverseMap();
-        CreateMap<Post, GetByIdPostResponse>().ReverseMap();
+        CreateMap<Post, GetListPostResponse>()
+            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : string.Empty));
+
+        CreateMap<Post, GetByIdPostResponse>()
+            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : string.Empty))
+            .ReverseMap();
+
         CreateMap<Paginate<Post>, PaginatedListResponse<GetListPostResponse>>().ReverseMap();
     }
 }

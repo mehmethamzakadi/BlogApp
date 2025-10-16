@@ -1,6 +1,9 @@
-﻿
+
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using BlogApp.Persistence.Contexts;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,16 +17,19 @@ namespace BlogApp.Persistence.DatabaseInitializer;
 
 public sealed class DbInitializer : IDbInitializer
 {
-    public async Task DatabaseInitializer(IApplicationBuilder app, IConfiguration configuration)
+    public async Task InitializeAsync(IServiceProvider serviceProvider, CancellationToken cancellationToken = default)
     {
-        using var scope = app.ApplicationServices.CreateScope();
+        await using AsyncServiceScope scope = serviceProvider.CreateAsyncScope();
         var dataContext = scope.ServiceProvider.GetRequiredService<BlogAppDbContext>();
-        await dataContext.Database.MigrateAsync();
+        await dataContext.Database.MigrateAsync(cancellationToken);
     }
 
-    public Task CreatePostgreSqlSeriLogTable(IConfiguration configuration)
+    public Task EnsurePostgreSqlSerilogTableAsync(IConfiguration configuration, CancellationToken cancellationToken = default)
     {
-        var postgreSqlConnectionString = configuration.GetConnectionString("BlogAppPostgreConnectionString") ?? string.Empty;
+        _ = cancellationToken;
+
+        var postgreSqlConnectionString = configuration.GetConnectionString("BlogAppPostgreConnectionString")
+            ?? throw new InvalidOperationException("PostgreSQL bağlantı dizesi yapılandırılmalıdır.");
 
         IDictionary<string, ColumnWriterBase> columnWriters = new Dictionary<string, ColumnWriterBase>
         {
@@ -34,10 +40,10 @@ public sealed class DbInitializer : IDbInitializer
             { "exception", new ExceptionColumnWriter(NpgsqlDbType.Text) },
             { "properties", new LogEventSerializedColumnWriter(NpgsqlDbType.Jsonb) },
             { "props_test", new PropertiesColumnWriter(NpgsqlDbType.Jsonb) },
-            { "machine_name", new SinglePropertyColumnWriter("MachineName", PropertyWriteMethod.ToString, NpgsqlDbType.Text, "l") }
+            { "machine_name", new SinglePropertyColumnWriter("MachineName", PropertyWriteMethod.ToString, NpgsqlDbType.Text, "log") }
         };
 
-        Log.Logger = new LoggerConfiguration()
+        using var logger = new LoggerConfiguration()
             .WriteTo
             .PostgreSQL(
                 connectionString: postgreSqlConnectionString,
@@ -45,12 +51,10 @@ public sealed class DbInitializer : IDbInitializer
                 columnOptions: columnWriters,
                 restrictedToMinimumLevel: LogEventLevel.Information,
                 needAutoCreateTable: true,
-                useCopy: false
-                )
+                useCopy: false)
             .CreateLogger();
 
+        logger.Information("Serilog PostgreSQL tablosu doğrulandı.");
         return Task.CompletedTask;
     }
-
-
 }

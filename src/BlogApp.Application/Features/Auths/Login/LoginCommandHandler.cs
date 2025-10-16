@@ -1,4 +1,6 @@
-﻿using BlogApp.Application.Abstractions.Identity;
+
+using System;
+using BlogApp.Application.Abstractions.Identity;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Events.Telegram;
 using BlogApp.Domain.Options;
@@ -17,15 +19,24 @@ public sealed class LoginCommandHandler(
     {
         var response = await authService.LoginAsync(request.Email, request.Password);
         if (response.Success)
-            await SendTelegramMessage(response.Data.UserName);
+        {
+            await SendTelegramMessage(response.Data.UserName, cancellationToken);
+        }
 
         return response;
     }
 
-    private async Task SendTelegramMessage(string userName)
+    private async Task SendTelegramMessage(string userName, CancellationToken cancellationToken)
     {
+        TelegramOptions options = telegramOptions.Value;
+        if (options.ChatId == 0 || string.IsNullOrWhiteSpace(options.TelegramBotToken))
+        {
+            return;
+        }
+
         var message = $"{userName} Kullanıcısı Sisteme Giriş Yaptı.";
         await publishEndpoint.Publish(
-            new SendTextMessageEvent(message: message, chatId: telegramOptions.Value.ChatId));
+            new SendTextMessageEvent(message: message, chatId: options.ChatId),
+            cancellationToken);
     }
 }
