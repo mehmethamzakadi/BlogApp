@@ -1,0 +1,185 @@
+:root {
+    --app-sidebar-bg: #1f2937;
+    --app-sidebar-text: #f3f4f6;
+}
+
+body, html {
+    margin: 0;
+    font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: #f5f6fb;
+    color: #1f2933;
+}
+
+app, app ::deep .rz-layout {
+    min-height: 100vh;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    padding: 1.25rem 1rem 0.75rem;
+    color: var(--app-sidebar-text);
+}
+
+.brand-logo {
+    width: 36px;
+    height: 36px;
+    margin-right: 0.75rem;
+}
+
+.rz-sidebar {
+    background: var(--app-sidebar-bg);
+    color: var(--app-sidebar-text);
+}
+
+.rz-sidebar ::deep .rz-panelmenu {
+    border: none;
+}
+
+.rz-sidebar ::deep .rz-panelmenu-item, .rz-sidebar ::deep .rz-panelmenu-header, .rz-sidebar ::deep .rz-panelmenu-content {
+    background: transparent;
+    color: var(--app-sidebar-text);
+}
+
+.rz-sidebar ::deep .rz-panelmenu .rz-state-active {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.topbar {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08);
+}
+
+.topbar h1 {
+    font-size: 1.25rem;
+    margin: 0 0 0 1rem;
+}
+
+.page-header {
+    margin-bottom: 1rem;
+}
+
+.filter-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.metric-card {
+    border-top: 3px solid var(--rz-primary);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1.25rem;
+}
+
+.metric-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.75rem;
+    color: var(--rz-primary);
+    margin-bottom: 0.5rem;
+}
+
+.metric-value {
+    font-size: 1.75rem;
+    font-weight: 600;
+}
+
+.metric-title {
+    color: #6b7280;
+}
+
+.metric-trend {
+    font-weight: 600;
+    margin-top: auto;
+}
+
+.metric-trend.up {
+    color: #16a34a;
+}
+
+.metric-trend.down {
+    color: #dc2626;
+}
+
+.card-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-bottom: 1rem;
+}
+
+.card-header h3 {
+    margin: 0;
+}
+
+.card-subtitle {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.comment-item {
+    display: flex;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.comment-item:last-child {
+    border-bottom: none;
+}
+
+.comment-meta {
+    color: #9ca3af;
+    font-size: 0.85rem;
+    margin-bottom: 0.35rem;
+}
+
+.post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.category-tag {
+    background: rgba(59, 130, 246, 0.15);
+    color: #1d4ed8;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+}
+
+.post-date {
+    color: #9ca3af;
+    font-size: 0.85rem;
+}
+
+.post-footer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.post-meta {
+    color: #9ca3af;
+    font-size: 0.85rem;
+}
+
+@media (max-width: 768px) {
+    .topbar {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .topbar h1 {
+        margin-left: 0.5rem;
+    }
+}
