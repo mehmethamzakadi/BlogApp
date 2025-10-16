@@ -10,14 +10,9 @@ namespace BlogApp.API.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public abstract class BaseApiController : ControllerBase
+    public abstract class BaseApiController(IMediator mediator) : ControllerBase
     {
-        protected BaseApiController(IMediator mediator)
-        {
-            Mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
-        }
-
-        protected IMediator Mediator { get; }
+        protected IMediator Mediator { get; } = mediator ?? throw new ArgumentNullException(nameof(mediator));
 
         [ApiExplorerSettings(IgnoreApi = true)]
         public IActionResult GetResponse<T>(IDataResult<T> result)

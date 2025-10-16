@@ -14,13 +14,6 @@ public sealed class GetPaginatedListByDynamicCategoriesQueryHandler(
 {
     public async Task<PaginatedListResponse<GetPaginatedListByDynamicCategoriesResponse>> Handle(GetPaginatedListByDynamicCategoriesQuery request, CancellationToken cancellationToken)
     {
-        //Paginate<Category> categories = await categoryRepository.GetPaginatedListAsync(
-        //index: request.DataGridRequest.PaginatedRequest.PageIndex,
-        //size: request.DataGridRequest.PaginatedRequest.PageSize,
-        //orderBy: x => x.OrderByDescending(x => x.CreatedDate),
-        //cancellationToken: cancellationToken
-        //);
-
         Paginate<Category> categoriesDynamic = await categoryRepository.GetPaginatedListByDynamicAsync(
         dynamic: request.DataGridRequest.DynamicQuery,
         index: request.DataGridRequest.PaginatedRequest.PageIndex,

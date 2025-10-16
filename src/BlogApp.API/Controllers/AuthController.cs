@@ -7,13 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.API.Controllers
 {
-    public class AuthController : BaseApiController
+    public class AuthController(IMediator mediator) : BaseApiController(mediator)
     {
-        public AuthController(IMediator mediator)
-            : base(mediator)
-        {
-        }
-
         [AllowAnonymous]
         [HttpPost]
         [Route("Login")]

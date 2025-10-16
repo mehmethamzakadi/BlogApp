@@ -5,6 +5,7 @@ using BlogApp.Application.Features.Posts.Commands.Delete;
 using BlogApp.Application.Features.Posts.Commands.Update;
 using BlogApp.Application.Features.Posts.Queries.GetById;
 using BlogApp.Application.Features.Posts.Queries.GetList;
+using BlogApp.Application.Features.Posts.Queries.GetPaginatedListByDynamic;
 using BlogApp.Domain.Common.Paging;
 using BlogApp.Domain.Common.Responses;
 using BlogApp.Domain.Entities;
@@ -19,6 +20,8 @@ public sealed class PostProfile : Profile
         CreateMap<Post, UpdatePostCommand>().ReverseMap();
         CreateMap<Post, DeletePostCommand>().ReverseMap();
 
+        CreateMap<Post, GetPaginatedListByDynamicPostsResponse>().ReverseMap();
+
         CreateMap<Post, GetListPostResponse>()
             .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : string.Empty));
 
@@ -26,6 +29,7 @@ public sealed class PostProfile : Profile
             .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : string.Empty))
             .ReverseMap();
 
-        CreateMap<Paginate<Post>, PaginatedListResponse<GetListPostResponse>>().ReverseMap();
+        CreateMap<Paginate<Post>, PaginatedListResponse<GetPaginatedListByDynamicPostsResponse>>().ReverseMap();
+
     }
 }

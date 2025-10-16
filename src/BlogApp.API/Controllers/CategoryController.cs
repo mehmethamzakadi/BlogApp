@@ -11,13 +11,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.API.Controllers
 {
-    public class CategoryController : BaseApiController
+    public class CategoryController(IMediator mediator) : BaseApiController(mediator)
     {
-        public CategoryController(IMediator mediator)
-            : base(mediator)
-        {
-        }
-
         [HttpPost("GetPaginatedList")]
         public async Task<IActionResult> GetPaginatedListByDynamic(DataGridRequest dataGridRequest)
         {

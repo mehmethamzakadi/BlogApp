@@ -1,8 +1,9 @@
+using BlogApp.Application.Features.Categories.Queries.GetPaginatedListByDynamic;
 using BlogApp.Application.Features.Posts.Commands.Create;
 using BlogApp.Application.Features.Posts.Commands.Delete;
 using BlogApp.Application.Features.Posts.Commands.Update;
 using BlogApp.Application.Features.Posts.Queries.GetById;
-using BlogApp.Application.Features.Posts.Queries.GetList;
+using BlogApp.Application.Features.Posts.Queries.GetPaginatedListByDynamic;
 using BlogApp.Domain.Common.Requests;
 using BlogApp.Domain.Common.Responses;
 using MediatR;
@@ -10,17 +11,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.API.Controllers
 {
-    public class PostController : BaseApiController
+    public class PostController(IMediator mediator) : BaseApiController(mediator)
     {
-        public PostController(IMediator mediator)
-            : base(mediator)
-        {
-        }
-
         [HttpPost("GetPaginatedList")]
-        public async Task<IActionResult> GetPaginatedListByDynamic([FromQuery] PaginatedRequest pageRequest)
+        public async Task<IActionResult> GetPaginatedListByDynamic(DataGridRequest dataGridRequest)
         {
-            PaginatedListResponse<GetListPostResponse> response = await Mediator.Send(new GetListPostQuery(pageRequest));
+            PaginatedListResponse<GetPaginatedListByDynamicPostsResponse> response = await Mediator.Send(new GetPaginatedListByDynamicPostsQuery(dataGridRequest));
             return Ok(response);
         }
 

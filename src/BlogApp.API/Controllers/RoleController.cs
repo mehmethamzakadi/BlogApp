@@ -10,13 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.API.Controllers
 {
-    public class RoleController : BaseApiController
+    public class RoleController(IMediator mediator) : BaseApiController(mediator)
     {
-        public RoleController(IMediator mediator)
-            : base(mediator)
-        {
-        }
-
         [HttpPost("GetPaginatedList")]
         public async Task<IActionResult> GetPaginatedListByDynamic([FromQuery] PaginatedRequest pageRequest)
         {

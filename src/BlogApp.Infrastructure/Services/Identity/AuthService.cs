@@ -13,11 +13,7 @@ public sealed class AuthService(UserManager<AppUser> userManager, SignInManager<
 {
     public async Task<IDataResult<LoginResponse>> LoginAsync(string email, string password)
     {
-        AppUser? user = await userManager.FindByEmailAsync(email);
-        if (user is null)
-        {
-            throw new AuthenticationErrorException();
-        }
+        AppUser? user = await userManager.FindByEmailAsync(email) ?? throw new AuthenticationErrorException();
 
         var signInResult = await signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: true);
         if (signInResult.IsLockedOut)
