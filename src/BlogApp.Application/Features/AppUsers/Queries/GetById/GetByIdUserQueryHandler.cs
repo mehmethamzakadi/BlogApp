@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+using System.Threading;
+using System.Threading.Tasks;
+using AutoMapper;
 using BlogApp.Application.Abstractions.Identity;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
@@ -10,13 +12,17 @@ public sealed class GetByIdUserQueryHandler(
     IUserService userManager,
     IMapper mapper) : IRequestHandler<GetByIdAppUserQuery, IDataResult<GetByIdAppUserResponse>>
 {
-    public async Task<IDataResult<GetByIdAppUserResponse>> Handle(GetByIdAppUserQuery request, CancellationToken cancellationToken)
+    public Task<IDataResult<GetByIdAppUserResponse>> Handle(GetByIdAppUserQuery request, CancellationToken cancellationToken)
     {
         AppUser? user = userManager.FindById(request.Id);
         if (user is null)
-            return new ErrorDataResult<GetByIdAppUserResponse>("Kullanıcı bulunamadı!");
+        {
+            IDataResult<GetByIdAppUserResponse> errorResult = new ErrorDataResult<GetByIdAppUserResponse>("Kullanıcı bulunamadı!");
+            return Task.FromResult(errorResult);
+        }
 
-        var userResponse = mapper.Map<GetByIdAppUserResponse>(user);
-        return new SuccessDataResult<GetByIdAppUserResponse>(userResponse);
+        GetByIdAppUserResponse userResponse = mapper.Map<GetByIdAppUserResponse>(user);
+        IDataResult<GetByIdAppUserResponse> successResult = new SuccessDataResult<GetByIdAppUserResponse>(userResponse);
+        return Task.FromResult(successResult);
     }
 }
