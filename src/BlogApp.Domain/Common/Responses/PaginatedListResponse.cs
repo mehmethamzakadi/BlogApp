@@ -5,11 +5,11 @@ namespace BlogApp.Domain.Common.Responses;
 
 public class PaginatedListResponse<T> : BasePageableModel
 {
-    private IList<T> _items;
+    private IList<T> _items = new List<T>();
 
     public IList<T> Items
     {
-        get => _items ??= new List<T>();
-        set => _items = value;
+        get => _items;
+        set => _items = value ?? new List<T>();
     }
 }
