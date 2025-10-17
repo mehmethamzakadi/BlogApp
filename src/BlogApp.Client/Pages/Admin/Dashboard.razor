@@ -1,6 +1,4 @@
 @page "/admin/dashboard"
-@using Radzen
-@using Radzen.Blazor
 
 <PageTitle>Admin Dashboard</PageTitle>
 
@@ -40,17 +38,19 @@
             </RadzenChart>
         </RadzenCard>
     </RadzenColumn>
+
     <RadzenColumn Size="12" SizeLg="5">
         <RadzenCard>
             <div class="card-header">
                 <h3>Son Yorumlar</h3>
                 <span class="card-subtitle">Topluluk tarafından yapılan en yeni yorumlar</span>
             </div>
+
             <div style="max-height: 320px; overflow-y: auto;">
                 @foreach (var comment in recentComments)
                 {
-                    <div class="comment-item">
-                        <RadzenAvatar Text="@comment.AuthorInitials" Style="margin-right: 0.75rem;" />
+                    <div class="comment-item" style="display:flex;align-items:flex-start;margin-bottom:1rem;">
+                        <div class="avatar-circle">@comment.AuthorInitials</div>
                         <div>
                             <strong>@comment.Author</strong>
                             <div class="comment-meta">@comment.PostTitle · @comment.CreatedAt.ToString("dd MMM")</div>
@@ -62,6 +62,8 @@
         </RadzenCard>
     </RadzenColumn>
 </RadzenRow>
+
+
 
 <RadzenCard Style="margin-top: 1.5rem;">
     <div class="card-header">

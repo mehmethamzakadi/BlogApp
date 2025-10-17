@@ -1,6 +1,4 @@
 @page "/"
-@using Radzen
-@using Radzen.Blazor
 
 <PageTitle>Blog Ana Sayfası</PageTitle>
 
@@ -27,20 +25,26 @@
                     <span class="category-tag">@post.Category</span>
                     <span class="post-date">@post.PublishedAt.ToString("dd MMM yyyy")</span>
                 </div>
+
                 <h3>@post.Title</h3>
                 <p>@post.Summary</p>
-                <div class="post-footer">
-                    <RadzenAvatar Text="@post.AuthorInitials" Style="margin-right: 0.5rem;" />
+
+                <div class="post-footer" style="display:flex;align-items:center;">
+                    @* <RadzenImage Path="@post.AuthorInitials" Style="width:40px;height:40px;border-radius:50%;margin-right:0.5rem;" /> *@
+                    <div class="avatar-circle">@post.AuthorInitials</div>
                     <div>
                         <strong>@post.Author</strong>
                         <div class="post-meta">@post.ReadTime dakika okuma</div>
                     </div>
-                    <RadzenButton Icon="chevron_right" Text="Devamını Oku" ButtonStyle="ButtonStyle.Primary" Style="margin-left:auto" />
+                    <RadzenButton Icon="chevron_right" Text="Devamını Oku"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Style="margin-left:auto" />
                 </div>
             </RadzenCard>
         </RadzenColumn>
     }
 </RadzenRow>
+
 
 @code {
     private string? searchTerm;
