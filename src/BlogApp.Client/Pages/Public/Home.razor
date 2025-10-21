@@ -1,0 +1,82 @@
+@page "/"
+
+<PageTitle>Blog Ana Sayfası</PageTitle>
+
+<RadzenRow Class="page-header">
+    <RadzenColumn Size="12" SizeMd="8">
+        <h1>Blog Yazıları</h1>
+        <p>Topluluğumuzdan en yeni güncellemeleri ve içerikleri keşfedin.</p>
+    </RadzenColumn>
+    <RadzenColumn Size="12" SizeMd="4" Class="filter-panel">
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="8px" AlignItems="AlignItems.Stretch">
+            <RadzenTextBox Placeholder="Arama" Style="flex: 1 1 auto;" @bind-Value="searchTerm" />
+            <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Light" />
+        </RadzenStack>
+        <RadzenDropDown Data="@categories" TextProperty="Name" ValueProperty="Id" @bind-Value="selectedCategory" Style="width: 100%; margin-top: 0.75rem;" Placeholder="Kategori seçin" />
+    </RadzenColumn>
+</RadzenRow>
+
+<RadzenRow Style="margin-top: 1rem;" ColumnGap="16px" RowGap="16px">
+    @foreach (var post in FilteredPosts)
+    {
+        <RadzenColumn Size="12" SizeMd="6" SizeLg="4">
+            <RadzenCard Style="height: 100%;">
+                <div class="post-header">
+                    <span class="category-tag">@post.Category</span>
+                    <span class="post-date">@post.PublishedAt.ToString("dd MMM yyyy")</span>
+                </div>
+
+                <h3>@post.Title</h3>
+                <p>@post.Summary</p>
+
+                <div class="post-footer" style="display:flex;align-items:center;">
+                    @* <RadzenImage Path="@post.AuthorInitials" Style="width:40px;height:40px;border-radius:50%;margin-right:0.5rem;" /> *@
+                    <div class="avatar-circle">@post.AuthorInitials</div>
+                    <div>
+                        <strong>@post.Author</strong>
+                        <div class="post-meta">@post.ReadTime dakika okuma</div>
+                    </div>
+                    <RadzenButton Icon="chevron_right" Text="Devamını Oku"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Style="margin-left:auto" />
+                </div>
+            </RadzenCard>
+        </RadzenColumn>
+    }
+</RadzenRow>
+
+
+@code {
+    private string? searchTerm;
+    private int? selectedCategory;
+
+    private readonly List<CategoryOption> categories = new()
+    {
+        new CategoryOption(0, "Tümü"),
+        new CategoryOption(1, "Teknoloji"),
+        new CategoryOption(2, "Ürün"),
+        new CategoryOption(3, "Topluluk"),
+        new CategoryOption(4, "Duyurular"),
+    };
+
+    private readonly List<BlogPostSummary> posts = new()
+    {
+        new BlogPostSummary("Blazor ile Modern Web", "Blazor Server mimarisi ve component tabanlı geliştirme pratiklerine dair ipuçları.", "Teknoloji", DateTime.Today.AddDays(-2), "Ayşe Yılmaz", 6),
+        new BlogPostSummary("Yeni Özellik: Radzen Bileşenleri", "Admin panelimizde Radzen bileşenlerini nasıl kullandığımızı anlattığımız yazımıza göz atın.", "Duyurular", DateTime.Today.AddDays(-5), "Mehmet Kaya", 4),
+        new BlogPostSummary("Topluluk Buluşması", "Geçtiğimiz hafta düzenlediğimiz topluluk buluşmasının öne çıkan başlıkları burada.", "Topluluk", DateTime.Today.AddDays(-7), "Zeynep Demir", 3),
+        new BlogPostSummary("Yol Haritamız", "Önümüzdeki çeyrekte blogda paylaşacağımız içerikler ve ürün güncellemeleri.", "Ürün", DateTime.Today.AddDays(-10), "Caner Arslan", 5),
+        new BlogPostSummary("Performans İpuçları", "BlogApp API performansını artırmak için uyguladığımız optimizasyonlar.", "Teknoloji", DateTime.Today.AddDays(-12), "Elif Yüce", 7),
+        new BlogPostSummary("Başarı Hikayeleri", "BlogApp kullanıcılarının başarı hikayelerinden ilham verici örnekler.", "Topluluk", DateTime.Today.AddDays(-15), "Mert Öz", 4)
+    };
+
+    private IEnumerable<BlogPostSummary> FilteredPosts => posts
+        .Where(p => selectedCategory is null || selectedCategory == 0 || p.Category == categories.First(c => c.Id == selectedCategory).Name)
+        .Where(p => string.IsNullOrWhiteSpace(searchTerm) || p.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) || p.Summary.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+
+    private record CategoryOption(int Id, string Name);
+
+    private record BlogPostSummary(string Title, string Summary, string Category, DateTime PublishedAt, string Author, int ReadTime)
+    {
+        public string AuthorInitials => string.Join(string.Empty, Author.Split(' ').Select(n => n[0])).ToUpperInvariant();
+    }
+}

@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using BlogApp.Domain.Repositories;
 using MediatR;
 
@@ -7,16 +9,17 @@ namespace BlogApp.Application.Features.Categories.Queries.GetAll;
 public sealed class GetAllCategoriesQueryHandler(ICategoryRepository categoryRepository)
     : IRequestHandler<GetAllListCategoriesQuery, IQueryable>
 {
-    public async Task<IQueryable> Handle(GetAllListCategoriesQuery request, CancellationToken cancellationToken)
+    public Task<IQueryable> Handle(GetAllListCategoriesQuery request, CancellationToken cancellationToken)
     {
-        return categoryRepository
+        IQueryable query = categoryRepository
             .Query()
             .Where(x => x.IsDeleted == false)
-            .Select(x =>
-            new
+            .Select(x => new
             {
                 x.Id,
                 x.Name
             });
+
+        return Task.FromResult(query);
     }
 }
