@@ -21,7 +21,7 @@ services:
       rabbitmq:
         condition: service_healthy
       postgresdb:
-        condition: service_started
+        condition: service_healthy
       redis.cache:
         condition: service_started
 
@@ -34,6 +34,14 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-BlogAppDb}"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
 
   rabbitmq:
     image: rabbitmq:3-management
