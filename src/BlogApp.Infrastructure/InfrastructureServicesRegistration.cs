@@ -76,8 +76,16 @@ namespace BlogApp.Infrastructure
                 };
             });
 
-            services.AddStackExchangeRedisCache(options =>
-                options.Configuration = configuration.GetConnectionString("RedisCache"));
+            var redisConnectionString = configuration.GetConnectionString("RedisCache");
+            if (!string.IsNullOrWhiteSpace(redisConnectionString))
+            {
+                services.AddStackExchangeRedisCache(options =>
+                    options.Configuration = redisConnectionString);
+            }
+            else
+            {
+                services.AddDistributedMemoryCache();
+            }
 
             services.AddMassTransit(x =>
             {
