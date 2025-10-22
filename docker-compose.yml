@@ -18,9 +18,12 @@ services:
     expose:
       - "8080"
     depends_on:
-      - postgresdb
-      - rabbitmq
-      - redis.cache
+      rabbitmq:
+        condition: service_healthy
+      postgresdb:
+        condition: service_started
+      redis.cache:
+        condition: service_started
 
   postgresdb:
     container_name: postgresdb
@@ -40,8 +43,16 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-blogapp}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-supersecret}
     volumes:
-      - rabbitmq_data:/var/lib/rabbitmq/mnesia/
+      - rabbitmq_data:/var/lib/rabbitmq       # ✅ düzeltilmiş (mnesia alt dizini kaldırıldı)
+    ports:
+      - "15672:15672"  # Yönetim paneli (opsiyonel)
+      - "5672:5672"    # AMQP bağlantısı
     restart: always
+    healthcheck:       # ✅ RabbitMQ tamamen hazır olmadan API başlamasın
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   redis.cache:
     image: redis:latest
