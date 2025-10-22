@@ -35,7 +35,7 @@ Projeyi Docker Compose ile hem lokal geliştirme ortamında hem de Ubuntu tabanl
    ```bash
    docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
    ```
-2. API konteyneri yalnızca dahili Docker ağı üzerinden 8080 portunu dinler. Nginx reverse proxy konteyneri 80 numaralı portu dış dünyaya açarak trafiği API servisine yönlendirir.
+2. API konteyneri yalnızca dahili Docker ağı üzerinden 8080 portunu dinler. Nginx reverse proxy konteyneri host üzerindeki 8080 numaralı portu dış dünyaya açarak gelen trafiği container içindeki 80 numaralı porta ve oradan API servisine yönlendirir.
 3. Servisleri durdurmak için aşağıdaki komutu kullanabilirsiniz:
    ```bash
    docker compose -f docker-compose.yml -f docker-compose.prod.yml down
