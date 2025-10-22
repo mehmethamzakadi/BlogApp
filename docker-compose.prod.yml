@@ -6,11 +6,20 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://0.0.0.0:8080
 
-  postgresdb:
+   postgresdb:
+    container_name: postgresdb
+    image: postgres:14
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-BlogAppDb}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: always
+    networks:
+      - blogapp_net
 
   nginx:
     image: nginx:1.25
