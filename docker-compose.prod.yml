@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  blogapp.api:
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://0.0.0.0:8080
+
+  postgresdb:
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-BlogAppDb}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+
+  nginx:
+    image: nginx:1.25
+    depends_on:
+      - blogapp.api
+    volumes:
+      - ./deploy/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "80:80"
