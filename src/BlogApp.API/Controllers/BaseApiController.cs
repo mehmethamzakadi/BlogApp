@@ -9,7 +9,7 @@ namespace BlogApp.API.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     public abstract class BaseApiController(IMediator mediator) : ControllerBase
     {
         protected IMediator Mediator { get; } = mediator ?? throw new ArgumentNullException(nameof(mediator));
