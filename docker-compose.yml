@@ -12,6 +12,9 @@ services:
       dockerfile: src/BlogApp.API/Dockerfile
     environment:
       <<: *app-environment
+      RabbitMQOptions__HostName: rabbitmq
+      RabbitMQOptions__UserName: ${RABBITMQ_DEFAULT_USER:-blogapp}
+      RabbitMQOptions__Password: ${RABBITMQ_DEFAULT_PASS:-supersecret}
     expose:
       - "8080"
     depends_on:
@@ -33,6 +36,9 @@ services:
     image: rabbitmq:3-management
     container_name: rabbitmq
     hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-blogapp}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-supersecret}
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq/mnesia/
     restart: always
