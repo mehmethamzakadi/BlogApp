@@ -7,30 +7,27 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.API.Controllers
 {
+    [AllowAnonymous]
     public class AuthController(IMediator mediator) : BaseApiController(mediator)
     {
-        [AllowAnonymous]
         [HttpPost]
-        [Route("Login")]
         public async Task<IActionResult> Login([FromBody] LoginCommand userLogin)
         {
             var result = await Mediator.Send(userLogin);
             return result.Success ? Ok(result) : Unauthorized(result);
         }
 
-        [AllowAnonymous]
-        [HttpPost("PasswordReset")]
-        public async Task<IActionResult> PasswordReset(PasswordResetCommand passwordResetCommandRequest)
+        [HttpPost]
+        public async Task<IActionResult> PasswordReset([FromBody] PasswordResetCommand passwordResetCommandRequest)
         {
             var response = await Mediator.Send(passwordResetCommandRequest);
             return Ok(response);
         }
 
-        [AllowAnonymous]
-        [HttpPost("PasswordVerify")]
-        public async Task<IActionResult> PasswordVerify(PasswordVerifyCommand passwordVerifyCommandRequestCommandRequest)
+        [HttpPost]
+        public async Task<IActionResult> PasswordVerify([FromBody] PasswordVerifyCommand passwordVerifyCommandRequest)
         {
-            var response = await Mediator.Send(passwordVerifyCommandRequestCommandRequest);
+            var response = await Mediator.Send(passwordVerifyCommandRequest);
             return Ok(response);
         }
     }
