@@ -10,13 +10,18 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://0.0.0.0:8080
       ConnectionStrings__DefaultConnection: "Host=postgresdb;Port=5432;Database=${POSTGRES_DB:-BlogAppDb};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}"
+      RabbitMQOptions__HostName: rabbitmq
+      RabbitMQOptions__UserName: ${RABBITMQ_DEFAULT_USER:-blogapp}
+      RabbitMQOptions__Password: ${RABBITMQ_DEFAULT_PASS:-supersecret}
     depends_on:
       postgresdb:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     networks:
       - blogapp_net
     ports:
-      - "8080:8080"  # API doğrudan test etmek istersen
+      - "8080:8080"
     restart: always
 
   postgresdb:
@@ -41,6 +46,25 @@ services:
       start_period: 5s
     networks:
       - blogapp_net
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-blogapp}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-supersecret}
+    ports:
+      - "15672:15672" # web arayüzü (isteğe bağlı)
+      - "5672:5672"   # uygulama bağlantısı
+    restart: always
+    networks:
+      - blogapp_net
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   nginx:
     image: nginx:1.25
