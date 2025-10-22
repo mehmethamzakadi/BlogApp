@@ -45,4 +45,14 @@ Projeyi Docker Compose ile hem lokal geliştirme ortamında hem de Ubuntu tabanl
 - `ASPNETCORE_ENVIRONMENT`: Varsayılan olarak üretimde `Production`, lokal ortamda `Development` olarak ayarlanır.
 - `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`: PostgreSQL veritabanı ayarlarını özelleştirmek için kullanılabilir.
 
-Kalıcı veriler Docker volume'ları (`postgres_data`, `rabbitmq_data`, `redis_data`) üzerinde saklanır.
+Kalıcı veriler Docker volume'ları (`postgres_data`, `rabbitmq_data`, `redis_data`) üzerinde saklanır. RabbitMQ için kullanıcı
+adını/şifresini değiştirirseniz mevcut `rabbitmq_data` volume'unda eski kimlik bilgileri tutulmaya devam ettiği için konteyner yeni
+değerlerle açıldığında oturum açma sorunları yaşayabilirsiniz. Bu durumda servisleri durdurduktan sonra volume'u silerek yeniden
+oluşturmalısınız:
+
+```bash
+docker compose down
+docker volume rm blogapp_rabbitmq_data
+```
+
+Ardından konteynerleri tekrar ayağa kaldırdığınızda (`docker compose up --build`) volume otomatik olarak yeniden oluşturulur.
