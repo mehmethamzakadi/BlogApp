@@ -6,7 +6,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://0.0.0.0:8080
 
-  postgresdb:
+   postgresdb:
     container_name: postgresdb
     image: postgres:14
     environment:
@@ -16,7 +16,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5435:5432"   # dış dünya 5435, container içinde yine 5432
     restart: always
     networks:
       - blogapp_net
