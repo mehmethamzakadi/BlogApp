@@ -286,6 +286,11 @@ FakesAssemblies/
 .ntvs_analysis.dat
 node_modules/
 
+# Frontend client artifacts
+clients/blogapp-client/node_modules/
+clients/blogapp-client/dist/
+clients/blogapp-client/.env
+
 # Visual Studio 6 build log
 *.plg
 
