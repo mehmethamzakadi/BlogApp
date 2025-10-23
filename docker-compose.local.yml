@@ -1,24 +1,96 @@
-version: "3.8"
+﻿version: "3.8"
 
 services:
+  # 🔹 API Servisi
   blogapp.api:
+    build:
+      context: .
+      dockerfile: src/BlogApp.API/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://0.0.0.0:8080
+      ConnectionStrings__BlogAppPostgreConnectionString: "Host=postgresdb;Port=5432;Database=BlogAppDb;Username=postgres;Password=postgres;Include Error Detail=true;"
+      RedisCache: "redis_server:6379"
+      RabbitMQOptions__HostName: rabbitmq
+      RabbitMQOptions__UserName: blogapp
+      RabbitMQOptions__Password: supersecret
+    depends_on:
+      postgresdb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis.cache:
+        condition: service_started
     ports:
       - "5000:8080"
     volumes:
       - ./src/BlogApp.API/appsettings.Development.json:/app/appsettings.Development.json:ro
+    networks:
+      - blogapp_net
 
+  # 🔹 PostgreSQL Veritabanı
   postgresdb:
+    container_name: postgresdb
+    image: postgres:14
+    environment:
+      POSTGRES_DB: BlogAppDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
-      - "5435:5432"
+      - "5435:5432"   # dış dünyadan erişim (opsiyonel)
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "PGPASSWORD=$${POSTGRES_PASSWORD} pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} -h localhost"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    networks:
+      - blogapp_net
 
+  # 🔹 RabbitMQ
   rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: blogapp
+      RABBITMQ_DEFAULT_PASS: supersecret
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "15672:15672"  # yönetim paneli
+      - "5672:5672"    # uygulama bağlantısı
+    restart: always
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - blogapp_net
 
+  # 🔹 Redis Cache
   redis.cache:
+    image: redis:latest
+    container_name: redis_server
+    restart: always
+    volumes:
+      - redis_data:/data
     ports:
       - "6379:6379"
+    networks:
+      - blogapp_net
+
+# 🔹 Kalıcı Volume'lar
+volumes:
+  postgres_data:
+  redis_data:
+
+# 🔹 Ortak Network
+networks:
+  blogapp_net:
+    driver: bridge
