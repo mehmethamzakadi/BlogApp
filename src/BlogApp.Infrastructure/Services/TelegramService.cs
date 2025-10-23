@@ -35,6 +35,6 @@ public sealed class TelegramService : ITelegramService
             throw new InvalidOperationException("Geçerli bir Telegram chat kimliği bulunamadı.");
         }
 
-        await telegramBotClient.SendTextMessageAsync(new ChatId(targetChatId), message);
+        await telegramBotClient.SendMessage(new ChatId(targetChatId), message);
     }
 }

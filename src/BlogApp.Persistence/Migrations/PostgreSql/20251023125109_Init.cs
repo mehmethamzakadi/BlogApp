@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -60,7 +61,7 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreatedById = table.Column<int>(type: "integer", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -79,11 +80,11 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     Title = table.Column<string>(type: "text", nullable: true),
                     Size = table.Column<int>(type: "integer", nullable: true),
-                    Path = table.Column<string>(type: "text", nullable: false),
-                    Type = table.Column<string>(type: "text", nullable: false),
+                    Path = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    Type = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreatedById = table.Column<int>(type: "integer", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -240,8 +241,8 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ParentId = table.Column<int>(type: "integer", nullable: true),
                     PostId = table.Column<int>(type: "integer", nullable: false),
-                    Content = table.Column<string>(type: "text", nullable: false),
-                    CommentOwnerMail = table.Column<string>(type: "text", nullable: false),
+                    Content = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false),
+                    CommentOwnerMail = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     IsPublished = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreatedById = table.Column<int>(type: "integer", nullable: false),
@@ -278,19 +279,19 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
             migrationBuilder.InsertData(
                 table: "AppUsers",
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[] { 1, 0, "5e74411c-518b-443f-8d88-424ccf9b6c9a", "admin@admin.com", false, false, null, "ADMIN@ADMIN.COM", "ADMIN", "AQAAAAIAAYagAAAAEHyHIr+DIynum8T0TLn9uLydW/CMydhyVQYYKUpR55u6Uxn0gh+oAXqG6dzb3Gv2Kg==", null, false, "eb1567b4-3727-4658-8c76-087c9ff64f38", false, "admin" });
+                values: new object[] { 1, 0, "1672f0b2-59e2-415a-85b4-d6f6fab5822f", "admin@admin.com", false, false, null, "ADMIN@ADMIN.COM", "ADMIN", "AQAAAAIAAYagAAAAELXUiIGO7GfYK3MC4umGHdy8FEuUoA18YCMOlW+Zjzsk93Ajnj7G6Zlw8Cm2gEFc6w==", null, false, "b1a1d25f-8a7e-4e9a-bc55-8dca5bfa1234", false, "admin" });
 
             migrationBuilder.InsertData(
                 table: "Categories",
                 columns: new[] { "Id", "CreatedById", "CreatedDate", "DeletedDate", "IsDeleted", "Name", "UpdatedById", "UpdatedDate" },
                 values: new object[,]
                 {
-                    { 1, 1, new DateTime(2024, 10, 7, 10, 7, 29, 47, DateTimeKind.Utc).AddTicks(3644), null, false, "ASP .NET Core", null, null },
-                    { 2, 1, new DateTime(2024, 10, 7, 10, 7, 29, 47, DateTimeKind.Utc).AddTicks(3657), null, false, "Entity Framework Core", null, null },
-                    { 3, 1, new DateTime(2024, 10, 7, 10, 7, 29, 47, DateTimeKind.Utc).AddTicks(3659), null, false, "Docker", null, null },
-                    { 4, 1, new DateTime(2024, 10, 7, 10, 7, 29, 47, DateTimeKind.Utc).AddTicks(3660), null, false, "RabbitMQ", null, null },
-                    { 5, 1, new DateTime(2024, 10, 7, 10, 7, 29, 47, DateTimeKind.Utc).AddTicks(3662), null, false, "Redis", null, null },
-                    { 6, 1, new DateTime(2024, 10, 7, 10, 7, 29, 47, DateTimeKind.Utc).AddTicks(3663), null, false, "Clean Architecture", null, null }
+                    { 1, 1, new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc), null, false, "ASP .NET Core", null, null },
+                    { 2, 1, new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc), null, false, "Entity Framework Core", null, null },
+                    { 3, 1, new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc), null, false, "Docker", null, null },
+                    { 4, 1, new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc), null, false, "RabbitMQ", null, null },
+                    { 5, 1, new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc), null, false, "Redis", null, null },
+                    { 6, 1, new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc), null, false, "Clean Architecture", null, null }
                 });
 
             migrationBuilder.InsertData(

@@ -10,7 +10,7 @@ namespace BlogApp.Persistence.Seeds
     {
         public void Configure(EntityTypeBuilder<Category> builder)
         {
-            var createdDate = new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            var createdDate = new DateTime(2025, 10, 23);
 
             builder.HasData(
                 new Category

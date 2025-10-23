@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BlogApp.Persistence.Migrations.PostgreSql
 {
     [DbContext(typeof(BlogAppDbContext))]
-    [Migration("20241007100729_Init")]
+    [Migration("20251023125109_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.8")
+                .HasAnnotation("ProductVersion", "9.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -163,15 +163,15 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         {
                             Id = 1,
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "5e74411c-518b-443f-8d88-424ccf9b6c9a",
+                            ConcurrencyStamp = "1672f0b2-59e2-415a-85b4-d6f6fab5822f",
                             Email = "admin@admin.com",
                             EmailConfirmed = false,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@ADMIN.COM",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEHyHIr+DIynum8T0TLn9uLydW/CMydhyVQYYKUpR55u6Uxn0gh+oAXqG6dzb3Gv2Kg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAELXUiIGO7GfYK3MC4umGHdy8FEuUoA18YCMOlW+Zjzsk93Ajnj7G6Zlw8Cm2gEFc6w==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "eb1567b4-3727-4658-8c76-087c9ff64f38",
+                            SecurityStamp = "b1a1d25f-8a7e-4e9a-bc55-8dca5bfa1234",
                             TwoFactorEnabled = false,
                             UserName = "admin"
                         });
@@ -289,7 +289,8 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<int?>("UpdatedById")
                         .HasColumnType("integer");
@@ -306,7 +307,7 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         {
                             Id = 1,
                             CreatedById = 1,
-                            CreatedDate = new DateTime(2024, 10, 7, 10, 7, 29, 47, DateTimeKind.Utc).AddTicks(3644),
+                            CreatedDate = new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc),
                             IsDeleted = false,
                             Name = "ASP .NET Core"
                         },
@@ -314,7 +315,7 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         {
                             Id = 2,
                             CreatedById = 1,
-                            CreatedDate = new DateTime(2024, 10, 7, 10, 7, 29, 47, DateTimeKind.Utc).AddTicks(3657),
+                            CreatedDate = new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc),
                             IsDeleted = false,
                             Name = "Entity Framework Core"
                         },
@@ -322,7 +323,7 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         {
                             Id = 3,
                             CreatedById = 1,
-                            CreatedDate = new DateTime(2024, 10, 7, 10, 7, 29, 47, DateTimeKind.Utc).AddTicks(3659),
+                            CreatedDate = new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc),
                             IsDeleted = false,
                             Name = "Docker"
                         },
@@ -330,7 +331,7 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         {
                             Id = 4,
                             CreatedById = 1,
-                            CreatedDate = new DateTime(2024, 10, 7, 10, 7, 29, 47, DateTimeKind.Utc).AddTicks(3660),
+                            CreatedDate = new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc),
                             IsDeleted = false,
                             Name = "RabbitMQ"
                         },
@@ -338,7 +339,7 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         {
                             Id = 5,
                             CreatedById = 1,
-                            CreatedDate = new DateTime(2024, 10, 7, 10, 7, 29, 47, DateTimeKind.Utc).AddTicks(3662),
+                            CreatedDate = new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc),
                             IsDeleted = false,
                             Name = "Redis"
                         },
@@ -346,7 +347,7 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         {
                             Id = 6,
                             CreatedById = 1,
-                            CreatedDate = new DateTime(2024, 10, 7, 10, 7, 29, 47, DateTimeKind.Utc).AddTicks(3663),
+                            CreatedDate = new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc),
                             IsDeleted = false,
                             Name = "Clean Architecture"
                         });
@@ -362,11 +363,13 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
 
                     b.Property<string>("CommentOwnerMail")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
 
                     b.Property<int>("CreatedById")
                         .HasColumnType("integer");
@@ -426,11 +429,13 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Path")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<int?>("Size")
                         .HasColumnType("integer");
@@ -440,7 +445,8 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<int?>("UpdatedById")
                         .HasColumnType("integer");

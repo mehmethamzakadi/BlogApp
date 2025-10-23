@@ -3,6 +3,7 @@ using BlogApp.Persistence.Contexts;
 using BlogApp.Persistence.DatabaseInitializer;
 using BlogApp.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,7 +15,14 @@ public static class PersistenceServicesRegistration
     {
         #region DbContext Configuration
         var postgreSqlConnectionString = configuration.GetConnectionString("BlogAppPostgreConnectionString");
-        services.AddDbContext<BlogAppDbContext>(options => options.UseNpgsql(postgreSqlConnectionString));
+
+        services.AddDbContextPool<BlogAppDbContext>((sp, options) =>
+        {
+            options.UseNpgsql(postgreSqlConnectionString);
+            options.EnableServiceProviderCaching();
+            options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning)); // ✅
+        });
+
         #endregion
 
         services.AddScoped<ICategoryRepository, CategoryRepository>();

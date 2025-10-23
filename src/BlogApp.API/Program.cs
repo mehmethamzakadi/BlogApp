@@ -1,12 +1,9 @@
 
-using System;
 using BlogApp.Application;
 using BlogApp.Infrastructure;
 using BlogApp.Persistence;
 using BlogApp.Persistence.DatabaseInitializer;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OpenApi.Models;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 var corsPolicyName = "_dynamicCorsPolicy";
@@ -36,32 +33,9 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddSwaggerGen(option =>
+builder.Services.AddOpenApi(options =>
 {
-    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Blog App API", Version = "v1" });
-    option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        In = ParameterLocation.Header,
-        Description = "Please enter a valid token",
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        BearerFormat = "JWT",
-        Scheme = "Bearer"
-    });
-    option.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer",
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
+    options.OpenApiVersion = Microsoft.OpenApi.OpenApiSpecVersion.OpenApi3_0;
 });
 
 var isDevelopment = builder.Environment.IsDevelopment();
@@ -86,8 +60,14 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.MapOpenApi();  // OpenAPI dokümaný için endpoint
+
+    app.MapScalarApiReference(options =>
+    {
+        options.Title = "BlogApp API";
+        options.Theme = ScalarTheme.DeepSpace; // Ýstersen Light, Solar, DeepSpace vs.
+    });
+
 }
 
 await using AsyncServiceScope scope = app.Services.CreateAsyncScope();

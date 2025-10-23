@@ -20,7 +20,7 @@ namespace BlogApp.Persistence.Seeds
                 LockoutEnabled = false,
                 EmailConfirmed = false,
                 TwoFactorEnabled = false,
-                SecurityStamp = Guid.NewGuid().ToString()
+                SecurityStamp = Guid.Parse("b1a1d25f-8a7e-4e9a-bc55-8dca5bfa1234").ToString(),
             };
 
             var password = new PasswordHasher<AppUser>();
