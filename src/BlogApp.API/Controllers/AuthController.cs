@@ -10,21 +10,21 @@ namespace BlogApp.API.Controllers
     [AllowAnonymous]
     public class AuthController(IMediator mediator) : BaseApiController(mediator)
     {
-        [HttpPost]
+        [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginCommand userLogin)
         {
             var result = await Mediator.Send(userLogin);
             return result.Success ? Ok(result) : Unauthorized(result);
         }
 
-        [HttpPost]
+        [HttpPost("PasswordReset")]
         public async Task<IActionResult> PasswordReset([FromBody] PasswordResetCommand passwordResetCommandRequest)
         {
             var response = await Mediator.Send(passwordResetCommandRequest);
             return Ok(response);
         }
 
-        [HttpPost]
+        [HttpPost("PasswordVerify")]
         public async Task<IActionResult> PasswordVerify([FromBody] PasswordVerifyCommand passwordVerifyCommandRequest)
         {
             var response = await Mediator.Send(passwordVerifyCommandRequest);

@@ -22,7 +22,7 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("GetById/{id}")]
         public async Task<IActionResult> GetById(int id)
         {
             var response = await Mediator.Send(new GetByIdAppUserQuery(id));
@@ -30,14 +30,14 @@ namespace BlogApp.API.Controllers
         }
 
         [HttpPost("Create")]
-        public async Task<IActionResult> Post(CreateAppUserCommand user)
+        public async Task<IActionResult> Create(CreateAppUserCommand user)
         {
             var response = await Mediator.Send(user);
             return Ok(response);
         }
 
         [HttpPut("Update")]
-        public async Task<IActionResult> Put(UpdateAppUserCommand updateUser)
+        public async Task<IActionResult> Update(UpdateAppUserCommand updateUser)
         {
             var response = await Mediator.Send(updateUser);
             return Ok(response);

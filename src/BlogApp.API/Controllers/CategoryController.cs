@@ -27,7 +27,7 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("GetById/{id}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
             var response = await Mediator.Send(new GetByIdCategoryQuery(id));
@@ -35,14 +35,14 @@ namespace BlogApp.API.Controllers
         }
 
         [HttpPost("Create")]
-        public async Task<IActionResult> Post(CreateCategoryCommand category)
+        public async Task<IActionResult> Create(CreateCategoryCommand category)
         {
             var response = await Mediator.Send(category);
             return Ok(response);
         }
 
         [HttpPut("Update")]
-        public async Task<IActionResult> Put([FromBody] UpdateCategoryCommand category)
+        public async Task<IActionResult> Update([FromBody] UpdateCategoryCommand category)
         {
             var response = await Mediator.Send(category);
             return Ok(response);
