@@ -11,9 +11,11 @@ export interface AuthUser {
 interface AuthState {
   user: AuthUser | null;
   token: string | null;
+  hydrated: boolean;
   login: (payload: { user: AuthUser; token: string }) => void;
   logout: () => void;
   isAuthenticated: () => boolean;
+  setHydrated: (hydrated: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -21,11 +23,15 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       user: null,
       token: null,
+      hydrated: typeof window === 'undefined',
       login: ({ user, token }) => {
         set({ user, token });
       },
       logout: () => {
         set({ user: null, token: null });
+      },
+      setHydrated: (hydrated) => {
+        set({ hydrated });
       },
       isAuthenticated: () => {
         const state = get();
@@ -44,7 +50,11 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'blogapp-auth',
-      storage: createJSONStorage(() => localStorage)
+      storage: createJSONStorage(() => localStorage),
+      partialize: ({ user, token }) => ({ user, token }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHydrated(true);
+      }
     }
   )
 );
