@@ -226,13 +226,13 @@ export function PostDetailPage() {
         </motion.section>
 
         <motion.section
-          className="grid gap-10 lg:grid-cols-[minmax(0,1.75fr)_minmax(320px,0.75fr)] xl:grid-cols-[minmax(0,1.95fr)_minmax(360px,0.65fr)] 2xl:grid-cols-[minmax(0,2.1fr)_minmax(380px,0.6fr)]"
+          className="grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(320px,0.85fr)] xl:grid-cols-[minmax(0,2.2fr)_minmax(360px,0.7fr)] 2xl:grid-cols-[minmax(0,2.35fr)_minmax(380px,0.65fr)]"
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.4 }}
         >
           <div className="overflow-hidden rounded-[2.75rem] border border-border/70 bg-card/95 shadow-xl backdrop-blur">
-            <div className="bg-background/95 px-6 py-10 sm:px-12 sm:py-14 lg:px-20 lg:py-[5.5rem] xl:px-24">
+            <div className="bg-background/95 px-6 py-10 sm:px-10 sm:py-14 lg:px-16 lg:py-[5rem] xl:px-20">
               <div className="mb-10 flex flex-wrap items-center justify-center gap-3 text-sm text-muted-foreground/80 sm:justify-between">
                 <Badge variant="secondary" className="rounded-full bg-secondary/80 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-secondary-foreground">
                   {categoryLabel}
