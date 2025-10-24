@@ -8,27 +8,19 @@ import {
 } from '@tanstack/react-table';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { PlusCircle, Pencil, Trash2, ArrowUpDown } from 'lucide-react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
 import {
   fetchPosts,
-  updatePost,
   deletePost
 } from '../../features/posts/api';
 import {
   Post,
-  PostFormValues,
   PostManagementListResponse,
   PostTableFilters
 } from '../../features/posts/types';
-import { postSchema, PostFormSchema } from '../../features/posts/schema';
-import { getAllCategories } from '../../features/categories/api';
-import { Category } from '../../features/categories/types';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
-import { Label } from '../../components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../../components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
@@ -44,11 +36,9 @@ const fieldMap: Record<string, string> = {
   isPublished: 'IsPublished'
 };
 
-const textareaBaseClasses =
-  'flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50';
-
 export function PostsPage() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [filters, setFilters] = useState<PostTableFilters>({
     pageIndex: 0,
     pageSize: 10
@@ -57,13 +47,7 @@ export function PostsPage() {
   const [sorting, setSorting] = useState<SortingState>([
     { id: 'title', desc: false }
   ]);
-  const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [postToDelete, setPostToDelete] = useState<Post | null>(null);
-
-  const categoriesQuery = useQuery<Category[]>({
-    queryKey: ['categories-options'],
-    queryFn: getAllCategories
-  });
 
   const postsQuery = useQuery<PostManagementListResponse>({
     queryKey: [
@@ -185,7 +169,7 @@ export function PostsPage() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setEditingPost(row.original)}
+              onClick={() => navigate(`/admin/posts/${row.original.id}/edit`)}
               aria-label="Düzenle"
             >
               <Pencil className="h-4 w-4" />
@@ -202,7 +186,7 @@ export function PostsPage() {
         )
       }
     ],
-    []
+    [navigate, setPostToDelete]
   );
 
   const table = useReactTable({
@@ -214,22 +198,6 @@ export function PostsPage() {
     onSortingChange: setSorting,
     manualSorting: true,
     getCoreRowModel: getCoreRowModel()
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: (values: PostFormValues) =>
-      editingPost ? updatePost(editingPost.id, values) : Promise.reject(),
-    onSuccess: (result) => {
-      if (!result.success) {
-        toast.error(result.message || 'Gönderi güncellenemedi');
-        return;
-      }
-      toast.success(result.message || 'Gönderi güncellendi');
-      setEditingPost(null);
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
-      queryClient.invalidateQueries({ queryKey: ['posts', 'published'] });
-    },
-    onError: (error) => handleApiError(error, 'Gönderi güncellenemedi')
   });
 
   const deleteMutation = useMutation({
@@ -264,50 +232,6 @@ export function PostsPage() {
       pageIndex: 0
     }));
   };
-
-  const formMethods = useForm<PostFormSchema>({
-    resolver: zodResolver(postSchema),
-    defaultValues: {
-      title: '',
-      summary: '',
-      body: '',
-      thumbnail: '',
-      isPublished: false,
-      categoryId: 0
-    }
-  });
-
-  const defaultFormValues = useMemo(
-    () => ({
-      title: '',
-      summary: '',
-      body: '',
-      thumbnail: '',
-      isPublished: false,
-      categoryId: categoriesQuery.data?.[0]?.id ?? 0
-    }),
-    [categoriesQuery.data]
-  );
-
-  useEffect(() => {
-    if (editingPost) {
-      formMethods.reset({
-        title: editingPost.title,
-        summary: editingPost.summary,
-        body: editingPost.body,
-        thumbnail: editingPost.thumbnail ?? '',
-        isPublished: editingPost.isPublished,
-        categoryId: editingPost.categoryId
-      });
-    }
-  }, [editingPost, formMethods]);
-
-  const onSubmit = formMethods.handleSubmit(async (values) => {
-    if (editingPost) {
-      await updateMutation.mutateAsync(values);
-    }
-    formMethods.reset(defaultFormValues);
-  });
 
   const totalPages = postsQuery.data?.pages ?? 0;
   const currentPage = postsQuery.data?.index ?? filters.pageIndex;
@@ -410,104 +334,6 @@ export function PostsPage() {
           </div>
         </CardContent>
       </Card>
-
-      <Dialog open={!!editingPost} onOpenChange={(open) => !open && setEditingPost(null)}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Gönderiyi Düzenle</DialogTitle>
-            <DialogDescription>Seçili gönderinin detaylarını güncelleyin.</DialogDescription>
-          </DialogHeader>
-          <form id="edit-post-form" onSubmit={onSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-post-title">Başlık</Label>
-              <Input
-                id="edit-post-title"
-                placeholder="Gönderi başlığı"
-                {...formMethods.register('title')}
-              />
-              {formMethods.formState.errors.title && (
-                <p className="text-sm text-destructive">{formMethods.formState.errors.title.message}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-post-summary">Özet</Label>
-              <textarea
-                id="edit-post-summary"
-                placeholder="Gönderinin kısa özeti"
-                className={cn(textareaBaseClasses, 'min-h-[100px]')}
-                {...formMethods.register('summary')}
-              />
-              {formMethods.formState.errors.summary && (
-                <p className="text-sm text-destructive">{formMethods.formState.errors.summary.message}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-post-body">İçerik</Label>
-              <textarea
-                id="edit-post-body"
-                placeholder="Gönderi içeriğini yazın"
-                className={cn(textareaBaseClasses, 'min-h-[180px]')}
-                {...formMethods.register('body')}
-              />
-              {formMethods.formState.errors.body && (
-                <p className="text-sm text-destructive">{formMethods.formState.errors.body.message}</p>
-              )}
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="edit-post-category">Kategori</Label>
-                <select
-                  id="edit-post-category"
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  {...formMethods.register('categoryId', { valueAsNumber: true })}
-                >
-                  <option value={0} disabled>
-                    Kategori seçin
-                  </option>
-                  {categoriesQuery.data?.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-                {formMethods.formState.errors.categoryId && (
-                  <p className="text-sm text-destructive">{formMethods.formState.errors.categoryId.message}</p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-post-thumbnail">Küçük Görsel URL</Label>
-                <Input
-                  id="edit-post-thumbnail"
-                  placeholder="https://..."
-                  {...formMethods.register('thumbnail')}
-                />
-                {formMethods.formState.errors.thumbnail && (
-                  <p className="text-sm text-destructive">{formMethods.formState.errors.thumbnail.message}</p>
-                )}
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                id="edit-post-isPublished"
-                type="checkbox"
-                className="h-4 w-4 rounded border border-input"
-                {...formMethods.register('isPublished')}
-              />
-              <Label htmlFor="edit-post-isPublished" className="text-sm font-medium">
-                Gönderiyi yayınla
-              </Label>
-            </div>
-          </form>
-          <DialogFooter className="gap-2">
-            <Button type="button" variant="ghost" onClick={() => setEditingPost(null)}>
-              İptal
-            </Button>
-            <Button type="submit" form="edit-post-form" disabled={updateMutation.isPending}>
-              {updateMutation.isPending ? 'Güncelleniyor...' : 'Güncelle'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       <Dialog open={!!postToDelete} onOpenChange={(open) => !open && setPostToDelete(null)}>
         <DialogContent>
