@@ -7,6 +7,7 @@ import { AdminLayout } from '../components/layout/admin-layout';
 import { DashboardPage } from '../pages/admin/dashboard-page';
 import { CategoriesPage } from '../pages/admin/categories-page';
 import { PostsPage } from '../pages/admin/posts-page';
+import { CreatePostPage } from '../pages/admin/create-post-page';
 
 export const router = createBrowserRouter([
   {
@@ -46,6 +47,10 @@ export const router = createBrowserRouter([
       {
         path: 'posts',
         element: <PostsPage />
+      },
+      {
+        path: 'posts/new',
+        element: <CreatePostPage />
       }
     ]
   },

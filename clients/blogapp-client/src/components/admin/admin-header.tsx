@@ -1,4 +1,5 @@
-import { Menu, SunMoon } from 'lucide-react';
+import { Home, LogOut, Menu, SunMoon, UserCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '../ui/button';
 import { useAuth } from '../../hooks/use-auth';
@@ -27,15 +28,30 @@ export function AdminHeader({ onToggleSidebar, isCollapsed }: AdminHeaderProps) 
         </span>
       </div>
       <div className="flex items-center gap-3">
+        <Button variant="ghost" size="icon" asChild className="sm:hidden">
+          <Link to="/">
+            <Home className="h-5 w-5" />
+            <span className="sr-only">Anasayfaya Dön</span>
+          </Link>
+        </Button>
+        <Button variant="outline" size="sm" asChild className="hidden sm:flex">
+          <Link to="/">Anasayfaya Dön</Link>
+        </Button>
         <Button variant="ghost" size="icon">
           <SunMoon className="h-5 w-5" />
           <span className="sr-only">Tema Değiştir</span>
         </Button>
-        <div className="flex flex-col items-end text-sm">
-          <span className="font-medium">{user?.userName}</span>
-          <button className="text-xs text-muted-foreground hover:text-primary" onClick={logout}>
-            Çıkış Yap
-          </button>
+        <div className="flex items-center gap-2 rounded-full border bg-muted/40 px-3 py-1.5 text-sm shadow-sm">
+          <UserCircle className="h-5 w-5 text-primary" />
+          <span className="font-medium text-foreground">{user?.userName}</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={logout}
+            className="-mr-2 h-7 rounded-full border px-2 text-xs"
+          >
+            <LogOut className="mr-1 h-3.5 w-3.5" /> Çıkış Yap
+          </Button>
         </div>
       </div>
     </motion.header>
