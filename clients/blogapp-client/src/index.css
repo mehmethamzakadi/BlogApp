@@ -57,7 +57,7 @@ html, body, #root {
 
 @layer components {
   .blog-content {
-    @apply mx-auto max-w-3xl text-balance text-lg leading-relaxed text-muted-foreground;
+    @apply mx-auto max-w-4xl text-balance text-xl leading-relaxed text-muted-foreground;
   }
 
   .blog-content > * + * {
@@ -90,7 +90,7 @@ html, body, #root {
   }
 
   .blog-content p {
-    @apply text-lg leading-[1.8] text-muted-foreground/95;
+    @apply text-xl leading-[1.85] text-muted-foreground/90;
   }
 
   .blog-content strong {
@@ -107,7 +107,7 @@ html, body, #root {
 
   .blog-content ul,
   .blog-content ol {
-    @apply ml-6 space-y-3 text-lg leading-relaxed;
+    @apply ml-6 space-y-3 text-xl leading-relaxed;
   }
 
   .blog-content ul {
