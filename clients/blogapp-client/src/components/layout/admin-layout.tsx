@@ -1,11 +1,17 @@
-import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { AdminSidebar } from '../admin/sidebar';
 import { AdminHeader } from '../admin/admin-header';
+import { ScrollToTopButton } from '../ui/scroll-to-top-button';
 
 export function AdminLayout() {
   const [collapsed, setCollapsed] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [location.pathname, location.search]);
 
   return (
     <div className="flex min-h-screen bg-muted/30">
@@ -24,6 +30,7 @@ export function AdminLayout() {
           <Outlet />
         </motion.main>
       </div>
+      <ScrollToTopButton />
     </div>
   );
 }
