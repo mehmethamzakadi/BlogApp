@@ -8,6 +8,32 @@ import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
 import { sanitizeHtml } from '../../lib/sanitize-html';
 
+const HTML_TAG_REGEX = /<\/?[a-z][^>]*>/i;
+
+function convertPlainTextToHtml(text: string): string {
+  const paragraphs = text
+    .replace(/\r\n/g, '\n')
+    .split(/\n\s*\n/g)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+
+  if (paragraphs.length === 0) {
+    return '';
+  }
+
+  const escapeHtml = (value: string) =>
+    value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+
+  return paragraphs
+    .map((paragraph) => `<p>${escapeHtml(paragraph).replace(/\n/g, '<br />')}</p>`)
+    .join('');
+}
+
 export function PostDetailPage() {
   const { postId } = useParams();
   const numericId = Number(postId);
@@ -28,7 +54,15 @@ export function PostDetailPage() {
       return '';
     }
 
-    return sanitizeHtml(post.body);
+    const trimmedBody = post.body.trim();
+
+    if (!trimmedBody) {
+      return '';
+    }
+
+    const content = HTML_TAG_REGEX.test(trimmedBody) ? post.body : convertPlainTextToHtml(post.body);
+
+    return sanitizeHtml(content);
   }, [post?.body]);
 
   if (!isValidId) {
