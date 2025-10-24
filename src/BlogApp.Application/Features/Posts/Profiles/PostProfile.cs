@@ -30,6 +30,7 @@ public sealed class PostProfile : Profile
             .ReverseMap();
 
         CreateMap<Paginate<Post>, PaginatedListResponse<GetPaginatedListByDynamicPostsResponse>>().ReverseMap();
+        CreateMap<Paginate<Post>, PaginatedListResponse<GetListPostResponse>>().ReverseMap();
 
     }
 }
