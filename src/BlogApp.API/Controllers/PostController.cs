@@ -48,10 +48,12 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
+        [AllowAnonymous]
         [HttpGet("GetById/{id}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            var response = await Mediator.Send(new GetByIdPostQuery(id));
+            bool includeUnpublished = User.Identity?.IsAuthenticated == true;
+            var response = await Mediator.Send(new GetByIdPostQuery(id, includeUnpublished));
             return Ok(response);
         }
 

@@ -10,7 +10,10 @@ public sealed class GetPostByIdQueryHandler(IPostRepository postRepository, IMap
 {
     public async Task<IDataResult<GetByIdPostResponse>> Handle(GetByIdPostQuery request, CancellationToken cancellationToken)
     {
-        Post? post = await postRepository.GetAsync(predicate: b => b.Id == request.Id, cancellationToken: cancellationToken);
+        Post? post = await postRepository.GetAsync(
+            predicate: b => b.Id == request.Id && (request.IncludeUnpublished || b.IsPublished),
+            cancellationToken: cancellationToken
+        );
         if (post is null)
             return new ErrorDataResult<GetByIdPostResponse>("Post bilgisi bulunamadı.");
 
