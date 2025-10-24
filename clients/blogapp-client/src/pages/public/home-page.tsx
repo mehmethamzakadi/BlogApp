@@ -6,8 +6,10 @@ import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
 
 export function HomePage() {
+  const publishedPostsQueryKey = ['posts', 'published', { pageIndex: 0, pageSize: 9 }] as const;
+
   const { data, isLoading, isError } = useQuery({
-    queryKey: [],
+    queryKey: publishedPostsQueryKey,
     queryFn: () => fetchPublishedPosts(0, 9)
   });
 
