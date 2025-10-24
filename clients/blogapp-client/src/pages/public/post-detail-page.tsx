@@ -131,7 +131,7 @@ export function PostDetailPage() {
     return (
       <div className="space-y-10">
         <div className="h-72 animate-pulse rounded-[2.75rem] bg-muted/40" />
-        <div className="mx-auto max-w-3xl space-y-4">
+        <div className="mx-auto max-w-4xl space-y-4">
           {Array.from({ length: 6 }).map((_, index) => (
             <div key={index} className="h-5 animate-pulse rounded-full bg-muted/50" />
           ))}
@@ -159,7 +159,7 @@ export function PostDetailPage() {
   const nextPostUrl = nextPost ? `/posts/${nextPost.id}` : '';
 
   return (
-    <div className="relative isolate bg-background pb-24">
+    <div className="relative min-h-screen bg-background overflow-x-hidden">
       <div
         className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(120%_120%_at_50%_0%,hsl(var(--primary)_/_0.08)_0%,transparent_55%)]"
         aria-hidden
@@ -173,7 +173,8 @@ export function PostDetailPage() {
         aria-hidden
       />
 
-      <div className="mx-auto flex w-full max-w-none flex-col gap-16 px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20">
+      <div className="w-full px-6 py-8 sm:px-10 md:px-16 lg:px-20 xl:px-28 2xl:px-32">
+        <div className="flex w-full flex-col gap-16">
         <Button variant="ghost" className="group mt-4 h-auto w-fit px-0 text-sm" asChild>
           <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground transition-colors group-hover:text-primary">
             <ArrowLeft className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-1" />
@@ -181,50 +182,61 @@ export function PostDetailPage() {
           </Link>
         </Button>
 
+        {/* Hero Section - Full Width */}
         <motion.section
-          className="relative overflow-hidden rounded-[3rem] border border-border/40 bg-background/95 shadow-xl shadow-primary/10"
+          className="relative overflow-hidden rounded-[3rem] border border-border/40 shadow-xl shadow-primary/10"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <div className="grid gap-12 px-6 py-14 sm:px-12 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,0.85fr)] lg:items-center lg:px-20 xl:grid-cols-[minmax(0,1.75fr)_minmax(0,0.8fr)] xl:px-24 2xl:grid-cols-[minmax(0,1.9fr)_minmax(0,0.75fr)] 2xl:px-28">
-            <div className="relative z-10 space-y-7 text-center lg:text-left">
-              <Badge className="mx-auto w-fit rounded-full bg-primary/80 px-4 py-1 text-xs uppercase tracking-wider text-primary-foreground shadow-sm lg:mx-0">
+          {/* Background Image with Overlay */}
+          {post.thumbnail ? (
+            <>
+              <div className="absolute inset-0">
+                <img 
+                  src={post.thumbnail} 
+                  alt={post.title} 
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-br from-background/95 via-background/90 to-background/85 backdrop-blur-sm" />
+            </>
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-secondary/15" />
+          )}
+
+          {/* Content */}
+          <div className="relative px-6 py-16 sm:px-12 sm:py-20 lg:px-20 lg:py-24 xl:px-24 xl:py-28 2xl:px-28 2xl:py-32">
+            <div className="mx-auto max-w-4xl space-y-8 text-center">
+              <Badge className="mx-auto w-fit rounded-full bg-primary/90 px-5 py-1.5 text-xs uppercase tracking-wider text-primary-foreground shadow-lg backdrop-blur-sm">
                 {categoryLabel}
               </Badge>
-              <h1 className="mx-auto max-w-3xl text-balance text-4xl font-semibold tracking-tight text-foreground sm:text-5xl lg:mx-0 lg:text-6xl">
+              
+              <h1 className="text-balance text-3xl font-bold tracking-tight text-foreground drop-shadow-sm sm:text-4xl lg:text-5xl xl:text-6xl">
                 {post.title}
               </h1>
-              <p className="mx-auto max-w-2xl text-lg text-muted-foreground/90 sm:text-xl lg:mx-0">{post.summary}</p>
-              <div className="flex flex-wrap items-center justify-center gap-3 text-sm text-muted-foreground/80 lg:justify-start">
-                <span className="inline-flex items-center gap-2 rounded-full bg-background/60 px-4 py-2 shadow-sm ring-1 ring-border/60">
+              
+              <p className="mx-auto max-w-3xl text-lg text-foreground/90 drop-shadow-sm sm:text-xl lg:text-2xl">
+                {post.summary}
+              </p>
+              
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-4 text-sm">
+                <span className="inline-flex items-center gap-2 rounded-full bg-background/70 px-5 py-2.5 font-medium text-foreground shadow-md backdrop-blur-md ring-1 ring-border/50">
                   <Calendar className="h-4 w-4" />
                   Yayınlanan makale
                 </span>
                 {readingInsights.wordCount > 0 && (
-                  <span className="inline-flex items-center gap-2 rounded-full bg-background/60 px-4 py-2 shadow-sm ring-1 ring-border/60">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-background/70 px-5 py-2.5 font-medium text-foreground shadow-md backdrop-blur-md ring-1 ring-border/50">
                     <Clock className="h-4 w-4" />
                     {readingInsights.readingMinutes} dakikalık okuma · {readingInsights.wordCount} kelime
                   </span>
                 )}
               </div>
             </div>
-
-            <div className="relative">
-              <div className="absolute inset-0 rounded-[3rem] bg-primary/12 opacity-70 blur-3xl" />
-              <div className="relative overflow-hidden rounded-[2.5rem] border border-border/50 bg-background shadow-2xl shadow-primary/15">
-                {post.thumbnail ? (
-                  <img src={post.thumbnail} alt={post.title} className="h-full w-full object-cover" />
-                ) : (
-                  <div className="flex h-full min-h-[260px] items-center justify-center bg-gradient-to-br from-primary/10 via-primary/5 to-secondary/15 p-10 text-center text-lg text-muted-foreground">
-                    Bu makale için görsel henüz eklenmedi.
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
         </motion.section>
 
+        {/* Main Content Section - Full Width */}
         <motion.section
           className="grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(320px,0.85fr)] xl:grid-cols-[minmax(0,2.2fr)_minmax(360px,0.7fr)] 2xl:grid-cols-[minmax(0,2.35fr)_minmax(380px,0.65fr)]"
           initial={{ opacity: 0, y: 24 }}
@@ -232,8 +244,8 @@ export function PostDetailPage() {
           transition={{ delay: 0.1, duration: 0.4 }}
         >
           <div className="overflow-hidden rounded-[2.75rem] border border-border/70 bg-card/95 shadow-xl backdrop-blur">
-            <div className="bg-background/95 px-6 py-10 sm:px-10 sm:py-14 lg:px-16 lg:py-[5rem] xl:px-20">
-              <div className="mb-10 flex flex-wrap items-center justify-center gap-3 text-sm text-muted-foreground/80 sm:justify-between">
+            <div className="bg-background/95 px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12 xl:px-10 xl:py-14">
+              <div className="mb-12 flex flex-wrap items-center justify-center gap-3 text-sm text-muted-foreground/80 sm:justify-between">
                 <Badge variant="secondary" className="rounded-full bg-secondary/80 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-secondary-foreground">
                   {categoryLabel}
                 </Badge>
@@ -325,6 +337,7 @@ export function PostDetailPage() {
           </aside>
         </motion.section>
 
+        {/* Post Navigation - Full Width */}
         <motion.nav
           className="rounded-[2.75rem] border border-border/50 bg-background/95 p-6 shadow-2xl shadow-primary/10 backdrop-blur"
           initial={{ opacity: 0, y: 24 }}
@@ -377,6 +390,7 @@ export function PostDetailPage() {
             )}
           </div>
         </motion.nav>
+        </div>
       </div>
     </div>
   );

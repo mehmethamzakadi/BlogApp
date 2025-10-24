@@ -38,24 +38,33 @@ export function HomePage() {
   const postItems = posts?.items ?? [];
 
   return (
-    <div className="space-y-16">
-      <section className="space-y-10" id="posts">
-        <div className="flex flex-wrap items-end justify-between gap-6">
-          <div className="space-y-2">
-            <h2 className="text-3xl font-semibold tracking-tight text-foreground">Öne çıkan yazılar</h2>
-            <p className="text-muted-foreground">
-              {activeCategory === null
-                ? 'Tüm kategorilerden en yeni içerikleri keşfedin.'
-                : `${activeCategoryName} kategorisindeki güncel gönderileri keşfedin.`}
-            </p>
-          </div>
-          <div className="flex items-center gap-3 text-sm text-muted-foreground">
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border/60 bg-background font-semibold text-foreground">
-              {posts?.count ?? 0}
-            </span>
-            toplam yayınlanmış yazı
-          </div>
-        </div>
+    <div className="relative min-h-screen bg-background">
+      {/* Background Effects */}
+      <div
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(120%_120%_at_50%_0%,hsl(var(--primary)_/_0.05)_0%,transparent_55%)]"
+        aria-hidden
+      />
+      
+      {/* Content Container */}
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="space-y-16">
+          <section className="space-y-10" id="posts">
+            <div className="flex flex-wrap items-end justify-between gap-6">
+              <div className="space-y-2">
+                <h2 className="text-3xl font-semibold tracking-tight text-foreground">Öne çıkan yazılar</h2>
+                <p className="text-muted-foreground">
+                  {activeCategory === null
+                    ? 'Tüm kategorilerden en yeni içerikleri keşfedin.'
+                    : `${activeCategoryName} kategorisindeki güncel gönderileri keşfedin.`}
+                </p>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border/60 bg-background font-semibold text-foreground">
+                  {posts?.count ?? 0}
+                </span>
+                toplam yayınlanmış yazı
+              </div>
+            </div>
 
         <div className="flex flex-wrap gap-3">
           {isCategoriesLoading
@@ -103,6 +112,8 @@ export function HomePage() {
           </div>
         )}
       </section>
+        </div>
+      </div>
     </div>
   );
 }
