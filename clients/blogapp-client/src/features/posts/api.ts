@@ -12,7 +12,7 @@ export async function fetchPublishedPosts(pageIndex = 0, pageSize = 6) {
       Filter: {
         Field: 'IsPublished',
         Operator: 'eq',
-        Value: true
+        Value: String(true)
       },
       Sort: [
         {

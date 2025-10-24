@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Separator } from '../../components/ui/separator';
@@ -36,7 +37,12 @@ export function DashboardPage() {
             BlogApp içeriklerinizi kolayca yönetin, yeni kategoriler oluşturun ve gönderilerinizi düzenleyin. Sağ menüden ilgili alanlara hızlıca ulaşabilirsiniz.
           </p>
         </div>
-        <Button size="lg">Yeni Gönderi Oluştur</Button>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Button size="lg">Yeni Gönderi Oluştur</Button>
+          <Button variant="outline" size="lg" asChild>
+            <Link to="/">Anasayfaya Dön</Link>
+          </Button>
+        </div>
       </motion.div>
 
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
