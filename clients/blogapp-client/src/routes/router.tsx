@@ -6,6 +6,7 @@ import { ProtectedRoute } from './protected-route';
 import { AdminLayout } from '../components/layout/admin-layout';
 import { DashboardPage } from '../pages/admin/dashboard-page';
 import { CategoriesPage } from '../pages/admin/categories-page';
+import { PostsPage } from '../pages/admin/posts-page';
 
 export const router = createBrowserRouter([
   {
@@ -41,6 +42,10 @@ export const router = createBrowserRouter([
       {
         path: 'categories',
         element: <CategoriesPage />
+      },
+      {
+        path: 'posts',
+        element: <PostsPage />
       }
     ]
   },
