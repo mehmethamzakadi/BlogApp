@@ -6,6 +6,33 @@ import { ArrowLeft } from 'lucide-react';
 import { getPostById } from '../../features/posts/api';
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
+import { sanitizeHtml } from '../../lib/sanitize-html';
+
+const HTML_TAG_REGEX = /<\/?[a-z][^>]*>/i;
+
+function convertPlainTextToHtml(text: string): string {
+  const paragraphs = text
+    .replace(/\r\n/g, '\n')
+    .split(/\n\s*\n/g)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+
+  if (paragraphs.length === 0) {
+    return '';
+  }
+
+  const escapeHtml = (value: string) =>
+    value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+
+  return paragraphs
+    .map((paragraph) => `<p>${escapeHtml(paragraph).replace(/\n/g, '<br />')}</p>`)
+    .join('');
+}
 
 export function PostDetailPage() {
   const { postId } = useParams();
@@ -22,15 +49,20 @@ export function PostDetailPage() {
     enabled: isValidId
   });
 
-  const contentBlocks = useMemo(() => {
+  const sanitizedContent = useMemo(() => {
     if (!post?.body) {
-      return [];
+      return '';
     }
 
-    return post.body
-      .split(/\n{2,}/)
-      .map((paragraph) => paragraph.trim())
-      .filter(Boolean);
+    const trimmedBody = post.body.trim();
+
+    if (!trimmedBody) {
+      return '';
+    }
+
+    const content = HTML_TAG_REGEX.test(trimmedBody) ? post.body : convertPlainTextToHtml(post.body);
+
+    return sanitizeHtml(content);
   }, [post?.body]);
 
   if (!isValidId) {
@@ -107,22 +139,20 @@ export function PostDetailPage() {
       </motion.section>
 
       <motion.section
-        className="mx-auto max-w-3xl space-y-8 rounded-3xl border border-border/60 bg-background/90 p-8 shadow-sm"
+        className="mx-auto w-full max-w-4xl overflow-hidden rounded-[2.5rem] border border-border/70 bg-card/95 shadow-lg backdrop-blur"
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.4 }}
       >
-        {contentBlocks.length > 0 ? (
-          contentBlocks.map((paragraph, index) => (
-            <p key={index} className="text-lg leading-relaxed text-muted-foreground">
-              {paragraph}
-            </p>
-          ))
-        ) : (
-          <p className="text-lg leading-relaxed text-muted-foreground">
-            {post.body}
-          </p>
-        )}
+        <div className="bg-gradient-to-b from-background/80 via-background to-background/95 px-6 py-10 sm:px-10 sm:py-12 lg:px-16 lg:py-16">
+          {sanitizedContent ? (
+            <article className="blog-content" dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
+          ) : (
+            <article className="blog-content">
+              <p>{post.summary ?? 'Bu gönderi için içerik bulunamadı.'}</p>
+            </article>
+          )}
+        </div>
       </motion.section>
     </div>
   );
