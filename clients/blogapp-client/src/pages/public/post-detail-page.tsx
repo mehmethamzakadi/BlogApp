@@ -159,21 +159,21 @@ export function PostDetailPage() {
   const nextPostUrl = nextPost ? `/posts/${nextPost.id}` : '';
 
   return (
-    <div className="relative isolate pb-24">
+    <div className="relative isolate bg-background pb-24">
       <div
-        className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-primary/10 via-background to-secondary/20"
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(120%_120%_at_50%_0%,hsl(var(--primary)_/_0.08)_0%,transparent_55%)]"
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute -left-24 top-24 -z-10 h-72 w-72 rounded-full bg-primary/15 blur-3xl sm:h-96 sm:w-96"
+        className="pointer-events-none absolute -left-32 top-32 -z-10 h-[28rem] w-[28rem] rounded-full bg-primary/10 blur-[140px]"
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute -right-20 top-1/2 -z-10 h-80 w-80 rounded-full bg-secondary/25 blur-3xl sm:h-[28rem] sm:w-[28rem]"
+        className="pointer-events-none absolute -right-24 top-1/3 -z-10 h-[30rem] w-[30rem] rounded-full bg-secondary/15 blur-[160px]"
         aria-hidden
       />
 
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-16 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-16 px-4 sm:px-6 lg:px-12 xl:px-16">
         <Button variant="ghost" className="group mt-4 h-auto w-fit px-0 text-sm" asChild>
           <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground transition-colors group-hover:text-primary">
             <ArrowLeft className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-1" />
@@ -182,12 +182,12 @@ export function PostDetailPage() {
         </Button>
 
         <motion.section
-          className="relative overflow-hidden rounded-[3rem] border border-border/40 bg-gradient-to-br from-primary/10 via-background to-secondary/20 shadow-xl shadow-primary/10"
+          className="relative overflow-hidden rounded-[3rem] border border-border/40 bg-background/95 shadow-xl shadow-primary/10"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <div className="grid gap-12 px-6 py-14 sm:px-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-center lg:px-20">
+          <div className="grid gap-12 px-6 py-14 sm:px-12 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.85fr)] lg:items-center lg:px-20 xl:px-24">
             <div className="relative z-10 space-y-7 text-center lg:text-left">
               <Badge className="mx-auto w-fit rounded-full bg-primary/80 px-4 py-1 text-xs uppercase tracking-wider text-primary-foreground shadow-sm lg:mx-0">
                 {categoryLabel}
@@ -211,8 +211,8 @@ export function PostDetailPage() {
             </div>
 
             <div className="relative">
-              <div className="absolute inset-0 rounded-[3rem] bg-gradient-to-br from-primary/25 via-primary/10 to-secondary/30 opacity-70 blur-3xl" />
-              <div className="relative overflow-hidden rounded-[2.5rem] border border-border/50 bg-background/80 shadow-2xl shadow-primary/10">
+              <div className="absolute inset-0 rounded-[3rem] bg-primary/12 opacity-70 blur-3xl" />
+              <div className="relative overflow-hidden rounded-[2.5rem] border border-border/50 bg-background shadow-2xl shadow-primary/15">
                 {post.thumbnail ? (
                   <img src={post.thumbnail} alt={post.title} className="h-full w-full object-cover" />
                 ) : (
@@ -226,13 +226,13 @@ export function PostDetailPage() {
         </motion.section>
 
         <motion.section
-          className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]"
+          className="grid gap-10 lg:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)] xl:grid-cols-[minmax(0,1.35fr)_minmax(360px,0.7fr)]"
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.4 }}
         >
           <div className="overflow-hidden rounded-[2.75rem] border border-border/70 bg-card/95 shadow-xl backdrop-blur">
-            <div className="bg-gradient-to-b from-background/95 via-background to-secondary/10 px-6 py-10 sm:px-12 sm:py-14 lg:px-16 lg:py-20">
+            <div className="bg-background/95 px-6 py-10 sm:px-12 sm:py-14 lg:px-20 lg:py-[5.5rem] xl:px-24">
               <div className="mb-10 flex flex-wrap items-center justify-center gap-3 text-sm text-muted-foreground/80 sm:justify-between">
                 <Badge variant="secondary" className="rounded-full bg-secondary/80 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-secondary-foreground">
                   {categoryLabel}
@@ -257,7 +257,7 @@ export function PostDetailPage() {
 
           <aside className="flex flex-col gap-6 lg:pt-4">
             <div className="sticky top-28 space-y-6">
-              <div className="overflow-hidden rounded-[2rem] border border-border/70 bg-gradient-to-br from-background to-secondary/20 p-8 shadow-lg">
+              <div className="overflow-hidden rounded-[2rem] border border-border/70 bg-background/95 p-8 shadow-lg">
                 <h2 className="text-xl font-semibold text-foreground">Makale bilgileri</h2>
                 <p className="mt-2 text-sm text-muted-foreground">
                   Göz yormayan renkler ve ferah bir düzen ile bu yazıyı keyifle okuyabilirsiniz.
@@ -284,7 +284,7 @@ export function PostDetailPage() {
                 </div>
               </div>
 
-              <div className="rounded-[2rem] border border-border/70 bg-gradient-to-br from-primary/10 via-primary/5 to-secondary/25 p-8 shadow-lg">
+              <div className="rounded-[2rem] border border-border/70 bg-background/95 p-8 shadow-lg">
                 <h3 className="text-lg font-semibold text-foreground">Yeni hikayeleri keşfet</h3>
                 <p className="mt-2 text-sm text-muted-foreground">
                   Okumaya ara verdiğinizde bile sonraki veya önceki yazıya kolayca geçebilirsiniz.
