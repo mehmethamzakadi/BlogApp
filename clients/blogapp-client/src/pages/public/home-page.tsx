@@ -41,81 +41,93 @@ export function HomePage() {
 
   const postItems = posts?.items ?? [];
   const featuredPost = postItems[0];
-  const spotlightPosts = postItems.slice(1, 3);
-  const remainingPosts = postItems.slice(3);
+  const curatedPosts = postItems.slice(1, 4);
+  const postsToDisplay = postItems.slice(featuredPost ? 1 : 0);
 
   return (
     <div className="space-y-16">
-      <section className="relative overflow-hidden rounded-[2.75rem] border border-border/50 bg-gradient-to-br from-primary/10 via-background to-secondary/10 shadow-2xl">
-        <div className="absolute -top-24 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-primary/20 blur-3xl" aria-hidden />
-        <div className="absolute -bottom-16 -right-12 h-72 w-72 rounded-full bg-secondary/20 blur-3xl" aria-hidden />
-        <div className="relative grid gap-12 px-8 py-14 sm:px-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,360px)] lg:px-16">
+      <section className="rounded-[2.75rem] border border-border/60 bg-background px-8 py-14 shadow-sm sm:px-12 lg:px-16">
+        <div className="grid gap-12 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
           <motion.div
             className="space-y-8"
-            initial={{ y: 12, opacity: 0 }}
+            initial={{ y: 16, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.4 }}
+            transition={{ duration: 0.45 }}
           >
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 py-1 text-sm font-medium text-primary">
-              <Sparkles className="h-4 w-4" />
-              Yeni nesil blog deneyimi
+            <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-muted/40 px-4 py-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <Sparkles className="h-4 w-4 text-primary" />
+              Sade blog deneyimi
             </div>
             <h1 className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-              İlham verici hikayelerle modern ve sade bir deneyim
+              Merakı yüksek okurlar için minimalist içerik kütüphanesi
             </h1>
-            <p className="max-w-2xl text-lg text-muted-foreground">
-              BlogApp topluluğu; teknoloji, tasarım ve üretkenlik alanlarındaki en güncel içerikleri buluşturur.
-              Kategoriler arasında dolaşarak merak ettiğiniz konuları keşfedin.
+            <p className="max-w-2xl text-base text-muted-foreground sm:text-lg">
+              Teknoloji, tasarım ve üretkenlik alanlarında seçtiğimiz yazıları tek bir temiz arayüzde buluşturuyoruz. Kategoriler arasında gezinin, ilham verici hikayelere hızlıca ulaşın.
             </p>
             <div className="flex flex-wrap items-center gap-4">
-              <Button size="lg" asChild>
+              <Button size="lg" variant="default" asChild>
                 <a href="#posts" className="inline-flex items-center gap-2">
-                  Yazıları Keşfet
+                  Yazıları keşfet
                   <ArrowRight className="h-4 w-4" />
                 </a>
               </Button>
-              <Badge variant="outline" className="rounded-full px-4 py-2 text-sm">
+              <Badge variant="outline" className="rounded-full px-4 py-2 text-sm font-medium">
                 Seçili kategori: {activeCategoryName}
               </Badge>
+            </div>
+            <div className="flex flex-wrap gap-10 text-sm text-muted-foreground">
+              <div>
+                <p className="text-3xl font-semibold text-foreground">{posts?.count ?? '—'}</p>
+                <p className="mt-1">yayınlanmış yazı</p>
+              </div>
+              <div>
+                <p className="text-3xl font-semibold text-foreground">{categories?.length ?? '—'}</p>
+                <p className="mt-1">kategorilik seçki</p>
+              </div>
             </div>
           </motion.div>
 
           <motion.div
-            className="relative overflow-hidden rounded-3xl border border-border/40 bg-background/80 p-8 shadow-lg backdrop-blur"
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1, duration: 0.4 }}
+            className="space-y-6 rounded-3xl border border-border/60 bg-muted/20 p-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1, duration: 0.45 }}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-secondary/30" aria-hidden />
-            <div className="relative z-10 flex h-full flex-col justify-between gap-6">
-              <div className="space-y-4">
-                <Badge className="w-fit rounded-full bg-primary/80 px-4 py-1 text-xs uppercase tracking-wider text-primary-foreground">
-                  Günün önerisi
-                </Badge>
-                <h2 className="text-2xl font-semibold text-foreground">
-                  {featuredPost ? featuredPost.title : 'Trend olan içerikler burada'}
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  {featuredPost
-                    ? featuredPost.summary
-                    : 'En çok ilgi gören yazıları keşfedin, yeni fikirler edinin ve üretkenliğinizi artırın.'}
-                </p>
-              </div>
-              <div>
-                {featuredPost ? (
-                  <Button variant="ghost" className="group h-auto px-0 text-primary" asChild>
-                    <Link to={`/posts/${featuredPost.id}`} className="inline-flex items-center gap-2">
-                      En popüler yazıyı incele
-                      <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                    </Link>
-                  </Button>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    Yeni içerikler eklendikçe bu alan sizin için öneriler sunar.
-                  </p>
-                )}
-              </div>
+            <div className="space-y-2">
+              <p className="text-xs font-medium uppercase tracking-[0.24em] text-muted-foreground">Günün seçkisi</p>
+              <h2 className="text-2xl font-semibold text-foreground">
+                {featuredPost ? featuredPost.title : 'Trend olan içerikler burada'}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {featuredPost
+                  ? featuredPost.summary
+                  : 'En çok ilgi gören yazıları keşfedin, yeni fikirler edinin ve üretkenliğinizi artırın.'}
+              </p>
+              {featuredPost && (
+                <Button variant="ghost" className="group h-auto px-0 text-primary" asChild>
+                  <Link to={`/posts/${featuredPost.id}`} className="inline-flex items-center gap-2 text-sm font-medium">
+                    Yazıyı aç
+                    <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                  </Link>
+                </Button>
+              )}
             </div>
+
+            {curatedPosts.length > 0 && (
+              <div className="space-y-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">Editörün notları</p>
+                <ul className="space-y-3">
+                  {curatedPosts.map((post) => (
+                    <li key={post.id} className="group rounded-2xl border border-transparent bg-background/60 p-4 transition-colors hover:border-border/80">
+                      <Link to={`/posts/${post.id}`} className="flex flex-col gap-2">
+                        <span className="text-sm font-medium text-muted-foreground">{post.categoryName}</span>
+                        <span className="text-base font-semibold text-foreground group-hover:text-primary">{post.title}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </motion.div>
         </div>
       </section>
@@ -148,8 +160,8 @@ export function HomePage() {
                 return (
                   <Button
                     key={option.id ?? 'all'}
-                    variant={isActive ? 'default' : 'outline'}
-                    className="rounded-full border border-border/60 bg-background/80 text-sm font-medium transition-colors hover:border-primary"
+                    variant={isActive ? 'default' : 'ghost'}
+                    className="rounded-full border border-border/60 bg-background/80 text-sm font-medium text-muted-foreground transition-colors hover:border-border/80 hover:bg-muted/40 hover:text-foreground"
                     type="button"
                     aria-pressed={isActive}
                     onClick={() => setActiveCategory(option.id)}
@@ -167,39 +179,20 @@ export function HomePage() {
         )}
 
         {isPostsLoading ? (
-          <div className="space-y-8">
-            <PostCardSkeleton variant="horizontal" />
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, index) => (
-                <PostCardSkeleton key={index} />
-              ))}
-            </div>
+          <div className="space-y-6">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <PostCardSkeleton key={index} variant="horizontal" />
+            ))}
           </div>
         ) : postItems.length === 0 ? (
           <div className="rounded-3xl border border-border/50 bg-muted/20 p-10 text-center text-muted-foreground">
             Bu kategoride henüz yayınlanmış gönderi bulunmuyor. Çok yakında yeni içerikler eklenecek!
           </div>
         ) : (
-          <div className="space-y-10">
-            {featuredPost && (
-              <PostCard key={featuredPost.id} post={featuredPost} variant="horizontal" />
-            )}
-
-            {spotlightPosts.length > 0 && (
-              <div className="grid gap-6 md:grid-cols-2">
-                {spotlightPosts.map((post) => (
-                  <PostCard key={post.id} post={post} variant="horizontal" />
-                ))}
-              </div>
-            )}
-
-            {remainingPosts.length > 0 && (
-              <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                {remainingPosts.map((post) => (
-                  <PostCard key={post.id} post={post} />
-                ))}
-              </div>
-            )}
+          <div className="space-y-6">
+            {postsToDisplay.map((post) => (
+              <PostCard key={post.id} post={post} variant="horizontal" />
+            ))}
           </div>
         )}
       </section>
