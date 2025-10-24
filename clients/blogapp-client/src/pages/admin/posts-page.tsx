@@ -251,6 +251,7 @@ export function PostsPage() {
       toast.success(result.message || 'Gönderi oluşturuldu');
       setIsCreateOpen(false);
       queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['posts', 'published'] });
     },
     onError: () => toast.error('Gönderi oluşturulurken bir hata oluştu')
   });
@@ -266,6 +267,7 @@ export function PostsPage() {
       toast.success(result.message || 'Gönderi güncellendi');
       setEditingPost(null);
       queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['posts', 'published'] });
     },
     onError: () => toast.error('Gönderi güncellenirken bir hata oluştu')
   });
@@ -280,6 +282,7 @@ export function PostsPage() {
       toast.success(result.message || 'Gönderi silindi');
       setPostToDelete(null);
       queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['posts', 'published'] });
     },
     onError: () => toast.error('Gönderi silinirken bir hata oluştu')
   });
