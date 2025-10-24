@@ -3,6 +3,7 @@ using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Repositories;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlogApp.Application.Features.Posts.Queries.GetById;
 
@@ -12,6 +13,7 @@ public sealed class GetPostByIdQueryHandler(IPostRepository postRepository, IMap
     {
         Post? post = await postRepository.GetAsync(
             predicate: b => b.Id == request.Id && (request.IncludeUnpublished || b.IsPublished),
+            include: x => x.Include(y => y.Category),
             cancellationToken: cancellationToken
         );
         if (post is null)
