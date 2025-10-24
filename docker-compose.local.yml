@@ -22,7 +22,7 @@ services:
       redis.cache:
         condition: service_started
     ports:
-      - "5050:8080"
+      - "6060:8080"
     volumes:
       - ./src/BlogApp.API/appsettings.Development.json:/app/appsettings.Development.json:ro
     networks:

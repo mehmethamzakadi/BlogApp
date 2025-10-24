@@ -1,4 +1,4 @@
-
+ï»¿
 using BlogApp.Application;
 using BlogApp.Infrastructure;
 using BlogApp.Persistence;
@@ -26,7 +26,8 @@ builder.Services.AddCors(options =>
     {
         policyBuilder.WithOrigins(allowedOrigins)
             .AllowAnyHeader()
-            .AllowAnyMethod();
+            .AllowAnyMethod()
+            .AllowCredentials(); // ðŸ”¥ React withCredentials iÃ§in gerekli
     });
 });
 
@@ -60,12 +61,12 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();  // OpenAPI dokümaný için endpoint
+    app.MapOpenApi();  // OpenAPI dokÃ¼manÄ± iÃ§in endpoint
 
     app.MapScalarApiReference(options =>
     {
         options.Title = "BlogApp API";
-        options.Theme = ScalarTheme.DeepSpace; // Ýstersen Light, Solar, DeepSpace vs.
+        options.Theme = ScalarTheme.DeepSpace; // Ä°stersen Light, Solar, DeepSpace vs.
     });
 
 }
