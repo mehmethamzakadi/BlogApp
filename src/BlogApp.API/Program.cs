@@ -1,8 +1,12 @@
 ﻿
+using System.Linq;
+using BlogApp.API.Middlewares;
 using BlogApp.Application;
+using BlogApp.Domain.Common.Results;
 using BlogApp.Infrastructure;
 using BlogApp.Persistence;
 using BlogApp.Persistence.DatabaseInitializer;
+using Microsoft.AspNetCore.Mvc;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,7 +35,31 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var errors = context.ModelState
+                .Where(state => state.Value?.Errors.Count > 0)
+                .SelectMany(state => state.Value!.Errors)
+                .Select(error => string.IsNullOrWhiteSpace(error.ErrorMessage)
+                    ? "Geçersiz veya eksik bilgiler mevcut."
+                    : error.ErrorMessage)
+                .Distinct()
+                .ToList();
+
+            var apiResult = new ApiResult<object>
+            {
+                Success = false,
+                Message = errors.FirstOrDefault() ?? "Geçersiz veya eksik bilgiler mevcut.",
+                InternalMessage = "ModelValidationError",
+                Errors = errors
+            };
+
+            return new BadRequestObjectResult(apiResult);
+        };
+    });
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddOpenApi(options =>
@@ -77,6 +105,9 @@ await dbInitializer.InitializeAsync(scope.ServiceProvider, app.Lifetime.Applicat
 await dbInitializer.EnsurePostgreSqlSerilogTableAsync(builder.Configuration, app.Lifetime.ApplicationStopping);
 
 //app.UseHttpsRedirection();
+
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseRouting();
 

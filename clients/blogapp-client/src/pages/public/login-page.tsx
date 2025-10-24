@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate, useLocation } from 'react-router-dom';
-import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { login } from '../../features/auth/api';
 import { useAuthStore } from '../../stores/auth-store';
@@ -11,6 +10,8 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
+import toast from 'react-hot-toast';
+import { handleApiError } from '../../lib/api-error';
 
 const loginSchema = z.object({
   email: z.string().email('Geçerli bir e-posta adresi girin'),
@@ -60,12 +61,7 @@ export function LoginPage() {
       navigate(redirectTo, { replace: true });
     },
     onError: (error: unknown) => {
-      if (error && typeof error === 'object' && 'response' in error) {
-        const message = (error as any).response?.data?.message ?? 'Giriş yapılamadı';
-        toast.error(message);
-      } else {
-        toast.error('Giriş yapılamadı');
-      }
+      handleApiError(error, 'Giriş yapılamadı');
     }
   });
 

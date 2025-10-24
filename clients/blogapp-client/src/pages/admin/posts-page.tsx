@@ -34,6 +34,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Separator } from '../../components/ui/separator';
 import { Badge } from '../../components/ui/badge';
+import { handleApiError } from '../../lib/api-error';
 import { cn } from '../../lib/utils';
 
 const fieldMap: Record<string, string> = {
@@ -228,7 +229,7 @@ export function PostsPage() {
       queryClient.invalidateQueries({ queryKey: ['posts'] });
       queryClient.invalidateQueries({ queryKey: ['posts', 'published'] });
     },
-    onError: () => toast.error('Gönderi güncellenirken bir hata oluştu')
+    onError: (error) => handleApiError(error, 'Gönderi güncellenemedi')
   });
 
   const deleteMutation = useMutation({
@@ -243,7 +244,7 @@ export function PostsPage() {
       queryClient.invalidateQueries({ queryKey: ['posts'] });
       queryClient.invalidateQueries({ queryKey: ['posts', 'published'] });
     },
-    onError: () => toast.error('Gönderi silinirken bir hata oluştu')
+    onError: (error) => handleApiError(error, 'Gönderi silinemedi')
   });
 
   const handlePageChange = (direction: 'prev' | 'next') => {

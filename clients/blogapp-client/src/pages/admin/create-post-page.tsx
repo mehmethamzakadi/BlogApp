@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
 import { RichTextEditor } from '../../components/editor/rich-text-editor';
 
 import { Button } from '../../components/ui/button';
@@ -13,9 +12,11 @@ import { Label } from '../../components/ui/label';
 import { createPost } from '../../features/posts/api';
 import { postSchema, PostFormSchema } from '../../features/posts/schema';
 import { PostFormValues } from '../../features/posts/types';
+import toast from 'react-hot-toast';
 import { getAllCategories } from '../../features/categories/api';
 import { Category } from '../../features/categories/types';
 import { useUnsavedChangesWarning } from '../../hooks/use-unsaved-changes-warning';
+import { handleApiError } from '../../lib/api-error';
 
 const textareaBaseClasses =
   'flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50';
@@ -92,7 +93,7 @@ export function CreatePostPage() {
       });
       navigate('/admin/posts');
     },
-    onError: () => toast.error('Gönderi oluşturulurken bir hata oluştu')
+    onError: (error) => handleApiError(error, 'Gönderi oluşturulamadı')
   });
 
   const shouldBlockNavigation = formState.isDirty && !hasSaved && !createMutation.isPending;
