@@ -3,4 +3,4 @@ node_modules
 dist
 dist-node
 .env
-*.local
+*.prod

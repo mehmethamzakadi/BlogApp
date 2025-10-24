@@ -32,6 +32,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-BlogAppDb}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5435:5432"   # dış dünyadan erişim (opsiyonel)
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -68,7 +70,8 @@ services:
     restart: always
     volumes:
       - redis_data:/data
-
+    ports:
+      - "6379:6379" 
 volumes:
   postgres_data:
   rabbitmq_data:
