@@ -45,7 +45,7 @@ export function PostsPage() {
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [sorting, setSorting] = useState<SortingState>([
-    { id: 'title', desc: false }
+    { id: 'id', desc: true }
   ]);
   const [postToDelete, setPostToDelete] = useState<Post | null>(null);
 
