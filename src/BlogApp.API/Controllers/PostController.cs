@@ -48,6 +48,7 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
+        [AllowAnonymous]
         [HttpGet("GetById/{id}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
