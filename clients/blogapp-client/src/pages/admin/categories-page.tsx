@@ -56,7 +56,7 @@ export function CategoriesPage() {
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [sorting, setSorting] = useState<SortingState>([
-    { id: 'name', desc: false }
+    { id: 'id', desc: true }
   ]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
