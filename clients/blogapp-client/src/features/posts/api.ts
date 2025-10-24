@@ -59,12 +59,29 @@ function buildPostDataGridPayload(filters: PostTableFilters) {
   return payload;
 }
 
-export async function fetchPublishedPosts(pageIndex = 0, pageSize = 6) {
-  const response = await api.get<PostListResponse>('/Post/GetList', {
-    params: {
-      PageIndex: pageIndex,
-      PageSize: pageSize
-    }
+export interface FetchPublishedPostsParams {
+  pageIndex?: number;
+  pageSize?: number;
+  categoryId?: number;
+}
+
+export async function fetchPublishedPosts({
+  pageIndex = 0,
+  pageSize = 6,
+  categoryId
+}: FetchPublishedPostsParams = {}) {
+  const endpoint = categoryId != null ? '/Post/GetListByCategoryId' : '/Post/GetList';
+  const params: Record<string, number> = {
+    PageIndex: pageIndex,
+    PageSize: pageSize
+  };
+
+  if (categoryId != null) {
+    params.CategoryId = categoryId;
+  }
+
+  const response = await api.get<PostListResponse>(endpoint, {
+    params
   });
 
   return normalizePaginatedResponse<PostSummary>(response.data);

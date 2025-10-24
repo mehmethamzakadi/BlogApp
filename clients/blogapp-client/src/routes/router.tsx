@@ -2,6 +2,7 @@ import { Navigate, createBrowserRouter } from 'react-router-dom';
 import { PublicLayout } from '../components/layout/public-layout';
 import { HomePage } from '../pages/public/home-page';
 import { LoginPage } from '../pages/public/login-page';
+import { PostDetailPage } from '../pages/public/post-detail-page';
 import { ProtectedRoute } from './protected-route';
 import { AdminLayout } from '../components/layout/admin-layout';
 import { DashboardPage } from '../pages/admin/dashboard-page';
@@ -21,6 +22,10 @@ export const router = createBrowserRouter([
       {
         path: 'login',
         element: <LoginPage />
+      },
+      {
+        path: 'posts/:postId',
+        element: <PostDetailPage />
       }
     ]
   },
