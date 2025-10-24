@@ -41,8 +41,7 @@ export function CreatePostPage() {
     queryKey: ['post', postId],
     queryFn: () => getPostById(postId!),
     enabled: isEditMode,
-    retry: false,
-    onError: (error) => handleApiError(error, 'Gönderi yüklenemedi')
+    retry: false
   });
 
   const defaultCategoryId = useMemo(() => categoriesQuery.data?.[0]?.id ?? 0, [categoriesQuery.data]);
@@ -82,20 +81,30 @@ export function CreatePostPage() {
     }
   }, [categoriesQuery.data, getValues, setValue]);
 
+  const postData = postQuery.data;
+
   useEffect(() => {
-    if (!isEditMode || !postQuery.data) {
+    if (!isEditMode || !postData) {
       return;
     }
 
     reset({
-      title: postQuery.data.title,
-      summary: postQuery.data.summary,
-      body: postQuery.data.body,
-      thumbnail: postQuery.data.thumbnail ?? '',
-      isPublished: postQuery.data.isPublished,
-      categoryId: postQuery.data.categoryId
+      title: postData.title,
+      summary: postData.summary,
+      body: postData.body,
+      thumbnail: postData.thumbnail ?? '',
+      isPublished: postData.isPublished,
+      categoryId: postData.categoryId
     });
-  }, [isEditMode, postQuery.data, reset]);
+  }, [isEditMode, postData, reset]);
+
+  useEffect(() => {
+    if (!isEditMode || !postQuery.isError) {
+      return;
+    }
+
+    handleApiError(postQuery.error, 'Gönderi yüklenemedi');
+  }, [isEditMode, postQuery.error, postQuery.isError]);
 
   const createMutation = useMutation({
     mutationFn: (values: PostFormValues) => createPost(values),
