@@ -1,4 +1,5 @@
 import axios, { AxiosHeaders } from 'axios';
+import { normalizeApiError } from '../types/api';
 import { useAuthStore } from '../stores/auth-store';
 
 const api = axios.create({
@@ -27,7 +28,8 @@ api.interceptors.response.use(
       }
     }
 
-    return Promise.reject(error);
+    const normalizedError = normalizeApiError(error, 'İsteğiniz işlenirken bir hata oluştu.');
+    return Promise.reject(normalizedError);
   }
 );
 

@@ -7,7 +7,6 @@ import {
   useReactTable
 } from '@tanstack/react-table';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import toast from 'react-hot-toast';
 import { PlusCircle, Pencil, Trash2, ArrowUpDown } from 'lucide-react';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -34,6 +33,8 @@ import {
 } from '../../components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Separator } from '../../components/ui/separator';
+import toast from 'react-hot-toast';
+import { handleApiError } from '../../lib/api-error';
 import { cn } from '../../lib/utils';
 
 const categorySchema = z.object({
@@ -180,7 +181,7 @@ export function CategoriesPage() {
       setIsCreateOpen(false);
       queryClient.invalidateQueries({ queryKey: ['categories'] });
     },
-    onError: () => toast.error('Kategori eklenirken bir hata oluştu')
+    onError: (error) => handleApiError(error, 'Kategori eklenemedi')
   });
 
   const updateMutation = useMutation({
@@ -195,7 +196,7 @@ export function CategoriesPage() {
       setEditingCategory(null);
       queryClient.invalidateQueries({ queryKey: ['categories'] });
     },
-    onError: () => toast.error('Kategori güncellenirken bir hata oluştu')
+    onError: (error) => handleApiError(error, 'Kategori güncellenemedi')
   });
 
   const deleteMutation = useMutation({
@@ -209,7 +210,7 @@ export function CategoriesPage() {
       setCategoryToDelete(null);
       queryClient.invalidateQueries({ queryKey: ['categories'] });
     },
-    onError: () => toast.error('Kategori silinirken bir hata oluştu')
+    onError: (error) => handleApiError(error, 'Kategori silinemedi')
   });
 
   const handlePageChange = (direction: 'prev' | 'next') => {
