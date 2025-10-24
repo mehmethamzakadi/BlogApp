@@ -7,7 +7,7 @@ import { Button } from '../../components/ui/button';
 
 export function HomePage() {
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['posts', 'published'],
+    queryKey: [],
     queryFn: () => fetchPublishedPosts(0, 9)
   });
 
@@ -78,7 +78,7 @@ export function HomePage() {
           )}
           {data?.items.map((post, index) => (
             <motion.article
-              key={post.id}
+              key={post.title}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}

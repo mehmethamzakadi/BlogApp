@@ -7,9 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.API.Controllers
 {
-    [AllowAnonymous]
     public class AuthController(IMediator mediator) : BaseApiController(mediator)
     {
+        [AllowAnonymous]
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginCommand userLogin)
         {
