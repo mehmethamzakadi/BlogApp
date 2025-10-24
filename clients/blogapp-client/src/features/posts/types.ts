@@ -11,3 +11,35 @@ export interface PostSummary {
 }
 
 export type PostListResponse = PaginatedListResponse<PostSummary>;
+
+export interface Post {
+  id: number;
+  title: string;
+  body: string;
+  summary: string;
+  thumbnail: string;
+  isPublished: boolean;
+  categoryName: string;
+  categoryId: number;
+}
+
+export type PostManagementListResponse = PaginatedListResponse<Post>;
+
+export interface PostFormValues {
+  title: string;
+  body: string;
+  summary: string;
+  thumbnail: string;
+  isPublished: boolean;
+  categoryId: number;
+}
+
+export interface PostTableFilters {
+  search?: string;
+  pageIndex: number;
+  pageSize: number;
+  sort?: {
+    field: string;
+    dir: 'asc' | 'desc';
+  };
+}

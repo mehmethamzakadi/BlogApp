@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { FolderKanban, LayoutDashboard } from 'lucide-react';
+import { FolderKanban, LayoutDashboard, FileText } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 const links = [
@@ -12,6 +12,11 @@ const links = [
     to: '/admin/categories',
     label: 'Kategoriler',
     icon: FolderKanban
+  },
+  {
+    to: '/admin/posts',
+    label: 'Gönderiler',
+    icon: FileText
   }
 ];
 
