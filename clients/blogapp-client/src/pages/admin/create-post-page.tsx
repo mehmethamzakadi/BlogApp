@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
@@ -9,9 +9,9 @@ import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
-import { createPost } from '../../features/posts/api';
+import { createPost, getPostById, updatePost } from '../../features/posts/api';
 import { postSchema, PostFormSchema } from '../../features/posts/schema';
-import { PostFormValues } from '../../features/posts/types';
+import { Post, PostFormValues } from '../../features/posts/types';
 import toast from 'react-hot-toast';
 import { getAllCategories } from '../../features/categories/api';
 import { Category } from '../../features/categories/types';
@@ -28,10 +28,21 @@ export function CreatePostPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [hasSaved, setHasSaved] = useState(false);
+  const { postId: postIdParam } = useParams<{ postId?: string }>();
+  const postId = postIdParam ? Number(postIdParam) : undefined;
+  const isEditMode = postId !== undefined && !Number.isNaN(postId);
 
   const categoriesQuery = useQuery<Category[]>({
     queryKey: ['categories-options'],
     queryFn: getAllCategories
+  });
+
+  const postQuery = useQuery<Post>({
+    queryKey: ['post', postId],
+    queryFn: () => getPostById(postId!),
+    enabled: isEditMode,
+    retry: false,
+    onError: (error) => handleApiError(error, 'Gönderi yüklenemedi')
   });
 
   const defaultCategoryId = useMemo(() => categoriesQuery.data?.[0]?.id ?? 0, [categoriesQuery.data]);
@@ -71,6 +82,21 @@ export function CreatePostPage() {
     }
   }, [categoriesQuery.data, getValues, setValue]);
 
+  useEffect(() => {
+    if (!isEditMode || !postQuery.data) {
+      return;
+    }
+
+    reset({
+      title: postQuery.data.title,
+      summary: postQuery.data.summary,
+      body: postQuery.data.body,
+      thumbnail: postQuery.data.thumbnail ?? '',
+      isPublished: postQuery.data.isPublished,
+      categoryId: postQuery.data.categoryId
+    });
+  }, [isEditMode, postQuery.data, reset]);
+
   const createMutation = useMutation({
     mutationFn: (values: PostFormValues) => createPost(values),
     onSuccess: async (result) => {
@@ -96,10 +122,42 @@ export function CreatePostPage() {
     onError: (error) => handleApiError(error, 'Gönderi oluşturulamadı')
   });
 
-  const shouldBlockNavigation = formState.isDirty && !hasSaved && !createMutation.isPending;
+  const updateMutation = useMutation({
+    mutationFn: async (values: PostFormValues) => {
+      if (!postId) {
+        throw new Error('Gönderi bulunamadı');
+      }
+
+      return updatePost(postId, values);
+    },
+    onSuccess: async (result) => {
+      if (!result.success) {
+        toast.error(result.message || 'Gönderi güncellenemedi');
+        return;
+      }
+
+      setHasSaved(true);
+      toast.success(result.message || 'Gönderi güncellendi');
+      await queryClient.invalidateQueries({ queryKey: ['posts'] });
+      await queryClient.invalidateQueries({ queryKey: ['posts', 'published'] });
+      if (postId) {
+        await queryClient.invalidateQueries({ queryKey: ['post', postId] });
+      }
+      navigate('/admin/posts');
+    },
+    onError: (error) => handleApiError(error, 'Gönderi güncellenemedi')
+  });
+
+  const isMutating = isEditMode ? updateMutation.isPending : createMutation.isPending;
+  const shouldBlockNavigation = formState.isDirty && !hasSaved && !isMutating;
   useUnsavedChangesWarning(shouldBlockNavigation, confirmMessage);
 
   const onSubmit = handleSubmit(async (values) => {
+    if (isEditMode) {
+      await updateMutation.mutateAsync(values);
+      return;
+    }
+
     await createMutation.mutateAsync(values);
   });
 
@@ -111,22 +169,31 @@ export function CreatePostPage() {
     navigate('/admin/posts');
   };
 
-  const submitLabel = createMutation.isPending
-    ? 'Kaydediliyor...'
-    : isPublished
-      ? 'Yayınla'
-      : 'Taslak Olarak Kaydet';
+  const submitLabel = isEditMode
+    ? isMutating
+      ? 'Güncelleniyor...'
+      : 'Güncelle'
+    : isMutating
+      ? 'Kaydediliyor...'
+      : isPublished
+        ? 'Yayınla'
+        : 'Taslak Olarak Kaydet';
+
+  const pageTitle = isEditMode ? 'Gönderiyi Düzenle' : 'Yeni Gönderi Oluştur';
+  const pageDescription = isEditMode
+    ? 'Gönderinizin detaylarını güncelleyin ve değişiklikleri kaydedin.'
+    : 'Gönderinizin detaylarını girin, ister hemen yayınlayın ister taslak olarak kaydedin.';
+  const isInitialLoading = isEditMode && postQuery.isLoading;
+  const hasLoadError = isEditMode && postQuery.isError;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 rounded-xl border bg-card p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-2">
-          <h1 className="text-2xl font-semibold tracking-tight">Yeni Gönderi Oluştur</h1>
-          <p className="text-sm text-muted-foreground">
-            Gönderinizin detaylarını girin, ister hemen yayınlayın ister taslak olarak kaydedin.
-          </p>
+          <h1 className="text-2xl font-semibold tracking-tight">{pageTitle}</h1>
+          <p className="text-sm text-muted-foreground">{pageDescription}</p>
         </div>
-        <Button variant="outline" onClick={handleBack} className="self-start sm:self-auto">
+        <Button variant="outline" onClick={handleBack} className="self-start sm:self-auto" disabled={isMutating}>
           Geri
         </Button>
       </div>
@@ -137,7 +204,14 @@ export function CreatePostPage() {
           <CardDescription>Başlık, özet ve içerik alanlarını doldurarak gönderinizi hazırlayın.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={onSubmit} className="space-y-6">
+          {isInitialLoading ? (
+            <div className="py-10 text-center text-sm text-muted-foreground">Gönderi yükleniyor...</div>
+          ) : hasLoadError ? (
+            <div className="py-10 text-center text-sm text-muted-foreground">
+              Gönderi yüklenirken bir hata oluştu. Lütfen tekrar deneyin.
+            </div>
+          ) : (
+            <form onSubmit={onSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="create-post-title">Başlık</Label>
               <Input
@@ -225,15 +299,16 @@ export function CreatePostPage() {
                 Gönderiyi Yayınla
               </label>
               <div className="flex gap-2">
-                <Button type="button" variant="outline" onClick={handleBack}>
+                <Button type="button" variant="outline" onClick={handleBack} disabled={isMutating}>
                   Vazgeç
                 </Button>
-                <Button type="submit" disabled={createMutation.isPending}>
+                <Button type="submit" disabled={isMutating}>
                   {submitLabel}
                 </Button>
               </div>
             </div>
-          </form>
+            </form>
+          )}
         </CardContent>
       </Card>
     </div>
