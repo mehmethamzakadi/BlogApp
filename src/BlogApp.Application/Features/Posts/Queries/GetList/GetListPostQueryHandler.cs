@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+using System.Linq;
+using AutoMapper;
 using BlogApp.Domain.Common.Paging;
 using BlogApp.Domain.Common.Responses;
 using BlogApp.Domain.Entities;
@@ -13,11 +14,13 @@ public sealed class GetListPostQueryHandler(IPostRepository postRepository, IMap
     public async Task<PaginatedListResponse<GetListPostResponse>> Handle(GetListPostQuery request, CancellationToken cancellationToken)
     {
         Paginate<Post> posts = await postRepository.GetPaginatedListAsync(
+            predicate: post => post.IsPublished,
+            orderBy: query => query.OrderByDescending(post => post.Id),
             index: request.PageRequest.PageIndex,
             include: p => p.Include(p => p.Category),
             size: request.PageRequest.PageSize,
             cancellationToken: cancellationToken
-       );
+        );
 
         PaginatedListResponse<GetListPostResponse> response = mapper.Map<PaginatedListResponse<GetListPostResponse>>(posts);
         return response;
