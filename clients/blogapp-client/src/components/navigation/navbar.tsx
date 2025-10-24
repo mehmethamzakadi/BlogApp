@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { LogOut, Menu, UserCircle, X } from 'lucide-react';
+import { LogOut, Menu, Moon, Sun, UserCircle, X } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useAuth } from '../../hooks/use-auth';
 import { cn } from '../../lib/utils';
+import { useThemeContext } from '../../providers/theme-provider';
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   cn(
@@ -14,6 +15,7 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
 export function Navbar() {
   const [open, setOpen] = useState(false);
   const { isAuthenticated, logout, user } = useAuth();
+  const { theme, toggleTheme } = useThemeContext();
 
   const handleLogout = () => {
     logout();
@@ -34,6 +36,19 @@ export function Navbar() {
               <NavLink to="/admin/dashboard" className={navLinkClass}>
                 Admin Paneli
               </NavLink>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleTheme}
+                className="h-9 w-9 rounded-full border"
+              >
+                {theme === 'dark' ? (
+                  <Sun className="h-4 w-4" />
+                ) : (
+                  <Moon className="h-4 w-4" />
+                )}
+                <span className="sr-only">Tema Değiştir</span>
+              </Button>
               <div className="flex items-center gap-2 rounded-full border bg-muted/40 px-3 py-1 text-sm shadow-sm">
                 <UserCircle className="h-4 w-4 text-primary" />
                 <span className="font-medium text-foreground">{user?.userName}</span>
@@ -49,9 +64,24 @@ export function Navbar() {
               </Button>
             </div>
           ) : (
-            <NavLink to="/login" className={navLinkClass}>
-              Giriş
-            </NavLink>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleTheme}
+                className="h-9 w-9 rounded-full border"
+              >
+                {theme === 'dark' ? (
+                  <Sun className="h-4 w-4" />
+                ) : (
+                  <Moon className="h-4 w-4" />
+                )}
+                <span className="sr-only">Tema Değiştir</span>
+              </Button>
+              <NavLink to="/login" className={navLinkClass}>
+                Giriş
+              </NavLink>
+            </div>
           )}
         </nav>
         <button
@@ -77,6 +107,24 @@ export function Navbar() {
                 >
                   Admin Paneli
                 </NavLink>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleTheme}
+                  className="justify-start gap-2"
+                >
+                  {theme === 'dark' ? (
+                    <>
+                      <Sun className="h-4 w-4" />
+                      Açık Tema
+                    </>
+                  ) : (
+                    <>
+                      <Moon className="h-4 w-4" />
+                      Koyu Tema
+                    </>
+                  )}
+                </Button>
                 <div className="flex items-center justify-between rounded-xl border bg-muted/40 px-3 py-2">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <UserCircle className="h-4 w-4 text-primary" />
@@ -97,9 +145,29 @@ export function Navbar() {
                 </div>
               </div>
             ) : (
-              <NavLink to="/login" className={navLinkClass} onClick={() => setOpen(false)}>
-                Giriş
-              </NavLink>
+              <div className="flex flex-col gap-3">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleTheme}
+                  className="justify-start gap-2"
+                >
+                  {theme === 'dark' ? (
+                    <>
+                      <Sun className="h-4 w-4" />
+                      Açık Tema
+                    </>
+                  ) : (
+                    <>
+                      <Moon className="h-4 w-4" />
+                      Koyu Tema
+                    </>
+                  )}
+                </Button>
+                <NavLink to="/login" className={navLinkClass} onClick={() => setOpen(false)}>
+                  Giriş
+                </NavLink>
+              </div>
             )}
           </nav>
         </div>

@@ -1,8 +1,9 @@
-import { Home, LogOut, Menu, SunMoon, UserCircle } from 'lucide-react';
+import { Home, LogOut, Menu, Moon, Sun, UserCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '../ui/button';
 import { useAuth } from '../../hooks/use-auth';
+import { useThemeContext } from '../../providers/theme-provider';
 
 interface AdminHeaderProps {
   onToggleSidebar: () => void;
@@ -11,6 +12,7 @@ interface AdminHeaderProps {
 
 export function AdminHeader({ onToggleSidebar, isCollapsed }: AdminHeaderProps) {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useThemeContext();
 
   return (
     <motion.header
@@ -37,8 +39,12 @@ export function AdminHeader({ onToggleSidebar, isCollapsed }: AdminHeaderProps) 
         <Button variant="outline" size="sm" asChild className="hidden sm:flex">
           <Link to="/">Anasayfaya Dön</Link>
         </Button>
-        <Button variant="ghost" size="icon">
-          <SunMoon className="h-5 w-5" />
+        <Button variant="ghost" size="icon" onClick={toggleTheme}>
+          {theme === 'dark' ? (
+            <Sun className="h-5 w-5" />
+          ) : (
+            <Moon className="h-5 w-5" />
+          )}
           <span className="sr-only">Tema Değiştir</span>
         </Button>
         <div className="flex items-center gap-2 rounded-full border bg-muted/40 px-3 py-1.5 text-sm shadow-sm">
