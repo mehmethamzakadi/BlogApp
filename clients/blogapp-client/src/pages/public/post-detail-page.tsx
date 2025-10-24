@@ -173,7 +173,7 @@ export function PostDetailPage() {
         aria-hidden
       />
 
-      <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-16 px-4 sm:px-6 lg:px-12 xl:px-16">
+      <div className="mx-auto flex w-full max-w-none flex-col gap-16 px-4 sm:px-6 lg:px-12 xl:px-16 2xl:px-20">
         <Button variant="ghost" className="group mt-4 h-auto w-fit px-0 text-sm" asChild>
           <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground transition-colors group-hover:text-primary">
             <ArrowLeft className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-1" />
@@ -187,7 +187,7 @@ export function PostDetailPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <div className="grid gap-12 px-6 py-14 sm:px-12 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.85fr)] lg:items-center lg:px-20 xl:px-24">
+          <div className="grid gap-12 px-6 py-14 sm:px-12 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,0.85fr)] lg:items-center lg:px-20 xl:grid-cols-[minmax(0,1.75fr)_minmax(0,0.8fr)] xl:px-24 2xl:grid-cols-[minmax(0,1.9fr)_minmax(0,0.75fr)] 2xl:px-28">
             <div className="relative z-10 space-y-7 text-center lg:text-left">
               <Badge className="mx-auto w-fit rounded-full bg-primary/80 px-4 py-1 text-xs uppercase tracking-wider text-primary-foreground shadow-sm lg:mx-0">
                 {categoryLabel}
@@ -226,7 +226,7 @@ export function PostDetailPage() {
         </motion.section>
 
         <motion.section
-          className="grid gap-10 lg:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)] xl:grid-cols-[minmax(0,1.35fr)_minmax(360px,0.7fr)]"
+          className="grid gap-10 lg:grid-cols-[minmax(0,1.75fr)_minmax(320px,0.75fr)] xl:grid-cols-[minmax(0,1.95fr)_minmax(360px,0.65fr)] 2xl:grid-cols-[minmax(0,2.1fr)_minmax(380px,0.6fr)]"
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.4 }}

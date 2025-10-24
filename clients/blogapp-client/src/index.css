@@ -57,7 +57,7 @@ html, body, #root {
 
 @layer components {
   .blog-content {
-    @apply mx-auto max-w-4xl text-balance text-xl leading-relaxed text-muted-foreground;
+    @apply w-full text-balance text-xl leading-relaxed text-muted-foreground;
   }
 
   .blog-content > * + * {
