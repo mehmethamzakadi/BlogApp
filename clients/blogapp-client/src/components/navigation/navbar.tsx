@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { LogOut, Menu, UserCircle, X } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useAuth } from '../../hooks/use-auth';
 import { cn } from '../../lib/utils';
@@ -30,15 +30,24 @@ export function Navbar() {
             Anasayfa
           </NavLink>
           {isAuthenticated ? (
-            <>
+            <div className="flex items-center gap-3">
               <NavLink to="/admin/dashboard" className={navLinkClass}>
-                Admin
+                Admin Paneli
               </NavLink>
-              <span className="text-sm text-muted-foreground">{user?.userName}</span>
-              <Button variant="ghost" size="sm" onClick={handleLogout}>
-                Çıkış
+              <div className="flex items-center gap-2 rounded-full border bg-muted/40 px-3 py-1 text-sm shadow-sm">
+                <UserCircle className="h-4 w-4 text-primary" />
+                <span className="font-medium text-foreground">{user?.userName}</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleLogout}
+                className="h-9 w-9 rounded-full border"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="sr-only">Çıkış Yap</span>
               </Button>
-            </>
+            </div>
           ) : (
             <NavLink to="/login" className={navLinkClass}>
               Giriş
@@ -60,21 +69,33 @@ export function Navbar() {
               Anasayfa
             </NavLink>
             {isAuthenticated ? (
-              <>
+              <div className="flex flex-col gap-3">
                 <NavLink
                   to="/admin/dashboard"
                   className={navLinkClass}
                   onClick={() => setOpen(false)}
                 >
-                  Admin
+                  Admin Paneli
                 </NavLink>
-                <div className="flex items-center justify-between px-3 text-sm text-muted-foreground">
-                  <span>{user?.userName}</span>
-                  <Button variant="ghost" size="sm" onClick={handleLogout}>
-                    Çıkış
+                <div className="flex items-center justify-between rounded-xl border bg-muted/40 px-3 py-2">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <UserCircle className="h-4 w-4 text-primary" />
+                    <span className="font-medium text-foreground">{user?.userName}</span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 rounded-full border"
+                    onClick={() => {
+                      handleLogout();
+                      setOpen(false);
+                    }}
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span className="sr-only">Çıkış Yap</span>
                   </Button>
                 </div>
-              </>
+              </div>
             ) : (
               <NavLink to="/login" className={navLinkClass} onClick={() => setOpen(false)}>
                 Giriş

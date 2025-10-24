@@ -38,9 +38,8 @@ export function DashboardPage() {
           </p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Button size="lg">Yeni Gönderi Oluştur</Button>
-          <Button variant="outline" size="lg" asChild>
-            <Link to="/">Anasayfaya Dön</Link>
+          <Button size="lg" asChild>
+            <Link to="/admin/posts/new">Yeni Gönderi Oluştur</Link>
           </Button>
         </div>
       </motion.div>
