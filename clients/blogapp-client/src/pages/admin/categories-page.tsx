@@ -16,6 +16,7 @@ import { fetchCategories, createCategory, updateCategory, deleteCategory } from 
 import {
   Category,
   CategoryFormValues,
+  CategoryListResponse,
   CategoryTableFilters
 } from '../../features/categories/types';
 import { Button } from '../../components/ui/button';
@@ -60,7 +61,7 @@ export function CategoriesPage() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
 
-  const categoriesQuery = useQuery({
+  const categoriesQuery = useQuery<CategoryListResponse>({
     queryKey: [
       'categories',
       filters.pageIndex,
@@ -70,7 +71,7 @@ export function CategoriesPage() {
       filters.sort?.dir ?? ''
     ],
     queryFn: () => fetchCategories(filters),
-    keepPreviousData: true
+    placeholderData: (previousData) => previousData
   });
 
   useEffect(() => {
@@ -87,7 +88,7 @@ export function CategoriesPage() {
       const nextSort = sortState
         ? {
             field: fieldMap[sortState.id] ?? sortState.id,
-            dir: sortState.desc ? 'desc' : 'asc'
+            dir: sortState.desc ? ('desc' as const) : ('asc' as const)
           }
         : undefined;
 
