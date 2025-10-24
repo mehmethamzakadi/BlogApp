@@ -107,7 +107,16 @@ export async function deletePost(id: number) {
   return normalizeApiResult(response.data);
 }
 
-export async function getPostById(id: number) {
-  const response = await api.get<Post>(`/Post/GetById/${id}`);
-  return response.data;
+export async function getPostById(id: number): Promise<Post> {
+  const response = await api.get<ApiResult<Post>>(`/Post/GetById/${id}`);
+  const result = normalizeApiResult<Post>(response.data);
+
+  if (!result.success || !result.data) {
+    throw {
+      ...result,
+      success: false
+    };
+  }
+
+  return result.data;
 }
