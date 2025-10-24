@@ -41,6 +41,14 @@ export interface DataGridRequest {
 }
 
 export function normalizeApiResult<T>(data: any): ApiResult<T> {
+  if (typeof data === 'string') {
+    return {
+      success: true,
+      message: data,
+      data: undefined as T
+    };
+  }
+
   if (data && typeof data === 'object' && 'success' in data) {
     return data as ApiResult<T>;
   }

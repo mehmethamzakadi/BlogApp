@@ -36,13 +36,10 @@ function buildPostDataGridPayload(filters: PostTableFilters) {
   const filter = filters.search
     ? {
         Field: 'Title',
+        Operator: 'contains',
+        Value: filters.search,
         Logic: 'or',
         Filters: [
-          {
-            Field: 'Title',
-            Operator: 'contains',
-            Value: filters.search
-          },
           {
             Field: 'Summary',
             Operator: 'contains',
