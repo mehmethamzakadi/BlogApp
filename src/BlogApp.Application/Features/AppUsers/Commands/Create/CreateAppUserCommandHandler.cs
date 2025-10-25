@@ -5,7 +5,6 @@ using BlogApp.Domain.Constants;
 using BlogApp.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using System.Linq;
 
 namespace BlogApp.Application.Features.AppUsers.Commands.Create;
 

@@ -1,5 +1,3 @@
-using System.Threading;
-using System.Threading.Tasks;
 using BlogApp.Application.Abstractions.Identity;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;

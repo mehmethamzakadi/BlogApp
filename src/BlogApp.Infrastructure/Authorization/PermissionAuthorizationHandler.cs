@@ -1,6 +1,4 @@
 using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace BlogApp.Infrastructure.Authorization;
 
@@ -14,7 +12,7 @@ public class PermissionAuthorizationHandler : AuthorizationHandler<PermissionReq
         PermissionRequirement requirement)
     {
         // Kullanıcının permission claim'lerini kontrol et
-        var permissionClaim = context.User.FindFirst(c => 
+        var permissionClaim = context.User.FindFirst(c =>
             c.Type == "permission" && c.Value == requirement.Permission);
 
         if (permissionClaim != null)

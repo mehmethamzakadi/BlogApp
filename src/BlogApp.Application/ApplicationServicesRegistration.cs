@@ -1,5 +1,4 @@
 ﻿using BlogApp.Application.Behaviors;
-using BlogApp.Application.Behaviors.Transaction;
 using BlogApp.Domain.Options;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -21,9 +20,8 @@ namespace BlogApp.Application
             services.AddMediatR(configuration =>
             {
                 configuration.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
-                configuration.AddOpenBehavior(typeof(TransactionScopeBehavior<,>));
                 configuration.AddOpenBehavior(typeof(LoggingBehavior<,>));
-                configuration.AddOpenBehavior(typeof(ActivityLoggingBehavior<,>));
+                configuration.AddOpenBehavior(typeof(DomainEventDispatcherBehavior<,>));
             });
 
             services.AddFluentValidationAutoValidation();

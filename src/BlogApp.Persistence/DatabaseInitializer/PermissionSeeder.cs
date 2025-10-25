@@ -1,10 +1,8 @@
 using BlogApp.Domain.Constants;
 using BlogApp.Domain.Entities;
-using BlogApp.Domain.Repositories;
 using BlogApp.Persistence.Contexts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace BlogApp.Persistence.DatabaseInitializer;

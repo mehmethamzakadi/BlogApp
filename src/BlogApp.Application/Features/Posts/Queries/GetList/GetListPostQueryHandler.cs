@@ -1,4 +1,3 @@
-using System.Linq;
 using AutoMapper;
 using BlogApp.Domain.Common.Paging;
 using BlogApp.Domain.Common.Responses;

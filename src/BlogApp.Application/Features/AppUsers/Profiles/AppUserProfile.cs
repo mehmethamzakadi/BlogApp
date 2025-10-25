@@ -3,7 +3,6 @@ using BlogApp.Application.Features.AppUsers.Commands.Create;
 using BlogApp.Application.Features.AppUsers.Queries.GetById;
 using BlogApp.Application.Features.AppUsers.Queries.GetList;
 using BlogApp.Application.Features.AppUsers.Queries.GetPaginatedListByDynamic;
-using BlogApp.Application.Features.Categories.Queries.GetPaginatedListByDynamic;
 using BlogApp.Domain.Common.Paging;
 using BlogApp.Domain.Common.Responses;
 using BlogApp.Domain.Entities;

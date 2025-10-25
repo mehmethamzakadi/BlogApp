@@ -1,7 +1,7 @@
+using BlogApp.Application.Features.AppRoles.Commands.BulkDelete;
 using BlogApp.Application.Features.AppRoles.Commands.Create;
 using BlogApp.Application.Features.AppRoles.Commands.Delete;
 using BlogApp.Application.Features.AppRoles.Commands.Update;
-using BlogApp.Application.Features.AppRoles.Commands.BulkDelete;
 using BlogApp.Application.Features.AppRoles.Queries.GetList;
 using BlogApp.Application.Features.AppRoles.Queries.GetRoleById;
 using BlogApp.Domain.Common.Requests;
@@ -45,7 +45,7 @@ namespace BlogApp.API.Controllers
         {
             if (id != command.Id)
                 return BadRequest("ID mismatch");
-            
+
             var response = await Mediator.Send(command);
             return Ok(response);
         }

@@ -54,7 +54,7 @@ namespace BlogApp.API.Controllers
         {
             if (id != command.Id)
                 return BadRequest("ID mismatch");
-            
+
             var response = await Mediator.Send(command);
             return Ok(response);
         }

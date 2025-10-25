@@ -1,13 +1,11 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using BlogApp.Application.Abstractions;
 using BlogApp.Application.Features.Categories.Commands.Create;
 using BlogApp.Application.Features.Posts.Commands.Create;
-using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Repositories;
+using Microsoft.AspNetCore.Http;
 using Moq;
+using IResult = BlogApp.Domain.Common.Results.IResult;
 
 namespace Application.UnitTests;
 
@@ -22,8 +20,10 @@ public class CreateCategoryCommandHandlerTests
             .ReturnsAsync(true);
 
         var cacheMock = new Mock<ICacheService>();
+        var unitOfWorkMock = new Mock<BlogApp.Domain.Common.IUnitOfWork>();
+        var httpContextAccessorMock = new Mock<IHttpContextAccessor>();
 
-        var handler = new CreateCategoryCommandHandler(repositoryMock.Object, cacheMock.Object);
+        var handler = new CreateCategoryCommandHandler(repositoryMock.Object, cacheMock.Object, unitOfWorkMock.Object, httpContextAccessorMock.Object);
         IResult result = await handler.Handle(new CreateCategoryCommand("Test"), CancellationToken.None);
 
         Assert.That(result.Success, Is.False);
@@ -47,7 +47,14 @@ public class CreateCategoryCommandHandlerTests
             .Returns(Task.CompletedTask)
             .Verifiable();
 
-        var handler = new CreateCategoryCommandHandler(repositoryMock.Object, cacheMock.Object);
+        var unitOfWorkMock = new Mock<BlogApp.Domain.Common.IUnitOfWork>();
+        unitOfWorkMock
+            .Setup(uow => uow.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(1);
+
+        var httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+
+        var handler = new CreateCategoryCommandHandler(repositoryMock.Object, cacheMock.Object, unitOfWorkMock.Object, httpContextAccessorMock.Object);
         IResult result = await handler.Handle(new CreateCategoryCommand("Test"), CancellationToken.None);
 
         Assert.That(result.Success, Is.True);
@@ -70,7 +77,9 @@ public class CreatePostCommandHandlerTests
             .Setup(uow => uow.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(1);
 
-        var handler = new CreatePostCommandHandler(repositoryMock.Object, unitOfWorkMock.Object);
+        var httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+
+        var handler = new CreatePostCommandHandler(repositoryMock.Object, unitOfWorkMock.Object, httpContextAccessorMock.Object);
         var command = new CreatePostCommand("Title", "Body", "Summary", "thumb", true, 5);
 
         IResult result = await handler.Handle(command, CancellationToken.None);

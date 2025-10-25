@@ -72,6 +72,28 @@ public sealed class UnitOfWork : IUnitOfWork
         }
     }
 
+    public IEnumerable<IDomainEvent> GetDomainEvents()
+    {
+        return _context.ChangeTracker
+            .Entries<BaseEntity>()
+            .Where(e => e.Entity.DomainEvents.Any())
+            .SelectMany(e => e.Entity.DomainEvents)
+            .ToList();
+    }
+
+    public void ClearDomainEvents()
+    {
+        var entities = _context.ChangeTracker
+            .Entries<BaseEntity>()
+            .Where(e => e.Entity.DomainEvents.Any())
+            .Select(e => e.Entity);
+
+        foreach (var entity in entities)
+        {
+            entity.ClearDomainEvents();
+        }
+    }
+
     public void Dispose()
     {
         Dispose(true);

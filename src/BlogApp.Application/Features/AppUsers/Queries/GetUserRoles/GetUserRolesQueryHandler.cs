@@ -1,9 +1,7 @@
-using BlogApp.Application.Abstractions.Identity;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace BlogApp.Application.Features.AppUsers.Queries.GetUserRoles;
 
@@ -28,16 +26,16 @@ public class GetUserRolesQueryHandler : IRequestHandler<GetUserRolesQuery, IData
 
         var roleNames = await _userManager.GetRolesAsync(user);
         var userRoles = new List<UserRoleDto>();
-        
+
         foreach (var roleName in roleNames)
         {
             var role = await _roleManager.FindByNameAsync(roleName);
             if (role != null)
             {
-                userRoles.Add(new UserRoleDto 
-                { 
-                    Id = role.Id, 
-                    Name = role.Name ?? string.Empty 
+                userRoles.Add(new UserRoleDto
+                {
+                    Id = role.Id,
+                    Name = role.Name ?? string.Empty
                 });
             }
         }

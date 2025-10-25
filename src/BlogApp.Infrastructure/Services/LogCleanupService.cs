@@ -24,10 +24,10 @@ public class LogCleanupService : BackgroundService
     {
         _scopeFactory = scopeFactory;
         _logger = logger;
-        
+
         // Run cleanup daily at 3 AM
         _cleanupInterval = TimeSpan.FromHours(24);
-        
+
         // Default retention: 90 days for Logs table
         _logRetentionDays = configuration.GetValue<int>("Logging:Database:RetentionDays", 90);
     }
@@ -41,12 +41,12 @@ public class LogCleanupService : BackgroundService
             try
             {
                 await CleanupOldLogsAsync(stoppingToken);
-                
+
                 // Calculate next run time (3 AM next day)
                 var now = DateTime.UtcNow;
                 var next3AM = now.Date.AddDays(1).AddHours(3);
                 var delay = next3AM - now;
-                
+
                 _logger.LogInformation("Next log cleanup scheduled for: {NextRun}", next3AM);
                 await Task.Delay(delay, stoppingToken);
             }

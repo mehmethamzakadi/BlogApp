@@ -1,8 +1,7 @@
-using System.Text;
 using BlogApp.Application.Abstractions.Identity;
 using BlogApp.Domain.Entities;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
+using System.Text;
 
 namespace BlogApp.Application.Features.AppUsers.Queries.Export;
 
@@ -34,7 +33,7 @@ public class ExportUsersQueryHandler : IRequestHandler<ExportUsersQuery, ExportU
     private string GenerateCsv(List<AppUser> users)
     {
         var sb = new StringBuilder();
-        
+
         // Header
         sb.AppendLine("Id,UserName,Email,PhoneNumber,EmailConfirmed");
 

@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using BlogApp.Domain.Common.Results;
+﻿using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Exceptions;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
 
 namespace BlogApp.API.Middlewares
 {
@@ -29,16 +24,16 @@ namespace BlogApp.API.Middlewares
             {
                 var request = context.Request;
                 var user = context.User?.Identity?.Name ?? "Anonymous";
-                
+
                 _logger.LogError(
-                    ex, 
+                    ex,
                     "Unhandled exception occurred. Path: {Path}, Method: {Method}, User: {User}, IP: {RemoteIp}",
                     request.Path,
                     request.Method,
                     user,
                     context.Connection.RemoteIpAddress?.ToString()
                 );
-                
+
                 await HandleExceptionAsync(context, ex);
             }
         }

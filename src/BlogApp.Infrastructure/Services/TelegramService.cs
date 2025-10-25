@@ -1,5 +1,3 @@
-
-using System;
 using BlogApp.Application.Abstractions;
 using BlogApp.Domain.Options;
 using Microsoft.Extensions.Options;

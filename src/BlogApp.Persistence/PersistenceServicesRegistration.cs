@@ -33,7 +33,7 @@ public static class PersistenceServicesRegistration
         services.AddScoped<IActivityLogRepository, ActivityLogRepository>();
         services.AddScoped<IPermissionRepository, PermissionRepository>();
         services.AddScoped<IDbInitializer, DbInitializer>();
-        
+
         // Unit of Work registration
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 

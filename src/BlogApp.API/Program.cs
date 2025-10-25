@@ -1,6 +1,4 @@
-﻿
-using System.Linq;
-using AspNetCoreRateLimit;
+﻿using AspNetCoreRateLimit;
 using BlogApp.API.Configuration;
 using BlogApp.API.Filters;
 using BlogApp.API.Middlewares;
@@ -134,7 +132,7 @@ app.UseSerilogRequestLogging(options =>
         diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
         diagnosticContext.Set("RemoteIpAddress", httpContext.Connection.RemoteIpAddress);
         diagnosticContext.Set("UserAgent", httpContext.Request.Headers["User-Agent"].ToString());
-        
+
         if (httpContext.User?.Identity?.IsAuthenticated == true)
         {
             diagnosticContext.Set("UserName", httpContext.User.Identity.Name);

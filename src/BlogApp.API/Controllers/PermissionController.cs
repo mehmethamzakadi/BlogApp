@@ -1,6 +1,6 @@
+using BlogApp.Application.Features.Permissions.Commands.AssignPermissionsToRole;
 using BlogApp.Application.Features.Permissions.Queries.GetAll;
 using BlogApp.Application.Features.Permissions.Queries.GetRolePermissions;
-using BlogApp.Application.Features.Permissions.Commands.AssignPermissionsToRole;
 using BlogApp.Domain.Constants;
 using BlogApp.Infrastructure.Authorization;
 using MediatR;

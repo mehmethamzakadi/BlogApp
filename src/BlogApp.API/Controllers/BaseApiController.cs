@@ -1,5 +1,4 @@
-﻿using System;
-using BlogApp.Domain.Common.Results;
+﻿using BlogApp.Domain.Common.Results;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

@@ -17,7 +17,7 @@ public class ActivityLogsController(IMediator mediator) : BaseApiController(medi
     [HasPermission(Permissions.DashboardView)]
     public async Task<IActionResult> GetPaginatedList([FromBody] DataGridRequest request)
     {
-        PaginatedListResponse<GetPaginatedActivityLogsResponse> response = 
+        PaginatedListResponse<GetPaginatedActivityLogsResponse> response =
             await Mediator.Send(new GetPaginatedActivityLogsQuery(request));
         return Ok(response);
     }

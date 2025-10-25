@@ -1,9 +1,9 @@
-﻿using System.Security.Claims;
-using BlogApp.Domain.Common;
+﻿using BlogApp.Domain.Common;
 using BlogApp.Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace BlogApp.Persistence.Contexts
 {
@@ -19,12 +19,12 @@ namespace BlogApp.Persistence.Contexts
         {
             var userIdClaim = _httpContextAccessor?.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var userId = int.TryParse(userIdClaim, out var parsedUserId) ? parsedUserId : 0;
-            
+
             // Eğer kullanıcı yoksa (seed işlemleri için), system kullanıcısı olarak işaretle
             // Gerçek API isteklerinde userId mutlaka olmalı
             var isSystemOperation = userId == 0 && _httpContextAccessor?.HttpContext == null;
             var effectiveUserId = isSystemOperation ? 1 : userId; // System operations için ID 1 kullan
-            
+
             foreach (var entry in base.ChangeTracker.Entries<BaseEntity>()
                .Where(q => q.State == EntityState.Added || q.State == EntityState.Modified || q.State == EntityState.Deleted))
             {
@@ -35,7 +35,7 @@ namespace BlogApp.Persistence.Contexts
                     {
                         throw new UnauthorizedAccessException("Kullanıcı bilgisi bulunamadı. Lütfen giriş yapınız.");
                     }
-                    
+
                     entry.Entity.CreatedDate = DateTime.UtcNow;
                     entry.Entity.CreatedById = effectiveUserId;
                 }

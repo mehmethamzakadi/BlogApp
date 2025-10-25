@@ -27,7 +27,7 @@ public class BulkDeleteUsersCommandHandler : IRequestHandler<BulkDeleteUsersComm
             try
             {
                 var user = await _userManager.FindByIdAsync(userId.ToString());
-                
+
                 if (user == null)
                 {
                     response.Errors.Add($"Kullanıcı bulunamadı: ID {userId}");
@@ -36,7 +36,7 @@ public class BulkDeleteUsersCommandHandler : IRequestHandler<BulkDeleteUsersComm
                 }
 
                 var result = await _userManager.DeleteAsync(user);
-                
+
                 if (result.Succeeded)
                 {
                     response.DeletedCount++;

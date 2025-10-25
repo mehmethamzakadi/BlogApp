@@ -1,15 +1,13 @@
+using BlogApp.Application.Features.AppUsers.Commands.AssignRolesToUser;
+using BlogApp.Application.Features.AppUsers.Commands.BulkDelete;
 using BlogApp.Application.Features.AppUsers.Commands.Create;
 using BlogApp.Application.Features.AppUsers.Commands.Delete;
 using BlogApp.Application.Features.AppUsers.Commands.Update;
-using BlogApp.Application.Features.AppUsers.Commands.BulkDelete;
-using BlogApp.Application.Features.AppUsers.Commands.AssignRolesToUser;
+using BlogApp.Application.Features.AppUsers.Queries.Export;
 using BlogApp.Application.Features.AppUsers.Queries.GetById;
-using BlogApp.Application.Features.AppUsers.Queries.GetList;
 using BlogApp.Application.Features.AppUsers.Queries.GetPaginatedListByDynamic;
 using BlogApp.Application.Features.AppUsers.Queries.GetUserRoles;
-using BlogApp.Application.Features.AppUsers.Queries.Export;
 using BlogApp.Application.Features.Auths.UpdatePassword;
-using BlogApp.Application.Features.Categories.Queries.GetPaginatedListByDynamic;
 using BlogApp.Domain.Common.Requests;
 using BlogApp.Domain.Common.Responses;
 using BlogApp.Domain.Constants;
@@ -51,7 +49,7 @@ namespace BlogApp.API.Controllers
         {
             if (id != command.Id)
                 return BadRequest("ID mismatch");
-            
+
             var response = await Mediator.Send(command);
             return Ok(response);
         }

@@ -2,8 +2,6 @@ using BlogApp.Domain.Entities;
 using BlogApp.Domain.Repositories;
 using BlogApp.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
 
 namespace BlogApp.Persistence.Repositories;
 

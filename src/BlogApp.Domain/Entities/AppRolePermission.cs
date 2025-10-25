@@ -1,5 +1,3 @@
-using System;
-
 namespace BlogApp.Domain.Entities;
 
 /// <summary>

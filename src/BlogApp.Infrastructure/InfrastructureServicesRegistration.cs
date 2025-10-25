@@ -1,5 +1,3 @@
-using System;
-using System.Text;
 using BlogApp.Application.Abstractions;
 using BlogApp.Application.Abstractions.Identity;
 using BlogApp.Domain.Constants;
@@ -18,6 +16,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using TokenOptions = BlogApp.Domain.Options.TokenOptions;
 
 namespace BlogApp.Infrastructure
@@ -124,7 +123,7 @@ namespace BlogApp.Infrastructure
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IRoleService, RoleService>();
-            
+
             // Authorization
             services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
             services.AddAuthorizationCore(options =>
@@ -136,7 +135,7 @@ namespace BlogApp.Infrastructure
                         policy.Requirements.Add(new PermissionRequirement(permission)));
                 }
             });
-            
+
             // Register log cleanup background service
             services.AddHostedService<LogCleanupService>();
 

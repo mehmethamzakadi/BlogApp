@@ -9,36 +9,36 @@ public class ActivityLogConfiguration : IEntityTypeConfiguration<ActivityLog>
     public void Configure(EntityTypeBuilder<ActivityLog> builder)
     {
         builder.ToTable("ActivityLogs");
-        
+
         builder.HasKey(a => a.Id);
-        
+
         builder.Property(a => a.ActivityType)
             .IsRequired()
             .HasMaxLength(50);
-        
+
         builder.Property(a => a.EntityType)
             .IsRequired()
             .HasMaxLength(50);
-        
+
         builder.Property(a => a.Title)
             .IsRequired()
             .HasMaxLength(500);
-        
+
         builder.Property(a => a.Details)
             .HasMaxLength(2000);
-        
+
         builder.Property(a => a.Timestamp)
             .IsRequired();
-        
+
         builder.HasOne(a => a.User)
             .WithMany()
             .HasForeignKey(a => a.UserId)
             .OnDelete(DeleteBehavior.SetNull);
-        
+
         // Index for performance
         builder.HasIndex(a => a.Timestamp)
             .HasDatabaseName("IX_ActivityLogs_Timestamp");
-        
+
         builder.HasIndex(a => new { a.EntityType, a.EntityId })
             .HasDatabaseName("IX_ActivityLogs_Entity");
     }

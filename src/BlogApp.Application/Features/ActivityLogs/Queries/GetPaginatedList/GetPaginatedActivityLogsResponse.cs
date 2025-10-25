@@ -1,5 +1,3 @@
-using BlogApp.Domain.Common.Responses;
-
 namespace BlogApp.Application.Features.ActivityLogs.Queries.GetPaginatedList;
 
 public class GetPaginatedActivityLogsResponse

@@ -19,7 +19,7 @@ public sealed class DbInitializer : IDbInitializer
     public async Task InitializeAsync(IServiceProvider serviceProvider, CancellationToken cancellationToken = default)
     {
         await using AsyncServiceScope scope = serviceProvider.CreateAsyncScope();
-        
+
         var dataContext = scope.ServiceProvider.GetRequiredService<BlogAppDbContext>();
         await dataContext.Database.MigrateAsync(cancellationToken);
 

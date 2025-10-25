@@ -14,7 +14,7 @@ namespace BlogApp.Persistence.Configurations
             // Indexes for "normalized" username and email, to allow efficient lookups
             b.HasIndex(u => u.NormalizedUserName).HasDatabaseName("UserNameIndex").IsUnique();
             b.HasIndex(u => u.NormalizedEmail).HasDatabaseName("EmailIndex");
-            
+
             // Ek performans indexleri
             b.HasIndex(u => u.Email).HasDatabaseName("IX_AppUsers_Email");
             b.HasIndex(u => u.UserName).HasDatabaseName("IX_AppUsers_UserName");

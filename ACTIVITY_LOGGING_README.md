@@ -1,147 +1,291 @@
-# BlogApp - Activity Logging & Advanced Logging
+# BlogApp - Activity Logging (Domain Events Pattern)# BlogApp - Activity Logging & Advanced Logging
 
-## 📊 Genel Bakış
 
-Bu doküman BlogApp'te implementa edilen gelişmiş loglama sisteminin detaylarını içerir.
 
-### Loglama Katmanları
+> ⚠️ **NOT:** Bu sistem artık **Domain Events Pattern** kullanmaktadır.## 📊 Genel Bakış
 
-1. **File Logs** - Development ve debugging için dosya tabanlı loglar
+>
+
+> Detaylı implementasyon bilgisi için: [DOMAIN_EVENTS_IMPLEMENTATION.md](DOMAIN_EVENTS_IMPLEMENTATION.md)Bu doküman BlogApp'te implementa edilen gelişmiş loglama sisteminin detaylarını içerir.
+
+
+
+## 📊 Hızlı Bakış### Loglama Katmanları
+
+
+
+Activity logging sistemi, kullanıcı aktivitelerini (post oluşturma, kategori silme, vb.) otomatik olarak kaydeder.1. **File Logs** - Development ve debugging için dosya tabanlı loglar
+
 2. **Structured Logs** - Production monitoring için PostgreSQL tabanlı structured loglar  
-3. **Activity Logs** - Compliance ve audit trail için kullanıcı aktivite logları
 
-## 🎯 Activity Log Sistemi
+### Nasıl Çalışır?3. **Activity Logs** - Compliance ve audit trail için kullanıcı aktivite logları
 
-### Özellikler
+
+
+1. **Command Handler** → Business logic yapılır, domain event raise edilir## 🎯 Activity Log Sistemi
+
+2. **DomainEventDispatcherBehavior** → Event'ler toplanır ve publish edilir  
+
+3. **Event Handlers** → ActivityLog, email, cache invalidation, vb. işlemler yapılır### Özellikler
+
 - ✅ **Otomatik Loglama:** MediatR pipeline behavior ile tüm Create/Update/Delete komutları otomatik loglanır
-- ✅ **Kullanıcı İzleme:** Hangi kullanıcının ne zaman ne yaptığını kaydeder
+
+### Örnek Flow- ✅ **Kullanıcı İzleme:** Hangi kullanıcının ne zaman ne yaptığını kaydeder
+
 - ✅ **Dashboard Entegrasyonu:** API endpoint'leri üzerinden aktiviteler sorgulanabilir
-- ✅ **Genişletilebilir Yapı:** Yeni entity tipleri kolayca eklenebilir
-- ✅ **Süresiz Saklama:** Compliance gereksinimleri için süresiz saklanır
 
-### Veritabanı Yapısı
+```csharp- ✅ **Genişletilebilir Yapı:** Yeni entity tipleri kolayca eklenebilir
 
-**ActivityLogs Tablosu:**
-```sql
-CREATE TABLE "ActivityLogs" (
-    "Id" SERIAL PRIMARY KEY,
-    "ActivityType" VARCHAR(50) NOT NULL,
-    "EntityType" VARCHAR(50) NOT NULL,
-    "EntityId" INTEGER,
-    "Title" VARCHAR(500) NOT NULL,
+// 1. Handler'da domain event raise et- ✅ **Süresiz Saklama:** Compliance gereksinimleri için süresiz saklanır
+
+public async Task<IResult> Handle(CreatePostCommand request, ...)
+
+{### Veritabanı Yapısı
+
+    var post = new Post { Title = request.Title, ... };
+
+    await _postRepository.AddAsync(post);**ActivityLogs Tablosu:**
+
+    await _unitOfWork.SaveChangesAsync();```sql
+
+    CREATE TABLE "ActivityLogs" (
+
+    // ✅ Domain event raise    "Id" SERIAL PRIMARY KEY,
+
+    post.AddDomainEvent(new PostCreatedEvent(post.Id, post.Title, ...));    "ActivityType" VARCHAR(50) NOT NULL,
+
+        "EntityType" VARCHAR(50) NOT NULL,
+
+    return new SuccessResult();    "EntityId" INTEGER,
+
+}    "Title" VARCHAR(500) NOT NULL,
+
     "Details" VARCHAR(2000),
-    "UserId" INTEGER,
-    "Timestamp" TIMESTAMP NOT NULL DEFAULT NOW(),
-    CONSTRAINT "FK_ActivityLogs_AppUsers" FOREIGN KEY ("UserId") 
-        REFERENCES "AppUsers"("Id") ON DELETE SET NULL
-);
 
-CREATE INDEX "IX_ActivityLogs_Timestamp" ON "ActivityLogs"("Timestamp");
-CREATE INDEX "IX_ActivityLogs_UserId" ON "ActivityLogs"("UserId");
-CREATE INDEX "IX_ActivityLogs_EntityType" ON "ActivityLogs"("EntityType");
-```
+// 2. Event handler otomatik çalışır    "UserId" INTEGER,
 
-### Loglanan Aktivite Tipleri
+public class PostCreatedEventHandler : INotificationHandler<PostCreatedEvent>    "Timestamp" TIMESTAMP NOT NULL DEFAULT NOW(),
 
-| ActivityType | EntityType | Açıklama |
-|-------------|------------|----------|
-| `post_created` | Post | Yeni blog yazısı oluşturuldu |
-| `post_updated` | Post | Blog yazısı güncellendi |
-| `post_deleted` | Post | Blog yazısı silindi |
-| `category_created` | Category | Yeni kategori oluşturuldu |
-| `category_updated` | Category | Kategori güncellendi |
-| `category_deleted` | Category | Kategori silindi |
-| `comment_created` | Comment | Yeni yorum yapıldı |
-| `comment_updated` | Comment | Yorum düzenlendi |
-| `comment_deleted` | Comment | Yorum silindi |
+{    CONSTRAINT "FK_ActivityLogs_AppUsers" FOREIGN KEY ("UserId") 
 
-## 🔧 Serilog Yapılandırması
+    public async Task Handle(PostCreatedEvent notification, ...)        REFERENCES "AppUsers"("Id") ON DELETE SET NULL
 
-### Log Sinks (Hedefler)
+    {);
 
-1. **Console Sink** - Development için renkli konsol çıktısı
-2. **File Sink** - Günlük rolling dosyalar (31 gün saklama, 10MB limit)
-3. **PostgreSQL Sink** - Structured logging (Information ve üzeri, 90 gün saklama)
-4. **Seq Sink** - Profesyonel log analiz ve görselleştirme platformu
+        // ActivityLog kaydet
 
-### Log Enrichers (Zenginleştirme)
+        var activityLog = new ActivityLogCREATE INDEX "IX_ActivityLogs_Timestamp" ON "ActivityLogs"("Timestamp");
 
-- **MachineName** - Sunucu adı
-- **Environment** - Development/Production
-- **ProcessId** - İşlem kimliği
-- **ThreadId** - Thread kimliği
-- **Application** - Uygulama adı (BlogApp)
-- **FromLogContext** - Request bazlı context bilgileri
+        {CREATE INDEX "IX_ActivityLogs_UserId" ON "ActivityLogs"("UserId");
 
-## � Kullanım Örnekleri
+            ActivityType = "post_created",CREATE INDEX "IX_ActivityLogs_EntityType" ON "ActivityLogs"("EntityType");
 
-### Otomatik Loglama (MediatR Pipeline)
+            EntityType = "Post",```
 
-Activity logging, `ActivityLoggingBehavior` MediatR pipeline behavior'u sayesinde otomatik çalışır:
+            Title = $"\"{notification.Title}\" oluşturuldu",
 
-```csharp
-// Post oluştururken
-var command = new CreatePostCommand 
-{ 
-    Title = "Yeni Blog Yazısı",
-    Content = "İçerik...",
-    CategoryId = 1
-};
-await _mediator.Send(command);
+            ...### Loglanan Aktivite Tipleri
 
-// ActivityLoggingBehavior otomatik olarak şunu loglar:
-// ActivityType: "post_created"
-// EntityType: "Post"
-// Title: "Yeni Blog Yazısı oluşturuldu"
-// UserId: Giriş yapmış kullanıcı ID
-// Timestamp: UTC zaman
-```
-
-### Manuel Activity Loglama
-
-Gerektiğinde repository'yi direkt kullanarak manuel log eklenebilir:
-
-```csharp
-public class CustomService
-{
-    private readonly IActivityLogRepository _activityLogRepository;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    public async Task CustomActionAsync()
-    {
-        var userId = _httpContextAccessor.HttpContext?.User
-            .FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        var activityLog = new ActivityLog
-        {
-            ActivityType = "custom_action",
-            EntityType = "CustomEntity",
-            Title = "Özel işlem gerçekleştirildi",
-            Details = "Ek detaylar...",
-            UserId = userId != null ? int.Parse(userId) : null
         };
 
-        await _activityLogRepository.AddAsync(activityLog);
-    }
-}
+        await _activityLogRepository.AddAsync(activityLog);| ActivityType | EntityType | Açıklama |
+
+        await _unitOfWork.SaveChangesAsync();|-------------|------------|----------|
+
+    }| `post_created` | Post | Yeni blog yazısı oluşturuldu |
+
+}| `post_updated` | Post | Blog yazısı güncellendi |
+
+```| `post_deleted` | Post | Blog yazısı silindi |
+
+| `category_created` | Category | Yeni kategori oluşturuldu |
+
+## 🎯 Loglanan Aktiviteler| `category_updated` | Category | Kategori güncellendi |
+
+| `category_deleted` | Category | Kategori silindi |
+
+| Event | Activity Type | Açıklama || `comment_created` | Comment | Yeni yorum yapıldı |
+
+|-------|--------------|----------|| `comment_updated` | Comment | Yorum düzenlendi |
+
+| `PostCreatedEvent` | `post_created` | Yeni post oluşturuldu || `comment_deleted` | Comment | Yorum silindi |
+
+| `PostUpdatedEvent` | `post_updated` | Post güncellendi |
+
+| `PostDeletedEvent` | `post_deleted` | Post silindi |## 🔧 Serilog Yapılandırması
+
+| `CategoryCreatedEvent` | `category_created` | Yeni kategori oluşturuldu |
+
+| `CategoryUpdatedEvent` | `category_updated` | Kategori güncellendi |### Log Sinks (Hedefler)
+
+| `CategoryDeletedEvent` | `category_deleted` | Kategori silindi |
+
+1. **Console Sink** - Development için renkli konsol çıktısı
+
+## 💾 Veritabanı Şeması2. **File Sink** - Günlük rolling dosyalar (31 gün saklama, 10MB limit)
+
+3. **PostgreSQL Sink** - Structured logging (Information ve üzeri, 90 gün saklama)
+
+```sql4. **Seq Sink** - Profesyonel log analiz ve görselleştirme platformu
+
+CREATE TABLE "ActivityLogs" (
+
+    "Id" SERIAL PRIMARY KEY,### Log Enrichers (Zenginleştirme)
+
+    "ActivityType" VARCHAR(50) NOT NULL,
+
+    "EntityType" VARCHAR(50) NOT NULL,- **MachineName** - Sunucu adı
+
+    "EntityId" INTEGER,- **Environment** - Development/Production
+
+    "Title" VARCHAR(500) NOT NULL,- **ProcessId** - İşlem kimliği
+
+    "Details" VARCHAR(2000),- **ThreadId** - Thread kimliği
+
+    "UserId" INTEGER,- **Application** - Uygulama adı (BlogApp)
+
+    "Timestamp" TIMESTAMP NOT NULL,- **FromLogContext** - Request bazlı context bilgileri
+
+    CONSTRAINT "FK_ActivityLogs_AppUsers" FOREIGN KEY ("UserId") 
+
+        REFERENCES "AppUsers"("Id") ON DELETE SET NULL## � Kullanım Örnekleri
+
+);
+
+```### Otomatik Loglama (MediatR Pipeline)
+
+
+
+## 🔍 Activity Log SorgulamaActivity logging, `ActivityLoggingBehavior` MediatR pipeline behavior'u sayesinde otomatik çalışır:
+
+
+
+### API Endpoint```csharp
+
+```// Post oluştururken
+
+GET /api/activitylogs?pageIndex=0&pageSize=20var command = new CreatePostCommand 
+
+```{ 
+
+    Title = "Yeni Blog Yazısı",
+
+### Response    Content = "İçerik...",
+
+```json    CategoryId = 1
+
+{};
+
+  "items": [await _mediator.Send(command);
+
+    {
+
+      "id": 1,// ActivityLoggingBehavior otomatik olarak şunu loglar:
+
+      "activityType": "post_created",// ActivityType: "post_created"
+
+      "entityType": "Post",// EntityType: "Post"
+
+      "entityId": 42,// Title: "Yeni Blog Yazısı oluşturuldu"
+
+      "title": "\"Yeni Blog Yazısı\" oluşturuldu",// UserId: Giriş yapmış kullanıcı ID
+
+      "userId": 5,// Timestamp: UTC zaman
+
+      "userName": "admin",```
+
+      "timestamp": "2025-10-25T10:30:00Z"
+
+    }### Manuel Activity Loglama
+
+  ],
+
+  "pageIndex": 0,Gerektiğinde repository'yi direkt kullanarak manuel log eklenebilir:
+
+  "pageSize": 20,
+
+  "totalCount": 150```csharp
+
+}public class CustomService
+
+```{
+
+    private readonly IActivityLogRepository _activityLogRepository;
+
+## ✨ Yeni Özellik Ekleme    private readonly IHttpContextAccessor _httpContextAccessor;
+
+
+
+Domain Events sayesinde yeni özellikler eklemek çok kolay:    public async Task CustomActionAsync()
+
+    {
+
+### Örnek: Email Notification Ekleme        var userId = _httpContextAccessor.HttpContext?.User
+
+            .FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+```csharp
+
+public class PostCreatedEmailHandler : INotificationHandler<PostCreatedEvent>        var activityLog = new ActivityLog
+
+{        {
+
+    private readonly IEmailService _emailService;            ActivityType = "custom_action",
+
+                EntityType = "CustomEntity",
+
+    public async Task Handle(PostCreatedEvent notification, ...)            Title = "Özel işlem gerçekleştirildi",
+
+    {            Details = "Ek detaylar...",
+
+        await _emailService.SendAsync(            UserId = userId != null ? int.Parse(userId) : null
+
+            to: "admin@blogapp.com",        };
+
+            subject: "Yeni Post Oluşturuldu",
+
+            body: $"Post: {notification.Title}"        await _activityLogRepository.AddAsync(activityLog);
+
+        );    }
+
+    }}
+
+}```
+
 ```
 
 ### Activity Log Sorgulama
 
+MediatR bu handler'ı otomatik bulur ve `PostCreatedEvent` raise edildiğinde çalıştırır!
+
 API endpoint'i üzerinden son aktiviteleri sorgulama:
 
-```http
-GET /api/dashboard/activities?pageSize=10
-Authorization: Bearer {token}
-```
+## 📚 İlgili Dökümanlar
 
-Response:
+```http
+
+- **[Domain Events Implementation](DOMAIN_EVENTS_IMPLEMENTATION.md)** - Detaylı implementasyon rehberiGET /api/dashboard/activities?pageSize=10
+
+- **[Logging Architecture](LOGGING_ARCHITECTURE.md)** - Genel logging mimarisiAuthorization: Bearer {token}
+
+- **[Transaction Management](TRANSACTION_MANAGEMENT_STRATEGY.md)** - Transaction stratejisi```
+
+
+
+## 🎓 Domain Events Pattern AvantajlarıResponse:
+
 ```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": 42,
+
+✅ **Separation of Concerns** - Activity logging business logic'ten ayrı  {
+
+✅ **Testability** - Her event handler ayrı test edilebilir    "success": true,
+
+✅ **Extensibility** - Yeni handler'lar kolayca eklenir    "data": [
+
+✅ **SOLID Principles** - Single Responsibility, Open/Closed      {
+
+✅ **Domain-Driven Design** - Domain expert'lerin konuştuğu event'ler      "id": 42,
+
       "activityType": "post_created",
       "entityType": "Post",
       "title": "Yeni Blog Yazısı oluşturuldu",

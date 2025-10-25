@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using BlogApp.Application.Abstractions.Identity;
-using BlogApp.Application.Features.Categories.Queries.GetPaginatedListByDynamic;
 using BlogApp.Domain.Common.Paging;
 using BlogApp.Domain.Common.Responses;
 using BlogApp.Domain.Entities;

@@ -6,7 +6,7 @@ namespace BlogApp.Application.Features.Dashboards.Queries.GetStatistics;
 
 public sealed class GetStatisticsQueryHandler(
     IPostRepository postRepository,
-    ICategoryRepository categoryRepository) 
+    ICategoryRepository categoryRepository)
     : IRequestHandler<GetStatisticsQuery, GetStatisticsResponse>
 {
     public async Task<GetStatisticsResponse> Handle(GetStatisticsQuery request, CancellationToken cancellationToken)

@@ -1,8 +1,5 @@
 using BlogApp.Domain.Repositories;
 using MediatR;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace BlogApp.Application.Features.Dashboards.Queries.GetRecentActivities;
 

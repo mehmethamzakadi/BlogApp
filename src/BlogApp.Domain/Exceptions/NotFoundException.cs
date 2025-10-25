@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace BlogApp.Domain.Exceptions
+﻿namespace BlogApp.Domain.Exceptions
 {
     public class NotFoundException : ApplicationException
     {

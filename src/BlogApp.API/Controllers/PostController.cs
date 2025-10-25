@@ -3,7 +3,6 @@ using BlogApp.Application.Features.Posts.Commands.Delete;
 using BlogApp.Application.Features.Posts.Commands.Update;
 using BlogApp.Application.Features.Posts.Queries.GetById;
 using BlogApp.Application.Features.Posts.Queries.GetList;
-using BlogApp.Application.Features.Posts.Queries.GetListByCategoryId;
 using BlogApp.Application.Features.Posts.Queries.GetPaginatedListByDynamic;
 using BlogApp.Domain.Common.Requests;
 using BlogApp.Domain.Common.Responses;
@@ -55,7 +54,7 @@ namespace BlogApp.API.Controllers
         {
             if (id != command.Id)
                 return BadRequest("ID mismatch");
-            
+
             return GetResponseOnlyResultMessage(await Mediator.Send(command));
         }
 

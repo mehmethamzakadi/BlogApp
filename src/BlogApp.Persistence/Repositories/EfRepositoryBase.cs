@@ -390,7 +390,7 @@ where TContext : DbContext
     public ICollection<TEntity> UpdateRange(ICollection<TEntity> entities)
     {
         foreach (TEntity entity in entities)
-          entity.UpdatedDate = DateTime.UtcNow;
+            entity.UpdatedDate = DateTime.UtcNow;
         Context.UpdateRange(entities);
         // SaveChanges kaldırıldı
         return entities;

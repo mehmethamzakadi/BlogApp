@@ -1,11 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using BlogApp.Application.Abstractions.Identity;
 using BlogApp.Application.Features.Auths.Login;
 using BlogApp.Domain.Entities;
@@ -13,6 +5,10 @@ using BlogApp.Domain.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 using TokenOptions = BlogApp.Domain.Options.TokenOptions;
 
 namespace BlogApp.Infrastructure.Services.Identity;
@@ -52,13 +48,13 @@ public sealed class JwtTokenService : ITokenService
             signingCredentials: signingCredentials);
 
         var refreshToken = GenerateRefreshToken();
-        
+
         // Extract permissions from claims
         var permissions = claims
             .Where(c => c.Type == "permission")
             .Select(c => c.Value)
             .ToList();
-        
+
         var tokenResponse = new LoginResponse(
             UserId: user.Id,
             UserName: user.UserName ?? string.Empty,

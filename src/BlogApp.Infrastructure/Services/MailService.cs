@@ -1,7 +1,3 @@
-
-using System;
-using System.Net;
-using System.Text;
 using BlogApp.Application.Abstractions;
 using BlogApp.Domain.Options;
 using MailKit.Net.Smtp;
@@ -9,6 +5,8 @@ using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using MimeKit.Text;
+using System.Net;
+using System.Text;
 
 namespace BlogApp.Infrastructure.Services;
 

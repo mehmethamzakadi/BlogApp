@@ -27,7 +27,7 @@ public class BulkDeleteRolesCommandHandler : IRequestHandler<BulkDeleteRolesComm
             try
             {
                 var role = await _roleManager.FindByIdAsync(roleId.ToString());
-                
+
                 if (role == null)
                 {
                     response.Errors.Add($"Rol bulunamadı: ID {roleId}");
@@ -44,7 +44,7 @@ public class BulkDeleteRolesCommandHandler : IRequestHandler<BulkDeleteRolesComm
                 }
 
                 var result = await _roleManager.DeleteAsync(role);
-                
+
                 if (result.Succeeded)
                 {
                     response.DeletedCount++;
