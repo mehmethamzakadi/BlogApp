@@ -1,4 +1,5 @@
-
+using BlogApp.Application.Behaviors.Transaction;
+using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Repositories;
@@ -6,7 +7,9 @@ using MediatR;
 
 namespace BlogApp.Application.Features.Posts.Commands.Create;
 
-public sealed class CreatePostCommandHandler(IPostRepository postRepository) : IRequestHandler<CreatePostCommand, IResult>
+public sealed class CreatePostCommandHandler(
+    IPostRepository postRepository,
+    IUnitOfWork unitOfWork) : IRequestHandler<CreatePostCommand, IResult>
 {
     public async Task<IResult> Handle(CreatePostCommand request, CancellationToken cancellationToken)
     {
@@ -21,6 +24,7 @@ public sealed class CreatePostCommandHandler(IPostRepository postRepository) : I
         };
 
         await postRepository.AddAsync(post);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new SuccessResult("Post bilgisi başarıyla eklendi.");
     }

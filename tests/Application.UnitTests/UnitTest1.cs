@@ -1,4 +1,3 @@
-
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -66,12 +65,18 @@ public class CreatePostCommandHandlerTests
             .Setup(repo => repo.AddAsync(It.IsAny<Post>()))
             .ReturnsAsync((Post post) => post);
 
-        var handler = new CreatePostCommandHandler(repositoryMock.Object);
+        var unitOfWorkMock = new Mock<BlogApp.Domain.Common.IUnitOfWork>();
+        unitOfWorkMock
+            .Setup(uow => uow.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(1);
+
+        var handler = new CreatePostCommandHandler(repositoryMock.Object, unitOfWorkMock.Object);
         var command = new CreatePostCommand("Title", "Body", "Summary", "thumb", true, 5);
 
         IResult result = await handler.Handle(command, CancellationToken.None);
 
         Assert.That(result.Success, Is.True);
         repositoryMock.Verify(repo => repo.AddAsync(It.Is<Post>(post => post.CategoryId == 5 && post.Title == "Title")), Times.Once);
+        unitOfWorkMock.Verify(uow => uow.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 }

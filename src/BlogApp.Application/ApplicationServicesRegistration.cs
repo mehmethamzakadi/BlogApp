@@ -1,5 +1,4 @@
 ﻿using BlogApp.Application.Behaviors;
-using BlogApp.Application.Behaviors.Logging;
 using BlogApp.Application.Behaviors.Transaction;
 using BlogApp.Domain.Options;
 using FluentValidation;

@@ -1,7 +1,10 @@
+using BlogApp.Domain.Entities;
 using BlogApp.Persistence.Contexts;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using NpgsqlTypes;
 using Serilog;
 using Serilog.Core;
@@ -16,8 +19,15 @@ public sealed class DbInitializer : IDbInitializer
     public async Task InitializeAsync(IServiceProvider serviceProvider, CancellationToken cancellationToken = default)
     {
         await using AsyncServiceScope scope = serviceProvider.CreateAsyncScope();
+        
         var dataContext = scope.ServiceProvider.GetRequiredService<BlogAppDbContext>();
         await dataContext.Database.MigrateAsync(cancellationToken);
+
+        // Permission'ları seed et
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<AppRole>>();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<PermissionSeeder>>();
+        var permissionSeeder = new PermissionSeeder(dataContext, roleManager, logger);
+        await permissionSeeder.SeedPermissionsAsync();
     }
 
     public Task EnsurePostgreSqlSerilogTableAsync(IConfiguration configuration, CancellationToken cancellationToken = default)

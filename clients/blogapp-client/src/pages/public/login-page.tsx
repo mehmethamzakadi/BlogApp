@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { login } from '../../features/auth/api';
 import { useAuthStore } from '../../stores/auth-store';
@@ -11,11 +11,11 @@ import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import toast from 'react-hot-toast';
-import { handleApiError } from '../../lib/api-error';
+import { handleApiError, showApiResponseError } from '../../lib/api-error';
 
 const loginSchema = z.object({
   email: z.string().email('Geçerli bir e-posta adresi girin'),
-  password: z.string().min(6, 'Şifre en az 6 karakter olmalıdır')
+  password: z.string().min(1, 'Şifre boş olamaz')
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -41,7 +41,7 @@ export function LoginPage() {
     mutationFn: login,
     onSuccess: (response) => {
       if (!response.success) {
-        toast.error(response.message || 'Giriş başarısız oldu');
+        showApiResponseError(response, 'Giriş başarısız oldu');
         return;
       }
 
@@ -50,7 +50,8 @@ export function LoginPage() {
           userId: response.data.userId,
           userName: response.data.userName,
           expiration: response.data.expiration,
-          refreshToken: response.data.refreshToken
+          refreshToken: response.data.refreshToken,
+          permissions: response.data.permissions || []
         },
         token: response.data.token
       });
@@ -100,6 +101,12 @@ export function LoginPage() {
               <Button type="submit" className="w-full" disabled={isPending}>
                 {isPending ? 'Giriş yapılıyor...' : 'Giriş Yap'}
               </Button>
+              <div className="text-center text-sm">
+                Hesabınız yok mu?{' '}
+                <Link to="/register" className="text-primary hover:underline">
+                  Kayıt Ol
+                </Link>
+              </div>
             </form>
           </CardContent>
         </Card>

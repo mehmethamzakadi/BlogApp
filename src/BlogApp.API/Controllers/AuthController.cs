@@ -2,6 +2,7 @@ using BlogApp.Application.Features.Auths.Login;
 using BlogApp.Application.Features.Auths.PasswordReset;
 using BlogApp.Application.Features.Auths.PasswordVerify;
 using BlogApp.Application.Features.Auths.RefreshToken;
+using BlogApp.Application.Features.Auths.Register;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +11,14 @@ namespace BlogApp.API.Controllers
 {
     public class AuthController(IMediator mediator) : BaseApiController(mediator)
     {
+        [AllowAnonymous]
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterCommand command)
+        {
+            var result = await Mediator.Send(command);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
         [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginCommand command)

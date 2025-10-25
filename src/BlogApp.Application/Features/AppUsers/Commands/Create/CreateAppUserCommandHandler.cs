@@ -28,10 +28,10 @@ public sealed class CreateAppUserCommandHandler(IUserService userService) : IReq
         IdentityResult creationResult = await userService.CreateAsync(user, request.Password);
         if (!creationResult.Succeeded)
         {
-            string message = "Kullanıcı oluşturulurken hatalar oluştu: " +
-                             string.Join("; ", creationResult.Errors.Select(error => $"{error.Code}-{error.Description}"));
+            List<string> errors = creationResult.Errors.Select(error => error.Description).ToList();
+            string message = "Kullanıcı oluşturulurken hatalar oluştu";
 
-            return new ErrorResult(message);
+            return new ErrorResult(message, errors);
         }
 
         await userService.AddToRoleAsync(user, UserRoles.User);

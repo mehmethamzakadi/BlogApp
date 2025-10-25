@@ -34,5 +34,7 @@ namespace BlogApp.Persistence.Contexts
         public DbSet<Comment> Comments { get; set; }
         public DbSet<AppUserToken> AppUserTokens { get; set; }
         public DbSet<ActivityLog> ActivityLogs { get; set; }
+        public DbSet<Permission> Permissions { get; set; }
+        public DbSet<AppRolePermission> AppRolePermissions { get; set; }
     }
 }

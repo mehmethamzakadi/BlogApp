@@ -26,7 +26,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Separator } from '../../components/ui/separator';
 import { Badge } from '../../components/ui/badge';
-import { handleApiError } from '../../lib/api-error';
+import { handleApiError, showApiResponseError } from '../../lib/api-error';
 import { cn } from '../../lib/utils';
 
 const fieldMap: Record<string, string> = {
@@ -204,7 +204,7 @@ export function PostsPage() {
     mutationFn: (postId: number) => deletePost(postId),
     onSuccess: (result) => {
       if (!result.success) {
-        toast.error(result.message || 'Gönderi silinemedi');
+        showApiResponseError(result, 'Gönderi silinemedi');
         return;
       }
       toast.success(result.message || 'Gönderi silindi');

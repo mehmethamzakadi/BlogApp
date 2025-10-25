@@ -1,11 +1,13 @@
-
+using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Repositories;
 using MediatR;
 
 namespace BlogApp.Application.Features.Posts.Commands.Update;
 
-public sealed class UpdatePostCommandHandler(IPostRepository postRepository) : IRequestHandler<UpdatePostCommand, IResult>
+public sealed class UpdatePostCommandHandler(
+    IPostRepository postRepository,
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdatePostCommand, IResult>
 {
     public async Task<IResult> Handle(UpdatePostCommand request, CancellationToken cancellationToken)
     {
@@ -23,6 +25,7 @@ public sealed class UpdatePostCommandHandler(IPostRepository postRepository) : I
         entity.CategoryId = request.CategoryId;
 
         await postRepository.UpdateAsync(entity);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new SuccessResult("Post bilgisi başarıyla güncellendi.");
     }

@@ -6,6 +6,7 @@ export interface AuthUser {
   userName: string;
   expiration: string;
   refreshToken: string;
+  permissions: string[];
 }
 
 interface AuthState {

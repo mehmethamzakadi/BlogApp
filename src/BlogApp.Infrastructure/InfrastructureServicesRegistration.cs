@@ -1,4 +1,3 @@
-
 using System;
 using System.Text;
 using BlogApp.Application.Abstractions;
@@ -6,12 +5,14 @@ using BlogApp.Application.Abstractions.Identity;
 using BlogApp.Domain.Constants;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Options;
+using BlogApp.Infrastructure.Authorization;
 using BlogApp.Infrastructure.Consumers;
 using BlogApp.Infrastructure.Services;
 using BlogApp.Infrastructure.Services.Identity;
 using BlogApp.Persistence.Contexts;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -43,6 +44,7 @@ namespace BlogApp.Infrastructure
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@";
                 options.User.RequireUniqueEmail = true;
             })
+                .AddErrorDescriber<TurkishIdentityErrorDescriber>()
                 .AddRoleManager<RoleManager<AppRole>>()
                 .AddEntityFrameworkStores<BlogAppDbContext>()
                 .AddDefaultTokenProviders();
@@ -122,6 +124,18 @@ namespace BlogApp.Infrastructure
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IRoleService, RoleService>();
+            
+            // Authorization
+            services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
+            services.AddAuthorizationCore(options =>
+            {
+                // Permission'lar için policy'ler oluştur
+                foreach (var permission in Permissions.GetAllPermissions())
+                {
+                    options.AddPolicy(permission, policy =>
+                        policy.Requirements.Add(new PermissionRequirement(permission)));
+                }
+            });
             
             // Register log cleanup background service
             services.AddHostedService<LogCleanupService>();

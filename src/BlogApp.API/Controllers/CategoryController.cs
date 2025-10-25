@@ -6,6 +6,8 @@ using BlogApp.Application.Features.Categories.Queries.GetById;
 using BlogApp.Application.Features.Categories.Queries.GetPaginatedListByDynamic;
 using BlogApp.Domain.Common.Requests;
 using BlogApp.Domain.Common.Responses;
+using BlogApp.Domain.Constants;
+using BlogApp.Infrastructure.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +17,7 @@ namespace BlogApp.API.Controllers
     public class CategoryController(IMediator mediator) : BaseApiController(mediator)
     {
         [HttpPost("search")]
+        [HasPermission(Permissions.CategoriesViewAll)]
         public async Task<IActionResult> Search([FromBody] DataGridRequest dataGridRequest)
         {
             PaginatedListResponse<GetPaginatedListByDynamicCategoriesResponse> response = await Mediator.Send(new GetPaginatedListByDynamicCategoriesQuery(dataGridRequest));
@@ -30,6 +33,7 @@ namespace BlogApp.API.Controllers
         }
 
         [HttpGet("{id}")]
+        [HasPermission(Permissions.CategoriesRead)]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
             var response = await Mediator.Send(new GetByIdCategoryQuery(id));
@@ -37,6 +41,7 @@ namespace BlogApp.API.Controllers
         }
 
         [HttpPost]
+        [HasPermission(Permissions.CategoriesCreate)]
         public async Task<IActionResult> Create([FromBody] CreateCategoryCommand command)
         {
             var response = await Mediator.Send(command);
@@ -44,6 +49,7 @@ namespace BlogApp.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [HasPermission(Permissions.CategoriesUpdate)]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateCategoryCommand command)
         {
             if (id != command.Id)
@@ -54,6 +60,7 @@ namespace BlogApp.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [HasPermission(Permissions.CategoriesDelete)]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
             var response = await Mediator.Send(new DeleteCategoryCommand(id));

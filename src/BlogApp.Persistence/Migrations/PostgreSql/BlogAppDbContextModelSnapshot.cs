@@ -156,6 +156,30 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                     b.ToTable("AppRoleClaims", (string)null);
                 });
 
+            modelBuilder.Entity("BlogApp.Domain.Entities.AppRolePermission", b =>
+                {
+                    b.Property<int>("RoleId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PermissionId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("GrantedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.HasKey("RoleId", "PermissionId");
+
+                    b.HasIndex("PermissionId")
+                        .HasDatabaseName("IX_AppRolePermissions_PermissionId");
+
+                    b.HasIndex("RoleId")
+                        .HasDatabaseName("IX_AppRolePermissions_RoleId");
+
+                    b.ToTable("AppRolePermissions", (string)null);
+                });
+
             modelBuilder.Entity("BlogApp.Domain.Entities.AppUser", b =>
                 {
                     b.Property<int>("Id")
@@ -233,13 +257,13 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         {
                             Id = 1,
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "e3b1bea1-05e8-4073-baa0-6b31ee826516",
+                            ConcurrencyStamp = "ab7bded6-4a2b-4228-9439-34b09c7dfb5b",
                             Email = "admin@admin.com",
                             EmailConfirmed = false,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@ADMIN.COM",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEEYYR5R7BcJ7zzXeb49j+PWJPEObVZTOagwm1f669W5hlEO8ZqPmJG4OyCbjTkmMdg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEGBY8IRyufHh5xKPO6tFwC6y6H12Jj5P89+9DGfXPkcq6VMFPO4vdQdyC5V6N85KcA==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "b1a1d25f-8a7e-4e9a-bc55-8dca5bfa1234",
                             TwoFactorEnabled = false,
@@ -545,6 +569,63 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                     b.ToTable("Images");
                 });
 
+            modelBuilder.Entity("BlogApp.Domain.Entities.Permission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CreatedById")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Module")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int?>("UpdatedById")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Permissions_Name");
+
+                    b.HasIndex("Module", "Type")
+                        .HasDatabaseName("IX_Permissions_Module_Type");
+
+                    b.ToTable("Permissions", (string)null);
+                });
+
             modelBuilder.Entity("BlogApp.Domain.Entities.Post", b =>
                 {
                     b.Property<int>("Id")
@@ -632,6 +713,25 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("BlogApp.Domain.Entities.AppRolePermission", b =>
+                {
+                    b.HasOne("BlogApp.Domain.Entities.Permission", "Permission")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BlogApp.Domain.Entities.AppRole", "Role")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("Role");
+                });
+
             modelBuilder.Entity("BlogApp.Domain.Entities.AppUserClaim", b =>
                 {
                     b.HasOne("BlogApp.Domain.Entities.AppUser", null)
@@ -700,6 +800,16 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         .IsRequired();
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("BlogApp.Domain.Entities.AppRole", b =>
+                {
+                    b.Navigation("RolePermissions");
+                });
+
+            modelBuilder.Entity("BlogApp.Domain.Entities.Permission", b =>
+                {
+                    b.Navigation("RolePermissions");
                 });
 
             modelBuilder.Entity("BlogApp.Domain.Entities.Post", b =>

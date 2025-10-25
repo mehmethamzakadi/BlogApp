@@ -166,7 +166,44 @@ BlogApp **3-katmanlı loglama mimarisi** kullanır:
 
 ---
 
-## 📚 Ek Kaynaklar
+## � Yetkilendirme & Güvenlik
+
+BlogApp **permission-based authorization** sistemi kullanır:
+
+### Özellikler
+- ✅ **JWT-based Authentication** - Güvenli token tabanlı kimlik doğrulama
+- ✅ **Permission-based Authorization** - Granüler yetki kontrolü
+- ✅ **Route Guards** - Sayfa seviyesinde erişim kontrolü
+- ✅ **UI Guards** - Component/buton seviyesinde görünürlük kontrolü
+- ✅ **403 Forbidden Page** - Kullanıcı dostu erişim engelleme sayfası
+- ✅ **Dynamic Sidebar** - Kullanıcı yetkilerine göre menü filtreleme
+
+### Kullanım
+```typescript
+// Route koruması
+<ProtectedRoute requiredPermission={Permissions.UsersViewAll}>
+  <UsersPage />
+</ProtectedRoute>
+
+// UI element koruması
+<PermissionGuard requiredPermission={Permissions.UsersCreate}>
+  <Button>Yeni Kullanıcı</Button>
+</PermissionGuard>
+
+// Hook kullanımı
+const { hasPermission } = usePermission();
+if (hasPermission(Permissions.PostsDelete)) {
+  // İşlem yap
+}
+```
+
+**📖 Detaylı Dokümantasyon:**
+- [PERMISSION_GUARDS_GUIDE.md](PERMISSION_GUARDS_GUIDE.md) - Kapsamlı implementasyon kılavuzu
+- [PERMISSION_CHEATSHEET.md](PERMISSION_CHEATSHEET.md) - Hızlı referans
+
+---
+
+## �📚 Ek Kaynaklar
 
 - [ANALYSIS.md](ANALYSIS.md) - Kod tabanı analizi ve iyileştirme önerileri
 - [Solution Items/Migrations.txt](Solution%20Items/Migrations.txt) - Veritabanı migration notları

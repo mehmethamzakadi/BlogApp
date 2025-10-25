@@ -1,26 +1,54 @@
 import { NavLink } from 'react-router-dom';
-import { FolderKanban, LayoutDashboard, FileText } from 'lucide-react';
+import { FolderKanban, LayoutDashboard, FileText, Users, Shield, Activity } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { usePermission } from '../../hooks/use-permission';
+import { Permissions } from '../../lib/permissions';
 
 const links = [
   {
     to: '/admin/dashboard',
     label: 'Dashboard',
-    icon: LayoutDashboard
+    icon: LayoutDashboard,
+    requiredPermission: Permissions.DashboardView
   },
   {
     to: '/admin/categories',
     label: 'Kategoriler',
-    icon: FolderKanban
+    icon: FolderKanban,
+    requiredPermission: Permissions.CategoriesViewAll
   },
   {
     to: '/admin/posts',
     label: 'Gönderiler',
-    icon: FileText
+    icon: FileText,
+    requiredPermission: Permissions.PostsViewAll
+  },
+  {
+    to: '/admin/users',
+    label: 'Kullanıcılar',
+    icon: Users,
+    requiredPermission: Permissions.UsersViewAll
+  },
+  {
+    to: '/admin/roles',
+    label: 'Roller & Yetkiler',
+    icon: Shield,
+    requiredPermission: Permissions.RolesViewAll
+  },
+  {
+    to: '/admin/activity-logs',
+    label: 'Aktivite Logları',
+    icon: Activity,
+    requiredPermission: Permissions.DashboardView
   }
 ];
 
 export function AdminSidebar({ collapsed }: { collapsed: boolean }) {
+  const { hasPermission } = usePermission();
+
+  // Permission'a göre menü itemlarını filtrele
+  const visibleLinks = links.filter((link) => hasPermission(link.requiredPermission));
+
   return (
     <aside
       className={cn(
@@ -32,7 +60,7 @@ export function AdminSidebar({ collapsed }: { collapsed: boolean }) {
         {collapsed ? 'BA' : 'BlogApp'}
       </div>
       <nav className="space-y-1 p-4">
-        {links.map((link) => (
+        {visibleLinks.map((link) => (
           <NavLink
             key={link.to}
             to={link.to}

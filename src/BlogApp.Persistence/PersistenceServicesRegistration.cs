@@ -1,4 +1,5 @@
-﻿using BlogApp.Domain.Repositories;
+﻿using BlogApp.Domain.Common;
+using BlogApp.Domain.Repositories;
 using BlogApp.Persistence.Contexts;
 using BlogApp.Persistence.DatabaseInitializer;
 using BlogApp.Persistence.Repositories;
@@ -30,7 +31,11 @@ public static class PersistenceServicesRegistration
         services.AddScoped<IImageRepository, ImageRepository>();
         services.AddScoped<IPostRepository, PostRepository>();
         services.AddScoped<IActivityLogRepository, ActivityLogRepository>();
+        services.AddScoped<IPermissionRepository, PermissionRepository>();
         services.AddScoped<IDbInitializer, DbInitializer>();
+        
+        // Unit of Work registration
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
     }

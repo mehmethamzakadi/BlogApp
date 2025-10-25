@@ -5,4 +5,5 @@ public sealed record LoginResponse(
     string UserName,
     DateTime Expiration,
     string Token,
-    string RefreshToken);
+    string RefreshToken,
+    List<string> Permissions);

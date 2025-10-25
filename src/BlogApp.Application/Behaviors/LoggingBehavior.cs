@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Serilog;
 
-namespace BlogApp.Application.Behaviors.Logging
+namespace BlogApp.Application.Behaviors
 {
     public sealed class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>

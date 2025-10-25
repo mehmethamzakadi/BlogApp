@@ -34,11 +34,11 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Separator } from '../../components/ui/separator';
 import toast from 'react-hot-toast';
-import { handleApiError } from '../../lib/api-error';
+import { handleApiError, showApiResponseError } from '../../lib/api-error';
 import { cn } from '../../lib/utils';
 
 const categorySchema = z.object({
-  name: z.string().min(2, 'Kategori adı en az 2 karakter olmalıdır')
+  name: z.string().min(5, 'Kategori adı en az 5 karakter olmalıdır').max(100, 'Kategori adı en fazla 100 karakter olabilir')
 });
 
 type CategoryFormSchema = z.infer<typeof categorySchema>;
@@ -174,7 +174,7 @@ export function CategoriesPage() {
     mutationFn: createCategory,
     onSuccess: (result) => {
       if (!result.success) {
-        toast.error(result.message || 'Kategori eklenemedi');
+        showApiResponseError(result, 'Kategori eklenemedi');
         return;
       }
       toast.success(result.message || 'Kategori eklendi');
@@ -191,7 +191,7 @@ export function CategoriesPage() {
       editingCategory ? updateCategory(editingCategory.id, values) : Promise.reject(),
     onSuccess: (result) => {
       if (!result.success) {
-        toast.error(result.message || 'Kategori güncellenemedi');
+        showApiResponseError(result, 'Kategori güncellenemedi');
         return;
       }
       toast.success(result.message || 'Kategori güncellendi');
@@ -207,7 +207,7 @@ export function CategoriesPage() {
     mutationFn: (categoryId: number) => deleteCategory(categoryId),
     onSuccess: (result) => {
       if (!result.success) {
-        toast.error(result.message || 'Kategori silinemedi');
+        showApiResponseError(result, 'Kategori silinemedi');
         return;
       }
       toast.success(result.message || 'Kategori silindi');

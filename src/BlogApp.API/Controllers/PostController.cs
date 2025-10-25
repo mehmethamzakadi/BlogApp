@@ -7,6 +7,8 @@ using BlogApp.Application.Features.Posts.Queries.GetListByCategoryId;
 using BlogApp.Application.Features.Posts.Queries.GetPaginatedListByDynamic;
 using BlogApp.Domain.Common.Requests;
 using BlogApp.Domain.Common.Responses;
+using BlogApp.Domain.Constants;
+using BlogApp.Infrastructure.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,6 +26,7 @@ namespace BlogApp.API.Controllers
         }
 
         [HttpPost("search")]
+        [HasPermission(Permissions.PostsViewAll)]
         public async Task<IActionResult> Search([FromBody] DataGridRequest dataGridRequest)
         {
             PaginatedListResponse<GetPaginatedListByDynamicPostsResponse> response = await Mediator.Send(new GetPaginatedListByDynamicPostsQuery(dataGridRequest));
@@ -40,12 +43,14 @@ namespace BlogApp.API.Controllers
         }
 
         [HttpPost]
+        [HasPermission(Permissions.PostsCreate)]
         public async Task<IActionResult> Create([FromBody] CreatePostCommand command)
         {
             return GetResponseOnlyResultMessage(await Mediator.Send(command));
         }
 
         [HttpPut("{id}")]
+        [HasPermission(Permissions.PostsUpdate)]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdatePostCommand command)
         {
             if (id != command.Id)
@@ -55,6 +60,7 @@ namespace BlogApp.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [HasPermission(Permissions.PostsDelete)]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
             return GetResponseOnlyResultMessage(await Mediator.Send(new DeletePostCommand(id)));

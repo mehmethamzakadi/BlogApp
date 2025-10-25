@@ -1,6 +1,7 @@
 import axios, { AxiosHeaders, InternalAxiosRequestConfig } from 'axios';
 import { normalizeApiError } from '../types/api';
 import { useAuthStore } from '../stores/auth-store';
+import toast from 'react-hot-toast';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -47,8 +48,21 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-    // 401 hatası ve henüz retry edilmemişse
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // 403 Forbidden - Yetki hatası
+    if (error.response?.status === 403) {
+      toast.error('Bu işlem için yetkiniz bulunmamaktadır.', {
+        duration: 4000,
+        icon: '🔒',
+      });
+      return Promise.reject(normalizeApiError(error, 'Bu işlem için yetkiniz bulunmamaktadır.'));
+    }
+
+    // Login, register gibi authentication endpoint'leri için 401 hatasını ignore et
+    const authEndpoints = ['/auth/login', '/auth/register', '/Auth/Login', '/Auth/Register'];
+    const isAuthEndpoint = authEndpoints.some(endpoint => originalRequest.url?.toLowerCase().includes(endpoint.toLowerCase()));
+
+    // 401 hatası ve henüz retry edilmemişse ve auth endpoint değilse
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
       if (isRefreshing) {
         // Zaten token yenileniyor, sıraya ekle
         return new Promise((resolve, reject) => {
@@ -90,7 +104,8 @@ api.interceptors.response.use(
           userId: response.data.data.userId,
           userName: response.data.data.userName,
           expiration: response.data.data.expiration,
-          refreshToken: response.data.data.refreshToken
+          refreshToken: response.data.data.refreshToken,
+          permissions: response.data.data.permissions || []
         };
 
         // Store'u güncelle

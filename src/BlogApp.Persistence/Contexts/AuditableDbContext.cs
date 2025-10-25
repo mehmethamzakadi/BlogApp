@@ -20,24 +20,30 @@ namespace BlogApp.Persistence.Contexts
             var userIdClaim = _httpContextAccessor?.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var userId = int.TryParse(userIdClaim, out var parsedUserId) ? parsedUserId : 0;
             
+            // Eğer kullanıcı yoksa (seed işlemleri için), system kullanıcısı olarak işaretle
+            // Gerçek API isteklerinde userId mutlaka olmalı
+            var isSystemOperation = userId == 0 && _httpContextAccessor?.HttpContext == null;
+            var effectiveUserId = isSystemOperation ? 1 : userId; // System operations için ID 1 kullan
+            
             foreach (var entry in base.ChangeTracker.Entries<BaseEntity>()
                .Where(q => q.State == EntityState.Added || q.State == EntityState.Modified || q.State == EntityState.Deleted))
             {
                 if (entry.State == EntityState.Added)
                 {
-                    if (userId == 0)
+                    // Sadece gerçek API isteklerinde (HttpContext varsa) kullanıcı kontrolü yap
+                    if (!isSystemOperation && userId == 0)
                     {
                         throw new UnauthorizedAccessException("Kullanıcı bilgisi bulunamadı. Lütfen giriş yapınız.");
                     }
                     
                     entry.Entity.CreatedDate = DateTime.UtcNow;
-                    entry.Entity.CreatedById = userId;
+                    entry.Entity.CreatedById = effectiveUserId;
                 }
 
                 if (entry.State == EntityState.Modified)
                 {
                     entry.Entity.UpdatedDate = DateTime.UtcNow;
-                    entry.Entity.UpdatedById = userId;
+                    entry.Entity.UpdatedById = effectiveUserId;
                 }
             }
 

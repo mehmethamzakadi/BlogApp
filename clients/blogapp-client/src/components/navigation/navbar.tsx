@@ -81,6 +81,9 @@ export function Navbar() {
               <NavLink to="/login" className={navLinkClass}>
                 Giriş
               </NavLink>
+              <NavLink to="/register" className={navLinkClass}>
+                Kayıt Ol
+              </NavLink>
             </div>
           )}
         </nav>
@@ -166,6 +169,9 @@ export function Navbar() {
                 </Button>
                 <NavLink to="/login" className={navLinkClass} onClick={() => setOpen(false)}>
                   Giriş
+                </NavLink>
+                <NavLink to="/register" className={navLinkClass} onClick={() => setOpen(false)}>
+                  Kayıt Ol
                 </NavLink>
               </div>
             )}

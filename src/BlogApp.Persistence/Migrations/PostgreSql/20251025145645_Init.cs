@@ -98,6 +98,28 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                 });
 
             migrationBuilder.CreateTable(
+                name: "Permissions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    Module = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedById = table.Column<int>(type: "integer", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedById = table.Column<int>(type: "integer", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    DeletedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Permissions", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AppRoleClaims",
                 columns: table => new
                 {
@@ -265,6 +287,31 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                 });
 
             migrationBuilder.CreateTable(
+                name: "AppRolePermissions",
+                columns: table => new
+                {
+                    RoleId = table.Column<int>(type: "integer", nullable: false),
+                    PermissionId = table.Column<int>(type: "integer", nullable: false),
+                    GrantedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AppRolePermissions", x => new { x.RoleId, x.PermissionId });
+                    table.ForeignKey(
+                        name: "FK_AppRolePermissions_AppRoles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "AppRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AppRolePermissions_Permissions_PermissionId",
+                        column: x => x.PermissionId,
+                        principalTable: "Permissions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Comments",
                 columns: table => new
                 {
@@ -310,7 +357,7 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
             migrationBuilder.InsertData(
                 table: "AppUsers",
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[] { 1, 0, "e3b1bea1-05e8-4073-baa0-6b31ee826516", "admin@admin.com", false, false, null, "ADMIN@ADMIN.COM", "ADMIN", "AQAAAAIAAYagAAAAEEYYR5R7BcJ7zzXeb49j+PWJPEObVZTOagwm1f669W5hlEO8ZqPmJG4OyCbjTkmMdg==", null, false, "b1a1d25f-8a7e-4e9a-bc55-8dca5bfa1234", false, "admin" });
+                values: new object[] { 1, 0, "ab7bded6-4a2b-4228-9439-34b09c7dfb5b", "admin@admin.com", false, false, null, "ADMIN@ADMIN.COM", "ADMIN", "AQAAAAIAAYagAAAAEGBY8IRyufHh5xKPO6tFwC6y6H12Jj5P89+9DGfXPkcq6VMFPO4vdQdyC5V6N85KcA==", null, false, "b1a1d25f-8a7e-4e9a-bc55-8dca5bfa1234", false, "admin" });
 
             migrationBuilder.InsertData(
                 table: "Categories",
@@ -348,6 +395,16 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
             migrationBuilder.CreateIndex(
                 name: "IX_AppRoleClaims_RoleId",
                 table: "AppRoleClaims",
+                column: "RoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AppRolePermissions_PermissionId",
+                table: "AppRolePermissions",
+                column: "PermissionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AppRolePermissions_RoleId",
+                table: "AppRolePermissions",
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
@@ -425,6 +482,17 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                 columns: new[] { "PostId", "IsPublished" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Permissions_Module_Type",
+                table: "Permissions",
+                columns: new[] { "Module", "Type" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Permissions_Name",
+                table: "Permissions",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Posts_CategoryId",
                 table: "Posts",
                 column: "CategoryId");
@@ -460,6 +528,9 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                 name: "AppRoleClaims");
 
             migrationBuilder.DropTable(
+                name: "AppRolePermissions");
+
+            migrationBuilder.DropTable(
                 name: "AppUserClaims");
 
             migrationBuilder.DropTable(
@@ -476,6 +547,9 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
 
             migrationBuilder.DropTable(
                 name: "Images");
+
+            migrationBuilder.DropTable(
+                name: "Permissions");
 
             migrationBuilder.DropTable(
                 name: "AppRoles");
