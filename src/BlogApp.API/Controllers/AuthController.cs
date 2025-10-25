@@ -26,6 +26,7 @@ namespace BlogApp.API.Controllers
             return result.Success ? Ok(result) : Unauthorized(result);
         }
 
+        [AllowAnonymous]
         [HttpPost("password-reset")]
         public async Task<IActionResult> PasswordReset([FromBody] PasswordResetCommand command)
         {
@@ -33,6 +34,7 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
+        [AllowAnonymous]
         [HttpPost("password-verify")]
         public async Task<IActionResult> PasswordVerify([FromBody] PasswordVerifyCommand command)
         {

@@ -1,80 +1,180 @@
 # BlogApp
 
-BlogApp; ASP.NET Core tabanlı arka uç ve Blazor Server tabanlı yönetim/son kullanıcı arayüzü içeren katmanlı bir örnek projedir.
+BlogApp; ASP.NET Core tabanlı modern bir blog uygulaması olup, Clean Architecture prensiplerine göre geliştirilmiş REST API ve React tabanlı web client'ı içerir.
 
-## Projeyi Çalıştırma
+## 🏗️ Proje Yapısı
+
+### Backend (ASP.NET Core 8.0)
+- **BlogApp.API** - REST API katmanı
+- **BlogApp.Application** - İş mantığı ve CQRS implementasyonu (MediatR)
+- **BlogApp.Domain** - Domain entities ve business rules
+- **BlogApp.Infrastructure** - External servisler (JWT, Email, RabbitMQ, Redis)
+- **BlogApp.Persistence** - Veritabanı operasyonları (EF Core + PostgreSQL)
+
+### Frontend (React + TypeScript)
+- **blogapp-client** - Modern React SPA (Vite + TailwindCSS + shadcn/ui)
+
+## 🚀 Projeyi Çalıştırma
 
 ### Sunucu
-`src/BlogApp.API` klasöründen `dotnet run` komutunu çalıştırarak REST API'yi ayağa kaldırabilirsiniz.
+`src/BlogApp.API` klasöründen REST API'yi başlatın:
+```bash
+cd src/BlogApp.API
+dotnet run
+```
+API varsayılan olarak `http://localhost:5000` üzerinde çalışır.
 
-### Blazor İstemci
-`src/BlogApp.Client` klasöründe yeni oluşturulan Blazor Server projesi, Radzen bileşenleriyle zenginleştirilmiş iki temel sayfa içerir:
+### React İstemci
+`clients/blogapp-client` klasöründen React uygulamasını başlatın:
+```bash
+cd clients/blogapp-client
+npm install
+npm run dev
+```
 
-- `/` — Blog ana sayfası, öne çıkan yazıları kart yapısı ile listeler, arama ve kategori filtreleri barındırır.
-- `/admin/dashboard` — Yönetim paneli, metrik kartları, trafik grafikleri ve gönderi listesi sunar.
+İstemci varsayılan olarak `http://localhost:5173` üzerinde çalışır.
 
-İstemciyi çalıştırmak için ilgili klasörde `dotnet run` komutunu kullanabilirsiniz.
+## 🐳 Docker ile Çalıştırma
 
-## Docker ile Çalıştırma
-
-Projeyi Docker Compose ile hem lokal geliştirme ortamında hem de Ubuntu tabanlı üretim sunucusunda çalıştırmak için ortak `docker-compose.yml` dosyasını, ortamınıza uygun ek dosya ile birlikte kullanabilirsiniz.
+Projeyi Docker Compose ile hem lokal geliştirme ortamında hem de üretim sunucusunda çalıştırabilirsiniz.
 
 ### Lokal Geliştirme
-1. İmajları oluşturup konteynerleri ayağa kaldırmak için:
-   ```bash
-   docker compose -f docker-compose.yml -f docker-compose.local.yml up --build
-   ```
-2. API `http://localhost:5000` üzerinden ulaşılabilir. PostgreSQL, RabbitMQ ve Redis portları da host makinenize yönlendirilir.
-3. Konteynerleri durdurmak için `Ctrl+C` kombinasyonunu kullanabilir veya aşağıdaki komutu çalıştırabilirsiniz:
-   ```bash
-   docker compose -f docker-compose.yml -f docker-compose.local.yml down
-   ```
+İmajları oluşturup konteynerleri başlatmak için:
+```bash
+docker compose -f docker-compose.yml -f docker-compose.local.yml up --build
+```
 
-### Ubuntu Üretim Sunucusu (Docker + Nginx)
-1. Gerekli imajları oluşturup konteynerleri arka planda başlatmak için:
-   ```bash
-   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
-   ```
-2. API konteyneri yalnızca dahili Docker ağı üzerinden 8080 portunu dinler. Nginx reverse proxy konteyneri host üzerindeki 8080 numaralı portu dış dünyaya açarak gelen trafiği container içindeki 80 numaralı porta ve oradan API servisine yönlendirir.
-3. Servisleri durdurmak için aşağıdaki komutu kullanabilirsiniz:
-   ```bash
-   docker compose -f docker-compose.yml -f docker-compose.prod.yml down
-   ```
+**Servisler:**
+- **API:** `http://localhost:5000`
+- **PostgreSQL:** `localhost:5432` (User: postgres, Password: postgres, DB: blogappdb)
+- **RabbitMQ Management:** `http://localhost:15672` (User: guest, Password: guest)
+- **Redis:** `localhost:6379`
+- **Seq (Log Viewer):** `http://localhost:5341`
 
-### Ortam Değişkenleri
-- `ASPNETCORE_ENVIRONMENT`: Varsayılan olarak üretimde `Production`, lokal ortamda `Development` olarak ayarlanır.
-- `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`: PostgreSQL veritabanı ayarlarını özelleştirmek için kullanılabilir.
+Konteynerleri durdurmak için:
+```bash
+docker compose -f docker-compose.yml -f docker-compose.local.yml down
+```
 
-Kalıcı veriler Docker volume'ları (`postgres_data`, `rabbitmq_data`, `redis_data`) üzerinde saklanır. RabbitMQ için kullanıcı
-adını/şifresini değiştirirseniz mevcut `rabbitmq_data` volume'unda eski kimlik bilgileri tutulmaya devam ettiği için konteyner yeni
-değerlerle açıldığında oturum açma sorunları yaşayabilirsiniz. Bu durumda servisleri durdurduktan sonra volume'u silerek yeniden
-oluşturmalısınız:
+### Üretim Ortamı (Docker + Nginx)
+Servisleri arka planda başlatmak için:
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+```
 
+**Yapılandırma:**
+- API konteyneri dahili Docker ağında 8080 portunda çalışır
+- Nginx reverse proxy dış dünyaya 8080 portunu açar ve trafiği API'ye yönlendirir
+- `ASPNETCORE_ENVIRONMENT` otomatik olarak `Production` ayarlanır
+- Seq servisi `http://seq:80` adresinden erişilebilir
+
+Servisleri durdurmak için:
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml down
+```
+
+### Ortam Değişkenleri ve Docker Volumes
+
+**Temel Yapılandırmalar:**
+- `ASPNETCORE_ENVIRONMENT`: `Development` (lokal) / `Production` (üretim)
+- `POSTGRES_DB`: Veritabanı adı (varsayılan: blogappdb)
+- `POSTGRES_USER`: PostgreSQL kullanıcı adı (varsayılan: postgres)
+- `POSTGRES_PASSWORD`: PostgreSQL şifresi (varsayılan: postgres)
+
+**Docker Volumes:**
+Kalıcı veriler aşağıdaki volume'larda saklanır:
+- `postgres_data`: PostgreSQL veritabanı
+- `rabbitmq_data`: RabbitMQ mesaj kuyruğu
+- `redis_data`: Redis cache
+- `seq_data`: Seq log verileri
+
+**⚠️ RabbitMQ Credentials Değiştirme:**
+RabbitMQ kullanıcı adı/şifresini değiştirirseniz, mevcut volume'daki eski kimlik bilgileri ile çakışma yaşanabilir. Bu durumda volume'u silip yeniden oluşturun:
 ```bash
 docker compose down
 docker volume rm blogapp_rabbitmq_data
+docker compose up --build
 ```
-
-Ardından konteynerleri tekrar ayağa kaldırdığınızda (`docker compose up --build`) volume otomatik olarak yeniden oluşturulur.
 
 ---
 
-## 📊 Logging & Monitoring
+## 📊 Logging & Monitoring Yapısı
 
-BlogApp **3-tier logging architecture** kullanır:
+BlogApp **3-katmanlı loglama mimarisi** kullanır:
 
-1. **File Logs** (`logs/blogapp-*.txt`) - Development & debugging
-2. **Structured Logs** (PostgreSQL `Logs` table) - Production monitoring
-3. **Activity Logs** (PostgreSQL `ActivityLogs` table) - Compliance & audit trail
+### 1. **File Logs** (`logs/blogapp-*.txt`)
+- **Amaç:** Development & debugging
+- **Seviye:** Debug, Info, Warning, Error, Critical
+- **Saklama:** 31 gün
+- **Kullanım:** Hızlı hata ayıklama, stack trace inceleme
 
-**Detaylı bilgi için:**
-- 📖 [LOGGING_ARCHITECTURE.md](LOGGING_ARCHITECTURE.md) - Kapsamlı mimari dokümantasyonu
-- 🎯 [LOGGING_QUICK_REFERENCE.md](LOGGING_QUICK_REFERENCE.md) - Hızlı referans ve örnekler
-- 📋 [ACTIVITY_LOGGING_README.md](ACTIVITY_LOGGING_README.md) - Activity logging detayları
+### 2. **Structured Logs** (PostgreSQL `Logs` tablosu)
+- **Amaç:** Production monitoring & analytics
+- **Seviye:** Information ve üzeri (Warning, Error, Critical)
+- **Saklama:** 90 gün (otomatik temizleme)
+- **Kullanım:** SQL sorguları ile log analizi, performans metrikleri
 
-**Monitoring Tools:**
-- **Seq** (http://localhost:5341) - Log analiz ve monitoring
-- **PostgreSQL** - Structured query ve analytics
-- **File Logs** - Quick debugging ve tail/grep
+### 3. **Activity Logs** (PostgreSQL `ActivityLogs` tablosu)
+- **Amaç:** Compliance & audit trail
+- **Kapsam:** Kullanıcı aksiyonları (create/update/delete)
+- **Saklama:** Süresiz
+- **Kullanım:** GDPR/SOC2 uyumluluk, güvenlik soruşturmaları
+
+### Monitoring Araçları
+- **Seq** (`http://localhost:5341`) - Gelişmiş log görselleştirme ve analiz
+- **PostgreSQL** - SQL sorguları ile detaylı log analizi
+- **File Logs** - CLI araçları (tail, grep) ile hızlı debug
+
+**📖 Detaylı Dokümantasyon:**
+- [LOGGING_ARCHITECTURE.md](LOGGING_ARCHITECTURE.md) - Kapsamlı mimari dokümantasyonu
+- [LOGGING_QUICK_REFERENCE.md](LOGGING_QUICK_REFERENCE.md) - Hızlı referans ve kod örnekleri
+- [LOGGING_COMPARISON.md](LOGGING_COMPARISON.md) - Tek-tier vs Multi-tier karşılaştırması
+- [ACTIVITY_LOGGING_README.md](ACTIVITY_LOGGING_README.md) - Activity logging detayları
+
+---
+
+## 🛠️ Teknoloji Stack
+
+### Backend
+- **Framework:** ASP.NET Core 8.0
+- **ORM:** Entity Framework Core 8.0
+- **Database:** PostgreSQL 16
+- **Cache:** Redis
+- **Message Queue:** RabbitMQ
+- **Authentication:** JWT Bearer
+- **Validation:** FluentValidation
+- **CQRS:** MediatR
+- **Logging:** Serilog (File + PostgreSQL + Seq)
+- **Rate Limiting:** AspNetCoreRateLimit
+- **API Documentation:** Scalar
+
+### Frontend
+- **Framework:** React 18 + TypeScript
+- **Build Tool:** Vite
+- **UI Library:** TailwindCSS + shadcn/ui
+- **Icons:** Lucide React
+- **Routing:** React Router v7
+- **State Management:** Zustand
+- **HTTP Client:** Axios
+- **Data Fetching:** TanStack Query
+- **Form Validation:** React Hook Form + Zod
+
+### DevOps
+- **Containerization:** Docker + Docker Compose
+- **Reverse Proxy:** Nginx
+- **Log Monitoring:** Seq
+
+---
+
+## 📚 Ek Kaynaklar
+
+- [ANALYSIS.md](ANALYSIS.md) - Kod tabanı analizi ve iyileştirme önerileri
+- [Solution Items/Migrations.txt](Solution%20Items/Migrations.txt) - Veritabanı migration notları
+
+---
+
+## 📝 Lisans
+
+Bu proje eğitim amaçlı geliştirilmiştir.
 
 ````
