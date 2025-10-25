@@ -122,6 +122,9 @@ namespace BlogApp.Infrastructure
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IRoleService, RoleService>();
+            
+            // Register log cleanup background service
+            services.AddHostedService<LogCleanupService>();
 
             return services;
         }

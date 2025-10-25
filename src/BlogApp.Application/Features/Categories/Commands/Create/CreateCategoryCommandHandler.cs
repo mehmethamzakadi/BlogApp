@@ -13,7 +13,7 @@ public sealed class CreateCategoryCommandHandler(ICategoryRepository categoryRep
 {
     public async Task<IResult> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
     {
-        bool categoryExists = await categoryRepository.AnyAsync(x => x.Name.ToLower() == request.Name.ToLower(), cancellationToken: cancellationToken);
+        bool categoryExists = await categoryRepository.AnyAsync(x => x.Name.Equals(request.Name, StringComparison.CurrentCultureIgnoreCase), cancellationToken: cancellationToken);
         if (categoryExists)
         {
             return new ErrorResult("Kategori bilgisi zaten mevcut!");

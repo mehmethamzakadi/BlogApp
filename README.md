@@ -56,3 +56,25 @@ docker volume rm blogapp_rabbitmq_data
 ```
 
 Ardından konteynerleri tekrar ayağa kaldırdığınızda (`docker compose up --build`) volume otomatik olarak yeniden oluşturulur.
+
+---
+
+## 📊 Logging & Monitoring
+
+BlogApp **3-tier logging architecture** kullanır:
+
+1. **File Logs** (`logs/blogapp-*.txt`) - Development & debugging
+2. **Structured Logs** (PostgreSQL `Logs` table) - Production monitoring
+3. **Activity Logs** (PostgreSQL `ActivityLogs` table) - Compliance & audit trail
+
+**Detaylı bilgi için:**
+- 📖 [LOGGING_ARCHITECTURE.md](LOGGING_ARCHITECTURE.md) - Kapsamlı mimari dokümantasyonu
+- 🎯 [LOGGING_QUICK_REFERENCE.md](LOGGING_QUICK_REFERENCE.md) - Hızlı referans ve örnekler
+- 📋 [ACTIVITY_LOGGING_README.md](ACTIVITY_LOGGING_README.md) - Activity logging detayları
+
+**Monitoring Tools:**
+- **Seq** (http://localhost:5341) - Log analiz ve monitoring
+- **PostgreSQL** - Structured query ve analytics
+- **File Logs** - Quick debugging ve tail/grep
+
+````
