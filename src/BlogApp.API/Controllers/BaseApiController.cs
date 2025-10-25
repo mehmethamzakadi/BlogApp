@@ -14,25 +14,25 @@ namespace BlogApp.API.Controllers
     {
         protected IMediator Mediator { get; } = mediator ?? throw new ArgumentNullException(nameof(mediator));
 
-        [ApiExplorerSettings(IgnoreApi = true)]
+        [NonAction]
         public IActionResult GetResponse<T>(IDataResult<T> result)
         {
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
-        [ApiExplorerSettings(IgnoreApi = true)]
+        [NonAction]
         public IActionResult GetResponseOnlyResult(IResult result)
         {
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
-        [ApiExplorerSettings(IgnoreApi = true)]
+        [NonAction]
         public IActionResult GetResponseOnlyResultMessage(IResult result)
         {
             return result.Success ? Ok(result.Message) : BadRequest(result.Message);
         }
 
-        [ApiExplorerSettings(IgnoreApi = true)]
+        [NonAction]
         public IActionResult GetResponseOnlyResultData<T>(IDataResult<T> result)
         {
             return result.Success ? Ok(result.Data) : BadRequest(result.Message);

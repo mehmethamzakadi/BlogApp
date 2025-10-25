@@ -27,7 +27,18 @@ namespace BlogApp.API.Middlewares
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unhandled exception while processing the request");
+                var request = context.Request;
+                var user = context.User?.Identity?.Name ?? "Anonymous";
+                
+                _logger.LogError(
+                    ex, 
+                    "Unhandled exception occurred. Path: {Path}, Method: {Method}, User: {User}, IP: {RemoteIp}",
+                    request.Path,
+                    request.Method,
+                    user,
+                    context.Connection.RemoteIpAddress?.ToString()
+                );
+                
                 await HandleExceptionAsync(context, ex);
             }
         }

@@ -71,8 +71,22 @@ services:
     volumes:
       - redis_data:/data
     ports:
-      - "6379:6379" 
+      - "6379:6379"
+
+  seq:
+    image: datalust/seq:latest
+    container_name: seq_logs
+    restart: always
+    environment:
+      ACCEPT_EULA: "Y"
+      SEQ_FIRSTRUN_ADMINPASSWORD: ${SEQ_ADMIN_PASSWORD:-Admin123!}
+    volumes:
+      - seq_data:/data
+    ports:
+      - "5341:80"  # Seq web UI
+      
 volumes:
   postgres_data:
   rabbitmq_data:
   redis_data:
+  seq_data:

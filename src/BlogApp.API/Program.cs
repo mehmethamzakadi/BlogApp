@@ -1,6 +1,8 @@
 ﻿
 using System.Linq;
 using AspNetCoreRateLimit;
+using BlogApp.API.Configuration;
+using BlogApp.API.Filters;
 using BlogApp.API.Middlewares;
 using BlogApp.Application;
 using BlogApp.Domain.Common.Results;
@@ -9,8 +11,13 @@ using BlogApp.Persistence;
 using BlogApp.Persistence.DatabaseInitializer;
 using Microsoft.AspNetCore.Mvc;
 using Scalar.AspNetCore;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Serilog
+builder.ConfigureSerilog();
+
 var corsPolicyName = "_dynamicCorsPolicy";
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
 if (allowedOrigins.Length == 0)
@@ -43,7 +50,11 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddControllers()
+builder.Services.AddControllers(options =>
+    {
+        // Add global action filter for request/response logging
+        options.Filters.Add<RequestResponseLoggingFilter>();
+    })
     .ConfigureApiBehaviorOptions(options =>
     {
         options.InvalidModelStateResponseFactory = context =>
@@ -90,7 +101,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     {
         Name = "BlogApp",
         HttpOnly = true,
-        SameSite = SameSiteMode.Strict,
+        SameSite = isDevelopment ? SameSiteMode.Lax : SameSiteMode.Strict,
         SecurePolicy = isDevelopment ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always,
     };
     options.LoginPath = "/Identity/Account/Login";
@@ -111,8 +122,25 @@ if (app.Environment.IsDevelopment())
         options.Title = "BlogApp API";
         options.Theme = ScalarTheme.DeepSpace; // İstersen Light, Solar, DeepSpace vs.
     });
-
 }
+
+// Add Serilog request logging
+app.UseSerilogRequestLogging(options =>
+{
+    options.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000}ms";
+    options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+    {
+        diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
+        diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
+        diagnosticContext.Set("RemoteIpAddress", httpContext.Connection.RemoteIpAddress);
+        diagnosticContext.Set("UserAgent", httpContext.Request.Headers["User-Agent"].ToString());
+        
+        if (httpContext.User?.Identity?.IsAuthenticated == true)
+        {
+            diagnosticContext.Set("UserName", httpContext.User.Identity.Name);
+        }
+    };
+});
 
 await using AsyncServiceScope scope = app.Services.CreateAsyncScope();
 var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
@@ -121,6 +149,7 @@ await dbInitializer.EnsurePostgreSqlSerilogTableAsync(builder.Configuration, app
 
 //app.UseHttpsRedirection();
 
+app.UseCors(corsPolicyName); // CORS must be before other middleware
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
@@ -128,12 +157,22 @@ app.UseIpRateLimiting();
 
 app.UseRouting();
 
-app.UseCors(corsPolicyName);
-
 app.UseAuthentication();
 
 app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+try
+{
+    Log.Information("Starting BlogApp API");
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

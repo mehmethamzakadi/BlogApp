@@ -13,9 +13,10 @@ namespace BlogApp.Persistence.Configurations
 
             builder.Property(x => x.Name).IsRequired().HasMaxLength(100);
 
-            // Indexler
+            // Indexler - Sadece silinmemiş kayıtlar için unique olsun
             builder.HasIndex(x => x.Name)
                 .IsUnique()
+                .HasFilter("\"IsDeleted\" = false")
                 .HasDatabaseName("IX_Categories_Name_Unique");
         }
     }

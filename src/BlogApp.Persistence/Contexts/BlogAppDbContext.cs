@@ -33,5 +33,6 @@ namespace BlogApp.Persistence.Contexts
         public DbSet<Image> Images { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<AppUserToken> AppUserTokens { get; set; }
+        public DbSet<ActivityLog> ActivityLogs { get; set; }
     }
 }

@@ -151,3 +151,22 @@ export async function fetchStatistics(): Promise<DashboardStatistics> {
   const response = await api.get<DashboardStatistics>('/dashboard/statistics');
   return response.data;
 }
+
+export interface ActivityDto {
+  id: number;
+  activityType: string;
+  entityType: string;
+  entityId?: number;
+  title: string;
+  timestamp: string;
+  userName?: string;
+}
+
+export interface RecentActivitiesResponse {
+  activities: ActivityDto[];
+}
+
+export async function fetchRecentActivities(count: number = 10): Promise<ActivityDto[]> {
+  const response = await api.get<RecentActivitiesResponse>(`/dashboard/activities?count=${count}`);
+  return response.data.activities;
+}

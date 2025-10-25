@@ -181,6 +181,7 @@ export function CategoriesPage() {
       setIsCreateOpen(false);
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-statistics'] });
+      queryClient.invalidateQueries({ queryKey: ['recent-activities'] });
     },
     onError: (error) => handleApiError(error, 'Kategori eklenemedi')
   });
@@ -197,6 +198,7 @@ export function CategoriesPage() {
       setEditingCategory(null);
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-statistics'] });
+      queryClient.invalidateQueries({ queryKey: ['recent-activities'] });
     },
     onError: (error) => handleApiError(error, 'Kategori güncellenemedi')
   });
@@ -212,6 +214,7 @@ export function CategoriesPage() {
       setCategoryToDelete(null);
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-statistics'] });
+      queryClient.invalidateQueries({ queryKey: ['recent-activities'] });
     },
     onError: (error) => handleApiError(error, 'Kategori silinemedi')
   });

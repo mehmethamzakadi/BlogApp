@@ -7,7 +7,7 @@ import { Button } from '../../components/ui/button';
 import { StatCard } from '../../components/dashboard/stat-card';
 import { ChartCard } from '../../components/dashboard/chart-card';
 import { ActivityFeed, Activity } from '../../components/dashboard/activity-feed';
-import { fetchStatistics } from '../../features/posts/api';
+import { fetchStatistics, fetchRecentActivities } from '../../features/posts/api';
 
 export function DashboardPage() {
   const { data: stats, isLoading } = useQuery({
@@ -16,33 +16,20 @@ export function DashboardPage() {
     refetchInterval: 30000 // Her 30 saniyede bir güncelle
   });
 
-  // Mock aktiviteler - Gerçek implementasyonda backend'den gelecek
-  const recentActivities: Activity[] = [
-    {
-      id: 1,
-      type: 'post_created',
-      title: 'Yeni gönderi oluşturuldu: "React Best Practices"',
-      timestamp: new Date(Date.now() - 1000 * 60 * 30) // 30 dk önce
-    },
-    {
-      id: 2,
-      type: 'category_created',
-      title: 'Yeni kategori eklendi: "Frontend Development"',
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2) // 2 saat önce
-    },
-    {
-      id: 3,
-      type: 'post_updated',
-      title: '"TypeScript Fundamentals" başlıklı gönderi güncellendi',
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5) // 5 saat önce
-    },
-    {
-      id: 4,
-      type: 'post_deleted',
-      title: '"Old Post" başlıklı gönderi silindi',
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24) // 1 gün önce
-    }
-  ];
+  const { data: recentActivities = [], isLoading: isLoadingActivities } = useQuery({
+    queryKey: ['recent-activities'],
+    queryFn: () => fetchRecentActivities(10),
+    refetchInterval: 30000 // Her 30 saniyede bir güncelle
+  });
+
+  // Transform API data to component format
+  const activities: Activity[] = recentActivities.map(activity => ({
+    id: activity.id,
+    activityType: activity.activityType,
+    title: activity.title,
+    timestamp: activity.timestamp,
+    userName: activity.userName
+  }));
 
   // Grafik verileri
   const weeklyPostsData = stats
@@ -60,7 +47,7 @@ export function DashboardPage() {
       ]
     : [];
 
-  if (isLoading) {
+  if (isLoading || isLoadingActivities) {
     return (
       <div className="space-y-8">
         <Card className="p-6">
@@ -188,7 +175,7 @@ export function DashboardPage() {
         </Card>
 
         <div className="lg:col-span-2">
-          <ActivityFeed activities={recentActivities} delay={0.6} />
+          <ActivityFeed activities={activities} delay={0.6} />
         </div>
       </div>
 

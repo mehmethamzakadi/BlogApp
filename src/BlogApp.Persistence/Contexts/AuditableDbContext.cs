@@ -19,11 +19,17 @@ namespace BlogApp.Persistence.Contexts
         {
             var userIdClaim = _httpContextAccessor?.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var userId = int.TryParse(userIdClaim, out var parsedUserId) ? parsedUserId : 0;
+            
             foreach (var entry in base.ChangeTracker.Entries<BaseEntity>()
                .Where(q => q.State == EntityState.Added || q.State == EntityState.Modified || q.State == EntityState.Deleted))
             {
                 if (entry.State == EntityState.Added)
                 {
+                    if (userId == 0)
+                    {
+                        throw new UnauthorizedAccessException("Kullanıcı bilgisi bulunamadı. Lütfen giriş yapınız.");
+                    }
+                    
                     entry.Entity.CreatedDate = DateTime.UtcNow;
                     entry.Entity.CreatedById = userId;
                 }

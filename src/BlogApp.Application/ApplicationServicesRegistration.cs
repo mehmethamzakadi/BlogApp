@@ -1,4 +1,5 @@
-﻿using BlogApp.Application.Behaviors.Logging;
+﻿using BlogApp.Application.Behaviors;
+using BlogApp.Application.Behaviors.Logging;
 using BlogApp.Application.Behaviors.Transaction;
 using BlogApp.Domain.Options;
 using FluentValidation;
@@ -23,6 +24,7 @@ namespace BlogApp.Application
                 configuration.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
                 configuration.AddOpenBehavior(typeof(TransactionScopeBehavior<,>));
                 configuration.AddOpenBehavior(typeof(LoggingBehavior<,>));
+                configuration.AddOpenBehavior(typeof(ActivityLoggingBehavior<,>));
             });
 
             services.AddFluentValidationAutoValidation();

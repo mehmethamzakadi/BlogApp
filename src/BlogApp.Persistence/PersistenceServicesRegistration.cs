@@ -29,6 +29,7 @@ public static class PersistenceServicesRegistration
         services.AddScoped<ICommentRepository, CommentRepository>();
         services.AddScoped<IImageRepository, ImageRepository>();
         services.AddScoped<IPostRepository, PostRepository>();
+        services.AddScoped<IActivityLogRepository, ActivityLogRepository>();
         services.AddScoped<IDbInitializer, DbInitializer>();
 
         return services;
