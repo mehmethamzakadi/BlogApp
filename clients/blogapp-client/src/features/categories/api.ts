@@ -45,19 +45,19 @@ function buildDataGridPayload(filters: CategoryTableFilters) {
 export async function fetchCategories(
   filters: CategoryTableFilters
 ): Promise<CategoryListResponse> {
-  const response = await api.post('/Category/GetPaginatedList', buildDataGridPayload(filters));
+  const response = await api.post('/category/search', buildDataGridPayload(filters));
   return normalizePaginatedResponse<Category>(response.data);
 }
 
 export async function createCategory(values: CategoryFormValues) {
-  const response = await api.post<ApiResult>('/Category/Create', {
+  const response = await api.post<ApiResult>('/category', {
     Name: values.name
   });
   return normalizeApiResult(response.data);
 }
 
 export async function updateCategory(id: number, values: CategoryFormValues) {
-  const response = await api.put<ApiResult>('/Category/Update', {
+  const response = await api.put<ApiResult>(`/category/${id}`, {
     Id: id,
     Name: values.name
   });
@@ -65,11 +65,11 @@ export async function updateCategory(id: number, values: CategoryFormValues) {
 }
 
 export async function deleteCategory(id: number) {
-  const response = await api.delete<ApiResult>(`/Category/Delete/${id}`);
+  const response = await api.delete<ApiResult>(`/category/${id}`);
   return normalizeApiResult(response.data);
 }
 
 export async function getAllCategories(): Promise<Category[]> {
-  const response = await api.get<Category[]>('/Category/GetAll');
+  const response = await api.get<Category[]>('/category');
   return response.data;
 }

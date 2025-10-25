@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace BlogApp.Application.Features.Auths.RefreshToken;
 
-public class RefreshTokenValidator : AbstractValidator<RefreshTokenCommand>
+public sealed class RefreshTokenValidator : AbstractValidator<RefreshTokenCommand>
 {
     public RefreshTokenValidator()
     {

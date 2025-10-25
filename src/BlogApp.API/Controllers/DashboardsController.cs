@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.API.Controllers
 {
-    public class DashboardsController(IMediator mediator) : BaseApiController(mediator)
+    public class DashboardController(IMediator mediator) : BaseApiController(mediator)
     {
-        [HttpGet("GetStatistics")]
+        [HttpGet("statistics")]
         public async Task<IActionResult> GetStatistics()
         {
             GetStatisticsResponse response = await Mediator.Send(new GetStatisticsQuery());

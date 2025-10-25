@@ -16,30 +16,22 @@ namespace BlogApp.API.Controllers
     public class PostController(IMediator mediator) : BaseApiController(mediator)
     {
         [AllowAnonymous]
-        [HttpGet("GetList")]
+        [HttpGet]
         public async Task<IActionResult> GetList([FromQuery] PaginatedRequest pageRequest)
         {
             PaginatedListResponse<GetListPostResponse> response = await Mediator.Send(new GetListPostQuery(pageRequest));
             return Ok(response);
         }
 
-        [AllowAnonymous]
-        [HttpGet("GetListByCategoryId")]
-        public async Task<IActionResult> GetListByCategoryId([FromQuery] PaginatedRequest pageRequest, [FromQuery] int categoryId)
-        {
-            PaginatedListResponse<GetListPostByCategoryIdResponse> response = await Mediator.Send(new GetListPostByCategoryIdQuery(pageRequest, categoryId));
-            return Ok(response);
-        }
-
-        [HttpPost("GetPaginatedList")]
-        public async Task<IActionResult> GetPaginatedListByDynamic(DataGridRequest dataGridRequest)
+        [HttpPost("search")]
+        public async Task<IActionResult> Search([FromBody] DataGridRequest dataGridRequest)
         {
             PaginatedListResponse<GetPaginatedListByDynamicPostsResponse> response = await Mediator.Send(new GetPaginatedListByDynamicPostsQuery(dataGridRequest));
             return Ok(response);
         }
 
         [AllowAnonymous]
-        [HttpGet("GetById/{id}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
             bool includeUnpublished = User.Identity?.IsAuthenticated == true;
@@ -47,20 +39,23 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
-        [HttpPost("Create")]
-        public async Task<IActionResult> Create(CreatePostCommand category)
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreatePostCommand command)
         {
-            return GetResponseOnlyResultMessage(await Mediator.Send(category));
+            return GetResponseOnlyResultMessage(await Mediator.Send(command));
         }
 
-        [HttpPut("Update")]
-        public async Task<IActionResult> Update(UpdatePostCommand category)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdatePostCommand command)
         {
-            return GetResponseOnlyResultMessage(await Mediator.Send(category));
+            if (id != command.Id)
+                return BadRequest("ID mismatch");
+            
+            return GetResponseOnlyResultMessage(await Mediator.Send(command));
         }
 
-        [HttpDelete("Delete/{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete([FromRoute] int id)
         {
             return GetResponseOnlyResultMessage(await Mediator.Send(new DeletePostCommand(id)));
         }

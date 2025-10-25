@@ -6,7 +6,7 @@ using MediatR;
 
 namespace BlogApp.Application.Features.AppRoles.Queries.GetList;
 
-public class GetListRoleQueryHandler(IRoleService roleService, IMapper mapper) : IRequestHandler<GetListRoleQuery, PaginatedListResponse<GetListAppRoleResponse>>
+public sealed class GetListRoleQueryHandler(IRoleService roleService, IMapper mapper) : IRequestHandler<GetListRoleQuery, PaginatedListResponse<GetListAppRoleResponse>>
 {
 
     public async Task<PaginatedListResponse<GetListAppRoleResponse>> Handle(GetListRoleQuery request, CancellationToken cancellationToken)

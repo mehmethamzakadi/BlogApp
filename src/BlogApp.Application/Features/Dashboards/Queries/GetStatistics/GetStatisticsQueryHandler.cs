@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BlogApp.Application.Features.Dashboards.Queries.GetStatistics;
 
-public class GetStatisticsQueryHandler(
+public sealed class GetStatisticsQueryHandler(
     IPostRepository postRepository,
     ICategoryRepository categoryRepository) 
     : IRequestHandler<GetStatisticsQuery, GetStatisticsResponse>

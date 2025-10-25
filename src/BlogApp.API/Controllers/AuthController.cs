@@ -11,32 +11,32 @@ namespace BlogApp.API.Controllers
     public class AuthController(IMediator mediator) : BaseApiController(mediator)
     {
         [AllowAnonymous]
-        [HttpPost("Login")]
-        public async Task<IActionResult> Login([FromBody] LoginCommand userLogin)
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginCommand command)
         {
-            var result = await Mediator.Send(userLogin);
+            var result = await Mediator.Send(command);
             return result.Success ? Ok(result) : Unauthorized(result);
         }
 
         [AllowAnonymous]
-        [HttpPost("RefreshToken")]
+        [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command)
         {
             var result = await Mediator.Send(command);
             return result.Success ? Ok(result) : Unauthorized(result);
         }
 
-        [HttpPost("PasswordReset")]
-        public async Task<IActionResult> PasswordReset([FromBody] PasswordResetCommand passwordResetCommandRequest)
+        [HttpPost("password-reset")]
+        public async Task<IActionResult> PasswordReset([FromBody] PasswordResetCommand command)
         {
-            var response = await Mediator.Send(passwordResetCommandRequest);
+            var response = await Mediator.Send(command);
             return Ok(response);
         }
 
-        [HttpPost("PasswordVerify")]
-        public async Task<IActionResult> PasswordVerify([FromBody] PasswordVerifyCommand passwordVerifyCommandRequest)
+        [HttpPost("password-verify")]
+        public async Task<IActionResult> PasswordVerify([FromBody] PasswordVerifyCommand command)
         {
-            var response = await Mediator.Send(passwordVerifyCommandRequest);
+            var response = await Mediator.Send(command);
             return Ok(response);
         }
     }

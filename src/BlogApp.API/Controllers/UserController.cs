@@ -15,45 +15,48 @@ namespace BlogApp.API.Controllers
 {
     public class UserController(IMediator mediator) : BaseApiController(mediator)
     {
-        [HttpPost("GetPaginatedList")]
-        public async Task<IActionResult> GetPaginatedListByDynamic(DataGridRequest dataGridRequest)
+        [HttpPost("search")]
+        public async Task<IActionResult> Search([FromBody] DataGridRequest dataGridRequest)
         {
             PaginatedListResponse<GetPaginatedListByDynamicUsersResponse> response = await Mediator.Send(new GetPaginatedListByDynamicUsersQuery(dataGridRequest));
             return Ok(response);
         }
 
-        [HttpGet("GetById/{id}")]
-        public async Task<IActionResult> GetById(int id)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById([FromRoute] int id)
         {
             var response = await Mediator.Send(new GetByIdAppUserQuery(id));
             return Ok(response);
         }
 
-        [HttpPost("Create")]
-        public async Task<IActionResult> Create(CreateAppUserCommand user)
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateAppUserCommand command)
         {
-            var response = await Mediator.Send(user);
+            var response = await Mediator.Send(command);
             return Ok(response);
         }
 
-        [HttpPut("Update")]
-        public async Task<IActionResult> Update(UpdateAppUserCommand updateUser)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateAppUserCommand command)
         {
-            var response = await Mediator.Send(updateUser);
+            if (id != command.Id)
+                return BadRequest("ID mismatch");
+            
+            var response = await Mediator.Send(command);
             return Ok(response);
         }
 
-        [HttpDelete("Delete/{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete([FromRoute] int id)
         {
             var response = await Mediator.Send(new DeleteAppUserCommand(id));
             return Ok(response);
         }
 
-        [HttpPost("UpdatePassword")]
-        public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordCommand updatePasswordCommandRequest)
+        [HttpPost("password")]
+        public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordCommand command)
         {
-            UpdatePasswordResponse response = await Mediator.Send(updatePasswordCommandRequest);
+            UpdatePasswordResponse response = await Mediator.Send(command);
             return Ok(response);
         }
     }

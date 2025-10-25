@@ -70,7 +70,7 @@ export async function fetchPublishedPosts({
   pageSize = 6,
   categoryId
 }: FetchPublishedPostsParams = {}) {
-  const endpoint = categoryId != null ? '/Post/GetListByCategoryId' : '/Post/GetList';
+  const endpoint = '/post';
   const params: Record<string, number> = {
     PageIndex: pageIndex,
     PageSize: pageSize
@@ -88,12 +88,12 @@ export async function fetchPublishedPosts({
 }
 
 export async function fetchPosts(filters: PostTableFilters): Promise<PostManagementListResponse> {
-  const response = await api.post('/Post/GetPaginatedList', buildPostDataGridPayload(filters));
+  const response = await api.post('/post/search', buildPostDataGridPayload(filters));
   return normalizePaginatedResponse<Post>(response.data);
 }
 
 export async function createPost(values: PostFormValues) {
-  const response = await api.post<ApiResult>('/Post/Create', {
+  const response = await api.post<ApiResult>('/post', {
     Title: values.title,
     Body: values.body,
     Summary: values.summary,
@@ -106,7 +106,7 @@ export async function createPost(values: PostFormValues) {
 }
 
 export async function updatePost(id: number, values: PostFormValues) {
-  const response = await api.put<ApiResult>('/Post/Update', {
+  const response = await api.put<ApiResult>(`/post/${id}`, {
     Id: id,
     Title: values.title,
     Body: values.body,
@@ -120,12 +120,12 @@ export async function updatePost(id: number, values: PostFormValues) {
 }
 
 export async function deletePost(id: number) {
-  const response = await api.delete<ApiResult>(`/Post/Delete/${id}`);
+  const response = await api.delete<ApiResult>(`/post/${id}`);
   return normalizeApiResult(response.data);
 }
 
 export async function getPostById(id: number): Promise<Post> {
-  const response = await api.get<ApiResult<Post>>(`/Post/GetById/${id}`);
+  const response = await api.get<ApiResult<Post>>(`/post/${id}`);
   const result = normalizeApiResult<Post>(response.data);
 
   if (!result.success || !result.data) {
@@ -148,6 +148,6 @@ export interface DashboardStatistics {
 }
 
 export async function fetchStatistics(): Promise<DashboardStatistics> {
-  const response = await api.get<DashboardStatistics>('/Post/GetStatistics');
+  const response = await api.get<DashboardStatistics>('/dashboard/statistics');
   return response.data;
 }

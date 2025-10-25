@@ -12,39 +12,42 @@ namespace BlogApp.API.Controllers
 {
     public class RoleController(IMediator mediator) : BaseApiController(mediator)
     {
-        [HttpPost("GetPaginatedList")]
-        public async Task<IActionResult> GetPaginatedListByDynamic([FromQuery] PaginatedRequest pageRequest)
+        [HttpGet]
+        public async Task<IActionResult> GetList([FromQuery] PaginatedRequest pageRequest)
         {
             PaginatedListResponse<GetListAppRoleResponse> response = await Mediator.Send(new GetListRoleQuery(pageRequest));
             return Ok(response);
         }
 
-        [HttpGet("GetRoleById/{id}")]
-        public async Task<IActionResult> GetRoleById([FromRoute] int id)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById([FromRoute] int id)
         {
             var response = await Mediator.Send(new GetRoleByIdRequest(id));
             return Ok(response);
         }
 
-        [HttpPost("Create")]
-        public async Task<IActionResult> Create([FromBody] CreateRoleCommand createRoleCommandRequest)
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateRoleCommand command)
         {
-            var addRole = await Mediator.Send(createRoleCommandRequest);
-            return Ok(addRole);
+            var response = await Mediator.Send(command);
+            return Ok(response);
         }
 
-        [HttpPut("Update")]
-        public async Task<IActionResult> Update([FromBody] UpdateRoleCommand updateRoleCommandRequest)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateRoleCommand command)
         {
-            var updateRole = await Mediator.Send(updateRoleCommandRequest);
-            return Ok(updateRole);
+            if (id != command.Id)
+                return BadRequest("ID mismatch");
+            
+            var response = await Mediator.Send(command);
+            return Ok(response);
         }
 
-        [HttpDelete("Delete/{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            var deleteRole = await Mediator.Send(new DeleteRoleCommand(id));
-            return Ok(deleteRole);
+            var response = await Mediator.Send(new DeleteRoleCommand(id));
+            return Ok(response);
         }
     }
 }

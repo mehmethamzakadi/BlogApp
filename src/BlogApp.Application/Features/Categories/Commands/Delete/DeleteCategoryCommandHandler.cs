@@ -5,7 +5,7 @@ using MediatR;
 
 namespace BlogApp.Application.Features.Categories.Commands.Delete;
 
-public class DeleteCategoryCommandHandler(ICategoryRepository categoryRepository) : IRequestHandler<DeleteCategoryCommand, IResult>
+public sealed class DeleteCategoryCommandHandler(ICategoryRepository categoryRepository) : IRequestHandler<DeleteCategoryCommand, IResult>
 {
     public async Task<IResult> Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
     {

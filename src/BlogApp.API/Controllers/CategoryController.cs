@@ -14,44 +14,47 @@ namespace BlogApp.API.Controllers
 {
     public class CategoryController(IMediator mediator) : BaseApiController(mediator)
     {
-        [HttpPost("GetPaginatedList")]
-        public async Task<IActionResult> GetPaginatedListByDynamic(DataGridRequest dataGridRequest)
+        [HttpPost("search")]
+        public async Task<IActionResult> Search([FromBody] DataGridRequest dataGridRequest)
         {
             PaginatedListResponse<GetPaginatedListByDynamicCategoriesResponse> response = await Mediator.Send(new GetPaginatedListByDynamicCategoriesQuery(dataGridRequest));
             return Ok(response);
         }
 
         [AllowAnonymous]
-        [HttpGet("GetAll")]
+        [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             IQueryable response = await Mediator.Send(new GetAllListCategoriesQuery());
             return Ok(response);
         }
 
-        [HttpGet("GetById/{id}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
             var response = await Mediator.Send(new GetByIdCategoryQuery(id));
             return Ok(response);
         }
 
-        [HttpPost("Create")]
-        public async Task<IActionResult> Create(CreateCategoryCommand category)
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateCategoryCommand command)
         {
-            var response = await Mediator.Send(category);
+            var response = await Mediator.Send(command);
             return Ok(response);
         }
 
-        [HttpPut("Update")]
-        public async Task<IActionResult> Update([FromBody] UpdateCategoryCommand category)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateCategoryCommand command)
         {
-            var response = await Mediator.Send(category);
+            if (id != command.Id)
+                return BadRequest("ID mismatch");
+            
+            var response = await Mediator.Send(command);
             return Ok(response);
         }
 
-        [HttpDelete("Delete/{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete([FromRoute] int id)
         {
             var response = await Mediator.Send(new DeleteCategoryCommand(id));
             return Ok(response);

@@ -68,6 +68,13 @@ builder.Services.AddControllers()
             return new BadRequestObjectResult(apiResult);
         };
     });
+
+// Configure routing to use lowercase URLs
+builder.Services.Configure<RouteOptions>(options =>
+{
+    options.LowercaseUrls = true;
+    options.LowercaseQueryStrings = false;
+});
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddOpenApi(options =>
