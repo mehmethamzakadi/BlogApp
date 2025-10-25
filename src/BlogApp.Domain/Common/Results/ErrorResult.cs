@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace BlogApp.Domain.Common.Results
+﻿namespace BlogApp.Domain.Common.Results
 {
     public class ErrorResult : Result
     {

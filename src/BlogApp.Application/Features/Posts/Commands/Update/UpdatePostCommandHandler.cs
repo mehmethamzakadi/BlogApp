@@ -29,11 +29,12 @@ public sealed class UpdatePostCommandHandler(
         entity.CategoryId = request.CategoryId;
 
         await postRepository.UpdateAsync(entity);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // ✅ Raise domain event
+        // ✅ Raise domain event BEFORE SaveChanges for Outbox Pattern
         var userId = currentUserService.GetCurrentUserId();
         entity.AddDomainEvent(new PostUpdatedEvent(entity.Id, entity.Title, userId ?? entity.UpdatedById ?? 0));
+
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new SuccessResult("Post bilgisi başarıyla güncellendi.");
     }

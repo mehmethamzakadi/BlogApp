@@ -42,7 +42,10 @@ export const Permissions = {
   CommentsUpdate: 'Comments.Update',
   CommentsDelete: 'Comments.Delete',
   CommentsViewAll: 'Comments.ViewAll',
-  CommentsModerate: 'Comments.Moderate'
+  CommentsModerate: 'Comments.Moderate',
+
+  // Activity Logs
+  ActivityLogsView: 'ActivityLogs.View'
 } as const;
 
 export type Permission = (typeof Permissions)[keyof typeof Permissions];

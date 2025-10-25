@@ -1,5 +1,4 @@
 ﻿using BlogApp.Domain.Common.Paging;
-using System.Collections.Generic;
 
 namespace BlogApp.Domain.Common.Responses;
 

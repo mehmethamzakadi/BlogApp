@@ -36,5 +36,6 @@ namespace BlogApp.Persistence.Contexts
         public DbSet<ActivityLog> ActivityLogs { get; set; }
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<AppRolePermission> AppRolePermissions { get; set; }
+        public DbSet<OutboxMessage> OutboxMessages { get; set; }
     }
 }

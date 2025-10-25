@@ -30,11 +30,12 @@ public sealed class UpdateCategoryCommandHandler(
         category.Name = request.Name;
 
         await categoryRepository.UpdateAsync(category);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // ✅ Raise domain event
+        // ✅ Raise domain event BEFORE SaveChanges for Outbox Pattern
         var userId = currentUserService.GetCurrentUserId();
         category.AddDomainEvent(new CategoryUpdatedEvent(category.Id, category.Name, userId ?? category.UpdatedById ?? 0));
+
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new SuccessResult("Kategori bilgisi başarıyla güncellendi.");
     }

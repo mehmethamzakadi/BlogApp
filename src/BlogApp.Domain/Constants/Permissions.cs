@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace BlogApp.Domain.Constants;
 
 /// <summary>
@@ -49,6 +47,9 @@ public static class Permissions
     public const string CommentsViewAll = "Comments.ViewAll";
     public const string CommentsModerate = "Comments.Moderate";
 
+    // Activity Logs Permissions
+    public const string ActivityLogsView = "ActivityLogs.View";
+
     /// <summary>
     /// Tüm permission'ları liste olarak döndürür. Seed işlemleri için kullanılır.
     /// </summary>
@@ -72,7 +73,10 @@ public static class Permissions
             CategoriesCreate, CategoriesRead, CategoriesUpdate, CategoriesDelete, CategoriesViewAll,
 
             // Comments
-            CommentsCreate, CommentsRead, CommentsUpdate, CommentsDelete, CommentsViewAll, CommentsModerate
+            CommentsCreate, CommentsRead, CommentsUpdate, CommentsDelete, CommentsViewAll, CommentsModerate,
+
+            // Activity Logs
+            ActivityLogsView
         };
     }
 

@@ -29,10 +29,11 @@ public sealed class CreatePostCommandHandler(
         };
 
         await postRepository.AddAsync(post);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // ✅ Raise domain event - Event handler will log the activity
+        // ✅ Raise domain event BEFORE SaveChanges for Outbox Pattern
         post.AddDomainEvent(new PostCreatedEvent(post.Id, post.Title, post.CategoryId, userId ?? post.CreatedById));
+
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new SuccessResult("Post bilgisi başarıyla eklendi.");
     }

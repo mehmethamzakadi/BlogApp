@@ -1,6 +1,8 @@
 using BlogApp.Domain.Common;
+using BlogApp.Domain.Entities;
 using BlogApp.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore.Storage;
+using System.Text.Json;
 
 namespace BlogApp.Persistence.Repositories;
 
@@ -20,7 +22,72 @@ public sealed class UnitOfWork : IUnitOfWork
 
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        return await _context.SaveChangesAsync(cancellationToken);
+        // OUTBOX PATTERN IMPLEMENTATION
+        // Get domain events from tracked entities before saving
+        var domainEvents = GetDomainEvents().ToList();
+
+        // Convert domain events to outbox messages for async processing via RabbitMQ
+        // This ensures ACID guarantees - events are stored in the same transaction as business data
+        foreach (var domainEvent in domainEvents)
+        {
+            if (ShouldStoreInOutbox(domainEvent))
+            {
+                var outboxMessage = new OutboxMessage
+                {
+                    EventType = domainEvent.GetType().Name,
+                    Payload = JsonSerializer.Serialize(domainEvent, domainEvent.GetType()),
+                    CreatedAt = DateTime.UtcNow,
+                    RetryCount = 0
+                };
+
+                await _context.OutboxMessages.AddAsync(outboxMessage, cancellationToken);
+            }
+        }
+
+        // Save everything in one atomic transaction:
+        // - Business data (entities)
+        // - Outbox messages (events)
+        var result = await _context.SaveChangesAsync(cancellationToken);
+
+        // Clear domain events after successful save
+        // Events are now safely stored in Outbox table
+        ClearDomainEvents();
+
+        return result;
+    }
+
+    private static bool ShouldStoreInOutbox(IDomainEvent domainEvent)
+    {
+        // Determine which domain events should be processed asynchronously via Outbox Pattern
+        // These events will be:
+        // 1. Stored in OutboxMessages table (same transaction as business data)
+        // 2. Picked up by OutboxProcessorService (background service)
+        // 3. Published to RabbitMQ
+        // 4. Consumed by ActivityLogConsumer
+        // 5. Converted to ActivityLog records
+
+        var eventTypeName = domainEvent.GetType().Name;
+
+        // Events that create ActivityLog entries
+        var outboxEventTypes = new[]
+        {
+            "CategoryCreatedEvent",
+            "CategoryUpdatedEvent",
+            "CategoryDeletedEvent",
+            "PostCreatedEvent",
+            "PostUpdatedEvent",
+            "PostDeletedEvent",
+            "UserCreatedEvent",
+            "UserUpdatedEvent",
+            "UserDeletedEvent",
+            "UserRolesAssignedEvent",
+            "RoleCreatedEvent",
+            "RoleUpdatedEvent",
+            "RoleDeletedEvent",
+            "PermissionsAssignedToRoleEvent"
+        };
+
+        return outboxEventTypes.Contains(eventTypeName);
     }
 
     public int SaveChanges()

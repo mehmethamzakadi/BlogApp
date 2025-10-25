@@ -91,6 +91,7 @@ namespace BlogApp.Infrastructure
             services.AddMassTransit(x =>
             {
                 x.AddConsumer<SendTelgeramMessageConsumer>();
+                x.AddConsumer<ActivityLogConsumer>();
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
@@ -102,9 +103,27 @@ namespace BlogApp.Infrastructure
                         hostConfigurator.Password(rabbitOptions.Password);
                     });
 
+                    // Telegram message queue
                     cfg.ReceiveEndpoint(EventConstants.SendTelegramTextMessageQueue, endpointConfigurator =>
                     {
                         endpointConfigurator.ConfigureConsumer<SendTelgeramMessageConsumer>(context);
+                    });
+
+                    // Activity Log queue with retry and error handling
+                    cfg.ReceiveEndpoint(EventConstants.ActivityLogQueue, endpointConfigurator =>
+                    {
+                        endpointConfigurator.ConfigureConsumer<ActivityLogConsumer>(context);
+
+                        // Retry configuration
+                        endpointConfigurator.UseMessageRetry(retryConfigurator =>
+                            retryConfigurator.Exponential(5,
+                                TimeSpan.FromSeconds(1),
+                                TimeSpan.FromMinutes(5),
+                                TimeSpan.FromSeconds(2)));
+
+                        // Concurrency settings
+                        endpointConfigurator.PrefetchCount = 16;
+                        endpointConfigurator.ConcurrentMessageLimit = 8;
                     });
 
                     if (rabbitOptions.RetryLimit > 0)
@@ -115,6 +134,10 @@ namespace BlogApp.Infrastructure
             });
 
             services.AddScoped<SendTelgeramMessageConsumer>();
+            services.AddScoped<ActivityLogConsumer>();
+
+            // Background Services
+            services.AddHostedService<Services.BackgroundServices.OutboxProcessorService>();
 
             services.AddSingleton<ITelegramService, TelegramService>();
             services.AddSingleton<ICacheService, RedisCacheService>();

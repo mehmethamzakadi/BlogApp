@@ -238,6 +238,8 @@ export function UsersPage() {
       toast.success('Kullanıcı başarıyla oluşturuldu');
       setIsCreateOpen(false);
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['activity-logs'] });
+      queryClient.invalidateQueries({ queryKey: ['recent-activities'] });
       createForm.reset();
     },
     onError: () => {
@@ -252,6 +254,8 @@ export function UsersPage() {
       toast.success('Kullanıcı başarıyla güncellendi');
       setEditingUser(null);
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['activity-logs'] });
+      queryClient.invalidateQueries({ queryKey: ['recent-activities'] });
     },
     onError: () => {
       toast.error('Kullanıcı güncellenirken hata oluştu');
@@ -264,6 +268,8 @@ export function UsersPage() {
       toast.success('Kullanıcı başarıyla silindi');
       setUserToDelete(null);
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['activity-logs'] });
+      queryClient.invalidateQueries({ queryKey: ['recent-activities'] });
     },
     onError: () => {
       toast.error('Kullanıcı silinirken hata oluştu');

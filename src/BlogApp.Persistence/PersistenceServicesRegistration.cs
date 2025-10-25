@@ -32,6 +32,7 @@ public static class PersistenceServicesRegistration
         services.AddScoped<IPostRepository, PostRepository>();
         services.AddScoped<IActivityLogRepository, ActivityLogRepository>();
         services.AddScoped<IPermissionRepository, PermissionRepository>();
+        services.AddScoped<IOutboxMessageRepository, OutboxMessageRepository>();
         services.AddScoped<IDbInitializer, DbInitializer>();
 
         // Unit of Work registration

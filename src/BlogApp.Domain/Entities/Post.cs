@@ -1,5 +1,4 @@
 ﻿using BlogApp.Domain.Common;
-using System.Collections.Generic;
 
 namespace BlogApp.Domain.Entities;
 

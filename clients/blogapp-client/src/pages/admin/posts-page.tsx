@@ -213,6 +213,7 @@ export function PostsPage() {
       queryClient.invalidateQueries({ queryKey: ['posts', 'published'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-statistics'] });
       queryClient.invalidateQueries({ queryKey: ['recent-activities'] });
+      queryClient.invalidateQueries({ queryKey: ['activity-logs'] });
     },
     onError: (error) => handleApiError(error, 'Gönderi silinemedi')
   });

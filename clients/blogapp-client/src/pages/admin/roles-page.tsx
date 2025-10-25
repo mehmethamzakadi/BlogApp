@@ -106,6 +106,8 @@ export function RolesPage() {
       toast.success('Rol başarıyla oluşturuldu');
       setIsCreateOpen(false);
       queryClient.invalidateQueries({ queryKey: ['roles'] });
+      queryClient.invalidateQueries({ queryKey: ['activity-logs'] });
+      queryClient.invalidateQueries({ queryKey: ['recent-activities'] });
       createForm.reset();
     },
     onError: () => toast.error('Rol oluşturulurken hata oluştu')
@@ -118,6 +120,8 @@ export function RolesPage() {
       toast.success('Rol başarıyla güncellendi');
       setEditingRole(null);
       queryClient.invalidateQueries({ queryKey: ['roles'] });
+      queryClient.invalidateQueries({ queryKey: ['activity-logs'] });
+      queryClient.invalidateQueries({ queryKey: ['recent-activities'] });
     },
     onError: () => toast.error('Rol güncellenirken hata oluştu')
   });
@@ -128,6 +132,8 @@ export function RolesPage() {
       toast.success('Rol başarıyla silindi');
       setRoleToDelete(null);
       queryClient.invalidateQueries({ queryKey: ['roles'] });
+      queryClient.invalidateQueries({ queryKey: ['activity-logs'] });
+      queryClient.invalidateQueries({ queryKey: ['recent-activities'] });
     },
     onError: () => toast.error('Rol silinirken hata oluştu')
   });

@@ -1,6 +1,5 @@
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Entities;
-using System.Collections.Generic;
 
 namespace BlogApp.Domain.Repositories;
 

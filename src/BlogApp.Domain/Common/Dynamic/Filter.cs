@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace BlogApp.Domain.Common.Dynamic;
+﻿namespace BlogApp.Domain.Common.Dynamic;
 
 public sealed class Filter
 {

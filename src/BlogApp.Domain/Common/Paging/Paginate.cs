@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace BlogApp.Domain.Common.Paging;
+﻿namespace BlogApp.Domain.Common.Paging;
 
 public sealed class Paginate<T>
 {

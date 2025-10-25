@@ -120,6 +120,7 @@ export function CreatePostPage() {
       await queryClient.invalidateQueries({ queryKey: ['posts', 'published'] });
       await queryClient.invalidateQueries({ queryKey: ['dashboard-statistics'] });
       await queryClient.invalidateQueries({ queryKey: ['recent-activities'] });
+      await queryClient.invalidateQueries({ queryKey: ['activity-logs'] });
       reset({
         title: '',
         summary: '',
@@ -153,6 +154,7 @@ export function CreatePostPage() {
       await queryClient.invalidateQueries({ queryKey: ['posts', 'published'] });
       await queryClient.invalidateQueries({ queryKey: ['dashboard-statistics'] });
       await queryClient.invalidateQueries({ queryKey: ['recent-activities'] });
+      await queryClient.invalidateQueries({ queryKey: ['activity-logs'] });
       if (postId) {
         await queryClient.invalidateQueries({ queryKey: ['post', postId] });
       }

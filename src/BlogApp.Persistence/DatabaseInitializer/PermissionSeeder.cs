@@ -218,6 +218,7 @@ public class PermissionSeeder
             Permissions.CommentsDelete => "Yorum silme yetkisi",
             Permissions.CommentsViewAll => "Tüm yorumları görüntüleme yetkisi",
             Permissions.CommentsModerate => "Yorum moderasyon yetkisi",
+            Permissions.ActivityLogsView => "Aktivite loglarını görüntüleme yetkisi",
             _ => $"{permissionName} permission"
         };
     }

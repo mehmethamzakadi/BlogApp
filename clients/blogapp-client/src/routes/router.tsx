@@ -110,7 +110,7 @@ export const router = createBrowserRouter([
       {
         path: 'activity-logs',
         element: (
-          <ProtectedRoute requiredPermission={Permissions.DashboardView}>
+          <ProtectedRoute requiredPermission={Permissions.ActivityLogsView}>
             <ActivityLogsPage />
           </ProtectedRoute>
         )

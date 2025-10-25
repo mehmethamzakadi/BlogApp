@@ -39,7 +39,7 @@ const links = [
     to: '/admin/activity-logs',
     label: 'Aktivite Logları',
     icon: Activity,
-    requiredPermission: Permissions.DashboardView
+    requiredPermission: Permissions.ActivityLogsView
   }
 ];
 

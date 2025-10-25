@@ -25,11 +25,12 @@ public sealed class CreateCategoryCommandHandler(
         }
 
         var category = await categoryRepository.AddAsync(new Category { Name = request.Name });
-        await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // ✅ Raise domain event
+        // ✅ Raise domain event BEFORE SaveChanges for Outbox Pattern
         var userId = currentUserService.GetCurrentUserId();
         category.AddDomainEvent(new CategoryCreatedEvent(category.Id, category.Name, userId ?? category.CreatedById));
+
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         await cache.Add(
             $"category-{category.Id}",

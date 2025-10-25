@@ -14,7 +14,7 @@ public class ActivityLogsController(IMediator mediator) : BaseApiController(medi
     /// Activity log'ları paginated ve filtrelenmiş şekilde getirir
     /// </summary>
     [HttpPost("search")]
-    [HasPermission(Permissions.DashboardView)]
+    [HasPermission(Permissions.ActivityLogsView)]
     public async Task<IActionResult> GetPaginatedList([FromBody] DataGridRequest request)
     {
         PaginatedListResponse<GetPaginatedActivityLogsResponse> response =

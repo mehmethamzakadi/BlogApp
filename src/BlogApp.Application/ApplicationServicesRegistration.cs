@@ -21,7 +21,7 @@ namespace BlogApp.Application
             {
                 configuration.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
                 configuration.AddOpenBehavior(typeof(LoggingBehavior<,>));
-                configuration.AddOpenBehavior(typeof(DomainEventDispatcherBehavior<,>));
+                // DomainEventDispatcherBehavior removed - events are now handled via Outbox Pattern
             });
 
             services.AddFluentValidationAutoValidation();
