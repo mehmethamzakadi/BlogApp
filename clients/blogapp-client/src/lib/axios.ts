@@ -28,6 +28,12 @@ const processQueue = (error: Error | null, token: string | null = null) => {
 
 api.interceptors.request.use((config) => {
   const token = useAuthStore.getState().token;
+  
+  // Refresh token endpoint'i için Authorization header ekleme
+  if (config.url?.includes('/Auth/RefreshToken')) {
+    return config;
+  }
+  
   if (token) {
     const headers = AxiosHeaders.from(config.headers ?? {});
     headers.set('Authorization', `Bearer ${token}`);
