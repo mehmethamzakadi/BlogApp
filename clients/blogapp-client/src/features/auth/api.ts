@@ -6,3 +6,10 @@ export async function login(request: LoginRequest): Promise<ApiResult<LoginRespo
   const response = await api.post<ApiResult<LoginResponse>>('/Auth/Login', request);
   return normalizeApiResult<LoginResponse>(response.data);
 }
+
+export async function refreshToken(token: string): Promise<ApiResult<LoginResponse>> {
+  const response = await api.post<ApiResult<LoginResponse>>('/Auth/RefreshToken', {
+    refreshToken: token
+  });
+  return normalizeApiResult<LoginResponse>(response.data);
+}

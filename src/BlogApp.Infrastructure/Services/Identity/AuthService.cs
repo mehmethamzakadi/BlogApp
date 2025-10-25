@@ -41,6 +41,38 @@ public sealed class AuthService(UserManager<AppUser> userManager, SignInManager<
         return new SuccessDataResult<LoginResponse>(tokenResponse, "Giriş Başarılı");
     }
 
+    public async Task<IDataResult<LoginResponse>> RefreshTokenAsync(string refreshToken)
+    {
+        // Refresh token ile kullanıcıyı bul
+        var users = userManager.Users.ToList();
+        AppUser? user = null;
+
+        foreach (var u in users)
+        {
+            var storedToken = await userManager.GetAuthenticationTokenAsync(u, "BlogApp", "RefreshToken");
+            if (storedToken == refreshToken)
+            {
+                user = u;
+                break;
+            }
+        }
+
+        if (user == null)
+        {
+            throw new AuthenticationErrorException("Geçersiz refresh token.");
+        }
+
+        // Yeni token oluştur
+        var authClaims = await tokenService.GetAuthClaims(user);
+        var tokenResponse = tokenService.GenerateAccessToken(authClaims, user);
+
+        // Eski refresh token'ı kaldır ve yenisini kaydet
+        await userManager.RemoveAuthenticationTokenAsync(user, "BlogApp", "RefreshToken");
+        await userManager.SetAuthenticationTokenAsync(user, "BlogApp", "RefreshToken", tokenResponse.RefreshToken);
+
+        return new SuccessDataResult<LoginResponse>(tokenResponse, "Token yenilendi");
+    }
+
     public async Task PasswordResetAsync(string email)
     {
         AppUser? user = await userManager.FindByEmailAsync(email);

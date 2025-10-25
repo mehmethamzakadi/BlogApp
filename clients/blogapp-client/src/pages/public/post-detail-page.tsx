@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Calendar, Clock } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Clock, BookOpen } from 'lucide-react';
 import { fetchPublishedPosts, getPostById } from '../../features/posts/api';
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
@@ -65,6 +65,22 @@ export function PostDetailPage() {
     return sanitizeHtml(content);
   }, [post?.body]);
 
+  // Kelime sayısı ve okuma süresi hesaplama (makale içeriğine göre)
+  const readingInfo = useMemo(() => {
+    if (!post?.body) {
+      return { wordCount: 0, readingMinutes: 1 };
+    }
+
+    // HTML taglerini temizle
+    const plainText = post.body.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    
+    const words = plainText.split(' ').filter(Boolean);
+    const wordCount = words.length;
+    // Dakika başına 200 kelime okuma hızı varsayımı
+    const readingMinutes = Math.max(1, Math.ceil(wordCount / 200));
+    return { wordCount, readingMinutes };
+  }, [post?.body]);
+
   const { data: publishedPosts } = useQuery({
     queryKey: ['posts', 'published', 'all'],
     queryFn: () =>
@@ -91,27 +107,6 @@ export function PostDetailPage() {
 
     return { previousPost: previous, nextPost: next };
   }, [post, publishedPosts?.items]);
-
-  const readingInsights = useMemo(() => {
-    if (!post?.body) {
-      return { wordCount: 0, readingMinutes: 0 };
-    }
-
-    const text = post.body
-      .replace(/<[^>]+>/g, ' ')
-      .replace(/&nbsp;/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-
-    if (!text) {
-      return { wordCount: 0, readingMinutes: 0 };
-    }
-
-    const words = text.split(' ').filter(Boolean);
-    const readingMinutes = Math.max(1, Math.round(words.length / 200));
-
-    return { wordCount: words.length, readingMinutes };
-  }, [post?.body]);
 
   if (!isValidId) {
     return (
@@ -174,7 +169,7 @@ export function PostDetailPage() {
       />
 
       <div className="w-full px-6 py-8 sm:px-10 md:px-16 lg:px-20 xl:px-28 2xl:px-32">
-        <div className="flex w-full flex-col gap-16">
+        <div className="flex w-full flex-col gap-10">
         <Button variant="ghost" className="group mt-4 h-auto w-fit px-0 text-sm" asChild>
           <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground transition-colors group-hover:text-primary">
             <ArrowLeft className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-1" />
@@ -182,81 +177,70 @@ export function PostDetailPage() {
           </Link>
         </Button>
 
-        {/* Hero Section - Full Width */}
+        {/* Hero Section - Tam Genişlik */}
         <motion.section
-          className="relative overflow-hidden rounded-[3rem] border border-border/40 shadow-xl shadow-primary/10"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          {/* Background Image with Overlay */}
-          {post.thumbnail ? (
-            <>
-              <div className="absolute inset-0">
-                <img 
-                  src={post.thumbnail} 
-                  alt={post.title} 
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-br from-background/95 via-background/90 to-background/85 backdrop-blur-sm" />
-            </>
-          ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-secondary/15" />
-          )}
+          <div className="relative overflow-hidden rounded-[2rem] border border-border/40 shadow-xl shadow-primary/10">
+            {/* Background Image with Overlay */}
+            {post.thumbnail ? (
+              <>
+                <div className="absolute inset-0">
+                  <img 
+                    src={post.thumbnail} 
+                    alt={post.title} 
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-br from-background/95 via-background/90 to-background/85 backdrop-blur-sm" />
+              </>
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-secondary/15" />
+            )}
 
-          {/* Content */}
-          <div className="relative px-6 py-16 sm:px-12 sm:py-20 lg:px-20 lg:py-24 xl:px-24 xl:py-28 2xl:px-28 2xl:py-32">
-            <div className="mx-auto max-w-4xl space-y-8 text-center">
-              <Badge className="mx-auto w-fit rounded-full bg-primary/90 px-5 py-1.5 text-xs uppercase tracking-wider text-primary-foreground shadow-lg backdrop-blur-sm">
-                {categoryLabel}
-              </Badge>
-              
-              <h1 className="text-balance text-3xl font-bold tracking-tight text-foreground drop-shadow-sm sm:text-4xl lg:text-5xl xl:text-6xl">
-                {post.title}
-              </h1>
-              
-              <p className="mx-auto max-w-3xl text-lg text-foreground/90 drop-shadow-sm sm:text-xl lg:text-2xl">
-                {post.summary}
-              </p>
-              
-              <div className="flex flex-wrap items-center justify-center gap-3 pt-4 text-sm">
-                <span className="inline-flex items-center gap-2 rounded-full bg-background/70 px-5 py-2.5 font-medium text-foreground shadow-md backdrop-blur-md ring-1 ring-border/50">
-                  <Calendar className="h-4 w-4" />
-                  Yayınlanan makale
-                </span>
-                {readingInsights.wordCount > 0 && (
-                  <span className="inline-flex items-center gap-2 rounded-full bg-background/70 px-5 py-2.5 font-medium text-foreground shadow-md backdrop-blur-md ring-1 ring-border/50">
+            {/* Content - Sadeleştirilmiş */}
+            <div className="relative px-6 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12">
+              <div className="space-y-5">
+                <Badge className="w-fit rounded-full bg-primary/90 px-4 py-1 text-xs uppercase tracking-wider text-primary-foreground shadow-lg backdrop-blur-sm">
+                  {categoryLabel}
+                </Badge>
+                
+                <h1 className="text-balance text-2xl font-bold tracking-tight text-foreground drop-shadow-sm sm:text-3xl lg:text-4xl">
+                  {post.title}
+                </h1>
+                
+                <p className="text-base text-foreground/90 drop-shadow-sm sm:text-lg">
+                  {post.summary}
+                </p>
+
+                {/* Makale Bilgileri */}
+                <div className="flex items-center gap-4 text-sm text-foreground/80">
+                  <div className="flex items-center gap-1.5">
                     <Clock className="h-4 w-4" />
-                    {readingInsights.readingMinutes} dakikalık okuma · {readingInsights.wordCount} kelime
-                  </span>
-                )}
+                    <span>{readingInfo.readingMinutes} dk okuma</span>
+                  </div>
+                  <div className="h-1 w-1 rounded-full bg-foreground/30" />
+                  <div className="flex items-center gap-1.5">
+                    <BookOpen className="h-4 w-4" />
+                    <span>{readingInfo.wordCount} kelime</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </motion.section>
 
-        {/* Main Content Section - Full Width */}
+        {/* Main Content Section - Tam Genişlik */}
         <motion.section
-          className="grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(320px,0.85fr)] xl:grid-cols-[minmax(0,2.2fr)_minmax(360px,0.7fr)] 2xl:grid-cols-[minmax(0,2.35fr)_minmax(380px,0.65fr)]"
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.4 }}
         >
           <div className="overflow-hidden rounded-[2.75rem] border border-border/70 bg-card/95 shadow-xl backdrop-blur">
-            <div className="bg-background/95 px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12 xl:px-10 xl:py-14">
-              <div className="mb-12 flex flex-wrap items-center justify-center gap-3 text-sm text-muted-foreground/80 sm:justify-between">
-                <Badge variant="secondary" className="rounded-full bg-secondary/80 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-secondary-foreground">
-                  {categoryLabel}
-                </Badge>
-                {readingInsights.wordCount > 0 && (
-                  <span className="inline-flex items-center gap-2 rounded-full bg-background/70 px-3 py-1.5 ring-1 ring-border/60">
-                    <Clock className="h-4 w-4" />
-                    {readingInsights.readingMinutes} dakika · {readingInsights.wordCount} kelime
-                  </span>
-                )}
-              </div>
-
+            <div className="bg-background/95 px-4 py-8 sm:px-6 sm:py-10 lg:px-10 lg:py-12 xl:px-14 xl:py-14">
+              {/* Makale İçeriği - Temiz ve Odaklanmış */}
               {sanitizedContent ? (
                 <article className="blog-content" dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
               ) : (
@@ -266,75 +250,6 @@ export function PostDetailPage() {
               )}
             </div>
           </div>
-
-          <aside className="flex flex-col gap-6 lg:pt-4">
-            <div className="sticky top-28 space-y-6">
-              <div className="overflow-hidden rounded-[2rem] border border-border/70 bg-background/95 p-8 shadow-lg">
-                <h2 className="text-xl font-semibold text-foreground">Makale bilgileri</h2>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Göz yormayan renkler ve ferah bir düzen ile bu yazıyı keyifle okuyabilirsiniz.
-                </p>
-                <div className="mt-6 space-y-4 text-sm text-muted-foreground">
-                  <div className="flex items-center justify-between rounded-xl bg-background/80 px-4 py-3 ring-1 ring-border/70">
-                    <span className="font-medium text-foreground">Kategori</span>
-                    <span className="truncate text-right text-foreground/90" title={categoryLabel}>
-                      {categoryLabel}
-                    </span>
-                  </div>
-                  {readingInsights.wordCount > 0 && (
-                    <div className="flex items-center justify-between rounded-xl bg-background/80 px-4 py-3 ring-1 ring-border/70">
-                      <span className="font-medium text-foreground">Okuma süresi</span>
-                      <span>{readingInsights.readingMinutes} dakika</span>
-                    </div>
-                  )}
-                  {readingInsights.wordCount > 0 && (
-                    <div className="flex items-center justify-between rounded-xl bg-background/80 px-4 py-3 ring-1 ring-border/70">
-                      <span className="font-medium text-foreground">Kelime sayısı</span>
-                      <span>{readingInsights.wordCount}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="rounded-[2rem] border border-border/70 bg-background/95 p-8 shadow-lg">
-                <h3 className="text-lg font-semibold text-foreground">Yeni hikayeleri keşfet</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Okumaya ara verdiğinizde bile sonraki veya önceki yazıya kolayca geçebilirsiniz.
-                </p>
-                <div className="mt-6 space-y-3 text-sm">
-                  {previousPost ? (
-                    <Link
-                      to={previousPostUrl}
-                      className="group flex items-center justify-between rounded-xl border border-border/60 bg-background/85 px-4 py-3 font-medium text-foreground transition hover:border-primary/60 hover:bg-primary/10"
-                    >
-                      <span>Önceki yazıya git</span>
-                      <ArrowLeft className="h-4 w-4 text-primary transition-transform duration-300 group-hover:-translate-x-1" />
-                    </Link>
-                  ) : (
-                    <div className="flex items-center justify-between rounded-xl border border-dashed border-border/60 bg-muted/30 px-4 py-3 text-muted-foreground">
-                      <span>Önceki yazı bulunamadı</span>
-                      <ArrowLeft className="h-4 w-4" />
-                    </div>
-                  )}
-
-                  {nextPost ? (
-                    <Link
-                      to={nextPostUrl}
-                      className="group flex items-center justify-between rounded-xl border border-border/60 bg-background/85 px-4 py-3 font-medium text-foreground transition hover:border-primary/60 hover:bg-primary/10"
-                    >
-                      <span>Sonraki yazıya git</span>
-                      <ArrowRight className="h-4 w-4 text-primary transition-transform duration-300 group-hover:translate-x-1" />
-                    </Link>
-                  ) : (
-                    <div className="flex items-center justify-between rounded-xl border border-dashed border-border/60 bg-muted/30 px-4 py-3 text-muted-foreground">
-                      <span>Sonraki yazı bulunamadı</span>
-                      <ArrowRight className="h-4 w-4" />
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </aside>
         </motion.section>
 
         {/* Post Navigation - Full Width */}

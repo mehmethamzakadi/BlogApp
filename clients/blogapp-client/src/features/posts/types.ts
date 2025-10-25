@@ -4,10 +4,12 @@ export interface PostSummary {
   id: number;
   title: string;
   summary: string;
+  body?: string; // Opsiyonel body alanı eklendi
   thumbnail: string;
   isPublished: boolean;
   categoryName: string;
   categoryId: number;
+  createdDate: Date;
 }
 
 export type PostListResponse = PaginatedListResponse<PostSummary>;
@@ -21,6 +23,7 @@ export interface Post {
   isPublished: boolean;
   categoryName: string;
   categoryId: number;
+  createdDate: Date;
 }
 
 export type PostManagementListResponse = PaginatedListResponse<Post>;

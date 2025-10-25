@@ -1,6 +1,7 @@
 using BlogApp.Application.Features.Auths.Login;
 using BlogApp.Application.Features.Auths.PasswordReset;
 using BlogApp.Application.Features.Auths.PasswordVerify;
+using BlogApp.Application.Features.Auths.RefreshToken;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,6 +15,14 @@ namespace BlogApp.API.Controllers
         public async Task<IActionResult> Login([FromBody] LoginCommand userLogin)
         {
             var result = await Mediator.Send(userLogin);
+            return result.Success ? Ok(result) : Unauthorized(result);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("RefreshToken")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command)
+        {
+            var result = await Mediator.Send(command);
             return result.Success ? Ok(result) : Unauthorized(result);
         }
 

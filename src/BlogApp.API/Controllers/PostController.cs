@@ -1,4 +1,3 @@
-using BlogApp.Application.Features.Categories.Queries.GetPaginatedListByDynamic;
 using BlogApp.Application.Features.Posts.Commands.Create;
 using BlogApp.Application.Features.Posts.Commands.Delete;
 using BlogApp.Application.Features.Posts.Commands.Update;
@@ -20,11 +19,7 @@ namespace BlogApp.API.Controllers
         [HttpGet("GetList")]
         public async Task<IActionResult> GetList([FromQuery] PaginatedRequest pageRequest)
         {
-            pageRequest ??= new PaginatedRequest();
-
-            PaginatedListResponse<GetListPostResponse> response = await Mediator.Send(
-                new GetListPostQuery(pageRequest)
-            );
+            PaginatedListResponse<GetListPostResponse> response = await Mediator.Send(new GetListPostQuery(pageRequest));
             return Ok(response);
         }
 
@@ -32,12 +27,7 @@ namespace BlogApp.API.Controllers
         [HttpGet("GetListByCategoryId")]
         public async Task<IActionResult> GetListByCategoryId([FromQuery] PaginatedRequest pageRequest, [FromQuery] int categoryId)
         {
-            pageRequest ??= new PaginatedRequest();
-
-            PaginatedListResponse<GetListPostByCategoryIdResponse> response = await Mediator.Send(
-                new GetListPostByCategoryIdQuery(pageRequest, categoryId)
-            );
-
+            PaginatedListResponse<GetListPostByCategoryIdResponse> response = await Mediator.Send(new GetListPostByCategoryIdQuery(pageRequest, categoryId));
             return Ok(response);
         }
 

@@ -8,5 +8,6 @@ public sealed record GetListPostByCategoryIdResponse(
     string Thumbnail,
     bool IsPublished,
     string CategoryName,
-    int CategoryId
+    int CategoryId,
+    DateTime CreatedDate
 );
