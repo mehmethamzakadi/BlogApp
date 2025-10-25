@@ -14,6 +14,11 @@ public sealed class Permission : BaseEntity
     public required string Name { get; set; }
 
     /// <summary>
+    /// Normalize edilmiş permission adı (case-insensitive arama için)
+    /// </summary>
+    public string? NormalizedName { get; set; }
+
+    /// <summary>
     /// Permission'ın açıklaması
     /// </summary>
     public string? Description { get; set; }
@@ -31,5 +36,5 @@ public sealed class Permission : BaseEntity
     /// <summary>
     /// Bu permission'a sahip roller
     /// </summary>
-    public ICollection<AppRolePermission> RolePermissions { get; set; } = new List<AppRolePermission>();
+    public ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();
 }

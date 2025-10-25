@@ -1,4 +1,4 @@
-﻿using BlogApp.Domain.Common.Results;
+using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Exceptions;
 
 namespace BlogApp.API.Middlewares

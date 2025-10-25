@@ -21,7 +21,7 @@ public interface IPermissionRepository : IAsyncRepository<Permission>, IReposito
     /// <summary>
     /// Role ait permission'ları getirir
     /// </summary>
-    Task<List<AppRolePermission>> GetRolePermissionsAsync(int roleId, CancellationToken cancellationToken = default);
+    Task<List<RolePermission>> GetRolePermissionsAsync(int roleId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Bir role permission atar (tüm eski permission'ları replace eder)

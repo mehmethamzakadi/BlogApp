@@ -1,4 +1,4 @@
-﻿namespace BlogApp.Domain.Constants
+namespace BlogApp.Domain.Constants
 {
     public static class EventConstants
     {

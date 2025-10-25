@@ -1,3 +1,3 @@
-﻿namespace BlogApp.Application.Features.Auths.UpdatePassword;
+namespace BlogApp.Application.Features.Auths.UpdatePassword;
 
 public sealed record UpdatePasswordResponse();

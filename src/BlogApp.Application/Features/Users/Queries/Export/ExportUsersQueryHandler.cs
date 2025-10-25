@@ -1,0 +1,61 @@
+using BlogApp.Domain.Entities;
+using BlogApp.Domain.Repositories;
+using MediatR;
+using System.Text;
+
+namespace BlogApp.Application.Features.Users.Queries.Export;
+
+public class ExportUsersQueryHandler : IRequestHandler<ExportUsersQuery, ExportUsersResponse>
+{
+    private readonly IUserRepository _userRepository;
+
+    public ExportUsersQueryHandler(IUserRepository userRepository)
+    {
+        _userRepository = userRepository;
+    }
+
+    public async Task<ExportUsersResponse> Handle(ExportUsersQuery request, CancellationToken cancellationToken)
+    {
+        var usersResult = await _userRepository.GetUsersAsync(0, int.MaxValue, cancellationToken);
+        var users = usersResult.Items.OrderBy(u => u.Id).ToList();
+
+        var csv = GenerateCsv(users);
+        var bytes = Encoding.UTF8.GetBytes(csv);
+
+        return new ExportUsersResponse
+        {
+            FileContent = bytes,
+            FileName = $"users_{DateTime.UtcNow:yyyyMMddHHmmss}.csv",
+            ContentType = "text/csv"
+        };
+    }
+
+    private string GenerateCsv(List<User> users)
+    {
+        var sb = new StringBuilder();
+
+        // Başlık
+        sb.AppendLine("Id,UserName,Email,PhoneNumber,EmailConfirmed");
+
+        // Satırlar
+        foreach (var user in users)
+        {
+            sb.AppendLine($"{user.Id},{EscapeCsv(user.UserName!)},{EscapeCsv(user.Email!)},{EscapeCsv(user.PhoneNumber)},{user.EmailConfirmed}");
+        }
+
+        return sb.ToString();
+    }
+
+    private string EscapeCsv(string? value)
+    {
+        if (string.IsNullOrEmpty(value))
+            return string.Empty;
+
+        if (value.Contains(",") || value.Contains("\"") || value.Contains("\n"))
+        {
+            return $"\"{value.Replace("\"", "\"\"")}\"";
+        }
+
+        return value;
+    }
+}

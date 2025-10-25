@@ -10,6 +10,6 @@ public class ActivityLog : BaseEntity
     public string Title { get; set; } = string.Empty;        // İnsan tarafından okunabilir açıklama
     public string? Details { get; set; }                     // JSON veya ek bilgi
     public int? UserId { get; set; }                         // İşlemi gerçekleştiren kullanıcı
-    public AppUser? User { get; set; }
+    public User? User { get; set; }
     public System.DateTime Timestamp { get; set; } = System.DateTime.UtcNow;
 }

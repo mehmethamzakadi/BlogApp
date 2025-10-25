@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 
 namespace BlogApp.Application.Features.Auths.UpdatePassword;
 

@@ -1,4 +1,4 @@
-﻿namespace BlogApp.Application.Abstractions;
+namespace BlogApp.Application.Abstractions;
 
 public interface ITelegramService
 {

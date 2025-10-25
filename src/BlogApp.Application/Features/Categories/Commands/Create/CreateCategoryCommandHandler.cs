@@ -18,13 +18,22 @@ public sealed class CreateCategoryCommandHandler(
 {
     public async Task<IResult> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
     {
-        bool categoryExists = await categoryRepository.AnyAsync(x => x.Name.ToLower() == request.Name.ToLower(), cancellationToken: cancellationToken);
+        // NormalizedName ile case-insensitive kontrol (database index kullanarak)
+        var normalizedName = request.Name.ToUpperInvariant();
+        bool categoryExists = await categoryRepository.AnyAsync(
+            x => x.NormalizedName == normalizedName, 
+            cancellationToken: cancellationToken);
+            
         if (categoryExists)
         {
-            return new ErrorResult("Kategori bilgisi zaten mevcut!");
+            return new ErrorResult("Bu kategori adı zaten mevcut!");
         }
 
-        var category = await categoryRepository.AddAsync(new Category { Name = request.Name });
+        var category = await categoryRepository.AddAsync(new Category 
+        { 
+            Name = request.Name,
+            NormalizedName = normalizedName
+        });
 
         // ✅ Outbox Pattern için SaveChanges'dan ÖNCE domain event'i tetikle
         var userId = currentUserService.GetCurrentUserId();

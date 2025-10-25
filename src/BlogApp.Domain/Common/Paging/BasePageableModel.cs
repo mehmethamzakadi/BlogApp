@@ -1,4 +1,4 @@
-﻿namespace BlogApp.Domain.Common.Paging;
+namespace BlogApp.Domain.Common.Paging;
 
 public abstract class BasePageableModel
 {

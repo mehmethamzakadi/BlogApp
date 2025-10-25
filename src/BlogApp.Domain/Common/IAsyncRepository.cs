@@ -1,4 +1,4 @@
-﻿using BlogApp.Domain.Common.Dynamic;
+using BlogApp.Domain.Common.Dynamic;
 using BlogApp.Domain.Common.Paging;
 using Microsoft.EntityFrameworkCore.Query;
 using System.Linq;

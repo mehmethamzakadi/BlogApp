@@ -33,6 +33,7 @@ import {
 } from '../../components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Separator } from '../../components/ui/separator';
+import { useInvalidateQueries } from '../../hooks/use-invalidate-queries';
 import toast from 'react-hot-toast';
 import { handleApiError, showApiResponseError } from '../../lib/api-error';
 import { cn } from '../../lib/utils';
@@ -50,6 +51,7 @@ const fieldMap: Record<string, string> = {
 
 export function CategoriesPage() {
   const queryClient = useQueryClient();
+  const { invalidateCategories } = useInvalidateQueries();
   const [filters, setFilters] = useState<CategoryTableFilters>({
     pageIndex: 0,
     pageSize: 10
@@ -179,10 +181,7 @@ export function CategoriesPage() {
       }
       toast.success(result.message || 'Kategori eklendi');
       setIsCreateOpen(false);
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-statistics'] });
-      queryClient.invalidateQueries({ queryKey: ['recent-activities'] });
-      queryClient.invalidateQueries({ queryKey: ['activity-logs'] });
+      invalidateCategories();
     },
     onError: (error) => handleApiError(error, 'Kategori eklenemedi')
   });
@@ -197,10 +196,7 @@ export function CategoriesPage() {
       }
       toast.success(result.message || 'Kategori güncellendi');
       setEditingCategory(null);
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-statistics'] });
-      queryClient.invalidateQueries({ queryKey: ['recent-activities'] });
-      queryClient.invalidateQueries({ queryKey: ['activity-logs'] });
+      invalidateCategories();
     },
     onError: (error) => handleApiError(error, 'Kategori güncellenemedi')
   });
@@ -214,10 +210,7 @@ export function CategoriesPage() {
       }
       toast.success(result.message || 'Kategori silindi');
       setCategoryToDelete(null);
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-statistics'] });
-      queryClient.invalidateQueries({ queryKey: ['recent-activities'] });
-      queryClient.invalidateQueries({ queryKey: ['activity-logs'] });
+      invalidateCategories();
     },
     onError: (error) => handleApiError(error, 'Kategori silinemedi')
   });

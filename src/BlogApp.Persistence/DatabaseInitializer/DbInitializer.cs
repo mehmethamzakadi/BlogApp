@@ -1,6 +1,5 @@
-using BlogApp.Domain.Entities;
+using BlogApp.Domain.Repositories;
 using BlogApp.Persistence.Contexts;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,9 +23,9 @@ public sealed class DbInitializer : IDbInitializer
         await dataContext.Database.MigrateAsync(cancellationToken);
 
         // Permission'ları seed et
-        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<AppRole>>();
+        var roleRepository = scope.ServiceProvider.GetRequiredService<IRoleRepository>();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<PermissionSeeder>>();
-        var permissionSeeder = new PermissionSeeder(dataContext, roleManager, logger);
+        var permissionSeeder = new PermissionSeeder(dataContext, roleRepository, logger);
         await permissionSeeder.SeedPermissionsAsync();
     }
 

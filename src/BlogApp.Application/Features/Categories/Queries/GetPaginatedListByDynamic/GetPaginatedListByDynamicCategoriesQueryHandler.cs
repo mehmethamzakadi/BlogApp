@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using BlogApp.Domain.Common.Paging;
 using BlogApp.Domain.Common.Responses;
 using BlogApp.Domain.Entities;

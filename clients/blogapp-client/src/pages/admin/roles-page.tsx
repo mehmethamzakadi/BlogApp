@@ -15,6 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Checkbox } from '../../components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../../components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { useInvalidateQueries } from '../../hooks/use-invalidate-queries';
 import toast from 'react-hot-toast';
 
 const roleSchema = z.object({
@@ -25,6 +26,7 @@ type RoleFormSchema = z.infer<typeof roleSchema>;
 
 export function RolesPage() {
   const queryClient = useQueryClient();
+  const { invalidateRoles } = useInvalidateQueries();
   const [page, setPage] = useState(0);
   const pageSize = 10;
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -105,9 +107,7 @@ export function RolesPage() {
     onSuccess: () => {
       toast.success('Rol başarıyla oluşturuldu');
       setIsCreateOpen(false);
-      queryClient.invalidateQueries({ queryKey: ['roles'] });
-      queryClient.invalidateQueries({ queryKey: ['activity-logs'] });
-      queryClient.invalidateQueries({ queryKey: ['recent-activities'] });
+      invalidateRoles();
       createForm.reset();
     },
     onError: () => toast.error('Rol oluşturulurken hata oluştu')
@@ -119,9 +119,7 @@ export function RolesPage() {
     onSuccess: () => {
       toast.success('Rol başarıyla güncellendi');
       setEditingRole(null);
-      queryClient.invalidateQueries({ queryKey: ['roles'] });
-      queryClient.invalidateQueries({ queryKey: ['activity-logs'] });
-      queryClient.invalidateQueries({ queryKey: ['recent-activities'] });
+      invalidateRoles();
     },
     onError: () => toast.error('Rol güncellenirken hata oluştu')
   });
@@ -131,9 +129,7 @@ export function RolesPage() {
     onSuccess: () => {
       toast.success('Rol başarıyla silindi');
       setRoleToDelete(null);
-      queryClient.invalidateQueries({ queryKey: ['roles'] });
-      queryClient.invalidateQueries({ queryKey: ['activity-logs'] });
-      queryClient.invalidateQueries({ queryKey: ['recent-activities'] });
+      invalidateRoles();
     },
     onError: () => toast.error('Rol silinirken hata oluştu')
   });
@@ -143,7 +139,7 @@ export function RolesPage() {
     onSuccess: () => {
       toast.success('Yetkiler başarıyla atandı');
       setAssigningPermissionsRole(null);
-      queryClient.invalidateQueries({ queryKey: ['role-permissions'] });
+      invalidateRoles();
     },
     onError: () => toast.error('Yetkiler atanırken hata oluştu')
   });

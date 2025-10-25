@@ -1,4 +1,4 @@
-﻿using BlogApp.Domain.Entities;
+using BlogApp.Domain.Entities;
 using BlogApp.Domain.Repositories;
 using BlogApp.Persistence.Contexts;
 

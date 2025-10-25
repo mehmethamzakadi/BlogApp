@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace BlogApp.Application.Features.Categories.Commands.Create
 {

@@ -19,6 +19,9 @@ public class PermissionConfiguration : IEntityTypeConfiguration<Permission>
             .IsRequired()
             .HasMaxLength(100);
 
+        builder.Property(p => p.NormalizedName)
+            .HasMaxLength(100);  // Geçici olarak nullable - migration sonrası required yapılacak
+
         builder.Property(p => p.Description)
             .HasMaxLength(500);
 
@@ -30,9 +33,13 @@ public class PermissionConfiguration : IEntityTypeConfiguration<Permission>
             .IsRequired()
             .HasMaxLength(50);
 
-        // Index'ler
-        builder.HasIndex(p => p.Name)
+        // Index'ler - NormalizedName üzerinden unique (case-insensitive)
+        builder.HasIndex(p => p.NormalizedName)
             .IsUnique()
+            .HasDatabaseName("IX_Permissions_NormalizedName_Unique");
+
+        // Name için normal index
+        builder.HasIndex(p => p.Name)
             .HasDatabaseName("IX_Permissions_Name");
 
         builder.HasIndex(p => new { p.Module, p.Type })

@@ -1,4 +1,4 @@
-﻿using BlogApp.Application.Abstractions;
+using BlogApp.Application.Abstractions;
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;

@@ -1,4 +1,4 @@
-﻿using BlogApp.Domain.Entities;
+using BlogApp.Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -32,10 +32,12 @@ namespace BlogApp.Persistence.Contexts
         public DbSet<Post> Posts { get; set; }
         public DbSet<Image> Images { get; set; }
         public DbSet<Comment> Comments { get; set; }
-        public DbSet<AppUserToken> AppUserTokens { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<ActivityLog> ActivityLogs { get; set; }
         public DbSet<Permission> Permissions { get; set; }
-        public DbSet<AppRolePermission> AppRolePermissions { get; set; }
+        public DbSet<RolePermission> RolePermissions { get; set; }
         public DbSet<OutboxMessage> OutboxMessages { get; set; }
     }
 }

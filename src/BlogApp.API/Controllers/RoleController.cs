@@ -1,9 +1,9 @@
-using BlogApp.Application.Features.AppRoles.Commands.BulkDelete;
-using BlogApp.Application.Features.AppRoles.Commands.Create;
-using BlogApp.Application.Features.AppRoles.Commands.Delete;
-using BlogApp.Application.Features.AppRoles.Commands.Update;
-using BlogApp.Application.Features.AppRoles.Queries.GetList;
-using BlogApp.Application.Features.AppRoles.Queries.GetRoleById;
+using BlogApp.Application.Features.Roles.Commands.BulkDelete;
+using BlogApp.Application.Features.Roles.Commands.Create;
+using BlogApp.Application.Features.Roles.Commands.Delete;
+using BlogApp.Application.Features.Roles.Commands.Update;
+using BlogApp.Application.Features.Roles.Queries.GetList;
+using BlogApp.Application.Features.Roles.Queries.GetRoleById;
 using BlogApp.Domain.Common.Requests;
 using BlogApp.Domain.Common.Responses;
 using BlogApp.Domain.Constants;
@@ -19,7 +19,7 @@ namespace BlogApp.API.Controllers
         [HasPermission(Permissions.RolesViewAll)]
         public async Task<IActionResult> GetList([FromQuery] PaginatedRequest pageRequest)
         {
-            PaginatedListResponse<GetListAppRoleResponse> response = await Mediator.Send(new GetListRoleQuery(pageRequest));
+            PaginatedListResponse<GetListRoleResponse> response = await Mediator.Send(new GetListRoleQuery(pageRequest));
             return Ok(response);
         }
 

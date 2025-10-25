@@ -1,4 +1,4 @@
-﻿namespace BlogApp.Domain.Exceptions;
+namespace BlogApp.Domain.Exceptions;
 
 public class AuthenticationErrorException : Exception
 {

@@ -1,4 +1,4 @@
-﻿using BlogApp.Domain.Common;
+using BlogApp.Domain.Common;
 using BlogApp.Domain.Repositories;
 using BlogApp.Persistence.Contexts;
 using BlogApp.Persistence.DatabaseInitializer;
@@ -34,6 +34,8 @@ public static class PersistenceServicesRegistration
         services.AddScoped<IActivityLogRepository, ActivityLogRepository>();
         services.AddScoped<IPermissionRepository, PermissionRepository>();
         services.AddScoped<IOutboxMessageRepository, OutboxMessageRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IDbInitializer, DbInitializer>();
 
         // Unit of Work kaydı

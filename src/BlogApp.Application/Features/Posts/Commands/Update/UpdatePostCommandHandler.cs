@@ -10,6 +10,7 @@ namespace BlogApp.Application.Features.Posts.Commands.Update;
 
 public sealed class UpdatePostCommandHandler(
     IPostRepository postRepository,
+    ICategoryRepository categoryRepository,
     IUnitOfWork unitOfWork,
     ICurrentUserService currentUserService) : IRequestHandler<UpdatePostCommand, IResult>
 {
@@ -19,6 +20,19 @@ public sealed class UpdatePostCommandHandler(
         if (entity is null)
         {
             return new ErrorResult("Post bilgisi bulunamadı!");
+        }
+
+        // Kategori değiştiriliyorsa geçerliliğini kontrol et
+        if (entity.CategoryId != request.CategoryId)
+        {
+            var categoryExists = await categoryRepository.AnyAsync(
+                x => x.Id == request.CategoryId && !x.IsDeleted, 
+                cancellationToken: cancellationToken);
+                
+            if (!categoryExists)
+            {
+                return new ErrorResult("Geçersiz kategori seçildi!");
+            }
         }
 
         entity.Title = request.Title;

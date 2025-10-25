@@ -1,13 +1,11 @@
-﻿using BlogApp.Domain.Common;
-using BlogApp.Domain.Entities;
+using BlogApp.Domain.Common;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace BlogApp.Persistence.Contexts
 {
-    public class AuditableDbContext : IdentityDbContext<AppUser, AppRole, int, AppUserClaim, AppUserRole, AppUserLogin, AppRoleClaim, AppUserToken>
+    public class AuditableDbContext : DbContext
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         public AuditableDbContext(DbContextOptions options, IHttpContextAccessor httpContextAccessor) : base(options)

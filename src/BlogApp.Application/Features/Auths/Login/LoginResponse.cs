@@ -1,4 +1,4 @@
-﻿namespace BlogApp.Application.Features.Auths.Login;
+namespace BlogApp.Application.Features.Auths.Login;
 
 public sealed record LoginResponse(
     int UserId,

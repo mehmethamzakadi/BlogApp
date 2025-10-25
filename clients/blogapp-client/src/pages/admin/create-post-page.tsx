@@ -16,6 +16,7 @@ import toast from 'react-hot-toast';
 import { getAllCategories } from '../../features/categories/api';
 import { Category } from '../../features/categories/types';
 import { useUnsavedChangesWarning } from '../../hooks/use-unsaved-changes-warning';
+import { useInvalidateQueries } from '../../hooks/use-invalidate-queries';
 import { handleApiError, showApiResponseError } from '../../lib/api-error';
 
 const textareaBaseClasses =
@@ -27,6 +28,7 @@ const confirmMessage =
 export function CreatePostPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { invalidatePosts } = useInvalidateQueries();
   const [hasSaved, setHasSaved] = useState(false);
   const { postId: postIdParam } = useParams<{ postId?: string }>();
   const postId = postIdParam ? Number(postIdParam) : undefined;
@@ -116,11 +118,7 @@ export function CreatePostPage() {
 
       setHasSaved(true);
       toast.success(result.message || 'Gönderi oluşturuldu');
-      await queryClient.invalidateQueries({ queryKey: ['posts'] });
-      await queryClient.invalidateQueries({ queryKey: ['posts', 'published'] });
-      await queryClient.invalidateQueries({ queryKey: ['dashboard-statistics'] });
-      await queryClient.invalidateQueries({ queryKey: ['recent-activities'] });
-      await queryClient.invalidateQueries({ queryKey: ['activity-logs'] });
+      invalidatePosts();
       reset({
         title: '',
         summary: '',
@@ -150,11 +148,7 @@ export function CreatePostPage() {
 
       setHasSaved(true);
       toast.success(result.message || 'Gönderi güncellendi');
-      await queryClient.invalidateQueries({ queryKey: ['posts'] });
-      await queryClient.invalidateQueries({ queryKey: ['posts', 'published'] });
-      await queryClient.invalidateQueries({ queryKey: ['dashboard-statistics'] });
-      await queryClient.invalidateQueries({ queryKey: ['recent-activities'] });
-      await queryClient.invalidateQueries({ queryKey: ['activity-logs'] });
+      invalidatePosts();
       if (postId) {
         await queryClient.invalidateQueries({ queryKey: ['post', postId] });
       }

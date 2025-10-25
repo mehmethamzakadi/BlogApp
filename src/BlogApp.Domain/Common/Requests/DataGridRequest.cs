@@ -1,4 +1,4 @@
-﻿using BlogApp.Domain.Common.Dynamic;
+using BlogApp.Domain.Common.Dynamic;
 
 namespace BlogApp.Domain.Common.Requests;
 

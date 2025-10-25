@@ -26,6 +26,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Separator } from '../../components/ui/separator';
 import { Badge } from '../../components/ui/badge';
+import { useInvalidateQueries } from '../../hooks/use-invalidate-queries';
 import { handleApiError, showApiResponseError } from '../../lib/api-error';
 import { cn } from '../../lib/utils';
 
@@ -38,6 +39,7 @@ const fieldMap: Record<string, string> = {
 
 export function PostsPage() {
   const queryClient = useQueryClient();
+  const { invalidatePosts } = useInvalidateQueries();
   const navigate = useNavigate();
   const [filters, setFilters] = useState<PostTableFilters>({
     pageIndex: 0,
@@ -209,11 +211,7 @@ export function PostsPage() {
       }
       toast.success(result.message || 'Gönderi silindi');
       setPostToDelete(null);
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
-      queryClient.invalidateQueries({ queryKey: ['posts', 'published'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-statistics'] });
-      queryClient.invalidateQueries({ queryKey: ['recent-activities'] });
-      queryClient.invalidateQueries({ queryKey: ['activity-logs'] });
+      invalidatePosts();
     },
     onError: (error) => handleApiError(error, 'Gönderi silinemedi')
   });

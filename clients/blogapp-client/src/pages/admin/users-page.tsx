@@ -41,6 +41,7 @@ import {
   DialogTitle
 } from '../../components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { useInvalidateQueries } from '../../hooks/use-invalidate-queries';
 import toast from 'react-hot-toast';
 import { PermissionGuard } from '../../components/auth/permission-guard';
 import { Permissions } from '../../lib/permissions';
@@ -71,6 +72,7 @@ const fieldMap: Record<string, string> = {
 export function UsersPage() {
   const queryClient = useQueryClient();
   const { hasPermission } = usePermission();
+  const { invalidateUsers } = useInvalidateQueries();
   const [filters, setFilters] = useState<UserTableFilters>({
     pageIndex: 0,
     pageSize: 10
@@ -237,9 +239,7 @@ export function UsersPage() {
     onSuccess: () => {
       toast.success('Kullanıcı başarıyla oluşturuldu');
       setIsCreateOpen(false);
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-      queryClient.invalidateQueries({ queryKey: ['activity-logs'] });
-      queryClient.invalidateQueries({ queryKey: ['recent-activities'] });
+      invalidateUsers();
       createForm.reset();
     },
     onError: () => {
@@ -253,9 +253,7 @@ export function UsersPage() {
     onSuccess: () => {
       toast.success('Kullanıcı başarıyla güncellendi');
       setEditingUser(null);
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-      queryClient.invalidateQueries({ queryKey: ['activity-logs'] });
-      queryClient.invalidateQueries({ queryKey: ['recent-activities'] });
+      invalidateUsers();
     },
     onError: () => {
       toast.error('Kullanıcı güncellenirken hata oluştu');
@@ -267,9 +265,7 @@ export function UsersPage() {
     onSuccess: () => {
       toast.success('Kullanıcı başarıyla silindi');
       setUserToDelete(null);
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-      queryClient.invalidateQueries({ queryKey: ['activity-logs'] });
-      queryClient.invalidateQueries({ queryKey: ['recent-activities'] });
+      invalidateUsers();
     },
     onError: () => {
       toast.error('Kullanıcı silinirken hata oluştu');
@@ -282,7 +278,7 @@ export function UsersPage() {
     onSuccess: () => {
       toast.success('Roller başarıyla atandı');
       setAssigningRolesUser(null);
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      invalidateUsers();
     },
     onError: () => {
       toast.error('Roller atanırken hata oluştu');

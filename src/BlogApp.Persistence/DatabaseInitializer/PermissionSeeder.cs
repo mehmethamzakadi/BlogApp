@@ -1,7 +1,7 @@
 using BlogApp.Domain.Constants;
 using BlogApp.Domain.Entities;
+using BlogApp.Domain.Repositories;
 using BlogApp.Persistence.Contexts;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -14,16 +14,16 @@ namespace BlogApp.Persistence.DatabaseInitializer;
 public class PermissionSeeder
 {
     private readonly BlogAppDbContext _context;
-    private readonly RoleManager<AppRole> _roleManager;
+    private readonly IRoleRepository _roleRepository;
     private readonly ILogger<PermissionSeeder> _logger;
 
     public PermissionSeeder(
         BlogAppDbContext context,
-        RoleManager<AppRole> roleManager,
+        IRoleRepository roleRepository,
         ILogger<PermissionSeeder> logger)
     {
         _context = context;
-        _roleManager = roleManager;
+        _roleRepository = roleRepository;
         _logger = logger;
     }
 
@@ -89,6 +89,7 @@ public class PermissionSeeder
             var permission = new Permission
             {
                 Name = permissionName,
+                NormalizedName = permissionName.ToUpperInvariant(),
                 Module = module,
                 Type = type,
                 Description = GetPermissionDescription(permissionName),
@@ -106,7 +107,9 @@ public class PermissionSeeder
 
     private async Task AssignAllPermissionsToAdminAsync()
     {
-        var adminRole = await _roleManager.FindByNameAsync(UserRoles.Admin);
+        var adminRole = await _roleRepository.Query()
+            .FirstOrDefaultAsync(r => r.NormalizedName == UserRoles.Admin.ToUpper());
+        
         if (adminRole == null)
         {
             _logger.LogWarning("Admin role not found");
@@ -117,7 +120,7 @@ public class PermissionSeeder
             .Where(p => !p.IsDeleted)
             .ToListAsync();
 
-        var existingRolePermissions = await _context.AppRolePermissions
+        var existingRolePermissions = await _context.RolePermissions
             .Where(rp => rp.RoleId == adminRole.Id)
             .Select(rp => rp.PermissionId)
             .ToListAsync();
@@ -125,7 +128,7 @@ public class PermissionSeeder
         // Sadece eksik olan permission'ları ekle, var olanları dokunma
         var permissionsToAdd = allPermissions
             .Where(p => !existingRolePermissions.Contains(p.Id))
-            .Select(p => new AppRolePermission
+            .Select(p => new RolePermission
             {
                 RoleId = adminRole.Id,
                 PermissionId = p.Id,
@@ -135,7 +138,7 @@ public class PermissionSeeder
 
         if (permissionsToAdd.Any())
         {
-            _context.AppRolePermissions.AddRange(permissionsToAdd);
+            _context.RolePermissions.AddRange(permissionsToAdd);
             _logger.LogInformation($"Assigned {permissionsToAdd.Count} new permissions to Admin role");
         }
         else
@@ -146,7 +149,9 @@ public class PermissionSeeder
 
     private async Task AssignBasicPermissionsToUserAsync()
     {
-        var userRole = await _roleManager.FindByNameAsync(UserRoles.User);
+        var userRole = await _roleRepository.Query()
+            .FirstOrDefaultAsync(r => r.NormalizedName == UserRoles.User.ToUpper());
+        
         if (userRole == null)
         {
             _logger.LogWarning("User role not found");
@@ -154,7 +159,7 @@ public class PermissionSeeder
         }
 
         // User rolünün zaten permission'ları varsa, manuel değişiklikleri korumak için seed işlemini atla
-        var hasExistingPermissions = await _context.AppRolePermissions
+        var hasExistingPermissions = await _context.RolePermissions
             .AnyAsync(rp => rp.RoleId == userRole.Id);
 
         if (hasExistingPermissions)
@@ -170,7 +175,7 @@ public class PermissionSeeder
             .ToListAsync();
 
         var permissionsToAdd = userPermissions
-            .Select(p => new AppRolePermission
+            .Select(p => new RolePermission
             {
                 RoleId = userRole.Id,
                 PermissionId = p.Id,
@@ -180,7 +185,7 @@ public class PermissionSeeder
 
         if (permissionsToAdd.Any())
         {
-            _context.AppRolePermissions.AddRange(permissionsToAdd);
+            _context.RolePermissions.AddRange(permissionsToAdd);
             _logger.LogInformation($"Assigned {permissionsToAdd.Count} default permissions to User role (first-time setup)");
         }
     }

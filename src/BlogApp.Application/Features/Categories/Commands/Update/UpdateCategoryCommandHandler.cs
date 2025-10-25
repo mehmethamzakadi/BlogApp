@@ -16,18 +16,28 @@ public sealed class UpdateCategoryCommandHandler(
 {
     public async Task<IResult> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
     {
-        var category = await categoryRepository.GetAsync(predicate: x => x.Id == request.Id, cancellationToken: cancellationToken);
+        var category = await categoryRepository.GetAsync(
+            predicate: x => x.Id == request.Id, 
+            cancellationToken: cancellationToken);
+            
         if (category is null)
         {
             return new ErrorResult("Kategori bilgisi bulunamadı!");
         }
 
-        if (category.Name.ToLower() == request.Name.ToLower())
+        // Başka bir kategoride aynı isim var mı kontrol et (mevcut kategori hariç)
+        var normalizedName = request.Name.ToUpperInvariant();
+        bool nameExists = await categoryRepository.AnyAsync(
+            x => x.NormalizedName == normalizedName && x.Id != request.Id, 
+            cancellationToken: cancellationToken);
+            
+        if (nameExists)
         {
-            return new ErrorResult("Kategori bilgisi zaten mevcut!");
+            return new ErrorResult("Bu kategori adı zaten kullanılıyor!");
         }
 
         category.Name = request.Name;
+        category.NormalizedName = normalizedName;
 
         await categoryRepository.UpdateAsync(category);
 

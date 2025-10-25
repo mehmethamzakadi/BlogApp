@@ -7,7 +7,6 @@ using BlogApp.Infrastructure.Authorization;
 using BlogApp.Infrastructure.Consumers;
 using BlogApp.Infrastructure.Services;
 using BlogApp.Infrastructure.Services.Identity;
-using BlogApp.Persistence.Contexts;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -31,22 +30,9 @@ namespace BlogApp.Infrastructure
             services.Configure<TelegramOptions>(configuration.GetSection(TelegramOptions.SectionName));
             services.Configure<RabbitMqOptions>(configuration.GetSection(RabbitMqOptions.SectionName));
 
-            services.AddIdentity<AppUser, AppRole>(options =>
-            {
-                options.Password.RequireDigit = true;
-                options.Password.RequiredLength = 8;
-                options.Password.RequiredUniqueChars = 1;
-                options.Password.RequireNonAlphanumeric = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireUppercase = true;
-
-                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@";
-                options.User.RequireUniqueEmail = true;
-            })
-                .AddErrorDescriber<TurkishIdentityErrorDescriber>()
-                .AddRoleManager<RoleManager<AppRole>>()
-                .AddEntityFrameworkStores<BlogAppDbContext>()
-                .AddDefaultTokenProviders();
+            // Custom Password Hasher for User entity
+            services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+            services.AddScoped<IPasswordHasher, PasswordHasher>();
 
             TokenOptions tokenOptions = configuration.GetSection(TokenOptions.SectionName).Get<TokenOptions>()
                 ?? throw new InvalidOperationException("Token ayarları yapılandırılmalıdır.");
@@ -143,9 +129,7 @@ namespace BlogApp.Infrastructure
             services.AddSingleton<ICacheService, RedisCacheService>();
             services.AddTransient<ITokenService, JwtTokenService>();
             services.AddTransient<IMailService, MailService>();
-            services.AddScoped<IUserService, UserService>();
             services.AddScoped<IAuthService, AuthService>();
-            services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
 
             // Authorization

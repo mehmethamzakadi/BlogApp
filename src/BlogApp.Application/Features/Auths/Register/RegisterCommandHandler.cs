@@ -1,39 +1,37 @@
-
-using BlogApp.Application.Abstractions.Identity;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Constants;
 using BlogApp.Domain.Entities;
+using BlogApp.Domain.Repositories;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 
 namespace BlogApp.Application.Features.Auths.Register;
 
-public sealed class RegisterCommandHandler(IUserService userService) : IRequestHandler<RegisterCommand, IResult>
+public sealed class RegisterCommandHandler(IUserRepository userRepository) : IRequestHandler<RegisterCommand, IResult>
 {
     public async Task<IResult> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
-        AppUser? existingUser = await userService.FindByEmailAsync(request.Email);
+        User? existingUser = await userRepository.FindByEmailAsync(request.Email);
         if (existingUser is not null)
         {
             return new ErrorResult("Bu e-posta adresi zaten kullanılıyor!");
         }
 
-        var user = new AppUser
+        var user = new User
         {
             Email = request.Email,
             UserName = request.UserName,
+            NormalizedUserName = request.UserName.ToUpperInvariant(),
+            NormalizedEmail = request.Email.ToUpperInvariant(),
+            PasswordHash = string.Empty // CreateAsync metodunda set edilecek
         };
 
-        IdentityResult creationResult = await userService.CreateAsync(user, request.Password);
-        if (!creationResult.Succeeded)
+        IResult creationResult = await userRepository.CreateAsync(user, request.Password);
+        if (!creationResult.Success)
         {
-            List<string> errors = creationResult.Errors.Select(error => error.Description).ToList();
-            string message = "Kullanıcı oluşturulurken hatalar oluştu";
-
-            return new ErrorResult(message, errors);
+            return creationResult;
         }
 
-        await userService.AddToRoleAsync(user, UserRoles.User);
+        await userRepository.AddToRoleAsync(user, UserRoles.User);
         return new SuccessResult("Kayıt işlemi başarılı. Giriş yapabilirsiniz.");
     }
 }

@@ -1,4 +1,4 @@
-﻿using BlogApp.Application.Abstractions;
+using BlogApp.Application.Abstractions;
 using BlogApp.Domain.Events.Telegram;
 using MassTransit;
 

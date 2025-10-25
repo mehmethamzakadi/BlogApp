@@ -1,4 +1,4 @@
-﻿using BlogApp.Domain.Common.Requests;
+using BlogApp.Domain.Common.Requests;
 using BlogApp.Domain.Common.Responses;
 using MediatR;
 

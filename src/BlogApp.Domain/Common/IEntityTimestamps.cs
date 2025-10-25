@@ -1,4 +1,4 @@
-﻿namespace BlogApp.Domain.Common;
+namespace BlogApp.Domain.Common;
 
 public interface IEntityTimestamps
 {

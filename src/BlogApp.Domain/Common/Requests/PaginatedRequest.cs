@@ -1,4 +1,4 @@
-﻿namespace BlogApp.Domain.Common.Requests;
+namespace BlogApp.Domain.Common.Requests;
 
 public class PaginatedRequest
 {

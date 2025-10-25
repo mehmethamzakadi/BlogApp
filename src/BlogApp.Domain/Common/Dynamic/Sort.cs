@@ -1,4 +1,4 @@
-﻿namespace BlogApp.Domain.Common.Dynamic;
+namespace BlogApp.Domain.Common.Dynamic;
 
 public sealed class Sort
 {

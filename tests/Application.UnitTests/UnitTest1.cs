@@ -71,6 +71,11 @@ public class CreatePostCommandHandlerTests
             .Setup(repo => repo.AddAsync(It.IsAny<Post>()))
             .ReturnsAsync((Post post) => post);
 
+        var categoryRepositoryMock = new Mock<BlogApp.Domain.Repositories.ICategoryRepository>();
+        categoryRepositoryMock
+            .Setup(repo => repo.AnyAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<Category, bool>>>(), It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
         var unitOfWorkMock = new Mock<BlogApp.Domain.Common.IUnitOfWork>();
         unitOfWorkMock
             .Setup(uow => uow.SaveChangesAsync(It.IsAny<CancellationToken>()))
@@ -78,7 +83,7 @@ public class CreatePostCommandHandlerTests
 
         var currentUserServiceMock = new Mock<ICurrentUserService>();
 
-        var handler = new CreatePostCommandHandler(repositoryMock.Object, unitOfWorkMock.Object, currentUserServiceMock.Object);
+        var handler = new CreatePostCommandHandler(repositoryMock.Object, categoryRepositoryMock.Object, unitOfWorkMock.Object, currentUserServiceMock.Object);
         var command = new CreatePostCommand("Title", "Body", "Summary", "thumb", true, 5);
 
         IResult result = await handler.Handle(command, CancellationToken.None);

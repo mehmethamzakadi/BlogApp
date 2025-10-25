@@ -1,8 +1,6 @@
 using BlogApp.Application.Abstractions;
-using BlogApp.Application.Abstractions.Identity;
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
-using BlogApp.Domain.Entities;
 using BlogApp.Domain.Events.PermissionEvents;
 using BlogApp.Domain.Repositories;
 using MediatR;
@@ -14,20 +12,20 @@ namespace BlogApp.Application.Features.Permissions.Commands.AssignPermissionsToR
 public class AssignPermissionsToRoleCommandHandler : IRequestHandler<AssignPermissionsToRoleCommand, IResult>
 {
     private readonly IPermissionRepository _permissionRepository;
-    private readonly IRoleService _roleService;
+    private readonly IRoleRepository _roleRepository;
     private readonly IMediator _mediator;
     private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
 
     public AssignPermissionsToRoleCommandHandler(
         IPermissionRepository permissionRepository,
-        IRoleService roleService,
+        IRoleRepository roleRepository,
         IMediator mediator,
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork)
     {
         _permissionRepository = permissionRepository;
-        _roleService = roleService;
+        _roleRepository = roleRepository;
         _mediator = mediator;
         _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
@@ -36,7 +34,7 @@ public class AssignPermissionsToRoleCommandHandler : IRequestHandler<AssignPermi
     public async Task<IResult> Handle(AssignPermissionsToRoleCommand request, CancellationToken cancellationToken)
     {
         // Rol kontrolü
-        var role = _roleService.GetRoleById(request.RoleId);
+        var role = _roleRepository.GetRoleById(request.RoleId);
         if (role == null)
         {
             return new ErrorResult("Rol bulunamadı");
@@ -51,7 +49,7 @@ public class AssignPermissionsToRoleCommandHandler : IRequestHandler<AssignPermi
         // Repository üzerinden permission'ları ata
         await _permissionRepository.AssignPermissionsToRoleAsync(request.RoleId, request.PermissionIds, cancellationToken);
 
-        // ✅ AppRole artık AddDomainEvent() metoduna sahip
+        // ✅ Role artık AddDomainEvent() metoduna sahip (BaseEntity üzerinden)
         var currentUserId = _currentUserService.GetCurrentUserId();
         role.AddDomainEvent(new PermissionsAssignedToRoleEvent(role.Id, role.Name!, permissions, currentUserId));
 

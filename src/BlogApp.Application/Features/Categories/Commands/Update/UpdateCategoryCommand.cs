@@ -1,4 +1,4 @@
-﻿using BlogApp.Domain.Common.Results;
+using BlogApp.Domain.Common.Results;
 using MediatR;
 
 namespace BlogApp.Application.Features.Categories.Commands.Update;

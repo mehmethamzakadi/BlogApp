@@ -1,4 +1,3 @@
-using BlogApp.Application.Abstractions.Identity;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Repositories;
 using MediatR;
@@ -8,17 +7,17 @@ namespace BlogApp.Application.Features.Permissions.Queries.GetRolePermissions;
 public class GetRolePermissionsQueryHandler : IRequestHandler<GetRolePermissionsQuery, IDataResult<GetRolePermissionsResponse>>
 {
     private readonly IPermissionRepository _permissionRepository;
-    private readonly IRoleService _roleService;
+    private readonly IRoleRepository _roleRepository;
 
-    public GetRolePermissionsQueryHandler(IPermissionRepository permissionRepository, IRoleService roleService)
+    public GetRolePermissionsQueryHandler(IPermissionRepository permissionRepository, IRoleRepository roleRepository)
     {
         _permissionRepository = permissionRepository;
-        _roleService = roleService;
+        _roleRepository = roleRepository;
     }
 
     public async Task<IDataResult<GetRolePermissionsResponse>> Handle(GetRolePermissionsQuery request, CancellationToken cancellationToken)
     {
-        var role = _roleService.GetRoleById(request.RoleId);
+        var role = _roleRepository.GetRoleById(request.RoleId);
         if (role == null)
         {
             return new ErrorDataResult<GetRolePermissionsResponse>("Rol bulunamadı");

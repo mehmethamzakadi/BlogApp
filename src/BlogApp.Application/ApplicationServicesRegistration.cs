@@ -1,4 +1,4 @@
-﻿using BlogApp.Application.Behaviors;
+using BlogApp.Application.Behaviors;
 using BlogApp.Domain.Options;
 using FluentValidation;
 using FluentValidation.AspNetCore;

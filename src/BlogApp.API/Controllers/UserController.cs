@@ -1,13 +1,13 @@
-using BlogApp.Application.Features.AppUsers.Commands.AssignRolesToUser;
-using BlogApp.Application.Features.AppUsers.Commands.BulkDelete;
-using BlogApp.Application.Features.AppUsers.Commands.Create;
-using BlogApp.Application.Features.AppUsers.Commands.Delete;
-using BlogApp.Application.Features.AppUsers.Commands.Update;
-using BlogApp.Application.Features.AppUsers.Queries.Export;
-using BlogApp.Application.Features.AppUsers.Queries.GetById;
-using BlogApp.Application.Features.AppUsers.Queries.GetPaginatedListByDynamic;
-using BlogApp.Application.Features.AppUsers.Queries.GetUserRoles;
 using BlogApp.Application.Features.Auths.UpdatePassword;
+using BlogApp.Application.Features.Users.Commands.AssignRolesToUser;
+using BlogApp.Application.Features.Users.Commands.BulkDelete;
+using BlogApp.Application.Features.Users.Commands.Create;
+using BlogApp.Application.Features.Users.Commands.Delete;
+using BlogApp.Application.Features.Users.Commands.Update;
+using BlogApp.Application.Features.Users.Queries.Export;
+using BlogApp.Application.Features.Users.Queries.GetById;
+using BlogApp.Application.Features.Users.Queries.GetPaginatedListByDynamic;
+using BlogApp.Application.Features.Users.Queries.GetUserRoles;
 using BlogApp.Domain.Common.Requests;
 using BlogApp.Domain.Common.Responses;
 using BlogApp.Domain.Constants;
@@ -31,13 +31,13 @@ namespace BlogApp.API.Controllers
         [HasPermission(Permissions.UsersRead)]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            var response = await Mediator.Send(new GetByIdAppUserQuery(id));
+            var response = await Mediator.Send(new GetByIdUserQuery(id));
             return Ok(response);
         }
 
         [HttpPost]
         [HasPermission(Permissions.UsersCreate)]
-        public async Task<IActionResult> Create([FromBody] CreateAppUserCommand command)
+        public async Task<IActionResult> Create([FromBody] CreateUserCommand command)
         {
             var response = await Mediator.Send(command);
             return Ok(response);
@@ -45,7 +45,7 @@ namespace BlogApp.API.Controllers
 
         [HttpPut("{id}")]
         [HasPermission(Permissions.UsersUpdate)]
-        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateAppUserCommand command)
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateUserCommand command)
         {
             if (id != command.Id)
                 return BadRequest("ID mismatch");
@@ -58,7 +58,7 @@ namespace BlogApp.API.Controllers
         [HasPermission(Permissions.UsersDelete)]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            var response = await Mediator.Send(new DeleteAppUserCommand(id));
+            var response = await Mediator.Send(new DeleteUserCommand(id));
             return Ok(response);
         }
 

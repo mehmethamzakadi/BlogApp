@@ -126,48 +126,24 @@ public sealed class UnitOfWork : IUnitOfWork
 
     public IEnumerable<IDomainEvent> GetDomainEvents()
     {
-        // BaseEntity'den türeyen entity'lerin event'lerini al
-        var baseEntityEvents = _context.ChangeTracker
+        // BaseEntity'den türeyen tüm entity'lerin event'lerini al
+        return _context.ChangeTracker
             .Entries<BaseEntity>()
             .Where(e => e.Entity.DomainEvents.Any())
-            .SelectMany(e => e.Entity.DomainEvents);
-
-        // IHasDomainEvents interface'ini implement eden entity'lerin event'lerini al
-        // (örn: AppUser, AppRole - bunlar BaseEntity'den türemiyor ama domain event'e sahip)
-        var hasDomainEventsEntities = _context.ChangeTracker
-            .Entries()
-            .Where(e => e.Entity is IHasDomainEvents)
-            .Cast<Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<IHasDomainEvents>>()
-            .Where(e => e.Entity.DomainEvents.Any())
-            .SelectMany(e => e.Entity.DomainEvents);
-
-        return baseEntityEvents.Concat(hasDomainEventsEntities).ToList();
+            .SelectMany(e => e.Entity.DomainEvents)
+            .ToList();
     }
 
     public void ClearDomainEvents()
     {
-        // BaseEntity'den türeyen entity'lerin event'lerini temizle
-        var baseEntities = _context.ChangeTracker
+        // BaseEntity'den türeyen tüm entity'lerin event'lerini temizle
+        var entities = _context.ChangeTracker
             .Entries<BaseEntity>()
             .Where(e => e.Entity.DomainEvents.Any())
             .Select(e => e.Entity)
             .ToList();
 
-        foreach (var entity in baseEntities)
-        {
-            entity.ClearDomainEvents();
-        }
-
-        // IHasDomainEvents interface'ini implement eden entity'lerin event'lerini temizle
-        var hasDomainEventsEntities = _context.ChangeTracker
-            .Entries()
-            .Where(e => e.Entity is IHasDomainEvents)
-            .Cast<Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<IHasDomainEvents>>()
-            .Where(e => e.Entity.DomainEvents.Any())
-            .Select(e => e.Entity)
-            .ToList();
-
-        foreach (var entity in hasDomainEventsEntities)
+        foreach (var entity in entities)
         {
             entity.ClearDomainEvents();
         }

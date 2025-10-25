@@ -1,4 +1,4 @@
-﻿using AspNetCoreRateLimit;
+using AspNetCoreRateLimit;
 using BlogApp.API.Configuration;
 using BlogApp.API.Filters;
 using BlogApp.API.Middlewares;

@@ -1,4 +1,4 @@
-﻿namespace BlogApp.Domain.Common.Results
+namespace BlogApp.Domain.Common.Results
 {
     public class SuccessResult : Result
     {
