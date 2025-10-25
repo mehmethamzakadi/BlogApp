@@ -124,6 +124,7 @@ public class PermissionSeeder
             .Select(rp => rp.PermissionId)
             .ToListAsync();
 
+        // Sadece eksik olan permission'ları ekle, var olanları dokunma
         var permissionsToAdd = allPermissions
             .Where(p => !existingRolePermissions.Contains(p.Id))
             .Select(p => new AppRolePermission
@@ -137,7 +138,11 @@ public class PermissionSeeder
         if (permissionsToAdd.Any())
         {
             _context.AppRolePermissions.AddRange(permissionsToAdd);
-            _logger.LogInformation($"Assigned {permissionsToAdd.Count} permissions to Admin role");
+            _logger.LogInformation($"Assigned {permissionsToAdd.Count} new permissions to Admin role");
+        }
+        else
+        {
+            _logger.LogInformation("Admin role already has all permissions");
         }
     }
 
@@ -150,18 +155,23 @@ public class PermissionSeeder
             return;
         }
 
+        // User rolünün zaten permission'ları varsa, manuel değişiklikleri korumak için seed işlemini atla
+        var hasExistingPermissions = await _context.AppRolePermissions
+            .AnyAsync(rp => rp.RoleId == userRole.Id);
+
+        if (hasExistingPermissions)
+        {
+            _logger.LogInformation("User role already has permissions assigned. Skipping default permission assignment to preserve manual changes.");
+            return;
+        }
+
+        // İlk kurulumda User rolüne temel permission'ları ata
         var userPermissionNames = Permissions.GetUserPermissions();
         var userPermissions = await _context.Permissions
             .Where(p => userPermissionNames.Contains(p.Name) && !p.IsDeleted)
             .ToListAsync();
 
-        var existingRolePermissions = await _context.AppRolePermissions
-            .Where(rp => rp.RoleId == userRole.Id)
-            .Select(rp => rp.PermissionId)
-            .ToListAsync();
-
         var permissionsToAdd = userPermissions
-            .Where(p => !existingRolePermissions.Contains(p.Id))
             .Select(p => new AppRolePermission
             {
                 RoleId = userRole.Id,
@@ -173,7 +183,7 @@ public class PermissionSeeder
         if (permissionsToAdd.Any())
         {
             _context.AppRolePermissions.AddRange(permissionsToAdd);
-            _logger.LogInformation($"Assigned {permissionsToAdd.Count} permissions to User role");
+            _logger.LogInformation($"Assigned {permissionsToAdd.Count} default permissions to User role (first-time setup)");
         }
     }
 

@@ -1,3 +1,4 @@
+using BlogApp.Domain.Common;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Repositories;
 using MediatR;
@@ -15,13 +16,16 @@ public class ActivityLoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TR
 {
     private readonly IActivityLogRepository _activityLogRepository;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IUnitOfWork _unitOfWork;
 
     public ActivityLoggingBehavior(
         IActivityLogRepository activityLogRepository,
-        IHttpContextAccessor httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor,
+        IUnitOfWork unitOfWork)
     {
         _activityLogRepository = activityLogRepository;
         _httpContextAccessor = httpContextAccessor;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<TResponse> Handle(
@@ -62,6 +66,7 @@ public class ActivityLoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TR
         };
 
         await _activityLogRepository.AddAsync(activityLog);
+        await _unitOfWork.SaveChangesAsync(cancellationToken); // ✅ Activity log'u kaydet
     }
 
     private (string ActivityType, string EntityType, bool ShouldLog) DetermineActivityType(string requestName)

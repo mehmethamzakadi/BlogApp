@@ -2,6 +2,7 @@
 using System;
 using BlogApp.Application.Abstractions;
 using BlogApp.Application.Features.Categories.Queries.GetById;
+using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Repositories;
@@ -9,7 +10,10 @@ using MediatR;
 
 namespace BlogApp.Application.Features.Categories.Commands.Create;
 
-public sealed class CreateCategoryCommandHandler(ICategoryRepository categoryRepository, ICacheService cache) : IRequestHandler<CreateCategoryCommand, IResult>
+public sealed class CreateCategoryCommandHandler(
+    ICategoryRepository categoryRepository, 
+    ICacheService cache,
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateCategoryCommand, IResult>
 {
     public async Task<IResult> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
     {
@@ -20,6 +24,7 @@ public sealed class CreateCategoryCommandHandler(ICategoryRepository categoryRep
         }
 
         var category = await categoryRepository.AddAsync(new Category { Name = request.Name });
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         await cache.Add(
             $"category-{category.Id}",

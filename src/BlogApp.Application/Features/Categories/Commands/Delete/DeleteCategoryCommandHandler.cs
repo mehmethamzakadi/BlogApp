@@ -1,11 +1,14 @@
-﻿using BlogApp.Domain.Common.Results;
+﻿using BlogApp.Domain.Common;
+using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Repositories;
 using MediatR;
 
 namespace BlogApp.Application.Features.Categories.Commands.Delete;
 
-public sealed class DeleteCategoryCommandHandler(ICategoryRepository categoryRepository) : IRequestHandler<DeleteCategoryCommand, IResult>
+public sealed class DeleteCategoryCommandHandler(
+    ICategoryRepository categoryRepository,
+    IUnitOfWork unitOfWork) : IRequestHandler<DeleteCategoryCommand, IResult>
 {
     public async Task<IResult> Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
     {
@@ -14,6 +17,7 @@ public sealed class DeleteCategoryCommandHandler(ICategoryRepository categoryRep
             return new ErrorResult("Kategori bilgisi bulunamadı!");
 
         await categoryRepository.DeleteAsync(category);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new SuccessResult("Kategori bilgisi başarıyla silindi.");
     }

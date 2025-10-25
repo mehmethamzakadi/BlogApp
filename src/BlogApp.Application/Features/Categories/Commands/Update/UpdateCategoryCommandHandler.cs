@@ -1,11 +1,14 @@
 
+using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Repositories;
 using MediatR;
 
 namespace BlogApp.Application.Features.Categories.Commands.Update;
 
-public sealed class UpdateCategoryCommandHandler(ICategoryRepository categoryRepository) : IRequestHandler<UpdateCategoryCommand, IResult>
+public sealed class UpdateCategoryCommandHandler(
+    ICategoryRepository categoryRepository,
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateCategoryCommand, IResult>
 {
     public async Task<IResult> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
     {
@@ -23,6 +26,7 @@ public sealed class UpdateCategoryCommandHandler(ICategoryRepository categoryRep
         category.Name = request.Name;
 
         await categoryRepository.UpdateAsync(category);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new SuccessResult("Kategori bilgisi başarıyla güncellendi.");
     }
