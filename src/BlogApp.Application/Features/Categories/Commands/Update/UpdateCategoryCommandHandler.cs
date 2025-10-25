@@ -15,7 +15,7 @@ public sealed class UpdateCategoryCommandHandler(ICategoryRepository categoryRep
             return new ErrorResult("Kategori bilgisi bulunamadı!");
         }
 
-        if (category.Name.Equals(request.Name, StringComparison.CurrentCultureIgnoreCase))
+        if (category.Name.ToLower() == request.Name.ToLower())
         {
             return new ErrorResult("Kategori bilgisi zaten mevcut!");
         }
