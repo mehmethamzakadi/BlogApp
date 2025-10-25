@@ -3,11 +3,9 @@ using BlogApp.Application.Features.Categories.Queries.GetById;
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
-using BlogApp.Domain.Events;
+using BlogApp.Domain.Events.CategoryEvents;
 using BlogApp.Domain.Repositories;
 using MediatR;
-using Microsoft.AspNetCore.Http;
-using System.Security.Claims;
 using IResult = BlogApp.Domain.Common.Results.IResult;
 
 namespace BlogApp.Application.Features.Categories.Commands.Create;
@@ -16,7 +14,7 @@ public sealed class CreateCategoryCommandHandler(
     ICategoryRepository categoryRepository,
     ICacheService cache,
     IUnitOfWork unitOfWork,
-    IHttpContextAccessor httpContextAccessor) : IRequestHandler<CreateCategoryCommand, IResult>
+    ICurrentUserService currentUserService) : IRequestHandler<CreateCategoryCommand, IResult>
 {
     public async Task<IResult> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
     {
@@ -30,7 +28,7 @@ public sealed class CreateCategoryCommandHandler(
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         // ✅ Raise domain event
-        var userId = GetCurrentUserId();
+        var userId = currentUserService.GetCurrentUserId();
         category.AddDomainEvent(new CategoryCreatedEvent(category.Id, category.Name, userId ?? category.CreatedById));
 
         await cache.Add(
@@ -40,15 +38,5 @@ public sealed class CreateCategoryCommandHandler(
             null);
 
         return new SuccessResult("Kategori bilgisi başarıyla eklendi.");
-    }
-
-    private int? GetCurrentUserId()
-    {
-        var userIdClaim = httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier);
-        if (userIdClaim != null && int.TryParse(userIdClaim.Value, out var userId))
-        {
-            return userId;
-        }
-        return null;
     }
 }

@@ -1,8 +1,11 @@
+using BlogApp.Application.Abstractions;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
+using BlogApp.Domain.Events.UserEvents;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using IResult = BlogApp.Domain.Common.Results.IResult;
 
 namespace BlogApp.Application.Features.AppUsers.Commands.AssignRolesToUser;
 
@@ -10,11 +13,19 @@ public class AssignRolesToUserCommandHandler : IRequestHandler<AssignRolesToUser
 {
     private readonly UserManager<AppUser> _userManager;
     private readonly RoleManager<AppRole> _roleManager;
+    private readonly IMediator _mediator;
+    private readonly ICurrentUserService _currentUserService;
 
-    public AssignRolesToUserCommandHandler(UserManager<AppUser> userManager, RoleManager<AppRole> roleManager)
+    public AssignRolesToUserCommandHandler(
+        UserManager<AppUser> userManager,
+        RoleManager<AppRole> roleManager,
+        IMediator mediator,
+        ICurrentUserService currentUserService)
     {
         _userManager = userManager;
         _roleManager = roleManager;
+        _mediator = mediator;
+        _currentUserService = currentUserService;
     }
 
     public async Task<IResult> Handle(AssignRolesToUserCommand request, CancellationToken cancellationToken)
@@ -55,6 +66,10 @@ public class AssignRolesToUserCommandHandler : IRequestHandler<AssignRolesToUser
             {
                 return new ErrorResult("Roller eklenemedi: " + string.Join(", ", addResult.Errors.Select(e => e.Description)));
             }
+
+            // ✅ Raise domain event - Event handler will log the activity
+            var currentUserId = _currentUserService.GetCurrentUserId();
+            await _mediator.Publish(new UserRolesAssignedEvent(user.Id, user.UserName!, roles, currentUserId), cancellationToken);
         }
 
         return new SuccessResult("Roller başarıyla atandı");

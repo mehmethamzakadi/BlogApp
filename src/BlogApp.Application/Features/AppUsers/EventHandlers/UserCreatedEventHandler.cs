@@ -1,20 +1,20 @@
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Entities;
-using BlogApp.Domain.Events.PostEvents;
+using BlogApp.Domain.Events.UserEvents;
 using BlogApp.Domain.Repositories;
 using MediatR;
 
-namespace BlogApp.Application.Features.Posts.EventHandlers;
+namespace BlogApp.Application.Features.AppUsers.EventHandlers;
 
 /// <summary>
-/// Handles PostCreatedEvent and logs the activity
+/// Handles UserCreatedEvent and logs the activity
 /// </summary>
-public class PostCreatedEventHandler : INotificationHandler<PostCreatedEvent>
+public class UserCreatedEventHandler : INotificationHandler<UserCreatedEvent>
 {
     private readonly IActivityLogRepository _activityLogRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public PostCreatedEventHandler(
+    public UserCreatedEventHandler(
         IActivityLogRepository activityLogRepository,
         IUnitOfWork unitOfWork)
     {
@@ -22,15 +22,15 @@ public class PostCreatedEventHandler : INotificationHandler<PostCreatedEvent>
         _unitOfWork = unitOfWork;
     }
 
-    public async Task Handle(PostCreatedEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(UserCreatedEvent notification, CancellationToken cancellationToken)
     {
         var activityLog = new ActivityLog
         {
-            ActivityType = "post_created",
-            EntityType = "Post",
-            EntityId = notification.PostId,
-            Title = $"\"{notification.Title}\" oluşturuldu",
-            Details = $"Kategori ID: {notification.CategoryId}",
+            ActivityType = "user_created",
+            EntityType = "User",
+            EntityId = notification.UserId,
+            Title = $"Kullanıcı \"{notification.UserName}\" oluşturuldu",
+            Details = $"Email: {notification.Email}",
             UserId = notification.CreatedById,
             Timestamp = DateTime.UtcNow
         };

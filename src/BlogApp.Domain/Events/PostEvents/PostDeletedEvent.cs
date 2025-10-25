@@ -1,6 +1,6 @@
 using BlogApp.Domain.Common;
 
-namespace BlogApp.Domain.Events;
+namespace BlogApp.Domain.Events.PostEvents;
 
 /// <summary>
 /// Domain event raised when a post is deleted

@@ -1,20 +1,20 @@
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Entities;
-using BlogApp.Domain.Events.PostEvents;
+using BlogApp.Domain.Events.RoleEvents;
 using BlogApp.Domain.Repositories;
 using MediatR;
 
-namespace BlogApp.Application.Features.Posts.EventHandlers;
+namespace BlogApp.Application.Features.AppRoles.EventHandlers;
 
 /// <summary>
-/// Handles PostCreatedEvent and logs the activity
+/// Handles RoleUpdatedEvent and logs the activity
 /// </summary>
-public class PostCreatedEventHandler : INotificationHandler<PostCreatedEvent>
+public class RoleUpdatedEventHandler : INotificationHandler<RoleUpdatedEvent>
 {
     private readonly IActivityLogRepository _activityLogRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public PostCreatedEventHandler(
+    public RoleUpdatedEventHandler(
         IActivityLogRepository activityLogRepository,
         IUnitOfWork unitOfWork)
     {
@@ -22,16 +22,15 @@ public class PostCreatedEventHandler : INotificationHandler<PostCreatedEvent>
         _unitOfWork = unitOfWork;
     }
 
-    public async Task Handle(PostCreatedEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(RoleUpdatedEvent notification, CancellationToken cancellationToken)
     {
         var activityLog = new ActivityLog
         {
-            ActivityType = "post_created",
-            EntityType = "Post",
-            EntityId = notification.PostId,
-            Title = $"\"{notification.Title}\" oluşturuldu",
-            Details = $"Kategori ID: {notification.CategoryId}",
-            UserId = notification.CreatedById,
+            ActivityType = "role_updated",
+            EntityType = "Role",
+            EntityId = notification.RoleId,
+            Title = $"Rol \"{notification.RoleName}\" güncellendi",
+            UserId = notification.UpdatedById,
             Timestamp = DateTime.UtcNow
         };
 

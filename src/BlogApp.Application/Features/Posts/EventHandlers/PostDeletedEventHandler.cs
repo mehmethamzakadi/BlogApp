@@ -1,6 +1,6 @@
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Entities;
-using BlogApp.Domain.Events;
+using BlogApp.Domain.Events.PostEvents;
 using BlogApp.Domain.Repositories;
 using MediatR;
 

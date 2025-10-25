@@ -1,6 +1,6 @@
 using BlogApp.Domain.Common;
 
-namespace BlogApp.Domain.Events;
+namespace BlogApp.Domain.Events.CategoryEvents;
 
 /// <summary>
 /// Domain event raised when a category is created
