@@ -3,6 +3,7 @@ using BlogApp.Application.Features.Auths.Login;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Repositories;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -94,16 +95,11 @@ public sealed class JwtTokenService : ITokenService
         var roles = await _userManager.GetRolesAsync(user);
         if (roles.Any())
         {
-            // Get role IDs from role names dynamically
-            var roleIds = new List<int>();
-            foreach (var roleName in roles)
-            {
-                var role = await _roleManager.FindByNameAsync(roleName);
-                if (role != null)
-                {
-                    roleIds.Add(role.Id);
-                }
-            }
+            // ✅ OPTIMIZED: Get all role IDs in a single query instead of loop
+            var roleIds = await _roleManager.Roles
+                .Where(r => roles.Contains(r.Name!))
+                .Select(r => r.Id)
+                .ToListAsync();
 
             if (roleIds.Any())
             {

@@ -11,10 +11,10 @@ public class PermissionConfiguration : IEntityTypeConfiguration<Permission>
         // Primary key
         builder.HasKey(p => p.Id);
 
-        // Table name
+        // Tablo adı
         builder.ToTable("Permissions");
 
-        // Properties
+        // Özellikler
         builder.Property(p => p.Name)
             .IsRequired()
             .HasMaxLength(100);
@@ -30,7 +30,7 @@ public class PermissionConfiguration : IEntityTypeConfiguration<Permission>
             .IsRequired()
             .HasMaxLength(50);
 
-        // Indexes
+        // Index'ler
         builder.HasIndex(p => p.Name)
             .IsUnique()
             .HasDatabaseName("IX_Permissions_Name");
@@ -38,7 +38,7 @@ public class PermissionConfiguration : IEntityTypeConfiguration<Permission>
         builder.HasIndex(p => new { p.Module, p.Type })
             .HasDatabaseName("IX_Permissions_Module_Type");
 
-        // Relationships
+        // İlişkiler
         builder.HasMany(p => p.RolePermissions)
             .WithOne(rp => rp.Permission)
             .HasForeignKey(rp => rp.PermissionId)

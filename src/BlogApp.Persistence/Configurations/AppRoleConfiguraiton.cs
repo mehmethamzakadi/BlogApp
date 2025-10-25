@@ -25,7 +25,7 @@ namespace BlogApp.Persistence.Configurations
             b.Property(u => u.NormalizedName).HasMaxLength(150);
 
             // The relationships between Role and other entity types
-            // Note that these relationships are configured with no navigation properties
+            // Not: Bu ilişkiler navigation property olmadan yapılandırılmıştır
 
             // Each Role can have many entries in the UserRole join table
             b.HasMany<AppUserRole>().WithOne().HasForeignKey(ur => ur.RoleId).IsRequired();

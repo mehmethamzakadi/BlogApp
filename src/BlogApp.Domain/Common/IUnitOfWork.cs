@@ -1,42 +1,42 @@
 namespace BlogApp.Domain.Common;
 
 /// <summary>
-/// Unit of Work pattern for managing database transactions
+/// Veritabanı transaction'larını yönetmek için Unit of Work pattern
 /// </summary>
 public interface IUnitOfWork : IDisposable
 {
     /// <summary>
-    /// Saves all changes made in this context to the database
+    /// Bu context'te yapılan tüm değişiklikleri veritabanına kaydeder
     /// </summary>
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Saves all changes synchronously
+    /// Tüm değişiklikleri senkron olarak kaydeder
     /// </summary>
     int SaveChanges();
 
     /// <summary>
-    /// Begins a database transaction
+    /// Bir veritabanı transaction'ı başlatır
     /// </summary>
     Task BeginTransactionAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Commits the current transaction
+    /// Mevcut transaction'ı commit eder
     /// </summary>
     Task CommitTransactionAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Rolls back the current transaction
+    /// Mevcut transaction'ı geri alır
     /// </summary>
     Task RollbackTransactionAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Gets all domain events from tracked entities
+    /// Takip edilen entity'lerden tüm domain event'leri getirir
     /// </summary>
     IEnumerable<IDomainEvent> GetDomainEvents();
 
     /// <summary>
-    /// Clears all domain events from tracked entities
+    /// Takip edilen entity'lerden tüm domain event'leri temizler
     /// </summary>
     void ClearDomainEvents();
 }

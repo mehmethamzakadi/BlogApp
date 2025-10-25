@@ -71,7 +71,7 @@ public class OutboxMessageRepository : EfRepositoryBase<OutboxMessage, BlogAppDb
 
     private static DateTime CalculateNextRetryTime(int retryCount)
     {
-        // Exponential backoff: 1min, 2min, 4min, 8min, 16min
+        // Üstel geri çekilme: 1dk, 2dk, 4dk, 8dk, 16dk
         var delayMinutes = Math.Pow(2, retryCount);
         return DateTime.UtcNow.AddMinutes(delayMinutes);
     }

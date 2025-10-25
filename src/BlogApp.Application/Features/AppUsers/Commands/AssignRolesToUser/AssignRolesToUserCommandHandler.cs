@@ -67,7 +67,7 @@ public class AssignRolesToUserCommandHandler : IRequestHandler<AssignRolesToUser
                 return new ErrorResult("Roller eklenemedi: " + string.Join(", ", addResult.Errors.Select(e => e.Description)));
             }
 
-            // ✅ Raise domain event - Event handler will log the activity
+            // ✅ Domain event'i tetikle - Event handler aktiviteyi loglar
             var currentUserId = _currentUserService.GetCurrentUserId();
             await _mediator.Publish(new UserRolesAssignedEvent(user.Id, user.UserName!, roles, currentUserId), cancellationToken);
         }

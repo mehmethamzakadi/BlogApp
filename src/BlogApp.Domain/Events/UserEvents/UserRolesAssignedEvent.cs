@@ -1,10 +1,12 @@
 using BlogApp.Domain.Common;
+using BlogApp.Domain.Common.Attributes;
 
 namespace BlogApp.Domain.Events.UserEvents;
 
 /// <summary>
-/// Domain event raised when roles are assigned to a user
+/// Bir kullanıcıya roller atandığında tetiklenen domain event
 /// </summary>
+[StoreInOutbox]
 public class UserRolesAssignedEvent : DomainEvent
 {
     public int UserId { get; }

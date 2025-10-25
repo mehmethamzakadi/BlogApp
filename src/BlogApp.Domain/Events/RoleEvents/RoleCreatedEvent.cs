@@ -1,10 +1,12 @@
 using BlogApp.Domain.Common;
+using BlogApp.Domain.Common.Attributes;
 
 namespace BlogApp.Domain.Events.RoleEvents;
 
 /// <summary>
-/// Domain event raised when a new role is created
+/// Yeni bir rol oluşturulduğunda tetiklenen domain event
 /// </summary>
+[StoreInOutbox]
 public class RoleCreatedEvent : DomainEvent
 {
     public int RoleId { get; }

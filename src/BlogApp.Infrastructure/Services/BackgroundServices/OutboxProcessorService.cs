@@ -14,8 +14,8 @@ using System.Text.Json;
 namespace BlogApp.Infrastructure.Services.BackgroundServices;
 
 /// <summary>
-/// Background service that processes outbox messages and publishes them to RabbitMQ
-/// Implements the Outbox Pattern for reliable message delivery
+/// Outbox mesajlarını işleyen ve RabbitMQ'ya yayınlayan arka plan servisi
+/// Güvenilir mesaj iletimi için Outbox Pattern uygular
 /// </summary>
 public class OutboxProcessorService : BackgroundService
 {
@@ -35,7 +35,7 @@ public class OutboxProcessorService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Outbox Processor Service started");
+        _logger.LogInformation("Outbox İşleyici Servisi başlatıldı");
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -45,13 +45,13 @@ public class OutboxProcessorService : BackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while processing outbox messages");
+                _logger.LogError(ex, "Outbox mesajları işlenirken hata oluştu");
             }
 
             await Task.Delay(_processingInterval, stoppingToken);
         }
 
-        _logger.LogInformation("Outbox Processor Service stopped");
+        _logger.LogInformation("Outbox İşleyici Servisi durduruldu");
     }
 
     private async Task ProcessOutboxMessagesAsync(CancellationToken cancellationToken)
@@ -62,40 +62,40 @@ public class OutboxProcessorService : BackgroundService
         var publishEndpoint = scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<Domain.Common.IUnitOfWork>();
 
-        // Get unprocessed messages
+        // İşlenmemiş mesajları getir
         var messages = await outboxRepository.GetUnprocessedMessagesAsync(BatchSize, cancellationToken);
 
         if (!messages.Any())
         {
-            return; // No messages to process
+            return; // İşlenecek mesaj yok
         }
 
-        _logger.LogInformation("Processing {Count} outbox messages", messages.Count);
+        _logger.LogInformation("{Count} adet outbox mesajı işleniyor", messages.Count);
 
         foreach (var message in messages)
         {
             try
             {
-                // Deserialize and publish the event
+                // Event'i deserialize et ve yayınla
                 var integrationEvent = DeserializeEvent(message.EventType, message.Payload);
 
                 if (integrationEvent != null)
                 {
                     await publishEndpoint.Publish(integrationEvent, cancellationToken);
 
-                    // Mark as processed
+                    // İşlenmiş olarak işaretle
                     await outboxRepository.MarkAsProcessedAsync(message.Id, cancellationToken);
                     await unitOfWork.SaveChangesAsync(cancellationToken);
 
-                    _logger.LogDebug("Successfully published outbox message {MessageId} of type {EventType}",
+                    _logger.LogDebug("{MessageId} ID'li {EventType} türündeki outbox mesajı başarıyla yayınlandı",
                         message.Id, message.EventType);
                 }
                 else
                 {
-                    _logger.LogWarning("Could not deserialize event type: {EventType}", message.EventType);
+                    _logger.LogWarning("Event tipi deserialize edilemedi: {EventType}", message.EventType);
                     await outboxRepository.MarkAsFailedAsync(
                         message.Id,
-                        $"Unknown event type: {message.EventType}",
+                        $"Bilinmeyen event tipi: {message.EventType}",
                         null,
                         cancellationToken);
                     await unitOfWork.SaveChangesAsync(cancellationToken);
@@ -103,7 +103,7 @@ public class OutboxProcessorService : BackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error publishing outbox message {MessageId}", message.Id);
+                _logger.LogError(ex, "Outbox mesajı {MessageId} yayınlanırken hata oluştu", message.Id);
 
                 if (message.RetryCount < MaxRetryCount)
                 {
@@ -116,13 +116,13 @@ public class OutboxProcessorService : BackgroundService
                 }
                 else
                 {
-                    _logger.LogError("Message {MessageId} exceeded max retry count. Moving to dead letter.",
+                    _logger.LogError("Mesaj {MessageId} maksimum deneme sayısını aştı. Dead letter'a taşınıyor.",
                         message.Id);
                 }
             }
         }
 
-        // Cleanup old processed messages (older than 7 days)
+        // Eski işlenmiş mesajları temizle (7 günden eski)
         try
         {
             await outboxRepository.CleanupProcessedMessagesAsync(7, cancellationToken);
@@ -130,7 +130,7 @@ public class OutboxProcessorService : BackgroundService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during outbox cleanup");
+            _logger.LogError(ex, "Outbox temizleme işlemi sırasında hata oluştu");
         }
     }
 
@@ -183,7 +183,7 @@ public class OutboxProcessorService : BackgroundService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error deserializing event type {EventType}", eventType);
+            _logger.LogError(ex, "Event tipi {EventType} deserialize edilirken hata oluştu", eventType);
             return null;
         }
     }

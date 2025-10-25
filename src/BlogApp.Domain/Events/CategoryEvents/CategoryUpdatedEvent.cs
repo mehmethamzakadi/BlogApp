@@ -1,7 +1,9 @@
 using BlogApp.Domain.Common;
+using BlogApp.Domain.Common.Attributes;
 
 namespace BlogApp.Domain.Events.CategoryEvents;
 
+[StoreInOutbox]
 public class CategoryUpdatedEvent : DomainEvent
 {
     public int CategoryId { get; }

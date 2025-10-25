@@ -20,7 +20,7 @@ public sealed class DeleteCategoryCommandHandler(
         if (category is null)
             return new ErrorResult("Kategori bilgisi bulunamadı!");
 
-        // ✅ Raise domain event BEFORE deletion
+        // ✅ Silme işleminden ÖNCE domain event'i tetikle
         var userId = currentUserService.GetCurrentUserId();
         category.AddDomainEvent(new CategoryDeletedEvent(category.Id, category.Name, userId ?? category.CreatedById));
 

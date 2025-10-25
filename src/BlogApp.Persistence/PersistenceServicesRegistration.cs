@@ -14,14 +14,15 @@ public static class PersistenceServicesRegistration
 {
     public static IServiceCollection AddConfigurePersistenceServices(this IServiceCollection services, IConfiguration configuration)
     {
-        #region DbContext Configuration
+        #region DbContext Yapılandırması
         var postgreSqlConnectionString = configuration.GetConnectionString("BlogAppPostgreConnectionString");
 
         services.AddDbContextPool<BlogAppDbContext>((sp, options) =>
         {
             options.UseNpgsql(postgreSqlConnectionString);
-            options.EnableServiceProviderCaching();
-            options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning)); // ✅
+            // ✅ DÜZELTİLDİ: EnableServiceProviderCaching() kaldırıldı - AddDbContextPool ile çakışır
+            // DbContextPool zaten dahili olarak service provider caching'i yönetir
+            options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
         });
 
         #endregion
@@ -35,7 +36,7 @@ public static class PersistenceServicesRegistration
         services.AddScoped<IOutboxMessageRepository, OutboxMessageRepository>();
         services.AddScoped<IDbInitializer, DbInitializer>();
 
-        // Unit of Work registration
+        // Unit of Work kaydı
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;

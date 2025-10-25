@@ -30,7 +30,7 @@ public sealed class UpdatePostCommandHandler(
 
         await postRepository.UpdateAsync(entity);
 
-        // ✅ Raise domain event BEFORE SaveChanges for Outbox Pattern
+        // ✅ Outbox Pattern için SaveChanges'dan ÖNCE domain event'i tetikle
         var userId = currentUserService.GetCurrentUserId();
         entity.AddDomainEvent(new PostUpdatedEvent(entity.Id, entity.Title, userId ?? entity.UpdatedById ?? 0));
 

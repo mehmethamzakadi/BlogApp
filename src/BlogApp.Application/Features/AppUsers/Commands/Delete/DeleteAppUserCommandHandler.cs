@@ -40,7 +40,7 @@ public sealed class DeleteUserCommandHandler : IRequestHandler<DeleteAppUserComm
 
         // UserManager kendi SaveChanges'ını yapıyor, UnitOfWork'e gerek yok
 
-        // ✅ Raise domain event - Event handler will log the activity
+        // ✅ Domain event'i tetikle - Event handler aktiviteyi loglar
         var currentUserId = _currentUserService.GetCurrentUserId();
         await _mediator.Publish(new UserDeletedEvent(userId, userName, userEmail, currentUserId), cancellationToken);
 

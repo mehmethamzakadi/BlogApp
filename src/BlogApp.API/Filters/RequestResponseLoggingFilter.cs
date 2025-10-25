@@ -4,7 +4,7 @@ using System.Diagnostics;
 namespace BlogApp.API.Filters;
 
 /// <summary>
-/// Logs HTTP requests and responses with detailed information
+/// HTTP isteklerini ve yanıtlarını detaylı bilgilerle birlikte loglar
 /// </summary>
 public class RequestResponseLoggingFilter : IAsyncActionFilter
 {
@@ -20,20 +20,20 @@ public class RequestResponseLoggingFilter : IAsyncActionFilter
         var request = context.HttpContext.Request;
         var stopwatch = Stopwatch.StartNew();
 
-        // Log request
+        // İstek bilgilerini logla
         _logger.LogInformation(
-            "HTTP {Method} {Path} started. User: {User}, RemoteIp: {RemoteIp}",
+            "HTTP {Method} {Path} başladı. Kullanıcı: {User}, RemoteIp: {RemoteIp}",
             request.Method,
             request.Path,
             context.HttpContext.User?.Identity?.Name ?? "Anonymous",
             context.HttpContext.Connection.RemoteIpAddress?.ToString()
         );
 
-        // Log request body for POST/PUT (be careful with sensitive data)
+        // POST/PUT istekleri için request body'yi logla (hassas veriler için dikkatli olunmalı)
         if ((request.Method == "POST" || request.Method == "PUT") && context.ActionArguments.Count > 0)
         {
             _logger.LogDebug(
-                "Request body: {@Arguments}",
+                "İstek gövdesi: {@Arguments}",
                 context.ActionArguments
             );
         }
@@ -41,7 +41,7 @@ public class RequestResponseLoggingFilter : IAsyncActionFilter
         var executedContext = await next();
         stopwatch.Stop();
 
-        // Log response
+        // Yanıt bilgilerini logla
         var statusCode = context.HttpContext.Response.StatusCode;
         var logLevel = statusCode >= 500 ? LogLevel.Error :
                       statusCode >= 400 ? LogLevel.Warning :
@@ -49,19 +49,19 @@ public class RequestResponseLoggingFilter : IAsyncActionFilter
 
         _logger.Log(
             logLevel,
-            "HTTP {Method} {Path} completed with {StatusCode} in {ElapsedMilliseconds}ms",
+            "HTTP {Method} {Path} tamamlandı. Durum: {StatusCode}, Süre: {ElapsedMilliseconds}ms",
             request.Method,
             request.Path,
             statusCode,
             stopwatch.ElapsedMilliseconds
         );
 
-        // Log exceptions
+        // Hataları logla
         if (executedContext.Exception != null)
         {
             _logger.LogError(
                 executedContext.Exception,
-                "HTTP {Method} {Path} failed with exception",
+                "HTTP {Method} {Path} hata ile sonuçlandı",
                 request.Method,
                 request.Path
             );

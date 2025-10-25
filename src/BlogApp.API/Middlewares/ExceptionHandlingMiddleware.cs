@@ -27,7 +27,7 @@ namespace BlogApp.API.Middlewares
 
                 _logger.LogError(
                     ex,
-                    "Unhandled exception occurred. Path: {Path}, Method: {Method}, User: {User}, IP: {RemoteIp}",
+                    "İşlenmeyen bir hata oluştu. Yol: {Path}, Metod: {Method}, Kullanıcı: {User}, IP: {RemoteIp}",
                     request.Path,
                     request.Method,
                     user,

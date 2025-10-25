@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 namespace BlogApp.Infrastructure.Services;
 
 /// <summary>
-/// Background service that periodically cleans up old logs from the database
+/// Veritabanından eski logları periyodik olarak temizleyen background service
 /// </summary>
 public class LogCleanupService : BackgroundService
 {
@@ -25,10 +25,10 @@ public class LogCleanupService : BackgroundService
         _scopeFactory = scopeFactory;
         _logger = logger;
 
-        // Run cleanup daily at 3 AM
+        // Her gün saat 3'te temizleme işlemini çalıştır
         _cleanupInterval = TimeSpan.FromHours(24);
 
-        // Default retention: 90 days for Logs table
+        // Varsayılan saklama süresi: Logs tablosu için 90 gün
         _logRetentionDays = configuration.GetValue<int>("Logging:Database:RetentionDays", 90);
     }
 
@@ -42,7 +42,7 @@ public class LogCleanupService : BackgroundService
             {
                 await CleanupOldLogsAsync(stoppingToken);
 
-                // Calculate next run time (3 AM next day)
+                // Sonraki çalışma zamanını hesapla (ertesi gün saat 3)
                 var now = DateTime.UtcNow;
                 var next3AM = now.Date.AddDays(1).AddHours(3);
                 var delay = next3AM - now;
@@ -53,7 +53,7 @@ public class LogCleanupService : BackgroundService
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error during log cleanup");
-                // Wait 1 hour before retry on error
+                // Hata durumunda yeniden denemeden önce 1 saat bekle
                 await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
             }
         }
@@ -68,7 +68,7 @@ public class LogCleanupService : BackgroundService
 
         try
         {
-            // Clean up old Serilog logs
+            // Eski Serilog loglarını temizle
             var deletedCount = await dbContext.Database
                 .ExecuteSqlRawAsync(
                     "DELETE FROM \"Logs\" WHERE raise_date < {0}",

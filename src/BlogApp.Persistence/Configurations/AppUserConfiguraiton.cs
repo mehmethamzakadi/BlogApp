@@ -32,7 +32,7 @@ namespace BlogApp.Persistence.Configurations
             b.Property(u => u.NormalizedEmail).HasMaxLength(200);
 
             // The relationships between User and other entity types
-            // Note that these relationships are configured with no navigation properties
+            // Not: Bu ilişkiler navigation property olmadan yapılandırılmıştır
 
             // Each User can have many UserClaims
             b.HasMany<AppUserClaim>().WithOne().HasForeignKey(uc => uc.UserId).IsRequired();

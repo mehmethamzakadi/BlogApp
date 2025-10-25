@@ -38,7 +38,7 @@ public sealed class DeleteRoleCommandHandler : IRequestHandler<DeleteRoleCommand
         if (!result.Succeeded)
             return new ErrorResult("Rol silme sırasında hata oluştu!");
 
-        // ✅ Raise domain event - Event handler will log the activity
+        // ✅ Domain event'i tetikle - Event handler aktiviteyi loglar
         var currentUserId = GetCurrentUserId();
         await _mediator.Publish(new RoleDeletedEvent(roleId, roleName, currentUserId), cancellationToken);
 

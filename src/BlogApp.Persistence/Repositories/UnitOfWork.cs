@@ -1,4 +1,5 @@
 using BlogApp.Domain.Common;
+using BlogApp.Domain.Common.Attributes;
 using BlogApp.Domain.Entities;
 using BlogApp.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -7,7 +8,7 @@ using System.Text.Json;
 namespace BlogApp.Persistence.Repositories;
 
 /// <summary>
-/// Unit of Work implementation for BlogAppDbContext
+/// BlogAppDbContext için Unit of Work implementasyonu
 /// </summary>
 public sealed class UnitOfWork : IUnitOfWork
 {
@@ -22,72 +23,56 @@ public sealed class UnitOfWork : IUnitOfWork
 
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        // OUTBOX PATTERN IMPLEMENTATION
-        // Get domain events from tracked entities before saving
-        var domainEvents = GetDomainEvents().ToList();
-
-        // Convert domain events to outbox messages for async processing via RabbitMQ
-        // This ensures ACID guarantees - events are stored in the same transaction as business data
-        foreach (var domainEvent in domainEvents)
+        try
         {
-            if (ShouldStoreInOutbox(domainEvent))
+            // OUTBOX PATTERN UYGULAMASI
+            // Kaydetmeden önce takip edilen entity'lerden domain event'leri al
+            var domainEvents = GetDomainEvents().ToList();
+
+            // Domain event'leri RabbitMQ üzerinden asenkron işleme için outbox mesajlarına dönüştür
+            // Bu, ACID garantilerini sağlar - event'ler business data ile aynı transaction içinde saklanır
+            foreach (var domainEvent in domainEvents)
             {
-                var outboxMessage = new OutboxMessage
+                if (ShouldStoreInOutbox(domainEvent))
                 {
-                    EventType = domainEvent.GetType().Name,
-                    Payload = JsonSerializer.Serialize(domainEvent, domainEvent.GetType()),
-                    CreatedAt = DateTime.UtcNow,
-                    RetryCount = 0
-                };
+                    var outboxMessage = new OutboxMessage
+                    {
+                        EventType = domainEvent.GetType().Name,
+                        Payload = JsonSerializer.Serialize(domainEvent, domainEvent.GetType()),
+                        CreatedAt = DateTime.UtcNow,
+                        RetryCount = 0
+                    };
 
-                await _context.OutboxMessages.AddAsync(outboxMessage, cancellationToken);
+                    await _context.OutboxMessages.AddAsync(outboxMessage, cancellationToken);
+                }
             }
+
+            // Her şeyi tek bir atomik transaction içinde kaydet:
+            // - Business data (entity'ler)
+            // - Outbox mesajları (event'ler)
+            var result = await _context.SaveChangesAsync(cancellationToken);
+
+            // Başarılı kayıttan sonra domain event'leri temizle
+            // Event'ler artık Outbox tablosunda güvenle saklanıyor
+            ClearDomainEvents();
+
+            return result;
         }
-
-        // Save everything in one atomic transaction:
-        // - Business data (entities)
-        // - Outbox messages (events)
-        var result = await _context.SaveChangesAsync(cancellationToken);
-
-        // Clear domain events after successful save
-        // Events are now safely stored in Outbox table
-        ClearDomainEvents();
-
-        return result;
+        finally
+        {
+            // ✅ DÜZELTİLDİ: SaveChanges başarısız olsa bile domain event'lerin her zaman temizlenmesini sağla
+            // Bu, bellek sızıntılarını ve eski event'lerin yeniden işlenmesini önler
+            ClearDomainEvents();
+        }
     }
 
     private static bool ShouldStoreInOutbox(IDomainEvent domainEvent)
     {
-        // Determine which domain events should be processed asynchronously via Outbox Pattern
-        // These events will be:
-        // 1. Stored in OutboxMessages table (same transaction as business data)
-        // 2. Picked up by OutboxProcessorService (background service)
-        // 3. Published to RabbitMQ
-        // 4. Consumed by ActivityLogConsumer
-        // 5. Converted to ActivityLog records
-
-        var eventTypeName = domainEvent.GetType().Name;
-
-        // Events that create ActivityLog entries
-        var outboxEventTypes = new[]
-        {
-            "CategoryCreatedEvent",
-            "CategoryUpdatedEvent",
-            "CategoryDeletedEvent",
-            "PostCreatedEvent",
-            "PostUpdatedEvent",
-            "PostDeletedEvent",
-            "UserCreatedEvent",
-            "UserUpdatedEvent",
-            "UserDeletedEvent",
-            "UserRolesAssignedEvent",
-            "RoleCreatedEvent",
-            "RoleUpdatedEvent",
-            "RoleDeletedEvent",
-            "PermissionsAssignedToRoleEvent"
-        };
-
-        return outboxEventTypes.Contains(eventTypeName);
+        // ✅ DÜZELTİLDİ: Magic string'ler yerine attribute kullanan tip güvenli yaklaşım
+        // Domain event tipinin [StoreInOutbox] attribute'una sahip olup olmadığını kontrol et
+        // Bu, derleme zamanı güvenliği ve daha kolay refactoring sağlar
+        var eventType = domainEvent.GetType();
+        return eventType.GetCustomAttributes(typeof(StoreInOutboxAttribute), false).Any();
     }
 
     public int SaveChanges()

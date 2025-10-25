@@ -1,10 +1,12 @@
 using BlogApp.Domain.Common;
+using BlogApp.Domain.Common.Attributes;
 
 namespace BlogApp.Domain.Events.PostEvents;
 
 /// <summary>
-/// Domain event raised when a post is deleted
+/// Bir gönderi silindiğinde tetiklenen domain event
 /// </summary>
+[StoreInOutbox]
 public class PostDeletedEvent : DomainEvent
 {
     public int PostId { get; }

@@ -4,12 +4,12 @@ namespace BlogApp.Domain.Entities;
 
 public class ActivityLog : BaseEntity
 {
-    public string ActivityType { get; set; } = string.Empty; // post_created, post_updated, post_deleted, category_created, etc.
-    public string EntityType { get; set; } = string.Empty;   // Post, Category, User, etc.
-    public int? EntityId { get; set; }                       // ID of the affected entity
-    public string Title { get; set; } = string.Empty;        // Human-readable description
-    public string? Details { get; set; }                     // JSON or additional info
-    public int? UserId { get; set; }                         // Who performed the action
+    public string ActivityType { get; set; } = string.Empty; // post_created, post_updated, post_deleted, category_created, vb.
+    public string EntityType { get; set; } = string.Empty;   // Post, Category, User, vb.
+    public int? EntityId { get; set; }                       // Etkilenen entity'nin ID'si
+    public string Title { get; set; } = string.Empty;        // İnsan tarafından okunabilir açıklama
+    public string? Details { get; set; }                     // JSON veya ek bilgi
+    public int? UserId { get; set; }                         // İşlemi gerçekleştiren kullanıcı
     public AppUser? User { get; set; }
     public System.DateTime Timestamp { get; set; } = System.DateTime.UtcNow;
 }

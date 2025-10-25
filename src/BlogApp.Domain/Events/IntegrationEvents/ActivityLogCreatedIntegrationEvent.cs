@@ -1,8 +1,8 @@
 namespace BlogApp.Domain.Events.IntegrationEvents;
 
 /// <summary>
-/// Integration event for creating activity log via RabbitMQ
-/// This event is published to message broker for async processing
+/// RabbitMQ üzerinden aktivite logu oluşturmak için integration event
+/// Bu event, asenkron işleme için message broker'a yayınlanır
 /// </summary>
 public record ActivityLogCreatedIntegrationEvent(
     string ActivityType,

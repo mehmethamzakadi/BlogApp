@@ -13,14 +13,14 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Serilog
+// Serilog yapılandırmasını yükle
 builder.ConfigureSerilog();
 
 var corsPolicyName = "_dynamicCorsPolicy";
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
 if (allowedOrigins.Length == 0)
 {
-    throw new InvalidOperationException("At least one allowed CORS origin must be configured under Cors:AllowedOrigins.");
+    throw new InvalidOperationException("En az bir izinli CORS origin yapılandırılmalıdır (Cors:AllowedOrigins).");
 }
 
 builder.Services.AddConfigurePersistenceServices(builder.Configuration);
@@ -30,7 +30,7 @@ builder.Services.AddConfigureInfrastructureServices(builder.Configuration);
 builder.Services.AddOptions();
 builder.Services.AddHttpContextAccessor();
 
-// RateLimit Configuration
+// Rate Limit yapılandırması
 builder.Services.AddMemoryCache();
 builder.Services.Configure<IpRateLimitOptions>(builder.Configuration.GetSection("IpRateLimiting"));
 builder.Services.Configure<IpRateLimitPolicies>(builder.Configuration.GetSection("IpRateLimitPolicies"));
@@ -44,13 +44,13 @@ builder.Services.AddCors(options =>
         policyBuilder.WithOrigins(allowedOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .AllowCredentials(); // 🔥 React withCredentials için gerekli
+            .AllowCredentials(); // React withCredentials için gerekli
     });
 });
 
 builder.Services.AddControllers(options =>
     {
-        // Add global action filter for request/response logging
+        // Request/Response loglama için global action filter ekle
         options.Filters.Add<RequestResponseLoggingFilter>();
     })
     .ConfigureApiBehaviorOptions(options =>
@@ -78,7 +78,7 @@ builder.Services.AddControllers(options =>
         };
     });
 
-// Configure routing to use lowercase URLs
+// Küçük harfli URL'ler için routing yapılandırması
 builder.Services.Configure<RouteOptions>(options =>
 {
     options.LowercaseUrls = true;
@@ -113,16 +113,16 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();  // OpenAPI dokümanı için endpoint
+    app.MapOpenApi();  // OpenAPI dokümanı için endpoint ekle
 
     app.MapScalarApiReference(options =>
     {
         options.Title = "BlogApp API";
-        options.Theme = ScalarTheme.DeepSpace; // İstersen Light, Solar, DeepSpace vs.
+        options.Theme = ScalarTheme.DeepSpace; // DeepSpace, Light, Solar gibi temalar kullanılabilir
     });
 }
 
-// Add Serilog request logging
+// Serilog request logging ekle
 app.UseSerilogRequestLogging(options =>
 {
     options.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000}ms";
@@ -140,6 +140,7 @@ app.UseSerilogRequestLogging(options =>
     };
 });
 
+// Veritabanı başlatma ve gerekli tabloları oluştur
 await using AsyncServiceScope scope = app.Services.CreateAsyncScope();
 var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
 await dbInitializer.InitializeAsync(scope.ServiceProvider, app.Lifetime.ApplicationStopping);
@@ -147,7 +148,7 @@ await dbInitializer.EnsurePostgreSqlSerilogTableAsync(builder.Configuration, app
 
 //app.UseHttpsRedirection();
 
-app.UseCors(corsPolicyName); // CORS must be before other middleware
+app.UseCors(corsPolicyName); // CORS diğer middleware'lerden önce olmalı
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
@@ -163,12 +164,12 @@ app.MapControllers();
 
 try
 {
-    Log.Information("Starting BlogApp API");
+    Log.Information("BlogApp API başlatılıyor");
     app.Run();
 }
 catch (Exception ex)
 {
-    Log.Fatal(ex, "Application terminated unexpectedly");
+    Log.Fatal(ex, "Uygulama beklenmedik bir şekilde sonlandırıldı");
 }
 finally
 {

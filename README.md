@@ -4,7 +4,7 @@ BlogApp; ASP.NET Core tabanlı modern bir blog uygulaması olup, Clean Architect
 
 ## 🏗️ Proje Yapısı
 
-### Backend (ASP.NET Core 8.0)
+### Backend (ASP.NET Core 9.0)
 - **BlogApp.API** - REST API katmanı
 - **BlogApp.Application** - İş mantığı ve CQRS implementasyonu (MediatR)
 - **BlogApp.Domain** - Domain entities ve business rules
@@ -16,13 +16,18 @@ BlogApp; ASP.NET Core tabanlı modern bir blog uygulaması olup, Clean Architect
 
 ## 🚀 Projeyi Çalıştırma
 
-### Sunucu
+### Sunucu (Backend API)
 `src/BlogApp.API` klasöründen REST API'yi başlatın:
 ```bash
 cd src/BlogApp.API
 dotnet run
 ```
-API varsayılan olarak `http://localhost:5000` üzerinde çalışır.
+API varsayılan olarak `https://localhost:6060` üzerinde çalışır.
+
+> **Not:** Development ortamında API şu URL'lerde erişilebilir:
+> - HTTPS: `https://localhost:7285`
+> - HTTP: `http://localhost:5285`
+> - Docker ortamında: `http://localhost:6060`
 
 ### React İstemci
 `clients/blogapp-client` klasöründen React uygulamasını başlatın:
@@ -45,9 +50,10 @@ docker compose -f docker-compose.yml -f docker-compose.local.yml up --build
 ```
 
 **Servisler:**
-- **API:** `http://localhost:5000`
+- **API:** `http://localhost:6060`
+- **React Client:** `http://localhost:5173`
 - **PostgreSQL:** `localhost:5432` (User: postgres, Password: postgres, DB: blogappdb)
-- **RabbitMQ Management:** `http://localhost:15672` (User: guest, Password: guest)
+- **RabbitMQ Management:** `http://localhost:15672` (User: blogapp, Password: supersecret)
 - **Redis:** `localhost:6379`
 - **Seq (Log Viewer):** `http://localhost:5341`
 
@@ -136,8 +142,8 @@ BlogApp **3-katmanlı loglama mimarisi** kullanır:
 ## 🛠️ Teknoloji Stack
 
 ### Backend
-- **Framework:** ASP.NET Core 8.0
-- **ORM:** Entity Framework Core 8.0
+- **Framework:** ASP.NET Core 9.0
+- **ORM:** Entity Framework Core 9.0
 - **Database:** PostgreSQL 16
 - **Cache:** Redis
 - **Message Queue:** RabbitMQ
@@ -146,7 +152,7 @@ BlogApp **3-katmanlı loglama mimarisi** kullanır:
 - **CQRS:** MediatR
 - **Logging:** Serilog (File + PostgreSQL + Seq)
 - **Rate Limiting:** AspNetCoreRateLimit
-- **API Documentation:** Scalar
+- **API Documentation:** Scalar (OpenAPI 3.0)
 
 ### Frontend
 - **Framework:** React 18 + TypeScript

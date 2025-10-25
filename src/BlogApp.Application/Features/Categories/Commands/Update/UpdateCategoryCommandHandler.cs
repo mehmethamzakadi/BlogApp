@@ -31,7 +31,7 @@ public sealed class UpdateCategoryCommandHandler(
 
         await categoryRepository.UpdateAsync(category);
 
-        // ✅ Raise domain event BEFORE SaveChanges for Outbox Pattern
+        // ✅ Outbox Pattern için SaveChanges'dan ÖNCE domain event'i tetikle
         var userId = currentUserService.GetCurrentUserId();
         category.AddDomainEvent(new CategoryUpdatedEvent(category.Id, category.Name, userId ?? category.UpdatedById ?? 0));
 

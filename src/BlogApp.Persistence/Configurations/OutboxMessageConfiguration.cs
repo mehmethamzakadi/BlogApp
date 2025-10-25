@@ -34,7 +34,7 @@ public class OutboxMessageConfiguration : IEntityTypeConfiguration<OutboxMessage
 
         builder.Property(x => x.NextRetryAt);
 
-        // Indexes for performance
+        // Performans için index'ler
         builder.HasIndex(x => x.ProcessedAt)
             .HasDatabaseName("IX_OutboxMessages_ProcessedAt");
 

@@ -5,11 +5,18 @@ using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Exceptions;
 using BlogApp.Domain.Extentions;
+using BlogApp.Persistence.Contexts;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlogApp.Infrastructure.Services.Identity;
 
-public sealed class AuthService(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ITokenService tokenService, IMailService mailService) : IAuthService
+public sealed class AuthService(
+    UserManager<AppUser> userManager,
+    SignInManager<AppUser> signInManager,
+    ITokenService tokenService,
+    IMailService mailService,
+    BlogAppDbContext dbContext) : IAuthService
 {
     public async Task<IDataResult<LoginResponse>> LoginAsync(string email, string password)
     {
@@ -43,19 +50,20 @@ public sealed class AuthService(UserManager<AppUser> userManager, SignInManager<
 
     public async Task<IDataResult<LoginResponse>> RefreshTokenAsync(string refreshToken)
     {
-        // Refresh token ile kullanıcıyı bul
-        var users = userManager.Users.ToList();
-        AppUser? user = null;
+        // ✅ OPTIMIZED: Query the token table directly instead of loading all users
+        // This prevents N+1 query and scales better with large user bases
+        var userToken = await dbContext.AppUserTokens
+            .FirstOrDefaultAsync(t =>
+                t.LoginProvider == "BlogApp" &&
+                t.Name == "RefreshToken" &&
+                t.Value == refreshToken);
 
-        foreach (var u in users)
+        if (userToken == null)
         {
-            var storedToken = await userManager.GetAuthenticationTokenAsync(u, "BlogApp", "RefreshToken");
-            if (storedToken == refreshToken)
-            {
-                user = u;
-                break;
-            }
+            throw new AuthenticationErrorException("Geçersiz refresh token.");
         }
+
+        var user = await userManager.FindByIdAsync(userToken.UserId.ToString());
 
         if (user == null)
         {

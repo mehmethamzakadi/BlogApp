@@ -1,10 +1,12 @@
 using BlogApp.Domain.Common;
+using BlogApp.Domain.Common.Attributes;
 
 namespace BlogApp.Domain.Events.PermissionEvents;
 
 /// <summary>
-/// Domain event raised when permissions are assigned to a role
+/// Bir role yetkiler atandığında tetiklenen domain event
 /// </summary>
+[StoreInOutbox]
 public class PermissionsAssignedToRoleEvent : DomainEvent
 {
     public int RoleId { get; }

@@ -6,27 +6,27 @@ namespace BlogApp.Domain.Repositories;
 public interface IOutboxMessageRepository : IAsyncRepository<OutboxMessage>, IRepository<OutboxMessage>
 {
     /// <summary>
-    /// Get unprocessed messages ready for processing
+    /// İşlenmeye hazır, işlenmemiş mesajları getirir
     /// </summary>
     Task<List<OutboxMessage>> GetUnprocessedMessagesAsync(int batchSize = 50, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Get messages that need retry (failed with retry count < max)
+    /// Yeniden denenmesi gereken mesajları getirir (başarısız ve retry sayısı < max)
     /// </summary>
     Task<List<OutboxMessage>> GetMessagesForRetryAsync(int maxRetryCount = 5, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Mark message as processed
+    /// Mesajı işlenmiş olarak işaretle
     /// </summary>
     Task MarkAsProcessedAsync(int messageId, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Mark message as failed with error details
+    /// Mesajı hata detaylarıyla birlikte başarısız olarak işaretle
     /// </summary>
     Task MarkAsFailedAsync(int messageId, string error, DateTime? nextRetryAt = null, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Clean up old processed messages (retention policy)
+    /// Eski işlenmiş mesajları temizle (saklama politikası)
     /// </summary>
     Task CleanupProcessedMessagesAsync(int retentionDays = 7, CancellationToken cancellationToken = default);
 }

@@ -1,5 +1,6 @@
 using BlogApp.Application.Abstractions;
 using BlogApp.Application.Abstractions.Identity;
+using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Events.PermissionEvents;
 using BlogApp.Domain.Repositories;
@@ -15,17 +16,20 @@ public class AssignPermissionsToRoleCommandHandler : IRequestHandler<AssignPermi
     private readonly IRoleService _roleService;
     private readonly IMediator _mediator;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IUnitOfWork _unitOfWork;
 
     public AssignPermissionsToRoleCommandHandler(
         IPermissionRepository permissionRepository,
         IRoleService roleService,
         IMediator mediator,
-        ICurrentUserService currentUserService)
+        ICurrentUserService currentUserService,
+        IUnitOfWork unitOfWork)
     {
         _permissionRepository = permissionRepository;
         _roleService = roleService;
         _mediator = mediator;
         _currentUserService = currentUserService;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<IResult> Handle(AssignPermissionsToRoleCommand request, CancellationToken cancellationToken)
@@ -46,9 +50,12 @@ public class AssignPermissionsToRoleCommandHandler : IRequestHandler<AssignPermi
         // Repository üzerinden permission'ları ata
         await _permissionRepository.AssignPermissionsToRoleAsync(request.RoleId, request.PermissionIds, cancellationToken);
 
-        // ✅ Raise domain event - Event handler will log the activity
+        // ✅ Domain event'i tetikle - Event handler aktiviteyi loglar
         var currentUserId = _currentUserService.GetCurrentUserId();
         await _mediator.Publish(new PermissionsAssignedToRoleEvent(role.Id, role.Name!, permissions, currentUserId), cancellationToken);
+
+        // ✅ DÜZELTİLDİ: UnitOfWork üzerinden değişiklikleri kaydet (daha önce eksikti)
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new SuccessResult("Permission'lar başarıyla atandı");
     }

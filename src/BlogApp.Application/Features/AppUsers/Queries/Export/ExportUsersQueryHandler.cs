@@ -34,10 +34,10 @@ public class ExportUsersQueryHandler : IRequestHandler<ExportUsersQuery, ExportU
     {
         var sb = new StringBuilder();
 
-        // Header
+        // Başlık
         sb.AppendLine("Id,UserName,Email,PhoneNumber,EmailConfirmed");
 
-        // Rows
+        // Satırlar
         foreach (var user in users)
         {
             sb.AppendLine($"{user.Id},{EscapeCsv(user.UserName!)},{EscapeCsv(user.Email!)},{EscapeCsv(user.PhoneNumber)},{user.EmailConfirmed}");

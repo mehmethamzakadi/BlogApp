@@ -37,7 +37,7 @@ public sealed class UpdateUserCommandHandler : IRequestHandler<UpdateAppUserComm
         if (!response.Succeeded)
             return new ErrorResult("Güncelleme işlemi sırasında hata oluştu!");
 
-        // ✅ Raise domain event - Event handler will log the activity
+        // ✅ Domain event'i tetikle - Event handler aktiviteyi loglar
         var currentUserId = _currentUserService.GetCurrentUserId();
         await _mediator.Publish(new UserUpdatedEvent(user.Id, user.UserName!, user.Email!, currentUserId), cancellationToken);
 

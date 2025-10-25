@@ -1,7 +1,7 @@
 namespace BlogApp.Domain.Common;
 
 /// <summary>
-/// Base class for domain events
+/// Domain event'ler için temel sınıf
 /// </summary>
 public abstract class DomainEvent : IDomainEvent
 {

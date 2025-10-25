@@ -37,7 +37,7 @@ public sealed class UpdateRoleCommandHandler : IRequestHandler<UpdateRoleCommand
         if (!result.Succeeded)
             return new ErrorResult("İşlem sırasında bir hata oluştu");
 
-        // ✅ Raise domain event - Event handler will log the activity
+        // ✅ Domain event'i tetikle - Event handler aktiviteyi loglar
         var currentUserId = GetCurrentUserId();
         await _mediator.Publish(new RoleUpdatedEvent(role.Id, role.Name!, currentUserId), cancellationToken);
 

@@ -1,10 +1,12 @@
 using BlogApp.Domain.Common;
+using BlogApp.Domain.Common.Attributes;
 
 namespace BlogApp.Domain.Events.CategoryEvents;
 
 /// <summary>
-/// Domain event raised when a category is created
+/// Bir kategori oluşturulduğunda tetiklenen domain event
 /// </summary>
+[StoreInOutbox]
 public class CategoryCreatedEvent : DomainEvent
 {
     public int CategoryId { get; }

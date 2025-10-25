@@ -1,10 +1,12 @@
 using BlogApp.Domain.Common;
+using BlogApp.Domain.Common.Attributes;
 
 namespace BlogApp.Domain.Events.RoleEvents;
 
 /// <summary>
-/// Domain event raised when a role is deleted
+/// Bir rol silindiğinde tetiklenen domain event
 /// </summary>
+[StoreInOutbox]
 public class RoleDeletedEvent : DomainEvent
 {
     public int RoleId { get; }

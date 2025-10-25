@@ -52,7 +52,7 @@ public sealed class CreateAppUserCommandHandler : IRequestHandler<CreateAppUserC
 
         await _userService.AddToRoleAsync(user, UserRoles.User);
 
-        // ✅ Raise domain event - Event handler will log the activity
+        // ✅ Domain event'i tetikle - Event handler aktiviteyi loglar
         var currentUserId = _currentUserService.GetCurrentUserId();
         await _mediator.Publish(new UserCreatedEvent(user.Id, user.UserName!, user.Email!, currentUserId), cancellationToken);
 

@@ -37,7 +37,7 @@ public sealed class CreateRoleCommandHandler : IRequestHandler<CreateRoleCommand
         if (!result.Succeeded)
             return new ErrorResult("İşlem sırasında hata oluştu!");
 
-        // ✅ Raise domain event - Event handler will log the activity
+        // ✅ Domain event'i tetikle - Event handler aktiviteyi loglar
         var currentUserId = GetCurrentUserId();
         await _mediator.Publish(new RoleCreatedEvent(role.Id, role.Name!, currentUserId), cancellationToken);
 

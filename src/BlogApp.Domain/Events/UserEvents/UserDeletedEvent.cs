@@ -1,10 +1,12 @@
 using BlogApp.Domain.Common;
+using BlogApp.Domain.Common.Attributes;
 
 namespace BlogApp.Domain.Events.UserEvents;
 
 /// <summary>
-/// Domain event raised when a user is deleted
+/// Bir kullanıcı silindiğinde tetiklenen domain event
 /// </summary>
+[StoreInOutbox]
 public class UserDeletedEvent : DomainEvent
 {
     public int UserId { get; }

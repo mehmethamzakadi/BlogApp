@@ -10,15 +10,17 @@ namespace BlogApp.Application.Behaviors
         {
             try
             {
-                Log.Information($"Starting request {typeof(TRequest).Name}");
+                // Yapılandırılmış loglama kullanarak istek başlatıldı
+                Log.Information("{RequestType} isteği başlatılıyor", typeof(TRequest).Name);
                 var result = await next();
-                Log.Information($"Competed request {typeof(TRequest).Name}");
+                Log.Information("{RequestType} isteği tamamlandı", typeof(TRequest).Name);
 
                 return result;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"Error request {typeof(TRequest).Name}, Message:{ex.Message}");
+                // Yapılandırılmış loglama ile hata kaydı
+                Log.Error(ex, "{RequestType} isteği sırasında hata oluştu", typeof(TRequest).Name);
                 throw;
             }
         }

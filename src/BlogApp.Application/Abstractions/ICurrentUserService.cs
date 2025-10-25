@@ -1,13 +1,13 @@
 namespace BlogApp.Application.Abstractions;
 
 /// <summary>
-/// Provides access to the current authenticated user's information
+/// Mevcut kimliği doğrulanmış kullanıcının bilgilerine erişim sağlar
 /// </summary>
 public interface ICurrentUserService
 {
     /// <summary>
-    /// Gets the current authenticated user's ID
+    /// Mevcut kimliği doğrulanmış kullanıcının ID'sini getirir
     /// </summary>
-    /// <returns>User ID if authenticated, otherwise null</returns>
+    /// <returns>Kimlik doğrulanmışsa kullanıcı ID'si, aksi takdirde null</returns>
     int? GetCurrentUserId();
 }

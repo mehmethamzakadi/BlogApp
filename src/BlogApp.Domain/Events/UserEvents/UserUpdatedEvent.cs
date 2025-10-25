@@ -1,10 +1,12 @@
 using BlogApp.Domain.Common;
+using BlogApp.Domain.Common.Attributes;
 
 namespace BlogApp.Domain.Events.UserEvents;
 
 /// <summary>
-/// Domain event raised when a user is updated
+/// Bir kullanıcı güncellendiğinde tetiklenen domain event
 /// </summary>
+[StoreInOutbox]
 public class UserUpdatedEvent : DomainEvent
 {
     public int UserId { get; }

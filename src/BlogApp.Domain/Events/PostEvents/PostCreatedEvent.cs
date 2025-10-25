@@ -1,10 +1,12 @@
 using BlogApp.Domain.Common;
+using BlogApp.Domain.Common.Attributes;
 
 namespace BlogApp.Domain.Events.PostEvents;
 
 /// <summary>
-/// Domain event raised when a post is created
+/// Bir gönderi oluşturulduğunda tetiklenen domain event
 /// </summary>
+[StoreInOutbox]
 public class PostCreatedEvent : DomainEvent
 {
     public int PostId { get; }

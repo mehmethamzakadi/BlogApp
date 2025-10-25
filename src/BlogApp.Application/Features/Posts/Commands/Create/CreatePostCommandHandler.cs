@@ -30,7 +30,7 @@ public sealed class CreatePostCommandHandler(
 
         await postRepository.AddAsync(post);
 
-        // ✅ Raise domain event BEFORE SaveChanges for Outbox Pattern
+        // ✅ Outbox Pattern için SaveChanges'dan ÖNCE domain event'i tetikle
         post.AddDomainEvent(new PostCreatedEvent(post.Id, post.Title, post.CategoryId, userId ?? post.CreatedById));
 
         await unitOfWork.SaveChangesAsync(cancellationToken);

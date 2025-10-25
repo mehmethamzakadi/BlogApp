@@ -55,6 +55,7 @@ public class PermissionRepository : EfRepositoryBase<Permission, BlogAppDbContex
             await Context.AppRolePermissions.AddRangeAsync(newPermissions, cancellationToken);
         }
 
-        await Context.SaveChangesAsync(cancellationToken);
+        // ✅ FIXED: SaveChanges removed - UnitOfWork is responsible for transaction management
+        // This ensures proper Outbox Pattern execution and maintains transaction integrity
     }
 }

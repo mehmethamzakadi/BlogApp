@@ -22,7 +22,7 @@ export function DashboardPage() {
     refetchInterval: 30000 // Her 30 saniyede bir güncelle
   });
 
-  // Transform API data to component format
+  // API verisini bileşen formatına dönüştür
   const activities: Activity[] = recentActivities.map(activity => ({
     id: activity.id,
     activityType: activity.activityType,

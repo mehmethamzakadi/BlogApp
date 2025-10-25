@@ -20,7 +20,7 @@ public sealed class DeletePostCommandHandler(
         if (post is null)
             return new ErrorResult("Post bilgisi bulunamadı!");
 
-        // ✅ Raise domain event BEFORE deletion (to capture title)
+        // ✅ Silme işleminden ÖNCE domain event'i tetikle (title bilgisini yakalamak için)
         var userId = currentUserService.GetCurrentUserId();
         post.AddDomainEvent(new PostDeletedEvent(post.Id, post.Title, userId ?? post.CreatedById));
 

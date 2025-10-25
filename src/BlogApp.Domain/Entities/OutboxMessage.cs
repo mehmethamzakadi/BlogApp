@@ -3,8 +3,8 @@ using BlogApp.Domain.Common;
 namespace BlogApp.Domain.Entities;
 
 /// <summary>
-/// Outbox pattern implementation for reliable message delivery
-/// Stores domain events before publishing to message broker
+/// Güvenilir mesaj iletimi için Outbox pattern uygulaması
+/// Domain event'leri message broker'a yayınlanmadan önce saklar
 /// </summary>
 public class OutboxMessage : BaseEntity
 {
