@@ -137,3 +137,17 @@ export async function getPostById(id: number): Promise<Post> {
 
   return result.data;
 }
+
+export interface DashboardStatistics {
+  totalPosts: number;
+  publishedPosts: number;
+  draftPosts: number;
+  totalCategories: number;
+  postsLast7Days: number;
+  postsLast30Days: number;
+}
+
+export async function fetchStatistics(): Promise<DashboardStatistics> {
+  const response = await api.get<DashboardStatistics>('/Post/GetStatistics');
+  return response.data;
+}

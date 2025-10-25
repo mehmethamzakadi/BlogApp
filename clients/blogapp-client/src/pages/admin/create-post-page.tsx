@@ -118,6 +118,7 @@ export function CreatePostPage() {
       toast.success(result.message || 'Gönderi oluşturuldu');
       await queryClient.invalidateQueries({ queryKey: ['posts'] });
       await queryClient.invalidateQueries({ queryKey: ['posts', 'published'] });
+      await queryClient.invalidateQueries({ queryKey: ['dashboard-statistics'] });
       reset({
         title: '',
         summary: '',
@@ -149,6 +150,7 @@ export function CreatePostPage() {
       toast.success(result.message || 'Gönderi güncellendi');
       await queryClient.invalidateQueries({ queryKey: ['posts'] });
       await queryClient.invalidateQueries({ queryKey: ['posts', 'published'] });
+      await queryClient.invalidateQueries({ queryKey: ['dashboard-statistics'] });
       if (postId) {
         await queryClient.invalidateQueries({ queryKey: ['post', postId] });
       }

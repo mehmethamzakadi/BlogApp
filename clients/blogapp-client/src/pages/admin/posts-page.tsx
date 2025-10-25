@@ -211,6 +211,7 @@ export function PostsPage() {
       setPostToDelete(null);
       queryClient.invalidateQueries({ queryKey: ['posts'] });
       queryClient.invalidateQueries({ queryKey: ['posts', 'published'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-statistics'] });
     },
     onError: (error) => handleApiError(error, 'Gönderi silinemedi')
   });

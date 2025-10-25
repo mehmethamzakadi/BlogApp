@@ -180,6 +180,7 @@ export function CategoriesPage() {
       toast.success(result.message || 'Kategori eklendi');
       setIsCreateOpen(false);
       queryClient.invalidateQueries({ queryKey: ['categories'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-statistics'] });
     },
     onError: (error) => handleApiError(error, 'Kategori eklenemedi')
   });
@@ -195,6 +196,7 @@ export function CategoriesPage() {
       toast.success(result.message || 'Kategori güncellendi');
       setEditingCategory(null);
       queryClient.invalidateQueries({ queryKey: ['categories'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-statistics'] });
     },
     onError: (error) => handleApiError(error, 'Kategori güncellenemedi')
   });
@@ -209,6 +211,7 @@ export function CategoriesPage() {
       toast.success(result.message || 'Kategori silindi');
       setCategoryToDelete(null);
       queryClient.invalidateQueries({ queryKey: ['categories'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-statistics'] });
     },
     onError: (error) => handleApiError(error, 'Kategori silinemedi')
   });
