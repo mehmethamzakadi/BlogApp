@@ -1,5 +1,6 @@
 ﻿
 using System.Linq;
+using AspNetCoreRateLimit;
 using BlogApp.API.Middlewares;
 using BlogApp.Application;
 using BlogApp.Domain.Common.Results;
@@ -23,6 +24,13 @@ builder.Services.AddConfigureInfrastructureServices(builder.Configuration);
 
 builder.Services.AddOptions();
 builder.Services.AddHttpContextAccessor();
+
+// RateLimit Configuration
+builder.Services.AddMemoryCache();
+builder.Services.Configure<IpRateLimitOptions>(builder.Configuration.GetSection("IpRateLimiting"));
+builder.Services.Configure<IpRateLimitPolicies>(builder.Configuration.GetSection("IpRateLimitPolicies"));
+builder.Services.AddInMemoryRateLimiting();
+builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 
 builder.Services.AddCors(options =>
 {
@@ -108,6 +116,8 @@ await dbInitializer.EnsurePostgreSqlSerilogTableAsync(builder.Configuration, app
 
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+app.UseIpRateLimiting();
 
 app.UseRouting();
 

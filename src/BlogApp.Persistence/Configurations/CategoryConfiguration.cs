@@ -1,5 +1,6 @@
 
 using BlogApp.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace BlogApp.Persistence.Configurations
@@ -11,6 +12,11 @@ namespace BlogApp.Persistence.Configurations
             base.Configure(builder);
 
             builder.Property(x => x.Name).IsRequired().HasMaxLength(100);
+
+            // Indexler
+            builder.HasIndex(x => x.Name)
+                .IsUnique()
+                .HasDatabaseName("IX_Categories_Name_Unique");
         }
     }
 }

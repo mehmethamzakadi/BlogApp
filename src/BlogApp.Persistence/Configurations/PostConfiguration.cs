@@ -1,5 +1,6 @@
 
 using BlogApp.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace BlogApp.Persistence.Configurations
@@ -14,6 +15,22 @@ namespace BlogApp.Persistence.Configurations
             builder.Property(x => x.Summary).IsRequired();
             builder.Property(x => x.Thumbnail).IsRequired();
             builder.Property(x => x.Title).IsRequired();
+
+            // Indexler
+            builder.HasIndex(x => x.CategoryId)
+                .HasDatabaseName("IX_Posts_CategoryId");
+
+            builder.HasIndex(x => x.IsPublished)
+                .HasDatabaseName("IX_Posts_IsPublished");
+
+            builder.HasIndex(x => x.CreatedDate)
+                .HasDatabaseName("IX_Posts_CreatedDate");
+
+            builder.HasIndex(x => new { x.IsPublished, x.CreatedDate })
+                .HasDatabaseName("IX_Posts_IsPublished_CreatedDate");
+
+            builder.HasIndex(x => x.Title)
+                .HasDatabaseName("IX_Posts_Title");
         }
     }
 }
