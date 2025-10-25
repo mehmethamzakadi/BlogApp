@@ -2,6 +2,7 @@ using BlogApp.Application.Abstractions;
 using BlogApp.Application.Abstractions.Identity;
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
+using BlogApp.Domain.Entities;
 using BlogApp.Domain.Events.PermissionEvents;
 using BlogApp.Domain.Repositories;
 using MediatR;
@@ -50,11 +51,11 @@ public class AssignPermissionsToRoleCommandHandler : IRequestHandler<AssignPermi
         // Repository üzerinden permission'ları ata
         await _permissionRepository.AssignPermissionsToRoleAsync(request.RoleId, request.PermissionIds, cancellationToken);
 
-        // ✅ Domain event'i tetikle - Event handler aktiviteyi loglar
+        // ✅ AppRole artık AddDomainEvent() metoduna sahip
         var currentUserId = _currentUserService.GetCurrentUserId();
-        await _mediator.Publish(new PermissionsAssignedToRoleEvent(role.Id, role.Name!, permissions, currentUserId), cancellationToken);
+        role.AddDomainEvent(new PermissionsAssignedToRoleEvent(role.Id, role.Name!, permissions, currentUserId));
 
-        // ✅ DÜZELTİLDİ: UnitOfWork üzerinden değişiklikleri kaydet (daha önce eksikti)
+        // UnitOfWork SaveChanges sırasında domain event'leri otomatik olarak Outbox'a kaydeder
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new SuccessResult("Permission'lar başarıyla atandı");

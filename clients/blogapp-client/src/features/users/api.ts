@@ -1,5 +1,6 @@
 import api from '../../lib/axios';
 import { ApiResult, normalizeApiResult, normalizePaginatedResponse } from '../../types/api';
+import { buildMultiFieldDataGridPayload } from '../../lib/data-grid-helpers';
 import {
   User,
   UserFormValues,
@@ -10,47 +11,9 @@ import {
   UserRolesResponse
 } from './types';
 
-function buildDataGridPayload(filters: UserTableFilters) {
-  const payload: Record<string, unknown> = {
-    PaginatedRequest: {
-      PageIndex: filters.pageIndex,
-      PageSize: filters.pageSize
-    }
-  };
-
-  const sort = filters.sort
-    ? [
-        {
-          Field: filters.sort.field,
-          Dir: filters.sort.dir
-        }
-      ]
-    : undefined;
-
-  const filter = filters.search
-    ? {
-        Logic: 'or',
-        Filters: [
-          { Field: 'FirstName', Operator: 'contains', Value: filters.search },
-          { Field: 'LastName', Operator: 'contains', Value: filters.search },
-          { Field: 'Email', Operator: 'contains', Value: filters.search },
-          { Field: 'UserName', Operator: 'contains', Value: filters.search }
-        ]
-      }
-    : undefined;
-
-  if (sort || filter) {
-    payload.DynamicQuery = {
-      ...(sort ? { Sort: sort } : {}),
-      ...(filter ? { Filter: filter } : {})
-    };
-  }
-
-  return payload;
-}
-
 export async function fetchUsers(filters: UserTableFilters): Promise<UserListResponse> {
-  const response = await api.post('/user/search', buildDataGridPayload(filters));
+  const searchFields = ['FirstName', 'LastName', 'Email', 'UserName'];
+  const response = await api.post('/user/search', buildMultiFieldDataGridPayload(filters, searchFields));
   return normalizePaginatedResponse<User>(response.data);
 }
 

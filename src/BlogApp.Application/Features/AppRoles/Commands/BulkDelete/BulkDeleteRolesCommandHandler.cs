@@ -1,5 +1,9 @@
+using BlogApp.Application.Abstractions;
 using BlogApp.Application.Abstractions.Identity;
+using BlogApp.Domain.Common;
 using BlogApp.Domain.Entities;
+using BlogApp.Domain.Events.RoleEvents;
+using BlogApp.Domain.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 
@@ -9,13 +13,19 @@ public class BulkDeleteRolesCommandHandler : IRequestHandler<BulkDeleteRolesComm
 {
     private readonly IRoleService _roleService;
     private readonly RoleManager<AppRole> _roleManager;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ICurrentUserService _currentUserService;
 
     public BulkDeleteRolesCommandHandler(
         IRoleService roleService,
-        RoleManager<AppRole> roleManager)
+        RoleManager<AppRole> roleManager,
+        IUnitOfWork unitOfWork,
+        ICurrentUserService currentUserService)
     {
         _roleService = roleService;
         _roleManager = roleManager;
+        _unitOfWork = unitOfWork;
+        _currentUserService = currentUserService;
     }
 
     public async Task<BulkDeleteRolesResponse> Handle(BulkDeleteRolesCommand request, CancellationToken cancellationToken)
@@ -47,6 +57,10 @@ public class BulkDeleteRolesCommandHandler : IRequestHandler<BulkDeleteRolesComm
 
                 if (result.Succeeded)
                 {
+                    // ✅ AppRole artık AddDomainEvent() metoduna sahip
+                    var currentUserId = _currentUserService.GetCurrentUserId();
+                    role.AddDomainEvent(new RoleDeletedEvent(roleId, role.Name!, currentUserId));
+                    
                     response.DeletedCount++;
                 }
                 else
@@ -61,6 +75,12 @@ public class BulkDeleteRolesCommandHandler : IRequestHandler<BulkDeleteRolesComm
                 response.Errors.Add($"Rol silinirken hata oluştu (ID {roleId}): {ex.Message}");
                 response.FailedCount++;
             }
+        }
+
+        // Tüm değişiklikleri tek transaction'da kaydet (Silme işlemleri + Outbox)
+        if (response.DeletedCount > 0)
+        {
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
 
         return response;

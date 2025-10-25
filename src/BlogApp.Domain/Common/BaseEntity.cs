@@ -6,7 +6,7 @@ namespace BlogApp.Domain.Common;
 /// Tüm domain entity'leri için temel sınıf.
 /// Ortak özellikleri ve domain event yönetimini sağlar.
 /// </summary>
-public abstract class BaseEntity : IEntityTimestamps
+public abstract class BaseEntity : IEntityTimestamps, IHasDomainEvents
 {
     public int Id { get; set; }
 

@@ -1,10 +1,11 @@
+using BlogApp.Application.Abstractions;
 using BlogApp.Application.Abstractions.Identity;
+using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Events.RoleEvents;
+using BlogApp.Domain.Repositories;
 using MediatR;
-using Microsoft.AspNetCore.Http;
-using System.Security.Claims;
 using IResult = BlogApp.Domain.Common.Results.IResult;
 
 namespace BlogApp.Application.Features.AppRoles.Commands.Create;
@@ -13,16 +14,19 @@ public sealed class CreateRoleCommandHandler : IRequestHandler<CreateRoleCommand
 {
     private readonly IRoleService _roleService;
     private readonly IMediator _mediator;
-    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IUnitOfWork _unitOfWork;
 
     public CreateRoleCommandHandler(
         IRoleService roleService,
         IMediator mediator,
-        IHttpContextAccessor httpContextAccessor)
+        ICurrentUserService currentUserService,
+        IUnitOfWork unitOfWork)
     {
         _roleService = roleService;
         _mediator = mediator;
-        _httpContextAccessor = httpContextAccessor;
+        _currentUserService = currentUserService;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<IResult> Handle(CreateRoleCommand request, CancellationToken cancellationToken)
@@ -37,20 +41,13 @@ public sealed class CreateRoleCommandHandler : IRequestHandler<CreateRoleCommand
         if (!result.Succeeded)
             return new ErrorResult("İşlem sırasında hata oluştu!");
 
-        // ✅ Domain event'i tetikle - Event handler aktiviteyi loglar
-        var currentUserId = GetCurrentUserId();
-        await _mediator.Publish(new RoleCreatedEvent(role.Id, role.Name!, currentUserId), cancellationToken);
+        // ✅ Artık AppRole da AddDomainEvent() metoduna sahip (IHasDomainEvents sayesinde)
+        var currentUserId = _currentUserService.GetCurrentUserId();
+        role.AddDomainEvent(new RoleCreatedEvent(role.Id, role.Name!, currentUserId));
+
+        // UnitOfWork SaveChanges sırasında domain event'leri otomatik olarak Outbox'a kaydeder
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new SuccessResult("Rol oluşturuldu.");
-    }
-
-    private int? GetCurrentUserId()
-    {
-        var userIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier);
-        if (userIdClaim != null && int.TryParse(userIdClaim.Value, out var userId))
-        {
-            return userId;
-        }
-        return null;
     }
 }

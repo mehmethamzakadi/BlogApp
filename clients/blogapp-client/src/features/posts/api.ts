@@ -1,5 +1,6 @@
 import api from '../../lib/axios';
 import { ApiResult, normalizeApiResult, normalizePaginatedResponse } from '../../types/api';
+import { buildCustomDataGridPayload } from '../../lib/data-grid-helpers';
 import {
   Post,
   PostFormValues,
@@ -10,13 +11,6 @@ import {
 } from './types';
 
 function buildPostDataGridPayload(filters: PostTableFilters) {
-  const payload: Record<string, unknown> = {
-    PaginatedRequest: {
-      PageIndex: filters.pageIndex,
-      PageSize: filters.pageSize
-    }
-  };
-
   const sortFieldMap: Record<string, string> = {
     id: 'Id',
     title: 'Title',
@@ -24,16 +18,7 @@ function buildPostDataGridPayload(filters: PostTableFilters) {
     isPublished: 'IsPublished'
   };
 
-  const sort = filters.sort
-    ? [
-        {
-          Field: sortFieldMap[filters.sort.field] ?? filters.sort.field,
-          Dir: filters.sort.dir
-        }
-      ]
-    : undefined;
-
-  const filter = filters.search
+  const customFilter = filters.search
     ? {
         Field: 'Title',
         Operator: 'contains',
@@ -49,14 +34,7 @@ function buildPostDataGridPayload(filters: PostTableFilters) {
       }
     : undefined;
 
-  if (sort || filter) {
-    payload.DynamicQuery = {
-      ...(sort ? { Sort: sort } : {}),
-      ...(filter ? { Filter: filter } : {})
-    };
-  }
-
-  return payload;
+  return buildCustomDataGridPayload(filters, customFilter, sortFieldMap);
 }
 
 export interface FetchPublishedPostsParams {

@@ -1,7 +1,9 @@
 using BlogApp.Application.Abstractions;
+using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Events.UserEvents;
+using BlogApp.Domain.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -15,17 +17,20 @@ public class AssignRolesToUserCommandHandler : IRequestHandler<AssignRolesToUser
     private readonly RoleManager<AppRole> _roleManager;
     private readonly IMediator _mediator;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IUnitOfWork _unitOfWork;
 
     public AssignRolesToUserCommandHandler(
         UserManager<AppUser> userManager,
         RoleManager<AppRole> roleManager,
         IMediator mediator,
-        ICurrentUserService currentUserService)
+        ICurrentUserService currentUserService,
+        IUnitOfWork unitOfWork)
     {
         _userManager = userManager;
         _roleManager = roleManager;
         _mediator = mediator;
         _currentUserService = currentUserService;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<IResult> Handle(AssignRolesToUserCommand request, CancellationToken cancellationToken)
@@ -67,10 +72,13 @@ public class AssignRolesToUserCommandHandler : IRequestHandler<AssignRolesToUser
                 return new ErrorResult("Roller eklenemedi: " + string.Join(", ", addResult.Errors.Select(e => e.Description)));
             }
 
-            // ✅ Domain event'i tetikle - Event handler aktiviteyi loglar
+            // ✅ AppUser artık AddDomainEvent() metoduna sahip
             var currentUserId = _currentUserService.GetCurrentUserId();
-            await _mediator.Publish(new UserRolesAssignedEvent(user.Id, user.UserName!, roles, currentUserId), cancellationToken);
+            user.AddDomainEvent(new UserRolesAssignedEvent(user.Id, user.UserName!, roles, currentUserId));
         }
+
+        // UnitOfWork SaveChanges sırasında domain event'leri otomatik olarak Outbox'a kaydeder
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new SuccessResult("Roller başarıyla atandı");
     }

@@ -1,10 +1,12 @@
 
 using BlogApp.Application.Abstractions;
 using BlogApp.Application.Abstractions.Identity;
+using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Constants;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Events.UserEvents;
+using BlogApp.Domain.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using IResult = BlogApp.Domain.Common.Results.IResult;
@@ -16,15 +18,18 @@ public sealed class CreateAppUserCommandHandler : IRequestHandler<CreateAppUserC
     private readonly IUserService _userService;
     private readonly IMediator _mediator;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IUnitOfWork _unitOfWork;
 
     public CreateAppUserCommandHandler(
         IUserService userService,
         IMediator mediator,
-        ICurrentUserService currentUserService)
+        ICurrentUserService currentUserService,
+        IUnitOfWork unitOfWork)
     {
         _userService = userService;
         _mediator = mediator;
         _currentUserService = currentUserService;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<IResult> Handle(CreateAppUserCommand request, CancellationToken cancellationToken)
@@ -52,9 +57,12 @@ public sealed class CreateAppUserCommandHandler : IRequestHandler<CreateAppUserC
 
         await _userService.AddToRoleAsync(user, UserRoles.User);
 
-        // ✅ Domain event'i tetikle - Event handler aktiviteyi loglar
+        // ✅ AppUser artık AddDomainEvent() metoduna sahip (IHasDomainEvents sayesinde)
         var currentUserId = _currentUserService.GetCurrentUserId();
-        await _mediator.Publish(new UserCreatedEvent(user.Id, user.UserName!, user.Email!, currentUserId), cancellationToken);
+        user.AddDomainEvent(new UserCreatedEvent(user.Id, user.UserName!, user.Email!, currentUserId));
+
+        // UnitOfWork SaveChanges sırasında domain event'leri otomatik olarak Outbox'a kaydeder
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new SuccessResult("Kullanıcı bilgisi başarıyla eklendi.");
     }
