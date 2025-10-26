@@ -19,25 +19,21 @@ Bu yaklaşım şu nedenlerle hatalıydı:
 3. Veritabanı resetlendiğinde ID'ler değişebilir
 
 ## Uygulanan Çözüm
-Rol ID'lerini `RoleManager` kullanarak dinamik olarak almaya çevirdik:
+Custom kimlik yapımıza uygun olarak rol ID'leri doğrudan `BlogAppDbContext.Roles` üzerinden okunacak şekilde güncellendi:
 
 ```csharp
 // DOĞRU KOD:
 var roleIds = new List<int>();
-foreach (var roleName in roles)
-{
-    var role = await _roleManager.FindByNameAsync(roleName);
-    if (role != null)
-    {
-        roleIds.Add(role.Id);  // ✅ Gerçek ID'yi veritabanından al
-    }
-}
+var roleIds = await _dbContext.Roles
+  .Where(r => userRoles.Contains(r.Name))
+  .Select(r => r.Id)
+  .ToListAsync();
 ```
 
 ## Değişiklik Yapılan Dosya
 - `src/BlogApp.Infrastructure/Services/Identity/JwtTokenService.cs`
-  - `RoleManager<AppRole>` dependency eklendi
-  - `GetAuthClaims` metodu güncellendi
+  - `BlogAppDbContext` ve `IPermissionRepository` kullanılarak rol-permission çözümleme akışı güncellendi
+  - `GetAuthClaims` metodu dinamik rol ID ve permission claim üretimi yapacak şekilde düzenlendi
 
 ## Çözümün Uygulanması İçin Adımlar
 

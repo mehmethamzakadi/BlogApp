@@ -1,206 +1,122 @@
 # Outbox Pattern Implementation
 
-## 📚 Overview
+## 1. Amaç
+Transactional outbox, domain event’lerin business değişiklikleriyle aynı ACID transaction içinde kaydedilmesini ve RabbitMQ’ya güvenilir biçimde aktarılmasını sağlar. BlogApp’te outbox akışı activity logging, Telegram bildirimleri ve ileride eklenecek diğer entegrasyonlar için tek kaynak olarak kullanılır.
 
-Bu proje **Outbox Pattern** kullanarak reliable message delivery (güvenilir mesaj teslimi) sağlar. Domain events veritabanına kaydedilir ve daha sonra bir background service tarafından RabbitMQ'ya yayınlanır.
-
-## 🏗️ Architecture
+## 2. Akış
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                          OUTBOX PATTERN FLOW                            │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                         │
-│  1. DOMAIN EVENT RAISED                                                 │
-│     ├─ User creates a category                                          │
-│     └─ Category entity raises CategoryCreatedEvent                      │
-│                                                                         │
-│  2. UNIT OF WORK INTERCEPTS                                             │
-│     ├─ UnitOfWork.SaveChangesAsync() is called                          │
-│     ├─ Gets all domain events from entities                             │
-│     ├─ Serializes events to JSON                                        │
-│     └─ Stores in OutboxMessages table (same transaction)                │
-│                                                                         │
-│  3. BACKGROUND SERVICE PROCESSES                                        │
-│     ├─ OutboxProcessorService runs every 5 seconds                      │
-│     ├─ Queries unprocessed messages from DB                             │
-│     ├─ Deserializes JSON to domain events                               │
-│     ├─ Converts to integration events                                   │
-│     └─ Publishes to RabbitMQ                                            │
-│                                                                         │
-│  4. RABBITMQ CONSUMER HANDLES                                           │
-│     ├─ ActivityLogConsumer receives message                             │
-│     ├─ Creates ActivityLog entity                                       │
-│     └─ Saves to database                                                │
-│                                                                         │
-│  5. CLEANUP                                                             │
-│     └─ Old processed messages deleted after 7 days                      │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
+Command Handler
+    ↳ Domain Event (örn. CategoryCreatedEvent)
+        ↳ [StoreInOutbox] attribute kontrolü
+            ↳ UnitOfWork.SaveChangesAsync
+                ↳ OutboxMessages tablosuna JSON payload
+                    ↳ OutboxProcessorService (5 sn döngü)
+                        ↳ Converter stratejisi (EventType -> IntegrationEvent)
+                            ↳ RabbitMQ publish (MassTransit)
+                                ↳ Consumer (örn. ActivityLogConsumer)
+                                    ↳ Hedef tabloya kayıt
 ```
 
-## 🎯 Benefits
+### Neden Attribute?
+`StoreInOutboxAttribute` sadece kritik domain event’lerin outbox’a yazılmasına izin verir. Böylece synchronous iş mantığı ile audit/entegrasyon akışları ayrılır, gereksiz satır oluşması engellenir.
 
-### ✅ **ACID Guarantees**
-- Domain events ve business data aynı transaction'da saklanır
-- Event kaybı riski yoktur
-- Database rollback olursa event'ler de rollback olur
+## 3. Temel Bileşenler
 
-### ✅ **Eventual Consistency**
-- Integration events asenkron olarak işlenir
-- Ana transaction performansını etkilemez
-- Retry mekanizması ile güvenilirlik
+### 3.1 OutboxMessage
 
-### ✅ **Decoupling**
-- Domain layer RabbitMQ'dan bağımsız
-- Event handler'lar basitleştirildi
-- Infrastructure concerns ayrıldı
-
-### ✅ **Fault Tolerance**
-- Message broker çökerse event'ler DB'de güvende
-- Exponential backoff ile akıllı retry
-- Dead letter queue ile hata yönetimi
-
-### ✅ **Scalability**
-- Background service bağımsız scale edilebilir
-- RabbitMQ consumer'lar horizontal scale olur
-- Batch processing için optimize edilmiş
-
-## 📦 Components
-
-### 1. **OutboxMessage Entity**
 ```csharp
 public class OutboxMessage : BaseEntity
 {
-    public string EventType { get; set; }        // "CategoryCreatedEvent"
-    public string Payload { get; set; }          // JSON serialized event
-    public DateTime CreatedAt { get; set; }      // When event was raised
-    public DateTime? ProcessedAt { get; set; }   // When published to RabbitMQ
-    public int RetryCount { get; set; }          // Number of retry attempts
-    public string? Error { get; set; }           // Last error message
-    public DateTime? NextRetryAt { get; set; }   // When to retry next
+    public string EventType { get; set; } = string.Empty;
+    public string Payload { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? ProcessedAt { get; set; }
+    public int RetryCount { get; set; } = 0;
+    public string? Error { get; set; }
+    public DateTime? NextRetryAt { get; set; }
 }
 ```
 
-### 2. **UnitOfWork Integration**
+- `BaseEntity` mirası sayesinde `Id`, `CreatedDate`, `CreatedById` vb. audit alanları otomatik gelir.
+- `EventType` string olarak saklanır (ör. `CategoryCreatedEvent`).
+- `Payload` domain event’in JSON karşılığıdır (tip bilgisi serileştirme sırasında korunur).
+
+### 3.2 UnitOfWork
+- `SaveChangesAsync`, tracked entity’lerden domain event’leri çıkarır.
+- Event tipi `[StoreInOutbox]` ile işaretliyse `OutboxMessages` tablosuna ekler.
+- `JsonSerializer.Serialize(domainEvent, domainEvent.GetType())` ile tip bilgisi kaybedilmez.
+- Transaction başarısız olsa bile `finally` bloğunda domain event listeleri temizlenir.
+
+### 3.3 Converter Stratejileri
+- `ActivityLogIntegrationEventConverter<T>` soyut sınıfı event payload’ını `ActivityLogCreatedIntegrationEvent`’e dönüştürür.
+- `InfrastructureServicesRegistration` tüm converter implementasyonlarını `IIntegrationEventConverterStrategy` olarak singleton kaydeder.
+- Yeni event için sadece converter eklemek yeterlidir.
+
+### 3.4 OutboxProcessorService
+- BackgroundService, her 5 sn’de bir (konfigüre edilmiş `_processingInterval`) çalışır.
+- `GetUnprocessedMessagesAsync` ile `ProcessedAt IS NULL` kayıtlarını, `NextRetryAt` süresi dolanları dahil, `BatchSize=50` olacak şekilde çeker.
+- `EventType` için uygun converter yoksa kayıt `MarkAsFailedAsync` ile hata durumuna alınır.
+- Başarılı publish sonrası `MarkAsProcessedAsync` çağrılır ve durum değişikliği hemen `unitOfWork.SaveChangesAsync` ile persist edilir.
+- Her tur sonunda 7 günden eski işlenmiş mesajlar temizlenir (`CleanupProcessedMessagesAsync(7)`).
+
+### 3.5 RabbitMQ Consumers
+- `ActivityLogConsumer`, `ActivityLogCreatedIntegrationEvent` aldığında yeni `ActivityLog` kaydı oluşturur ve `IUnitOfWork.SaveChangesAsync` çağırır.
+- Retry MassTransit tarafından yönetilir; kalıcı hata durumunda kayıt tekrar outbox tarafından işleme alınır.
+
+## 4. Konfigürasyon
+
+### 4.1 DI Kayıtları
+
 ```csharp
-public async Task<int> SaveChangesAsync(CancellationToken ct)
-{
-    // Get domain events
-    var domainEvents = GetDomainEvents().ToList();
-    
-    // Store events in outbox table
-    foreach (var domainEvent in domainEvents)
-    {
-        if (ShouldStoreInOutbox(domainEvent))
-        {
-            var outboxMessage = new OutboxMessage
-            {
-                EventType = domainEvent.GetType().Name,
-                Payload = JsonSerializer.Serialize(domainEvent),
-                CreatedAt = DateTime.UtcNow
-            };
-            await _context.OutboxMessages.AddAsync(outboxMessage, ct);
-        }
-    }
-    
-    // Save everything in one transaction
-    var result = await _context.SaveChangesAsync(ct);
-    ClearDomainEvents();
-    
-    return result;
-}
+services.AddHostedService<OutboxProcessorService>();
+services.AddSingleton<IIntegrationEventConverterStrategy, CategoryCreatedIntegrationEventConverter>();
+// ... (tüm Category/Post/User/Role/Permission converter’ları)
+services.AddScoped<ActivityLogConsumer>();
 ```
 
-### 3. **OutboxProcessorService**
-Background service that runs every 5 seconds:
+### 4.2 MassTransit / RabbitMQ
 
 ```csharp
-protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+cfg.ReceiveEndpoint(EventConstants.ActivityLogQueue, endpoint =>
 {
-    while (!stoppingToken.IsCancellationRequested)
-    {
-        await ProcessOutboxMessagesAsync(stoppingToken);
-        await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
-    }
-}
-```
+    endpoint.ConfigureConsumer<ActivityLogConsumer>(context);
 
-**Processing Logic:**
-- Batch read unprocessed messages (50 at a time)
-- Deserialize JSON to domain events
-- Convert to integration events
-- Publish to RabbitMQ
-- Mark as processed or failed with retry
+    endpoint.UseMessageRetry(retry => retry.Exponential(
+        retryLimit: 5,
+        minInterval: TimeSpan.FromSeconds(1),
+        maxInterval: TimeSpan.FromMinutes(5),
+        intervalDelta: TimeSpan.FromSeconds(2)));
 
-### 4. **ActivityLogConsumer**
-Consumes integration events from RabbitMQ:
-
-```csharp
-public async Task Consume(ConsumeContext<ActivityLogCreatedIntegrationEvent> context)
-{
-    var log = new ActivityLog
-    {
-        ActivityType = context.Message.ActivityType,
-        EntityType = context.Message.EntityType,
-        EntityId = context.Message.EntityId,
-        Title = context.Message.Title,
-        Details = context.Message.Details,
-        UserId = context.Message.UserId,
-        Timestamp = context.Message.Timestamp
-    };
-    
-    await _repository.AddAsync(log);
-    await _unitOfWork.SaveChangesAsync();
-}
-```
-
-## 🔧 Configuration
-
-### RabbitMQ Queue Setup
-```csharp
-cfg.ReceiveEndpoint(EventConstants.ActivityLogQueue, e =>
-{
-    e.ConfigureConsumer<ActivityLogConsumer>(context);
-    
-    // Exponential retry: 1s, 2s, 4s, 8s, 16s
-    e.UseMessageRetry(r => r.Exponential(5,
-        TimeSpan.FromSeconds(1),
-        TimeSpan.FromMinutes(5),
-        TimeSpan.FromSeconds(2)));
-    
-    // Concurrency
-    e.PrefetchCount = 16;
-    e.ConcurrentMessageLimit = 8;
+    endpoint.PrefetchCount = 16;
+    endpoint.ConcurrentMessageLimit = 8;
 });
 ```
 
-### Outbox Processor Settings
-```csharp
-private readonly TimeSpan _processingInterval = TimeSpan.FromSeconds(5);
-private const int BatchSize = 50;
-private const int MaxRetryCount = 5;
-```
+### 4.3 Outbox Ayarları
+- `BatchSize`: 50
+- `MaxRetryCount`: 5
+- `Retry` zamanlaması: 1, 2, 4, 8, 16 dakika (üstel artış)
+- `Cleanup` süresi: 7 gün
 
-## 📊 Database Schema
+## 5. Veritabanı Şeması
 
-### OutboxMessages Table
 ```sql
 CREATE TABLE "OutboxMessages" (
-    "Id" SERIAL PRIMARY KEY,
-    "EventType" VARCHAR(256) NOT NULL,
-    "Payload" TEXT NOT NULL,
-    "CreatedAt" TIMESTAMP NOT NULL,
-    "ProcessedAt" TIMESTAMP NULL,
-    "RetryCount" INTEGER NOT NULL DEFAULT 0,
-    "Error" VARCHAR(2000) NULL,
-    "NextRetryAt" TIMESTAMP NULL,
-    "CreatedDate" TIMESTAMP NOT NULL,
-    "CreatedById" INTEGER NOT NULL,
-    "UpdatedDate" TIMESTAMP NULL,
-    "UpdatedById" INTEGER NULL,
-    "IsDeleted" BOOLEAN NOT NULL,
-    "DeletedDate" TIMESTAMP NULL
+    "Id" uuid PRIMARY KEY,
+    "EventType" varchar(256) NOT NULL,
+    "Payload" text NOT NULL,
+    "CreatedAt" timestamp NOT NULL,
+    "ProcessedAt" timestamp NULL,
+    "RetryCount" int NOT NULL DEFAULT 0,
+    "Error" varchar(2000) NULL,
+    "NextRetryAt" timestamp NULL,
+    "CreatedDate" timestamp NOT NULL,
+    "CreatedById" uuid NOT NULL,
+    "UpdatedDate" timestamp NULL,
+    "UpdatedById" uuid NULL,
+    "IsDeleted" boolean NOT NULL,
+    "DeletedDate" timestamp NULL
 );
 
 CREATE INDEX "IX_OutboxMessages_ProcessedAt" ON "OutboxMessages" ("ProcessedAt");
@@ -208,145 +124,82 @@ CREATE INDEX "IX_OutboxMessages_CreatedAt" ON "OutboxMessages" ("CreatedAt");
 CREATE INDEX "IX_OutboxMessages_ProcessedAt_NextRetryAt" ON "OutboxMessages" ("ProcessedAt", "NextRetryAt");
 ```
 
-## 🚀 Usage Example
+> Not: EF Core migration’ları `Guid` tipindeki `Id` ve audit kolonlarını `BaseEntity` üzerinden yaratır.
 
-### 1. Raise Domain Event (Application Layer)
-```csharp
-// In CreateCategoryCommandHandler
-var category = new Category { Name = "Technology" };
-await _categoryRepository.AddAsync(category);
+## 6. İzleme ve Operasyon
 
-// Raise domain event
-category.AddDomainEvent(new CategoryCreatedEvent(
-    category.Id, 
-    category.Name, 
-    currentUserId));
+### 6.1 SQL Sorguları
 
-// Save changes (events stored in outbox automatically)
-await _unitOfWork.SaveChangesAsync(cancellationToken);
-```
-
-### 2. Event Processing (Automatic)
-- ✅ Event stored in OutboxMessages table
-- ✅ Background service picks it up within 5 seconds
-- ✅ Publishes to RabbitMQ
-- ✅ Consumer creates ActivityLog
-- ✅ Message marked as processed
-
-### 3. Monitor Outbox (Optional)
 ```sql
--- View unprocessed messages
-SELECT * FROM "OutboxMessages" WHERE "ProcessedAt" IS NULL;
+-- İşlenmemiş mesajlar
+SELECT "Id", "EventType", "RetryCount", "NextRetryAt"
+FROM "OutboxMessages"
+WHERE "ProcessedAt" IS NULL
+ORDER BY "CreatedAt";
 
--- View failed messages
-SELECT * FROM "OutboxMessages" WHERE "Error" IS NOT NULL;
+-- Hata alan mesajlar
+SELECT "Id", "EventType", "Error", "RetryCount"
+FROM "OutboxMessages"
+WHERE "Error" IS NOT NULL AND "ProcessedAt" IS NULL;
 
--- View messages pending retry
-SELECT * FROM "OutboxMessages" 
-WHERE "ProcessedAt" IS NULL 
-  AND "RetryCount" > 0 
-  AND "NextRetryAt" > NOW();
+-- Retry bekleyenler
+SELECT "Id", "EventType", "NextRetryAt"
+FROM "OutboxMessages"
+WHERE "ProcessedAt" IS NULL AND "RetryCount" > 0 AND "NextRetryAt" > NOW();
 ```
 
-## 🔍 Event Types Supported
+### 6.2 Prometheus / Healthcheck Önerileri
+- Outbox kuyruğundaki kayıt sayısı (işlenmemiş + hatalı)
+- Son başarılı publish zamanı
+- Maksimum retry sayısını aşmış kayıtlar (manuel müdahale gerektirir)
 
-### Stored in Outbox (Async Processing)
-- ✅ CategoryCreatedEvent
-- ✅ CategoryUpdatedEvent
-- ✅ CategoryDeletedEvent
-- ✅ PostCreatedEvent
-- ✅ PostUpdatedEvent
-- ✅ PostDeletedEvent
-- ✅ UserCreatedEvent
-- ✅ UserUpdatedEvent
-- ✅ UserDeletedEvent
-- ✅ UserRolesAssignedEvent
-- ✅ RoleCreatedEvent
-- ✅ RoleUpdatedEvent
-- ✅ RoleDeletedEvent
-- ✅ PermissionsAssignedToRoleEvent
+## 7. Desteklenen Domain Event’ler
 
-### Direct Processing (Sync)
-- ❌ Business validation events (handled by domain)
+| Event | Açıklama | ActivityLog Converter |
+|-------|----------|-----------------------|
+| `CategoryCreatedEvent` | Yeni kategori | ✅ |
+| `CategoryUpdatedEvent` | Güncelleme | ✅ |
+| `CategoryDeletedEvent` | Silme | ✅ |
+| `PostCreatedEvent` | Yeni yazı | ✅ |
+| `PostUpdatedEvent` | Yazı güncelleme | ✅ |
+| `PostDeletedEvent` | Yazı silme | ✅ |
+| `UserCreatedEvent` | Kullanıcı oluşturma | ✅ |
+| `UserUpdatedEvent` | Güncelleme | ✅ |
+| `UserDeletedEvent` | Silme | ✅ |
+| `UserRolesAssignedEvent` | Rol ataması | ✅ |
+| `RoleCreatedEvent` | Rol oluşturma | ✅ |
+| `RoleUpdatedEvent` | Rol güncelleme | ✅ |
+| `RoleDeletedEvent` | Rol silme | ✅ |
+| `PermissionsAssignedToRoleEvent` | Yetki ataması | ✅ |
 
-## 📈 Performance Characteristics
+Yeni bir event eklemek için `[StoreInOutbox]` attribute’u, uygun converter ve gerekirse consumer implementasyonu eklenmelidir.
 
-### Throughput
-- **Batch Size**: 50 messages per iteration
-- **Processing Interval**: 5 seconds
-- **Max Throughput**: ~600 messages/minute
+## 8. Yeni Event Ekleme Adımları
 
-### Latency
-- **Min Latency**: 0-5 seconds (next processing cycle)
-- **Avg Latency**: 2.5 seconds
-- **Max Latency**: 5 seconds + processing time
+1. Domain event sınıfını oluştur ve `[StoreInOutbox]` ile işaretle.
+2. Event’i raise eden handler’da `entity.AddDomainEvent(new Event(...))` çağır.
+3. `ActivityLogIntegrationEventConverters` içerisine yeni converter ekle veya farklı bir integration event oluştur.
+4. Converter’ı `InfrastructureServicesRegistration`’da `IIntegrationEventConverterStrategy` olarak kaydet.
+5. Gerekirse yeni RabbitMQ consumer yaz ve MassTransit receive endpoint’ini tanımla.
 
-### Retry Strategy
-- **Exponential Backoff**: 1min, 2min, 4min, 8min, 16min
-- **Max Retries**: 5 attempts
-- **Total Retry Time**: ~31 minutes
+## 9. Retry ve Cleanup Mekanizması
 
-## 🛠️ Maintenance
+- `MarkAsFailedAsync`, `RetryCount`’ı artırır ve `NextRetryAt` değerini üstel olarak ayarlar.
+- `GetUnprocessedMessagesAsync`, `NextRetryAt <= UtcNow` şartıyla tekrar denemeye hazır mesajları sıraya alır.
+- Maximum denemeye (5) ulaşan kayıtlar outbox’ta kalır; manuel inceleme önerilir.
+- Her döngünün sonunda `CleanupProcessedMessagesAsync(7)` ile 7 günden eski başarılı kayıtlar soft delete yerine kalıcı silinir.
 
-### Cleanup Old Messages
-Automatic cleanup runs during each processing cycle:
-```csharp
-await outboxRepository.CleanupProcessedMessagesAsync(
-    retentionDays: 7, 
-    cancellationToken);
-```
+## 10. Best Practices
 
-### Manual Cleanup
-```sql
-DELETE FROM "OutboxMessages" 
-WHERE "ProcessedAt" IS NOT NULL 
-  AND "ProcessedAt" < NOW() - INTERVAL '7 days';
-```
+- Production’da outbox tablosu büyüklüğünü ve retry metriklerini gözlemle.
+- `Payload` boyutunu <1 MB tutacak şekilde event içeriklerini minimal tasarla.
+- Yeni consumer eklerken idempotent davranışı garanti et (ör. aynı activity log tekrar yazılmamalı).
+- Sık gerçekleşen event’ler için converter’larda gereksiz string formatlamasından kaçın.
+- Gereksiz event’leri `[StoreInOutbox]` ile işaretleme; synchronous işlem yeterliyse domain handler’ı kullan.
 
-### Dead Letter Messages
-Messages exceeding max retries remain in database for investigation:
-```sql
-SELECT * FROM "OutboxMessages" 
-WHERE "RetryCount" >= 5 
-  AND "ProcessedAt" IS NULL;
-```
+## 11. İlgili Dokümanlar
+- `docs/DOMAIN_EVENTS_IMPLEMENTATION.md`
+- `docs/ACTIVITY_LOGGING_README.md`
+- `docs/TRANSACTION_MANAGEMENT_STRATEGY.md`
 
-## 📝 Migration
-
-### Apply Migration
-```bash
-cd src/BlogApp.Persistence
-dotnet ef database update --context BlogAppDbContext --startup-project ../BlogApp.API
-```
-
-### Rollback Migration
-```bash
-dotnet ef database update 20251025145645_Init --context BlogAppDbContext --startup-project ../BlogApp.API
-```
-
-## 🎓 Best Practices
-
-### ✅ DO
-- Monitor outbox table size regularly
-- Set up alerts for high retry counts
-- Use indexes for performance
-- Implement dead letter queue monitoring
-- Keep payload size reasonable (<1MB)
-
-### ❌ DON'T
-- Don't delete outbox messages manually
-- Don't bypass outbox for critical events
-- Don't modify processed messages
-- Don't decrease retry intervals too much
-
-## 🔗 Related Documentation
-
-- [Domain Events Implementation](./DOMAIN_EVENTS_IMPLEMENTATION.md)
-- [Activity Logging](./ACTIVITY_LOGGING_README.md)
-- [Transaction Management](./TRANSACTION_MANAGEMENT_STRATEGY.md)
-
-## 📚 References
-
-- [Outbox Pattern - Martin Fowler](https://microservices.io/patterns/data/transactional-outbox.html)
-- [Reliable Messaging - Microsoft](https://docs.microsoft.com/en-us/azure/architecture/patterns/publisher-subscriber)
-- [MassTransit Outbox](https://masstransit.io/documentation/configuration/middleware/outbox)
+Bu doküman, outbox pattern’inin güncel .NET 9 implementasyonunu özetler. Kodda değişiklik yaptığınızda converter kayıtları, MassTransit endpoint ayarları ve UnitOfWork davranışını senkron tutmayı unutmayın.

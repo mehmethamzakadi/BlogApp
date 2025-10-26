@@ -1,294 +1,143 @@
+tail -f logs/blogapp-2025-10-25.txt
+grep "ERROR" logs/blogapp-*.txt
+grep -c "ERROR" logs/blogapp-*.txt
 # 🎯 BlogApp Logging Quick Reference
 
-## 📊 3-Tier Logging Architecture
+## 📊 Katmanlar
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│                    LOGGING ARCHITECTURE                          │
-└──────────────────────────────────────────────────────────────────┘
-
-┌──────────────────────────────────────────────────────────────────┐
-│ 🔍 Tier 1: FILE LOGS (Development & Debug)                      │
-├──────────────────────────────────────────────────────────────────┤
-│ Location:    logs/blogapp-YYYY-MM-DD.txt                        │
-│ Levels:      Debug, Info, Warning, Error, Critical             │
-│ Retention:   31 days                                            │
-│ Purpose:     Debugging, troubleshooting                         │
-│ Volume:      HIGH (all requests, stack traces)                  │
+│ Tier 0: Console (Development)                                   │
+│ • stdout                                                        │
+│ • Level: Debug                                                  │
+│ • Amaç: Lokal debug                                             │
 └──────────────────────────────────────────────────────────────────┘
                               ↓
 ┌──────────────────────────────────────────────────────────────────┐
-│ 📊 Tier 2: STRUCTURED LOGS (Production Monitoring)              │
-├──────────────────────────────────────────────────────────────────┤
-│ Location:    PostgreSQL "Logs" table                            │
-│ Levels:      Information, Warning, Error, Critical              │
-│ Retention:   90 days (auto-cleanup @ 3 AM daily)                │
-│ Purpose:     Monitoring, alerting, analytics                    │
-│ Volume:      MEDIUM (important events only)                     │
-│ Query:       SELECT * FROM "Logs" WHERE level = 'Error'         │
+│ Tier 1: File Logs (logs/blogapp-YYYY-MM-DD.txt)                 │
+│ • Level: Debug ve üzeri                                         │
+│ • Retention: 31 gün (rolling)                                   │
+│ • Amaç: Debug, hızlı analiz                                     │
 └──────────────────────────────────────────────────────────────────┘
                               ↓
 ┌──────────────────────────────────────────────────────────────────┐
-│ 📋 Tier 3: ACTIVITY LOGS (Compliance & Audit)                   │
-├──────────────────────────────────────────────────────────────────┤
-│ Location:    PostgreSQL "ActivityLogs" table                    │
-│ Events:      User actions (create/update/delete)                │
-│ Retention:   UNLIMITED (compliance requirement)                 │
-│ Purpose:     Audit trail, security, legal                       │
-│ Volume:      LOW (business events only)                         │
-│ Query:       SELECT * FROM "ActivityLogs" WHERE "UserId" = 5    │
+│ Tier 2: Structured Logs (PostgreSQL "Logs")                     │
+│ • Level: Information ve üzeri                                   │
+│ • Retention: 90 gün (LogCleanupService)                         │
+│ • Amaç: Üretim izleme, uyarı, rapor                             │
+└──────────────────────────────────────────────────────────────────┘
+                              ↓
+┌──────────────────────────────────────────────────────────────────┐
+│ Tier 3: Activity Logs (PostgreSQL "ActivityLogs")               │
+│ • Kaynak: Domain event → Outbox → RabbitMQ → Consumer           │
+│ • Retention: Sınırsız                                           │
+│ • Amaç: Audit trail, güvenlik                                   │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
----
-
-## 🎨 Log Level Decision Tree
+## 🎨 Log Level Seçimi
 
 ```
-Is this a development detail? (variable values, flow control)
-    ↓ YES → LogDebug() → File only
-    ↓ NO
-    
-Is this an important business event? (user login, order created)
-    ↓ YES → LogInformation() → File + DB
-    ↓ NO
-    
-Is this a potential issue? (deprecated API, high latency)
-    ↓ YES → LogWarning() → File + DB + Alert
-    ↓ NO
-    
-Is this a handled error? (validation failure, external API error)
-    ↓ YES → LogError() → File + DB + Alert + Investigate
-    ↓ NO
-    
-Is this a system failure? (DB down, out of memory)
-    ↓ YES → LogCritical() → File + DB + Alert + Page On-call Engineer
+Debug   → Geliştirme detayı, diagnostik
+Info    → İş olayı, başarılı işlem
+Warning → Potansiyel sorun, recoverable hata
+Error   → Yönetilen exception, başarısız işlem
+Fatal   → Sistemsel felaket (örn. DB erişilemez)
 ```
 
----
+## 🚦 Hangi Tier Kullanılır?
 
-## 🚦 When to Use Which Log Type?
+| Senaryo | File | Structured | Activity |
+|---------|------|------------|----------|
+| Request/Response ayrıntıları | ✅ | ✅ (Info) | ❌ |
+| Kullanıcı login oldu | ✅ | ✅ | ❌ |
+| Post oluşturuldu | ✅ | ✅ | ✅ |
+| Validation hatası | ✅ (Warn) | ✅ (Warn) | ❌ |
+| Sistem hatası | ✅ (Error/Fatal) | ✅ | ❌ |
+| Audit gerektiren işlem (delete vb.) | ✅ | ✅ | ✅ |
 
-| Scenario | File Log | Structured Log | Activity Log |
-|----------|----------|----------------|--------------|
-| User logged in | ✅ Debug | ✅ Info | ✅ Activity |
-| Post created | ✅ Debug | ✅ Info | ✅ Activity |
-| Validation failed | ✅ Warning | ✅ Warning | ❌ |
-| Exception thrown | ✅ Error | ✅ Error | ❌ |
-| DB connection lost | ✅ Critical | ✅ Critical | ❌ |
-| Request details | ✅ Debug | ❌ | ❌ |
-| Stack trace | ✅ Error | ✅ Error | ❌ |
-| User deleted post | ✅ Info | ✅ Info | ✅ Activity |
-
----
-
-## 💻 Code Examples
-
-### ✅ GOOD Examples
+## 💻 Kod Şablonları
 
 ```csharp
-// 1. Structured logging with parameters
-_logger.LogInformation(
-    "User {UserId} created post {PostId} in category {CategoryId}",
-    userId, postId, categoryId
-);
+// Structured bilgi logu
+Log.Information("User {UserId} created post {PostId}", userId, postId);
 
-// 2. Exception logging with context
-try {
-    await ProcessPayment(orderId, amount);
-} catch (Exception ex) {
-    _logger.LogError(ex, 
-        "Payment processing failed for order {OrderId}, amount {Amount}", 
-        orderId, amount
-    );
+// Exception logu
+try
+{
+    await handler();
+}
+catch (Exception ex)
+{
+    Log.Error(ex, "Unhandled exception for request {RequestPath}", httpContext.Request.Path);
     throw;
 }
 
-// 3. Performance-sensitive logging
-if (_logger.IsEnabled(LogLevel.Debug)) {
-    _logger.LogDebug("Query result: {@Result}", expensiveQuery);
-}
-
-// 4. Activity logging (automatic via MediatR)
-var command = new CreatePostCommand { Title = "New Post" };
-await _mediator.Send(command);
-// → Automatically logged to ActivityLogs table
+// Request logging (Serilog middleware)
+// Program.cs → app.UseSerilogRequestLogging(...)
 ```
 
-### ❌ BAD Examples
+### Kaçınılması Gerekenler
+- String birleştirerek log yazma (`"User " + userId ...`)
+- Şifre/token gibi hassas bilgileri loglama
+- Exception’ı swallow etmek
+- Yanlış seviye kullanmak (ör. buton tıklandığında Critical)
 
-```csharp
-// ❌ String concatenation
-_logger.LogInformation("User " + userId + " created post " + postId);
+## 📈 İzleme Komutları
 
-// ❌ Logging sensitive data
-_logger.LogInformation("User password: {Password}", password);
-
-// ❌ Swallowing exceptions
-try {
-    await DeletePost(postId);
-} catch { } // ❌ No logging!
-
-// ❌ Using wrong log level
-_logger.LogCritical("User clicked button"); // ❌ Not critical!
-```
-
----
-
-## 📈 Monitoring Queries
-
-### File Logs (CLI)
+### File (CLI)
 ```bash
-# Tail live logs
-tail -f logs/blogapp-2025-10-25.txt
-
-# Search for errors
+tail -f logs/blogapp-$(date +%Y-%m-%d).txt
 grep "ERROR" logs/blogapp-*.txt
-
-# Count errors by day
-grep -c "ERROR" logs/blogapp-*.txt
 ```
 
-### Database Logs (SQL)
+### PostgreSQL (`Logs`)
 ```sql
--- Errors in last 24 hours
-SELECT message, raise_date, exception
+SELECT message, raise_date
 FROM "Logs"
-WHERE level = 'Error' 
+WHERE level IN ('Error','Fatal')
   AND raise_date > NOW() - INTERVAL '24 hours';
 
--- Top error messages
-SELECT message, COUNT(*) as count
-FROM "Logs"
-WHERE level = 'Error'
-GROUP BY message
-ORDER BY count DESC
-LIMIT 10;
-
--- Slow requests
-SELECT 
-    properties->>'RequestPath' as path,
-    AVG((properties->>'ElapsedMilliseconds')::numeric) as avg_ms
+SELECT properties->>'RequestPath' AS path,
+       AVG((properties->>'ElapsedMilliseconds')::numeric) AS avg_ms
 FROM "Logs"
 WHERE properties ? 'ElapsedMilliseconds'
 GROUP BY path
 HAVING AVG((properties->>'ElapsedMilliseconds')::numeric) > 1000;
 ```
 
-### Activity Logs (SQL)
+### Activity Logs
 ```sql
--- User's recent activities
-SELECT 
-    a."ActivityType",
-    a."Title",
-    a."Timestamp",
-    u."UserName"
-FROM "ActivityLogs" a
-LEFT JOIN "AppUsers" u ON a."UserId" = u."Id"
-WHERE a."UserId" = 5
-ORDER BY a."Timestamp" DESC;
-
--- Deleted posts audit
-SELECT 
-    a."Title",
-    a."Timestamp",
-    u."UserName"
-FROM "ActivityLogs" a
-LEFT JOIN "AppUsers" u ON a."UserId" = u."Id"
-WHERE a."ActivityType" = 'post_deleted'
-ORDER BY a."Timestamp" DESC;
+SELECT "ActivityType", "EntityType", "Title", "Timestamp"
+FROM "ActivityLogs"
+WHERE "UserId" = :userId
+ORDER BY "Timestamp" DESC;
 ```
 
----
+## ⚙️ Konfigürasyon Özeti
 
-## ⚙️ Configuration
+- `SerilogConfiguration.ConfigureSerilog()`
+  - `MinimumLevel.Debug()` + override (Microsoft/System = Warning)
+  - Console, File, PostgreSQL, Seq sink’leri
+- `appsettings.json`
+  - `Logging.Database.RetentionDays = 90`
+  - `Logging.ActivityLogs.RetentionDays = 0` (sınırsız)
+- `LogCleanupService`
+  - Her gece UTC 03:00 civarında `Logs` tablosunu temizler
 
-### appsettings.json
-```json
-{
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",      // Production
-      "Microsoft.AspNetCore": "Warning"
-    },
-    "File": {
-      "RetentionDays": 31
-    },
-    "Database": {
-      "RetentionDays": 90,
-      "EnableAutoCleanup": true      // Runs daily @ 3 AM
-    },
-    "ActivityLogs": {
-      "RetentionDays": 0               // Unlimited
-    }
-  }
-}
-```
-
-### appsettings.Development.json
-```json
-{
-  "Logging": {
-    "LogLevel": {
-      "Default": "Debug",            // Development
-      "Microsoft": "Information"
-    }
-  }
-}
-```
-
----
-
-## 🔔 Alerting (Seq)
-
-### Seq Queries for Alerts
+## 🔔 Seq Örnek Sorgular
 
 ```
-# Error spike (>10 errors in 5 minutes)
-@Level = 'Error' 
-| group by time(5m) 
-| where count() > 10
+@Level in ['Error','Fatal']
 
-# Slow requests (>5 seconds)
-ElapsedMilliseconds > 5000
+ElapsedMilliseconds > 2000
 
-# 500 errors
-StatusCode >= 500
-
-# Failed logins (potential attack)
-@MessageTemplate = 'Login failed for user {UserId}'
-| group by time(1m)
-| where count() > 5
+properties['RequestPath'] like '%/api/auth%'
 ```
 
----
-
-## 🎯 Summary: Why 3 Tiers?
-
-| Aspect | File Logs | Structured Logs | Activity Logs |
-|--------|-----------|-----------------|---------------|
-| **Purpose** | Debug | Monitor | Audit |
-| **Audience** | Developers | DevOps/SRE | Business/Legal |
-| **Volume** | High | Medium | Low |
-| **Retention** | Short (31d) | Medium (90d) | Unlimited |
-| **Query** | grep/tail | SQL/Seq | SQL |
-| **Cost** | Low | Medium | Low |
-| **Performance** | Fast write | Slower write | Slowest write |
-
-**Result:** Each tier serves a specific purpose. Combining them would:
-- ❌ Hurt performance (too many DB writes)
-- ❌ Waste storage (debug logs in DB)
-- ❌ Violate compliance (mixing audit with debug)
-- ❌ Increase costs (unnecessary DB space)
-
-✅ **Current architecture is OPTIMAL!**
-
----
-
-## 📚 Related Files
-
-- `LOGGING_ARCHITECTURE.md` - Detailed documentation
-- `ACTIVITY_LOGGING_README.md` - Activity logging specifics
-- `SerilogConfiguration.cs` - Log configuration
-- `LogCleanupService.cs` - Automatic cleanup
-- `ActivityLoggingBehavior.cs` - Activity logging behavior
+## 📚 İlgili Dosyalar
+- `docs/LOGGING_ARCHITECTURE.md`
+- `docs/ACTIVITY_LOGGING_README.md`
+- `src/BlogApp.API/Configuration/SerilogConfiguration.cs`
+- `src/BlogApp.Infrastructure/Services/LogCleanupService.cs`
+- `src/BlogApp.Infrastructure/Consumers/ActivityLogConsumer.cs`

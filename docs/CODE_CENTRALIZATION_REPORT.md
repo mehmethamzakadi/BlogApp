@@ -9,15 +9,15 @@ Projede tekrar eden kod parçaları tespit edildi ve merkezileştirildi. Ayrıca
 ### 1. Backend: Domain Events Pattern İyileştirmesi ⭐ (EN ÖNEMLİ)
 
 **Sorun:** 
-- `Post`, `Category` → `BaseEntity.AddDomainEvent()` kullanıyordu ✅
-- `AppUser`, `AppRole` → `IdentityUser/IdentityRole`'den türediği için `AddDomainEvent()` yoktu ❌
-- Bu yüzden 10 handler'da `OutboxMessageHelper` kullanmak zorunda kalındı
+- `Post`, `Category` gibi aggregate'ler `BaseEntity.AddDomainEvent()` kullanıyordu ✅
+- Eski `AppUser`/`AppRole` modelleri Identity tabanlı olduğundan domain event listesine sahip değildi ❌
+- Kullanıcı/Rol handler'ları manuel `OutboxMessageHelper` çağrıları içeriyordu
 - **Mimari tutarsızlık** ve **anti-pattern**
 
 **Çözüm:**
 1. ✅ `IHasDomainEvents` interface oluşturuldu
 2. ✅ `BaseEntity` bu interface'i implement etti
-3. ✅ `AppUser` ve `AppRole` bu interface'i implement etti
+3. ✅ Custom `User` ve `Role` entity'leri `BaseEntity` üzerinden domain event desteği kazandı
 4. ✅ `UnitOfWork` hem `BaseEntity` hem `IHasDomainEvents` entity'lerini destekler hale getirildi
 5. ✅ 10 handler güncellendi - artık tümü `entity.AddDomainEvent()` kullanıyor
 6. ✅ `OutboxMessageHelper` silindi - artık gerekli değil
@@ -27,19 +27,17 @@ Projede tekrar eden kod parçaları tespit edildi ve merkezileştirildi. Ayrıca
 src/BlogApp.Domain/Common/IHasDomainEvents.cs
 ```
 
-**Güncellenen Dosyalar (13 dosya):**
-- `Domain/Common/BaseEntity.cs`
-- `Domain/Entities/AppUser.cs`
-- `Domain/Entities/AppRole.cs`
+- `Domain/Entities/User.cs`
+- `Domain/Entities/Role.cs`
 - `Persistence/Repositories/UnitOfWork.cs`
 - 9x Handler dosyaları:
   - CreateRoleCommandHandler
   - UpdateRoleCommandHandler
   - DeleteRoleCommandHandler
   - BulkDeleteRolesCommandHandler
-  - CreateAppUserCommandHandler
-  - UpdateAppUserCommandHandler
-  - DeleteAppUserCommandHandler
+  - CreateUserCommandHandler
+  - UpdateUserCommandHandler
+  - DeleteUserCommandHandler
   - BulkDeleteUsersCommandHandler
   - AssignRolesToUserCommandHandler
   - AssignPermissionsToRoleCommandHandler
@@ -187,7 +185,7 @@ public IEnumerable<IDomainEvent> GetDomainEvents()
         .Where(e => e.Entity.DomainEvents.Any())
         .SelectMany(e => e.Entity.DomainEvents);
 
-    // IHasDomainEvents implement edenleri al (AppUser, AppRole)
+  // IHasDomainEvents implement edenleri al (User, Role gibi custom modeller)
     var hasDomainEventsEntities = _context.ChangeTracker
         .Entries()
         .Where(e => e.Entity is IHasDomainEvents)

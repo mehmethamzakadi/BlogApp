@@ -1,43 +1,45 @@
-# BlogApp - Kapsamlı Kod Analizi ve İyileştirme Raporu
-## ?? Tarih: 2025 - Detaylı Backend İncelemesi
+# BlogApp - KapsamlÄ± Kod Analizi ve Ä°yileÅŸtirme Raporu
+## ğŸ“… Tarih: 2025 - DetaylÄ± Backend Ä°ncelemesi
+
+> â„¹ï¸ **GÃ¼ncelleme (26 Ekim 2025):** Bu rapor, eski ASP.NET Identity tabanlÄ± `AppUser/AppRole` modeline yapÄ±lan incelemeleri iÃ§eriyordu. Proje artÄ±k `src/BlogApp.Domain/Entities/User.cs` ve `Role.cs` Ã¼zerinden ilerleyen custom kimlik altyapÄ±sÄ±nÄ± kullanÄ±yor. AÅŸaÄŸÄ±daki bulgular tarihsel referans olarak tutulmuÅŸtur; gÃ¼ncel kodla Ã§alÄ±ÅŸÄ±rken ilgili kÄ±sÄ±mlarÄ± yeni entity ve repository adlarÄ±yla eÅŸleÅŸtirmeyi unutmayÄ±n.
 
 ---
 
-## ?? Yönetici Özeti
+## ?? Yï¿½netici ï¿½zeti
 
-BlogApp projesi, **Clean Architecture** prensiplerine uygun, modern .NET 9 teknolojileri kullanılarak geliştirilmiş, orta-büyük ölçekli bir blog uygulamasıdır. Proje genel olarak **iyi kalitede** kod standartlarına sahip ancak bazı kritik iyileştirmeler gereklidir.
+BlogApp projesi, **Clean Architecture** prensiplerine uygun, modern .NET 9 teknolojileri kullanï¿½larak geliï¿½tirilmiï¿½, orta-bï¿½yï¿½k ï¿½lï¿½ekli bir blog uygulamasï¿½dï¿½r. Proje genel olarak **iyi kalitede** kod standartlarï¿½na sahip ancak bazï¿½ kritik iyileï¿½tirmeler gereklidir.
 
 **Genel Skor: 7.5/10** ????
 
-### Güçlü Yönler ?
+### Gï¿½ï¿½lï¿½ Yï¿½nler ?
 - Clean Architecture implementasyonu
 - CQRS pattern (MediatR)
-- Kapsamlı loglama mimarisi (3-tier)
+- Kapsamlï¿½ loglama mimarisi (3-tier)
 - JWT authentication & authorization
 - FluentValidation entegrasyonu
 - Docker & containerization
 - Pipeline behaviors (Logging, Transaction, Activity)
 
-### İyileştirme Gereken Alanlar ??
--  **Unit of Work pattern eksikliği** (KRİTİK) - ? ÇÖZÜLDÜ
-- Hardcoded string'ler (constants kullanılmamış)
-- Bazı command handler'larda validation eksikliği
+### ï¿½yileï¿½tirme Gereken Alanlar ??
+-  **Unit of Work pattern eksikliï¿½i** (KRï¿½Tï¿½K) - ? ï¿½ï¿½Zï¿½LDï¿½
+- Hardcoded string'ler (constants kullanï¿½lmamï¿½ï¿½)
+- Bazï¿½ command handler'larda validation eksikliï¿½i
 - Test coverage yetersiz
-- Bazı nullable reference warnings
+- Bazï¿½ nullable reference warnings
 
 ---
 
-## ?? Detaylı Analiz
+## ?? Detaylï¿½ Analiz
 
-### 1. ?? **KRITIK SORUNLAR** (Yüksek Öncelik)
+### 1. ?? **KRITIK SORUNLAR** (Yï¿½ksek ï¿½ncelik)
 
-#### 1.1 Unit of Work Pattern Eksikliği - ? DÜZELTILDI
+#### 1.1 Unit of Work Pattern Eksikliï¿½i - ? Dï¿½ZELTILDI
 
 **Tespit Edilen Sorun:**
-Her repository metodu kendi `SaveChanges()` çağrısını yapıyordu. Bu yaklaşım:
-- Transaction yönetimini zorlaştırır
-- Performans sorunlarına yol açar
-- Atomicity garantisi vermez (birden fazla işlemde)
+Her repository metodu kendi `SaveChanges()` ï¿½aï¿½rï¿½sï¿½nï¿½ yapï¿½yordu. Bu yaklaï¿½ï¿½m:
+- Transaction yï¿½netimini zorlaï¿½tï¿½rï¿½r
+- Performans sorunlarï¿½na yol aï¿½ar
+- Atomicity garantisi vermez (birden fazla iï¿½lemde)
 
 **Eski Kod:**
 ```csharp
@@ -53,16 +55,16 @@ public async Task<TEntity> AddAsync(TEntity entity)
 
 **Sorunlu Senaryo:**
 ```csharp
-// Birden fazla işlem varsa her biri ayrı transaction olur
+// Birden fazla iï¿½lem varsa her biri ayrï¿½ transaction olur
 await postRepository.AddAsync(post); // Transaction #1
 await imageRepository.AddAsync(image); // Transaction #2
-// Biri başarısız olursa diğeri rollback olmaz!
+// Biri baï¿½arï¿½sï¿½z olursa diï¿½eri rollback olmaz!
 ```
 
-**Çözüm:**
-? `IUnitOfWork` interface'i oluşturuldu
+**ï¿½ï¿½zï¿½m:**
+? `IUnitOfWork` interface'i oluï¿½turuldu
 ? `UnitOfWork` implementasyonu eklendi
-? Repository metodlarından `SaveChanges` çağrıları kaldırıldı
+? Repository metodlarï¿½ndan `SaveChanges` ï¿½aï¿½rï¿½larï¿½ kaldï¿½rï¿½ldï¿½
 ? Command Handler'lara `IUnitOfWork` dependency injection ile eklendi
 ? DI container'a `UnitOfWork` kaydedildi
 
@@ -83,50 +85,50 @@ public sealed class CreatePostCommandHandler(
 }
 ```
 
-**Faydaları:**
-- ? Transaction yönetimi merkezi
-- ? Performans artışı (batch save)
+**Faydalarï¿½:**
+- ? Transaction yï¿½netimi merkezi
+- ? Performans artï¿½ï¿½ï¿½ (batch save)
 - ? Atomicity garantisi
-- ? Testing'de mock'lama kolaylığı
+- ? Testing'de mock'lama kolaylï¿½ï¿½ï¿½
 
-**Güncellenmiş Dosyalar:**
-1. `src/BlogApp.Domain/Common/IUnitOfWork.cs` - ? OLUŞTURULDU
-2. `src/BlogApp.Persistence/Repositories/UnitOfWork.cs` - ? OLUŞTURULDU
-3. `src/BlogApp.Persistence/Repositories/EfRepositoryBase.cs` - ? GÜNCELLENDİ
-4. `src/BlogApp.Persistence/PersistenceServicesRegistration.cs` - ? GÜNCELLENDİ
-5. `src/BlogApp.Application/Features/Posts/Commands/Create/CreatePostCommandHandler.cs` - ? GÜNCELLENDİ
-6. `src/BlogApp.Application/Features/Posts/Commands/Update/UpdatePostCommandHandler.cs` - ? GÜNCELLENDİ
-7. `src/BlogApp.Application/Features/AppUsers/Commands/Delete/DeleteAppUserCommandHandler.cs` - ? GÜNCELLENDİ
+**Gï¿½ncellenmiï¿½ Dosyalar:**
+1. `src/BlogApp.Domain/Common/IUnitOfWork.cs` - ? OLUï¿½TURULDU
+2. `src/BlogApp.Persistence/Repositories/UnitOfWork.cs` - ? OLUï¿½TURULDU
+3. `src/BlogApp.Persistence/Repositories/EfRepositoryBase.cs` - ? Gï¿½NCELLENDï¿½
+4. `src/BlogApp.Persistence/PersistenceServicesRegistration.cs` - ? Gï¿½NCELLENDï¿½
+5. `src/BlogApp.Application/Features/Posts/Commands/Create/CreatePostCommandHandler.cs` - ? Gï¿½NCELLENDï¿½
+6. `src/BlogApp.Application/Features/Posts/Commands/Update/UpdatePostCommandHandler.cs` - ? Gï¿½NCELLENDï¿½
+7. `src/BlogApp.Application/Features/AppUsers/Commands/Delete/DeleteAppUserCommandHandler.cs` - ? Gï¿½NCELLENDï¿½
 
-**Yapılması Gerekenler:**
-?? Tüm diğer Command Handler'lar da güncellenmeli (Category, Comment, Permission vs.)
-?? Integration testler yazılmalı
+**Yapï¿½lmasï¿½ Gerekenler:**
+?? Tï¿½m diï¿½er Command Handler'lar da gï¿½ncellenmeli (Category, Comment, Permission vs.)
+?? Integration testler yazï¿½lmalï¿½
 
 ---
 
-#### 1.2 Magic Strings & Hardcoded Values (Orta Öncelikli)
+#### 1.2 Magic Strings & Hardcoded Values (Orta ï¿½ncelikli)
 
 **Tespit Edilen Sorun:**
-Projede çok sayıda hardcoded string ve magic number bulunuyor.
+Projede ï¿½ok sayï¿½da hardcoded string ve magic number bulunuyor.
 
-**Sorunlu Örnekler:**
+**Sorunlu ï¿½rnekler:**
 ```csharp
 // ? ActivityLoggingBehavior.cs
 var name when name.Contains("CreatePost") => ("post_created", "Post", true),
 
 // ? CreatePostCommandHandler.cs
-return new SuccessResult("Post bilgisi başarıyla eklendi.");
+return new SuccessResult("Post bilgisi baï¿½arï¿½yla eklendi.");
 
 // ? DeleteAppUserCommandHandler.cs
-return new ErrorResult("Kullanıcı bilgisi bulunamadı!");
+return new ErrorResult("Kullanï¿½cï¿½ bilgisi bulunamadï¿½!");
 
 // ? JwtTokenService.cs
 await userManager.SetAuthenticationTokenAsync(user, "BlogApp", "RefreshToken", tokenResponse.RefreshToken);
 ```
 
-**Çözüm Önerileri:**
+**ï¿½ï¿½zï¿½m ï¿½nerileri:**
 
-**1. Constants Sınıfları Oluştur:**
+**1. Constants Sï¿½nï¿½flarï¿½ Oluï¿½tur:**
 ```csharp
 // src/BlogApp.Domain/Constants/ActivityTypes.cs
 public static class ActivityTypes
@@ -153,16 +155,16 @@ public static class Messages
 {
     public static class Success
     {
-        public const string PostCreated = "Post bilgisi başarıyla eklendi.";
-        public const string PostUpdated = "Post bilgisi başarıyla güncellendi.";
-        public const string PostDeleted = "Post bilgisi başarıyla silindi.";
+        public const string PostCreated = "Post bilgisi baï¿½arï¿½yla eklendi.";
+        public const string PostUpdated = "Post bilgisi baï¿½arï¿½yla gï¿½ncellendi.";
+        public const string PostDeleted = "Post bilgisi baï¿½arï¿½yla silindi.";
     }
 
     public static class Error
     {
-        public const string PostNotFound = "Post bilgisi bulunamadı!";
-     public const string UserNotFound = "Kullanıcı bilgisi bulunamadı!";
-        public const string CategoryNotFound = "Kategori bilgisi bulunamadı!";
+        public const string PostNotFound = "Post bilgisi bulunamadï¿½!";
+     public const string UserNotFound = "Kullanï¿½cï¿½ bilgisi bulunamadï¿½!";
+        public const string CategoryNotFound = "Kategori bilgisi bulunamadï¿½!";
     }
 }
 
@@ -174,38 +176,38 @@ public static class AuthenticationProviders
 }
 ```
 
-**2. Resource Dosyaları Kullan (i18n için):**
+**2. Resource Dosyalarï¿½ Kullan (i18n iï¿½in):**
 ```xml
 <!-- Resources/Messages.resx -->
 <data name="PostCreated" xml:space="preserve">
-    <value>Post bilgisi başarıyla eklendi.</value>
+    <value>Post bilgisi baï¿½arï¿½yla eklendi.</value>
 </data>
 <data name="PostNotFound" xml:space="preserve">
-    <value>Post bilgisi bulunamadı!</value>
+    <value>Post bilgisi bulunamadï¿½!</value>
 </data>
 ```
 
-**Faydaları:**
-- ? Kod okunabilirliği artar
-- ? Typo hataları azalır
-- ? Çoklu dil desteği kolaylaşır
-- ? Maintenance kolaylaşır
+**Faydalarï¿½:**
+- ? Kod okunabilirliï¿½i artar
+- ? Typo hatalarï¿½ azalï¿½r
+- ? ï¿½oklu dil desteï¿½i kolaylaï¿½ï¿½r
+- ? Maintenance kolaylaï¿½ï¿½r
 
-**Öneri:** Bu değişiklikler **orta öncelikli** olup, yeni feature'larda uygulanmaya başlanabilir.
+**ï¿½neri:** Bu deï¿½iï¿½iklikler **orta ï¿½ncelikli** olup, yeni feature'larda uygulanmaya baï¿½lanabilir.
 
 ---
 
 #### 1.3 Nullable Reference Type Warnings
 
 **Tespit Edilen Sorun:**
-Bazı sınıflarda nullable reference type uyarıları var.
+Bazï¿½ sï¿½nï¿½flarda nullable reference type uyarï¿½larï¿½ var.
 
-**Örnekler:**
+**ï¿½rnekler:**
 ```csharp
 // Post.cs
 public sealed class Post : BaseEntity
 {
-  public string Title { get; set; } = default!; // ?? default! kullanımı
+  public string Title { get; set; } = default!; // ?? default! kullanï¿½mï¿½
     public string Body { get; set; } = default!;
     // ...
 }
@@ -221,9 +223,9 @@ public sealed class Comment : BaseEntity
 }
 ```
 
-**Çözüm Önerileri:**
+**ï¿½ï¿½zï¿½m ï¿½nerileri:**
 
-1. **Entity Constructor'ları Kullan:**
+1. **Entity Constructor'larï¿½ Kullan:**
 ```csharp
 public sealed class Post : BaseEntity
 {
@@ -265,24 +267,24 @@ public class CreatePostCommandHandler
         ArgumentException.ThrowIfNullOrWhiteSpace(request.Title);
         ArgumentException.ThrowIfNullOrWhiteSpace(request.Body);
 
-        // İşlem devam eder...
+        // ï¿½ï¿½lem devam eder...
     }
 }
 ```
 
-**Faydaları:**
-- ? Null reference exceptions azalır
-- ? Kod güvenliği artar
-- ? Compiler warnings azalır
+**Faydalarï¿½:**
+- ? Null reference exceptions azalï¿½r
+- ? Kod gï¿½venliï¿½i artar
+- ? Compiler warnings azalï¿½r
 
 ---
 
-### 2. ?? **ORTA ÖNCELİKLİ İYİLEŞTİRMELER**
+### 2. ?? **ORTA ï¿½NCELï¿½KLï¿½ ï¿½Yï¿½LEï¿½Tï¿½RMELER**
 
 #### 2.1 Validation Eksiklikleri
 
 **Tespit Edilen Sorun:**
-Bazı command'larda validator bulunmuyor.
+Bazï¿½ command'larda validator bulunmuyor.
 
 **Validator Bulunmayan Command'lar:**
 - `DeletePostCommand`
@@ -292,7 +294,7 @@ Bazı command'larda validator bulunmuyor.
 - `AssignPermissionsToRoleCommand`
 - `UpdatePasswordCommand` (partial validation)
 
-**Çözüm Örneği:**
+**ï¿½ï¿½zï¿½m ï¿½rneï¿½i:**
 ```csharp
 // DeletePostCommandValidator.cs
 public sealed class DeletePostCommandValidator : AbstractValidator<DeletePostCommand>
@@ -300,7 +302,7 @@ public sealed class DeletePostCommandValidator : AbstractValidator<DeletePostCom
     public DeletePostCommandValidator()
     {
         RuleFor(x => x.Id)
-            .GreaterThan(0).WithMessage("Geçersiz post ID'si.");
+            .GreaterThan(0).WithMessage("Geï¿½ersiz post ID'si.");
     }
 }
 
@@ -310,42 +312,42 @@ public sealed class AssignRolesToUserCommandValidator : AbstractValidator<Assign
     public AssignRolesToUserCommandValidator()
     {
       RuleFor(x => x.UserId)
-    .GreaterThan(0).WithMessage("Geçersiz kullanıcı ID'si.");
+    .GreaterThan(0).WithMessage("Geï¿½ersiz kullanï¿½cï¿½ ID'si.");
 
    RuleFor(x => x.Roles)
-            .NotEmpty().WithMessage("En az bir rol seçilmelidir.")
+            .NotEmpty().WithMessage("En az bir rol seï¿½ilmelidir.")
             .Must(roles => roles.All(r => !string.IsNullOrWhiteSpace(r)))
-                .WithMessage("Rol isimleri boş olamaz.");
+                .WithMessage("Rol isimleri boï¿½ olamaz.");
     }
 }
 ```
 
-**Faydaları:**
-- ? Input validation güçlenir
-- ? Business rule violations erken yakalanır
-- ? Hata mesajları tutarlı olur
+**Faydalarï¿½:**
+- ? Input validation gï¿½ï¿½lenir
+- ? Business rule violations erken yakalanï¿½r
+- ? Hata mesajlarï¿½ tutarlï¿½ olur
 
 ---
 
-####2.2 Exception Handling İyileştirmeleri
+####2.2 Exception Handling ï¿½yileï¿½tirmeleri
 
 **Tespit Edilen Sorun:**
-Bazı yerlerde exception handling eksik veya generic.
+Bazï¿½ yerlerde exception handling eksik veya generic.
 
-**Sorunlu Örnekler:**
+**Sorunlu ï¿½rnekler:**
 ```csharp
 // AuthService.cs
 AppUser? user = await userManager.FindByEmailAsync(email) ?? throw new AuthenticationErrorException();
-// ? Kullanıcıya "Email bulunamadı" mı yoksa "Şifre yanlış" mı belli olmuyor
+// ? Kullanï¿½cï¿½ya "Email bulunamadï¿½" mï¿½ yoksa "ï¿½ifre yanlï¿½ï¿½" mï¿½ belli olmuyor
 
 // PostRepository GetAsync
 Post? post = await postRepository.GetAsync(...);
 if (post is null)
-    return new ErrorResult("Post bilgisi bulunamadı.");
-// ? İyi ama daha spesifik olabilir
+    return new ErrorResult("Post bilgisi bulunamadï¿½.");
+// ? ï¿½yi ama daha spesifik olabilir
 ```
 
-**İyileştirme Önerileri:**
+**ï¿½yileï¿½tirme ï¿½nerileri:**
 
 1. **Custom Exception Types:**
 ```csharp
@@ -363,7 +365,7 @@ public class EntityNotFoundException<TEntity> : NotFoundException
   }
 }
 
-// Kullanım:
+// Kullanï¿½m:
 if (post is null)
     throw new EntityNotFoundException<Post>(request.Id);
 ```
@@ -376,29 +378,29 @@ public static class ResultExtensions
      where T : class
 {
         return entity is null
-  ? new ErrorDataResult<T>($"{entityName} bilgisi bulunamadı!")
+  ? new ErrorDataResult<T>($"{entityName} bilgisi bulunamadï¿½!")
             : new SuccessDataResult<T>(entity);
   }
 }
 
-// Kullanım:
+// Kullanï¿½m:
 var post = await postRepository.GetAsync(...);
 return post.ToNotFoundResult("Post");
 ```
 
-**Faydaları:**
-- ? Daha anlamlı hata mesajları
+**Faydalarï¿½:**
+- ? Daha anlamlï¿½ hata mesajlarï¿½
 - ? Exception handling consistency
-- ? Client-side error handling kolaylaşır
+- ? Client-side error handling kolaylaï¿½ï¿½r
 
 ---
 
-#### 2.3 Caching Strategy Eksikliği
+#### 2.3 Caching Strategy Eksikliï¿½i
 
 **Tespit Edilen Sorun:**
-Redis cache servisi kayıtlı ancak sadece distributed cache olarak kullanılıyor. Business logic'te cache kullanımı yok.
+Redis cache servisi kayï¿½tlï¿½ ancak sadece distributed cache olarak kullanï¿½lï¿½yor. Business logic'te cache kullanï¿½mï¿½ yok.
 
-**Öneri:**
+**ï¿½neri:**
 
 1. **Category List Caching:**
 ```csharp
@@ -439,7 +441,7 @@ public sealed class CreateCategoryCommandHandler
 
     public async Task<IResult> Handle(...)
     {
-  // Kategori oluştur
+  // Kategori oluï¿½tur
         await _repository.AddAsync(category);
       await _unitOfWork.SaveChangesAsync();
 
@@ -451,25 +453,25 @@ public sealed class CreateCategoryCommandHandler
 }
 ```
 
-**Faydaları:**
-- ? API response time azalır
-- ? Database load azalır
+**Faydalarï¿½:**
+- ? API response time azalï¿½r
+- ? Database load azalï¿½r
 - ? Scalability artar
 
 ---
 
-### 3. ?? **DÜŞÜK ÖNCELİKLİ İYİLEŞTİRMELER**
+### 3. ?? **Dï¿½ï¿½ï¿½K ï¿½NCELï¿½KLï¿½ ï¿½Yï¿½LEï¿½Tï¿½RMELER**
 
 #### 3.1 Test Coverage
 
 **Durum:** Minimal test coverage var.
 
-**Öneriler:**
+**ï¿½neriler:**
 - Unit testler (Domain logic, Validators)
 - Integration testler (API endpoints, Database)
 - Command/Query handler testleri
 
-**Örnek:**
+**ï¿½rnek:**
 ```csharp
 // CreatePostCommandHandlerTests.cs
 public class CreatePostCommandHandlerTests
@@ -498,9 +500,9 @@ public class CreatePostCommandHandlerTests
 
 #### 3.2 API Versioning
 
-**Durum:** Şu anda versioning yok.
+**Durum:** ï¿½u anda versioning yok.
 
-**Öneri:**
+**ï¿½neri:**
 ```csharp
 // Program.cs
 builder.Services.AddApiVersioning(options =>
@@ -526,7 +528,7 @@ public class PostController : BaseApiController
 
 **Durum:** Health check endpoint'leri yok.
 
-**Öneri:**
+**ï¿½neri:**
 ```csharp
 // Program.cs
 builder.Services.AddHealthChecks()
@@ -543,33 +545,33 @@ app.MapHealthChecks("/health/ready", new HealthCheckOptions
 
 ---
 
-## ?? KOD KALİTESİ METR İKLERİ
+## ?? KOD KALï¿½TESï¿½ METR ï¿½KLERï¿½
 
-### Genel Değerlendirme
+### Genel Deï¿½erlendirme
 
 | Alan | Skor | Yorum |
 |------|------|-------|
-| Architecture | 9/10 | Clean Architecture iyi uygulanmış |
+| Architecture | 9/10 | Clean Architecture iyi uygulanmï¿½ï¿½ |
 | Code Organization | 8/10 | CQRS ve feature folder structure iyi |
-| Dependency Management | 8/10 | DI ve IoC düzgün kullanılmış |
-| Error Handling | 7/10 | Middleware var ama iyileştirilebilir |
+| Dependency Management | 8/10 | DI ve IoC dï¿½zgï¿½n kullanï¿½lmï¿½ï¿½ |
+| Error Handling | 7/10 | Middleware var ama iyileï¿½tirilebilir |
 | Validation | 7/10 | FluentValidation var ama eksik yerler var |
-| Logging | 9/10 | 3-tier logging mükemmel |
-| Security | 8/10 | JWT, CORS, HTTPS düzgün yapılandırılmış |
-| **Transaction Management** | **9/10** | **Unit of Work + TransactionScope hybrid yaklaşımı** ? |
+| Logging | 9/10 | 3-tier logging mï¿½kemmel |
+| Security | 8/10 | JWT, CORS, HTTPS dï¿½zgï¿½n yapï¿½landï¿½rï¿½lmï¿½ï¿½ |
+| **Transaction Management** | **9/10** | **Unit of Work + TransactionScope hybrid yaklaï¿½ï¿½mï¿½** ? |
 | Performance | 8/10 | **Unit of Work eklendi** ? |
-| Testing | 3/10 | ?? Test coverage çok düşük |
-| Documentation | 8/10 | **Transaction strategy dokümante edildi** ? |
+| Testing | 3/10 | ?? Test coverage ï¿½ok dï¿½ï¿½ï¿½k |
+| Documentation | 8/10 | **Transaction strategy dokï¿½mante edildi** ? |
 
 **Toplam Ortalama: 7.6/10** ????
 
 ---
 
-## ?? Transaction Management (Güncellenmiş Bölüm)
+## ?? Transaction Management (Gï¿½ncellenmiï¿½ Bï¿½lï¿½m)
 
 ### Mevcut Durum ?
 
-BlogApp'te **hybrid transaction management strategy** kullanılıyor:
+BlogApp'te **hybrid transaction management strategy** kullanï¿½lï¿½yor:
 
 **1. Unit of Work (Primary)** - %95 durumlarda
 ```csharp
@@ -580,7 +582,7 @@ await unitOfWork.SaveChangesAsync(cancellationToken);
 **2. TransactionScope Behavior (Advanced)** - Complex senaryolarda
 ```csharp
 public record ProcessOrderCommand(...) : IRequest<IResult>, ITransactionalRequest;
-// Distributed transactions için (DB + RabbitMQ + Redis)
+// Distributed transactions iï¿½in (DB + RabbitMQ + Redis)
 ```
 
 **Dosyalar:**
@@ -589,33 +591,33 @@ public record ProcessOrderCommand(...) : IRequest<IResult>, ITransactionalReques
 - ? `TransactionScopeBehavior` (MediatR pipeline)
 - ? `ITransactionalRequest` marker interface
 
-**Öneriler:**
+**ï¿½neriler:**
 1. **Basit CRUD ? UnitOfWork kullan** (performans)
 2. **Complex business logic ? ITransactionalRequest kullan** (atomicity)
-3. **Dokümantasyon:** [TRANSACTION_MANAGEMENT_STRATEGY.md](TRANSACTION_MANAGEMENT_STRATEGY.md)
+3. **Dokï¿½mantasyon:** [TRANSACTION_MANAGEMENT_STRATEGY.md](TRANSACTION_MANAGEMENT_STRATEGY.md)
 
-### Neden İkisi de Gerekli?
+### Neden ï¿½kisi de Gerekli?
 
-| Senaryo | Kullanılacak Strateji |
+| Senaryo | Kullanï¿½lacak Strateji |
 |---------|----------------------|
-| Post oluştur/güncelle/sil | UnitOfWork |
+| Post oluï¿½tur/gï¿½ncelle/sil | UnitOfWork |
 | Kategori CRUD | UnitOfWork |
-| Sipariş işle (DB + Payment + RabbitMQ) | TransactionScope |
-| Kullanıcı kaydı (DB + Email) | UnitOfWork yeterli |
-| Kompleks sipariş süreci (DB + Queue + Cache) | TransactionScope |
+| Sipariï¿½ iï¿½le (DB + Payment + RabbitMQ) | TransactionScope |
+| Kullanï¿½cï¿½ kaydï¿½ (DB + Email) | UnitOfWork yeterli |
+| Kompleks sipariï¿½ sï¿½reci (DB + Queue + Cache) | TransactionScope |
 
-**Sonuç:** TransactionScope silinmemeli, ileride complex senaryolar için kullanılacak! ??
+**Sonuï¿½:** TransactionScope silinmemeli, ileride complex senaryolar iï¿½in kullanï¿½lacak! ??
 
 ---
 
-## ?? YAPIILMASI GEREKEN GÜNCELLEMELER (Checklist)
+## ?? YAPIILMASI GEREKEN Gï¿½NCELLEMELER (Checklist)
 
-### ?? Kritik (Hemen yapılmalı)
+### ?? Kritik (Hemen yapï¿½lmalï¿½)
 - [x] **Unit of Work pattern implementasyonu** - ? TAMAMLANDI
-- [ ] **Tüm Command Handler'larda Unit of Work kullanımı**
-  - [x] CreatePostCommandHandler - ? GÜNCELLENDİ
-  - [x] UpdatePostCommandHandler - ? GÜNCELLENDİ
-  - [x] DeleteAppUserCommandHandler - ? GÜNCELLENDİ
+- [ ] **Tï¿½m Command Handler'larda Unit of Work kullanï¿½mï¿½**
+  - [x] CreatePostCommandHandler - ? Gï¿½NCELLENDï¿½
+  - [x] UpdatePostCommandHandler - ? Gï¿½NCELLENDï¿½
+  - [x] DeleteAppUserCommandHandler - ? Gï¿½NCELLENDï¿½
   - [ ] CreateCategoryCommandHandler
   - [ ] UpdateCategoryCommandHandler
   - [ ] DeleteCategoryCommandHandler
@@ -627,84 +629,84 @@ public record ProcessOrderCommand(...) : IRequest<IResult>, ITransactionalReques
   - [ ] CreateAppUserCommandHandler
   - [ ] UpdateAppUserCommandHandler
 
-### ?? Orta Öncelikli (Kısa vadede yapılmalı)
-- [ ] **Constants sınıfları oluştur** (ActivityTypes, Messages, vb.)
-- [ ] **Eksik Validator'ları ekle** (Delete commands, Assign commands)
+### ?? Orta ï¿½ncelikli (Kï¿½sa vadede yapï¿½lmalï¿½)
+- [ ] **Constants sï¿½nï¿½flarï¿½ oluï¿½tur** (ActivityTypes, Messages, vb.)
+- [ ] **Eksik Validator'larï¿½ ekle** (Delete commands, Assign commands)
 - [ ] **Caching strategy implementasyonu** (Category, Post listing)
 - [ ] **Custom exception types** (EntityNotFoundException<T>)
-- [ ] **Nullable reference type warnings çöz**
+- [ ] **Nullable reference type warnings ï¿½ï¿½z**
 
-### ?? Düşük Öncelikli (Uzun vadede yapılmalı)
-- [ ] **Unit test coverage artır** (hedef: %60+)
+### ?? Dï¿½ï¿½ï¿½k ï¿½ncelikli (Uzun vadede yapï¿½lmalï¿½)
+- [ ] **Unit test coverage artï¿½r** (hedef: %60+)
 - [ ] **Integration testler ekle** (API endpoints)
 - [ ] **API Versioning ekle**
 - [ ] **Health Check endpoints ekle**
-- [ ] **XML Comments ekle** (Swagger dokümantasyonu için)
+- [ ] **XML Comments ekle** (Swagger dokï¿½mantasyonu iï¿½in)
 - [ ] **Performance monitoring** (Application Insights, Prometheus)
 - [ ] **Rate limiting optimize et**
-- [ ] **Bulk operations** (AddRangeAsync için performance tuning)
+- [ ] **Bulk operations** (AddRangeAsync iï¿½in performance tuning)
 
 ---
 
-## ?? SONUÇ VE ÖNERİLER
+## ?? SONUï¿½ VE ï¿½NERï¿½LER
 
-### Genel Değerlendirme
+### Genel Deï¿½erlendirme
 
-BlogApp projesi, **solid fundamentals** üzerine kurulmuş, professional-grade bir kod tabanına sahip. Clean Architecture, CQRS, ve modern .NET best practices başarıyla uygulanmış.
+BlogApp projesi, **solid fundamentals** ï¿½zerine kurulmuï¿½, professional-grade bir kod tabanï¿½na sahip. Clean Architecture, CQRS, ve modern .NET best practices baï¿½arï¿½yla uygulanmï¿½ï¿½.
 
-**Güçlü Yönler:**
-- ? Katmanlı mimari ve separation of concerns mükemmel
+**Gï¿½ï¿½lï¿½ Yï¿½nler:**
+- ? Katmanlï¿½ mimari ve separation of concerns mï¿½kemmel
 - ? Loglama stratejisi production-ready (3-tier logging)
-- ? MediatR pipeline behaviors iyi kullanılmış
-- ? FluentValidation kapsamlı
+- ? MediatR pipeline behaviors iyi kullanï¿½lmï¿½ï¿½
+- ? FluentValidation kapsamlï¿½
 - ? Docker containerization var
-- ? JWT authentication & authorization düzgün yapılandırılmış
+- ? JWT authentication & authorization dï¿½zgï¿½n yapï¿½landï¿½rï¿½lmï¿½ï¿½
 
-**İyileştirme Alanları:**
-- ?? **Unit of Work pattern** kritik bir eksikti - ? ÇÖZÜLDÜ
-- ?? Hardcoded strings -> constants'a taşınmalı
+**ï¿½yileï¿½tirme Alanlarï¿½:**
+- ?? **Unit of Work pattern** kritik bir eksikti - ? ï¿½ï¿½Zï¿½LDï¿½
+- ?? Hardcoded strings -> constants'a taï¿½ï¿½nmalï¿½
 - ?? Test coverage yetersiz
 - ?? Cache strategy eksik
 
-### Öncelik Sırası
+### ï¿½ncelik Sï¿½rasï¿½
 
 **1. Acil (Bu hafta):**
 1. ? Unit of Work implementasyonu - TAMAMLANDI
-2. Kalan Command Handler'larda UnitOfWork kullanımı
-3. Build ve test çalıştır
+2. Kalan Command Handler'larda UnitOfWork kullanï¿½mï¿½
+3. Build ve test ï¿½alï¿½ï¿½tï¿½r
 
-**2. Kısa Vade (Bu ay):**
-1. Constants sınıfları oluştur
-2. Eksik validator'ları ekle
-3. Caching strategy başlat (Category listing)
+**2. Kï¿½sa Vade (Bu ay):**
+1. Constants sï¿½nï¿½flarï¿½ oluï¿½tur
+2. Eksik validator'larï¿½ ekle
+3. Caching strategy baï¿½lat (Category listing)
 
-**3. Orta Vade (Bu çeyrek):**
-1. Test coverage %60'a çıkar
+**3. Orta Vade (Bu ï¿½eyrek):**
+1. Test coverage %60'a ï¿½ï¿½kar
 2. API versioning ekle
 3. Health checks implementasyonu
 
-**4. Uzun Vade (Gelecek çeyrekler):**
+**4. Uzun Vade (Gelecek ï¿½eyrekler):**
 1. Performance monitoring
 2. i18n/Localization
 3. Advanced features (PWA, Offline mode, vb.)
 
-### Sonuç
+### Sonuï¿½
 
-Projeniz **production-ready** durumda ancak yukarıdaki iyileştirmelerle **enterprise-grade** seviyesine çıkabilir. Unit of Work pattern'ın eklenmesi en kritik iyileştirmeydi ve başarıyla tamamlandı ?.
+Projeniz **production-ready** durumda ancak yukarï¿½daki iyileï¿½tirmelerle **enterprise-grade** seviyesine ï¿½ï¿½kabilir. Unit of Work pattern'ï¿½n eklenmesi en kritik iyileï¿½tirmeydi ve baï¿½arï¿½yla tamamlandï¿½ ?.
 
-**Tavsiye:** Yeni feature geliştirirken yukarıdaki best practice'leri uygulayın. Mevcut kodu refactor etmek için aşamalı bir yaklaşım izleyin.
+**Tavsiye:** Yeni feature geliï¿½tirirken yukarï¿½daki best practice'leri uygulayï¿½n. Mevcut kodu refactor etmek iï¿½in aï¿½amalï¿½ bir yaklaï¿½ï¿½m izleyin.
 
 ---
 
-## ?? İlgili Dokümantasyon
+## ?? ï¿½lgili Dokï¿½mantasyon
 
-- [ANALYSIS.md](ANALYSIS.md) - Önceki kod analizi
-- [LOGGING_ARCHITECTURE.md](LOGGING_ARCHITECTURE.md) - Loglama mimarisi detayları
-- [ACTIVITY_LOGGING_README.md](ACTIVITY_LOGGING_README.md) - Activity logging dokümantasyonu
+- [ANALYSIS.md](ANALYSIS.md) - ï¿½nceki kod analizi
+- [LOGGING_ARCHITECTURE.md](LOGGING_ARCHITECTURE.md) - Loglama mimarisi detaylarï¿½
+- [ACTIVITY_LOGGING_README.md](ACTIVITY_LOGGING_README.md) - Activity logging dokï¿½mantasyonu
 - [TRANSACTION_MANAGEMENT_STRATEGY.md](TRANSACTION_MANAGEMENT_STRATEGY.md) - Transaction management stratejisi
 
 ---
 
-**Hazırlayan:** GitHub Copilot  
+**Hazï¿½rlayan:** GitHub Copilot  
 **Tarih:** 2025  
 **Versiyon:** 1.1

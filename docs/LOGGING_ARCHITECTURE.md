@@ -1,403 +1,118 @@
-# BlogApp - Logging Architecture & Best Practices
+# BlogApp Logging Architecture
 
-## 📊 Mevcut Loglama Mimarisi
+Güncel loglama altyapısı; Serilog tabanlı çoklu sink, request izleme ve otomatik temizlik katmanlarıyla üretim kullanımını hedefler. Bu doküman mimariyi, varsayılan ayarları ve operasyon rehberini özetler.
 
-BlogApp'te **3 katmanlı loglama stratejisi** uygulanmıştır. Bu yaklaşım industry best practice'lerine uygundur ve her log türünün farklı amaçlara hizmet etmesini sağlar.
+## 1. Genel Bakış
+- **Çekirdek kurulum:** `src/BlogApp.API/Configuration/SerilogConfiguration.cs`
+- **Aktif middleware:** `app.UseSerilogRequestLogging()` (request/response süresi ve meta veri)
+- **Arka plan servisleri:** `LogCleanupService` (DB log temizliği)
+- **Konfigürasyon kaynakları:** `appsettings*.json` + environment değişkenleri
+- **Minimum seviyeler:**
+  - Default: `Debug`
+  - Microsoft: `Information`
+  - EF Core & System: `Warning`
 
----
+## 2. Sink Ayrımı
 
-## 🏗️ Loglama Katmanları
+| Sink | Dosya/Tablo | Minimum Level | Amaç | Saklama |
+|------|--------------|---------------|------|---------|
+| Console | stdout | Debug | Lokal geliştirme | Anlık |
+| File | `logs/blogapp-<date>.txt` | Debug | Geliştirme & hızlı inceleme | 31 gün (rolling) |
+| PostgreSQL | `Logs` tablosu | Information | Üretim analizi, uyarılar | 90 gün (otomatik silme) |
+| Seq | `Serilog:SeqUrl` | Debug | İzleme & dashboard | Harici depolama |
 
-### 1️⃣ **Application Logs (File-based)**
+**Notlar**
+- File yolu proje köküne göredir; Docker konteynerinde `/app/logs`. Dosya boyutu limiti: 10 MB.
+- PostgreSQL sütunları `message`, `level`, `raise_date`, `exception`, `properties`, `machine_name` vb. olarak oluşturulur (Serilog auto-create).
+- Seq URL ve API anahtarı `appsettings.{Environment}.json` üzerinden konfigüre edilir (development: `http://localhost:5341`).
 
-**Lokasyon:** `C:\Users\PC\Desktop\Calismalarim\BlogApp\src\BlogApp.API\logs\blogapp-YYYY-MM-DD.txt`
+## 3. Request Logging
+`Program.cs` içindeki `UseSerilogRequestLogging` aşağıdaki alanları log property’lerine ekler:
+- `RequestMethod`, `RequestPath`, `StatusCode`, `Elapsed`
+- `RequestHost`, `RequestScheme`, `RemoteIpAddress`, `UserAgent`
+- Authenticated kullanıcı varsa `UserName`
 
-**Yapılandırma:**
+Bu kayıtlar console/file/PostgreSQL/Seq sink’lerine aynı anda akar ve troubleshooting’de kullanılabilir.
+
+## 4. Otomatik Temizlik
+- `LogCleanupService` günlük olarak UTC 03:00 civarında `Logging:Database:RetentionDays` süresini aşmış `Logs` kayıtlarını siler (varsayılan 90 gün).
+- Temizlikten sonra `VACUUM ANALYZE "Logs"` çalıştırılarak tablo optimize edilir.
+- File loglarının saklama süresi Serilog sink tarafından (`retainedFileCountLimit = 31`) yönetilir.
+- Activity logları (audit) **silinmez**; süre `Logging:ActivityLogs.RetentionDays = 0` (süresiz) olarak tutulur. Ayrıntılar için `docs/ACTIVITY_LOGGING_README.md`.
+
+## 5. Structured Logging Örnekleri
+
 ```csharp
-// SerilogConfiguration.cs
-.WriteTo.File(
-    path: "logs/blogapp-.txt",
-    rollingInterval: RollingInterval.Day,
-    retainedFileCountLimit: 31,
-    fileSizeLimitBytes: 10 * 1024 * 1024 // 10 MB
-)
+// Business olayı – bilgi seviyesi (DB + file + Seq)
+Log.Information("User {UserId} created post {PostId}", userId, postId);
+
+// Uyarı – rate limit
+Log.Warning("Rate limit approaching for IP {IP}: {Count}/minute", ip, count);
+
+// Hata – exception ile birlikte
+Log.Error(exception, "Failed to send email to {Email}", email);
+
+// Kritik – altyapı sorunu
+Log.Fatal(exception, "Database connection lost");
 ```
 
-**Özellikler:**
-- ✅ Günlük dosyalar (rolling daily)
-- ✅ 31 gün saklama süresi
-- ✅ Tüm log seviyelerini içerir (Debug, Information, Warning, Error, Critical)
-- ✅ Stack trace'ler ve exception detayları
-- ✅ Request/Response detayları
+- Sensitif değerleri (şifre, token vb.) loglamaktan kaçının.
+- `IsEnabled` kontrolüyle pahalı nesnelerin debug’da serialize edilmesini yönetin.
 
-**Kullanım Senaryoları:**
-- 🔍 Development ortamında debugging
-- 🐛 Production'da hata analizi (stack trace review)
-- ⚡ Hızlı log tarama (grep/tail kullanımı)
-- 📊 Geçici sorun giderme
+## 6. Query Örnekleri (PostgreSQL `Logs`)
 
-**Avantajlar:**
-- Hızlı yazma (disk I/O)
-- Veritabanını şişirmiyor
-- Offline erişilebilir
-- Grep, tail, less gibi CLI araçlarıyla kolay analiz
-
-**Dezavantajlar:**
-- Structured query yapılamaz
-- Aggregate/istatistik çıkarma zor
-- Dosya boyutu sınırı var
-
----
-
-### 2️⃣ **Structured Logs (Database - PostgreSQL)**
-
-**Lokasyon:** PostgreSQL `Logs` tablosu (Serilog tarafından otomatik oluşturulur)
-
-**Yapılandırma:**
-```csharp
-// SerilogConfiguration.cs
-.WriteTo.PostgreSQL(
-    connectionString: connectionString,
-    tableName: "Logs",
-    columnOptions: columnWriters,
-    needAutoCreateTable: true,
-    restrictedToMinimumLevel: LogEventLevel.Information  // ⚠️ Önemli!
-)
-```
-
-**Tablo Yapısı:**
 ```sql
-CREATE TABLE "Logs" (
-    message TEXT,
-    message_template TEXT,
-    level VARCHAR,
-    raise_date TIMESTAMP,
-    exception TEXT,
-    properties JSONB,
-    machine_name VARCHAR
-);
-```
-
-**Özellikler:**
-- ✅ Sadece **Information ve üzeri** loglar (Warning, Error, Critical)
-- ✅ Structured data (JSON properties)
-- ✅ SQL ile sorgulanabilir
-- ✅ 90 gün saklama (otomatik cleanup)
-- ✅ Aggregate ve analytics
-
-**Neden Sadece Information+?**
-```
-Debug logları DB'yi şişirir ve performans düşürür.
-File logs debug için yeterlidir.
-Production'da Information seviyesi yeterli bilgi sağlar.
-```
-
-**Kullanım Senaryoları:**
-- 📈 Production monitoring
-- 🔔 Alert/notification sistemleri
-- 📊 Log aggregation (error patterns)
-- 🎯 Metrics extraction (response times, error rates)
-- 🔎 Complex query'ler ("Son 24 saatte kaç 500 hatası aldık?")
-
-**Örnek Sorgular:**
-```sql
--- Son 24 saatteki hatalar
-SELECT message, level, raise_date, exception
+-- Son 24 saat hata logları
+SELECT raise_date, message, exception
 FROM "Logs"
 WHERE level IN ('Error', 'Fatal')
   AND raise_date > NOW() - INTERVAL '24 hours'
 ORDER BY raise_date DESC;
 
--- En çok hata veren endpoint'ler
-SELECT properties->>'RequestPath' as endpoint, COUNT(*) as error_count
+-- Endpoint bazlı hata sayısı
+SELECT properties->>'RequestPath' AS endpoint, COUNT(*)
 FROM "Logs"
 WHERE level = 'Error'
   AND properties ? 'RequestPath'
-  AND raise_date > NOW() - INTERVAL '7 days'
 GROUP BY endpoint
-ORDER BY error_count DESC
+ORDER BY COUNT(*) DESC
 LIMIT 10;
 
--- Response time ortalaması
-SELECT 
-    DATE(raise_date) as date,
-    AVG((properties->>'ElapsedMilliseconds')::numeric) as avg_response_time
+-- Ortalama yanıt süresi (ms) – son 7 gün
+SELECT DATE(raise_date) AS log_day,
+       AVG((properties->>'ElapsedMilliseconds')::numeric) AS avg_elapsed
 FROM "Logs"
 WHERE properties ? 'ElapsedMilliseconds'
-  AND raise_date > NOW() - INTERVAL '30 days'
-GROUP BY DATE(raise_date)
-ORDER BY date;
+  AND raise_date > NOW() - INTERVAL '7 days'
+GROUP BY log_day
+ORDER BY log_day;
 ```
 
-**Avantajlar:**
-- Structured query desteği
-- Aggregate/analytics yapılabilir
-- Centralized logging
-- Alert/monitoring entegrasyonu kolay
+## 7. Monitoring & Alerting
+- Seq üzerinde saved query ve dashboard’lar oluşturun (`@Level in ['Error','Fatal']`).
+- PostgreSQL üzerinde `raise_date` indeksleri (Serilog otomatik oluşturur) query performansını destekler.
+- Üretimde alarm senaryoları:
+  - Error/Fatal oranı artışı
+  - Uzun süren request’ler (`Elapsed > 1000` ms)
+  - Rate limit uyarıları
 
-**Dezavantajlar:**
-- Disk space kullanımı (cleanup gerekli)
-- Write performance overhead
-- Backup'a dahil
+## 8. İlgili Kod & Konfigürasyon
+- `src/BlogApp.API/Configuration/SerilogConfiguration.cs`
+- `src/BlogApp.API/Program.cs` (middleware & request logging)
+- `src/BlogApp.Infrastructure/Services/LogCleanupService.cs`
+- `src/BlogApp.API/appsettings*.json`
+- Docker: log klasörü volume olarak tanımlanmalıdır (örn. `- ./logs:/app/logs`).
+
+## 9. En İyi Uygulamalar
+- Log seviyelerini doğru seçin (Debug sadece geliştirme; Information+ prod).
+- Exception’ları swallow etmeyin; `Log.Error` sonrasında tekrar fırlatın veya uygun yanıt üretin.
+- Structured property isimlerini tutarlı kullanın (`RequestPath`, `ElapsedMilliseconds`).
+- Kullanıcıya ait PII verilerini maskelayın veya loglamaktan kaçının.
+- Uzun vadede `Logging.Database.RetentionDays` değerini trafik/depoya göre ayarlayın.
 
 ---
 
-### 3️⃣ **Activity Logs (Business Audit Trail)**
-
-**Lokasyon:** PostgreSQL `ActivityLogs` tablosu
-
-**Yapılandırma:**
-```csharp
-// ActivityLoggingBehavior.cs - MediatR Pipeline
-public class ActivityLoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-{
-    // Otomatik loglama
-}
-```
-
-**Tablo Yapısı:**
-```sql
-CREATE TABLE "ActivityLogs" (
-    "Id" INTEGER PRIMARY KEY,
-    "ActivityType" VARCHAR(50),
-    "EntityType" VARCHAR(50),
-    "EntityId" INTEGER,
-    "Title" VARCHAR(500),
-    "Details" VARCHAR(2000),
-    "UserId" INTEGER,
-    "Timestamp" TIMESTAMP,
-    FOREIGN KEY ("UserId") REFERENCES "AppUsers"("Id")
-);
-```
-
-**Özellikler:**
-- ✅ Business-critical events only
-- ✅ User action tracking
-- ✅ **Süresiz saklama** (compliance için)
-- ✅ Otomatik loglama (MediatR pipeline)
-- ✅ Dashboard entegrasyonu
-
-**Loglanan Aktiviteler:**
-- ✏️ Post created/updated/deleted
-- 🏷️ Category created/updated/deleted
-- 💬 Comment created/updated/deleted
-- 👤 User login/logout
-- 🔐 Password change
-- ⚙️ System configuration changes
-
-**Kullanım Senaryoları:**
-- 📋 Compliance/audit trail (GDPR, SOC2, ISO 27001)
-- 🔒 Security investigations ("Kim bu veriyi sildi?")
-- 📊 User behavior analytics
-- ⚖️ Legal/dispute resolution
-- 📈 Business intelligence
-
-**Örnek Sorgular:**
-```sql
--- Belirli bir kullanıcının tüm aktiviteleri
-SELECT a.*, u."UserName"
-FROM "ActivityLogs" a
-JOIN "AppUsers" u ON a."UserId" = u."Id"
-WHERE a."UserId" = 5
-ORDER BY a."Timestamp" DESC;
-
--- Son 10 aktivite
-SELECT 
-    a."ActivityType",
-    a."Title",
-    a."Timestamp",
-    u."UserName"
-FROM "ActivityLogs" a
-LEFT JOIN "AppUsers" u ON a."UserId" = u."Id"
-ORDER BY a."Timestamp" DESC
-LIMIT 10;
-
--- Silinmiş post'ları kim sildi?
-SELECT 
-    a."Title",
-    a."Timestamp",
-    u."UserName",
-    a."Details"
-FROM "ActivityLogs" a
-LEFT JOIN "AppUsers" u ON a."UserId" = u."Id"
-WHERE a."ActivityType" = 'post_deleted'
-ORDER BY a."Timestamp" DESC;
-```
-
-**Avantajlar:**
-- Compliance requirements karşılar
-- Security audit trail
-- Business insights
-- User accountability
-- Dispute resolution
-
-**Dezavantajlar:**
-- Süresiz saklama (disk space)
-- Privacy considerations (GDPR - right to be forgotten)
-
----
-
-## 🎯 3 Katmanlı Strateji Neden Best Practice?
-
-### **Separation of Concerns**
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  Application Logs (File)                                    │
-│  • Development & debugging                                  │
-│  • Technical details                                        │
-│  • Short retention (31 days)                                │
-│  • High volume (Debug+)                                     │
-└─────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│  Structured Logs (Database)                                 │
-│  • Production monitoring                                    │
-│  • Operational insights                                     │
-│  • Medium retention (90 days)                               │
-│  • Medium volume (Info+)                                    │
-└─────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│  Activity Logs (Database)                                   │
-│  • Business audit trail                                     │
-│  • Compliance & legal                                       │
-│  • Unlimited retention                                      │
-│  • Low volume (Critical events only)                        │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### **Performans Optimizasyonu**
-
-```csharp
-// ❌ Kötü: Her log DB'ye yazılırsa
-[RequestResponseLoggingFilter]
-public async Task OnActionExecutionAsync()
-{
-    _logger.LogDebug("Request started..."); // DB'ye yazar ❌
-    // Her request için DB write = Yavaş!
-}
-
-// ✅ İyi: Log level separation
-restrictedToMinimumLevel: LogEventLevel.Information
-// Debug logları sadece file'a yazar ✅
-// DB sadece kritik logları alır ✅
-```
-
-### **Maliyet Optimizasyonu**
-
-| Log Type | Storage | Retention | Cost/Month |
-|----------|---------|-----------|------------|
-| File | Disk | 31 days | ~ $0.02/GB |
-| DB (Info+) | PostgreSQL | 90 days | ~ $0.10/GB |
-| Activity | PostgreSQL | Unlimited | ~ $0.10/GB (but low volume) |
-
-**Total:** ~$5-10/month (medium traffic blog app)
-
----
-
-## 🔧 Otomatik Log Cleanup
-
-**Service:** `LogCleanupService.cs`
-
-```csharp
-// Her gün saat 03:00'da çalışır
-// 90 günden eski "Logs" kayıtlarını siler
-// ActivityLogs'a dokunmaz (süresiz)
-
-protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-{
-    while (!stoppingToken.IsCancellationRequested)
-    {
-        await CleanupOldLogsAsync(stoppingToken);
-        
-        // Bir sonraki gün 03:00'a kadar bekle
-        var next3AM = DateTime.UtcNow.Date.AddDays(1).AddHours(3);
-        await Task.Delay(next3AM - DateTime.UtcNow, stoppingToken);
-    }
-}
-```
-
-**Konfigürasyon:**
-```json
-// appsettings.json
-{
-  "Logging": {
-    "Database": {
-      "RetentionDays": 90,
-      "EnableAutoCleanup": true
-    },
-    "ActivityLogs": {
-      "RetentionDays": 0  // 0 = süresiz
-    }
-  }
-}
-```
-
----
-
-## 📊 Log Levels Stratejisi
-
-### **Log Level Kullanımı**
-
-```csharp
-// 🔍 Debug - Development only, verbose details
-_logger.LogDebug("User {UserId} attempting to login with email {Email}", userId, email);
-
-// ℹ️ Information - Important business events
-_logger.LogInformation("User {UserId} logged in successfully", userId);
-
-// ⚠️ Warning - Potential issues, recoverable errors
-_logger.LogWarning("Rate limit approaching for IP {IP}: {RequestCount}/60", ip, count);
-
-// ❌ Error - Handled exceptions, business logic errors
-_logger.LogError(ex, "Failed to send email to {Email}", email);
-
-// 🔥 Critical - System failures, data loss
-_logger.LogCritical(ex, "Database connection lost. Application shutting down.");
-```
-
-### **Environment-based Configuration**
-
-**Development:**
-```json
-{
-  "Serilog": {
-    "MinimumLevel": {
-      "Default": "Debug",
-      "Override": {
-        "Microsoft": "Information",
-        "System": "Information"
-      }
-    }
-  }
-}
-```
-
-**Production:**
-```json
-{
-  "Serilog": {
-    "MinimumLevel": {
-      "Default": "Information",
-      "Override": {
-        "Microsoft": "Warning",
-        "System": "Warning",
-        "Microsoft.EntityFrameworkCore": "Warning"
-      }
-    }
-  }
-}
-```
-
----
-
-## 🎯 Best Practices Summary
-
-### ✅ **DO (Yapılması Gerekenler)**
-
-1. **Log levels'ı doğru kullan**
-   ```csharp
+Ek kaynaklar: `LOGGING_QUICK_REFERENCE.md`, `ACTIVITY_LOGGING_README.md`, `ERROR_HANDLING_GUIDE.md`.
    _logger.LogInformation("Order {OrderId} created", orderId);  // ✅
    _logger.LogDebug("Processing order details...");             // ✅
    ```

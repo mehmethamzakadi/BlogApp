@@ -22,12 +22,11 @@ BlogApp; ASP.NET Core tabanlı modern bir blog uygulaması olup, Clean Architect
 cd src/BlogApp.API
 dotnet run
 ```
-API varsayılan olarak `https://localhost:6060` üzerinde çalışır.
+Varsayılan launch profili `https://localhost:7285` ve `http://localhost:5285` adreslerini dinler.
 
-> **Not:** Development ortamında API şu URL'lerde erişilebilir:
-> - HTTPS: `https://localhost:7285`
-> - HTTP: `http://localhost:5285`
-> - Docker ortamında: `http://localhost:6060`
+> **Not:** React istemcisi `.env.local` dosyasında `VITE_API_URL=http://localhost:6060/api` kullandığı için API'yi 6060 portunda çalıştırmanız gerekiyorsa:
+> - `dotnet run --urls http://localhost:6060` komutunu verin **veya**
+> - Docker Compose ile `blogapp.api` servisini başlatın (otomatik olarak `http://localhost:6060` portunu map eder).
 
 ### React İstemci
 `clients/blogapp-client` klasöründen React uygulamasını başlatın:
@@ -52,7 +51,7 @@ docker compose -f docker-compose.yml -f docker-compose.local.yml up --build
 **Servisler:**
 - **API:** `http://localhost:6060`
 - **React Client:** `http://localhost:5173`
-- **PostgreSQL:** `localhost:5432` (User: postgres, Password: postgres, DB: blogappdb)
+- **PostgreSQL:** `localhost:5435` (User: postgres, Password: postgres, DB: BlogAppDb)
 - **RabbitMQ Management:** `http://localhost:15672` (User: blogapp, Password: supersecret)
 - **Redis:** `localhost:6379`
 - **Seq (Log Viewer):** `http://localhost:5341`
@@ -172,7 +171,7 @@ BlogApp **3-katmanlı loglama mimarisi** kullanır:
 
 ---
 
-## � Yetkilendirme & Güvenlik
+## 🔐 Yetkilendirme & Güvenlik
 
 BlogApp **permission-based authorization** sistemi kullanır:
 
@@ -209,7 +208,7 @@ if (hasPermission(Permissions.PostsDelete)) {
 
 ---
 
-## �📚 Ek Kaynaklar
+## 📚 Ek Kaynaklar
 
 - [ANALYSIS.md](ANALYSIS.md) - Kod tabanı analizi ve iyileştirme önerileri
 - [Solution Items/Migrations.txt](Solution%20Items/Migrations.txt) - Veritabanı migration notları

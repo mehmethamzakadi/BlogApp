@@ -16,22 +16,33 @@
 - ❌ `PaginatedListResponse` property'leri hatalı (TotalCount, Page, PageSize)
 
 **Çözüm:**
-- ✅ `IDynamicQueryBuilder` dependency kaldırıldı
-- ✅ `DataGridRequest.PaginatedRequest.PageIndex/PageSize` kullanıldı
-- ✅ `Paginate<T>` modeli kullanılarak `PaginatedListResponse` oluşturuldu
-- ✅ `IMapper` ile mapping yapıldı
-- ✅ Manual pagination ve filtering implementasyonu
+- ✅ `IDynamicQueryBuilder` bağımlılığı kaldırıldı, istekten gelen `DynamicQuery` doğrudan kullanıldı
+- ✅ `DataGridRequest.PaginatedRequest.PageIndex/PageSize` alanlarına göre paging sağlandı
+- ✅ Varsayılan sıralama `ActivityLog.Timestamp` alanına göre desc olacak şekilde ayarlandı
+- ✅ `_activityLogRepository.GetPaginatedListByDynamicAsync` ile pagination & filtreleme repository katmanına taşındı
+- ✅ `IMapper` ile `Paginate<ActivityLog>` nesnesi `PaginatedListResponse<GetPaginatedActivityLogsResponse>` tipine dönüştürüldü
 
 **Değişiklikler:**
 ```csharp
-// ÖNCE
-var dynamicQuery = _dynamicQueryBuilder.BuildQuery(query, request.Request);
-.Skip((request.Request.PageRequest.Page - 1) * request.Request.PageRequest.PageSize)
-
 // SONRA
-var items = await query
-    .Skip(request.Request.PaginatedRequest.PageIndex * request.Request.PaginatedRequest.PageSize)
-    .Take(request.Request.PaginatedRequest.PageSize)
+DynamicQuery dynamicQuery = request.Request.DynamicQuery ?? new DynamicQuery();
+
+List<Sort> sortDescriptors = dynamicQuery.Sort?.ToList() ?? new List<Sort>();
+if (sortDescriptors.Count == 0)
+{
+    sortDescriptors.Add(new Sort(nameof(ActivityLog.Timestamp), "desc"));
+}
+
+dynamicQuery.Sort = sortDescriptors;
+
+Paginate<ActivityLog> activityLogs = await _activityLogRepository.GetPaginatedListByDynamicAsync(
+    dynamic: dynamicQuery,
+    index: request.Request.PaginatedRequest.PageIndex,
+    size: request.Request.PaginatedRequest.PageSize,
+    include: a => a.Include(a => a.User!),
+    cancellationToken: cancellationToken);
+
+return _mapper.Map<PaginatedListResponse<GetPaginatedActivityLogsResponse>>(activityLogs);
 ```
 
 ---
@@ -43,18 +54,43 @@ var items = await query
 - ❌ `IAppUserRepository` interface'i bulunamıyor
 
 **Çözüm:**
-- ✅ `IUserService` ve `UserManager<AppUser>` kullanıldı
-- ✅ `FindByIdAsync` ile user bulma
+- ✅ `IUserRepository` ve `IUnitOfWork` kullanılarak repository pattern'e dönüldü
+- ✅ Silme öncesi `UserDeletedEvent` domain event'i tetiklendi ve aktiviteler outbox ile loglandı
+- ✅ Başarılı silmelerden sonra tek seferde `SaveChangesAsync` çağrıldı
 
 **Değişiklikler:**
 ```csharp
-// ÖNCE
-private readonly IAppUserRepository _userRepository;
-var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
-
 // SONRA
-private readonly IUserService _userService;
-var user = await _userManager.FindByIdAsync(userId.ToString());
+var user = await _userRepository.FindByIdAsync(userId);
+
+if (user == null)
+{
+    response.Errors.Add($"Kullanıcı bulunamadı: ID {userId}");
+    response.FailedCount++;
+    continue;
+}
+
+var currentUserId = _currentUserService.GetCurrentUserId();
+user.AddDomainEvent(new UserDeletedEvent(userId, user.UserName ?? string.Empty, user.Email ?? string.Empty, currentUserId));
+
+var result = await _userRepository.DeleteUserAsync(user);
+
+if (result.Success)
+{
+    response.DeletedCount++;
+}
+else
+{
+    response.Errors.Add($"Kullanıcı silinemedi (ID {userId}): {result.Message}");
+    response.FailedCount++;
+}
+
+...
+
+if (response.DeletedCount > 0)
+{
+    await _unitOfWork.SaveChangesAsync(cancellationToken);
+}
 ```
 
 ---
@@ -66,18 +102,50 @@ var user = await _userManager.FindByIdAsync(userId.ToString());
 - ❌ `IAppRoleRepository` interface'i bulunamıyor
 
 **Çözüm:**
-- ✅ `IRoleService` ve `RoleManager<AppRole>` kullanıldı
-- ✅ `FindByIdAsync` ile role bulma
+- ✅ `IRoleRepository` kullanılarak rol yönetimi Persistence katmanına taşındı
+- ✅ Admin rolü hard delete'e karşı korunarak hatalı silme önlendi
+- ✅ `RoleDeletedEvent` ile domain eventi tetiklendi ve `IUnitOfWork` üzerinden transaction tamamlandı
 
 **Değişiklikler:**
 ```csharp
-// ÖNCE
-private readonly IAppRoleRepository _roleRepository;
-var role = await _roleRepository.GetByIdAsync(roleId, cancellationToken);
-
 // SONRA
-private readonly IRoleService _roleService;
-var role = await _roleManager.FindByIdAsync(roleId.ToString());
+var role = _roleRepository.GetRoleById(roleId);
+
+if (role == null)
+{
+    response.Errors.Add($"Rol bulunamadı: ID {roleId}");
+    response.FailedCount++;
+    continue;
+}
+
+if (role.NormalizedName == "ADMIN")
+{
+    response.Errors.Add("Admin rolü silinemez");
+    response.FailedCount++;
+    continue;
+}
+
+var currentUserId = _currentUserService.GetCurrentUserId();
+role.AddDomainEvent(new RoleDeletedEvent(roleId, role.Name!, currentUserId));
+
+var result = await _roleRepository.DeleteRole(role);
+
+if (result.Success)
+{
+    response.DeletedCount++;
+}
+else
+{
+    response.Errors.Add($"Rol silinemedi (ID {roleId}): {result.Message}");
+    response.FailedCount++;
+}
+
+...
+
+if (response.DeletedCount > 0)
+{
+    await _unitOfWork.SaveChangesAsync(cancellationToken);
+}
 ```
 
 ---
@@ -92,23 +160,22 @@ var role = await _roleManager.FindByIdAsync(roleId.ToString());
 - ❌ `AppUser.CreatedDate` property'si yok
 
 **Çözüm:**
-- ✅ `IUserService` kullanıldı
-- ✅ CSV header ve data mevcut property'lere göre güncellendi
-- ✅ `Id, UserName, Email, PhoneNumber, EmailConfirmed` alanları export ediliyor
+- ✅ `IUserRepository.GetUsersAsync` çağrısı ile pagination destekli veri erişimi sağlandı
+- ✅ CSV başlıkları mevcut entity alanlarına (`UserName`, `Email`, `PhoneNumber`, `EmailConfirmed`) göre güncellendi
+- ✅ `Encoding.UTF8` kullanılarak export dosyası üretildi
 
 **Değişiklikler:**
 ```csharp
-// ÖNCE
-private readonly IAppUserRepository _userRepository;
-var users = await _userRepository.Query().OrderBy(u => u.Id).ToListAsync();
-sb.AppendLine("Id,UserName,Email,FirstName,LastName,CreatedDate");
-sb.AppendLine($"{user.Id},{user.UserName},{user.Email},{user.FirstName},{user.LastName},{user.CreatedDate}");
-
 // SONRA
-private readonly IUserService _userService;
-var usersResult = await _userService.GetUsers(0, int.MaxValue, cancellationToken);
+var usersResult = await _userRepository.GetUsersAsync(0, int.MaxValue, cancellationToken);
+var users = usersResult.Items.OrderBy(u => u.Id).ToList();
+
 sb.AppendLine("Id,UserName,Email,PhoneNumber,EmailConfirmed");
-sb.AppendLine($"{user.Id},{user.UserName},{user.Email},{user.PhoneNumber},{user.EmailConfirmed}");
+
+foreach (var user in users)
+{
+    sb.AppendLine($"{user.Id},{EscapeCsv(user.UserName!)},{EscapeCsv(user.Email!)},{EscapeCsv(user.PhoneNumber)},{user.EmailConfirmed}");
+}
 ```
 
 ---
@@ -145,10 +212,10 @@ dist/assets/index-BNEZMSAM.js   1,100.46 kB │ gzip: 333.77 kB
 
 ## 🔍 Tespit Edilen Ana Sorunlar
 
-### 1. Repository Pattern Kullanımı
-**Sorun:** Yeni eklenen feature'larda `IAppUserRepository` ve `IAppRoleRepository` interface'leri kullanılmaya çalışılmış ancak bu interface'ler projede tanımlı değil.
+### 1. Repository Pattern Tutarlılığı
+**Sorun:** Yeni eklenen feature'larda `IAppUserRepository` ve `IAppRoleRepository` gibi olmayan interface'lere bağımlılık vardı.
 
-**Çözüm:** Mevcut `IUserService` ve `IRoleService` interface'leri kullanıldı.
+**Çözüm:** Persistence katmanındaki mevcut `IUserRepository` ve `IRoleRepository` implementasyonları kullanıldı, transaction yönetimi `IUnitOfWork` ile merkezileştirildi.
 
 ### 2. Domain Model Farklılıkları
 **Sorun:** `AppUser` entity'sinde `FirstName`, `LastName`, `CreatedDate` gibi property'ler yok (IdentityUser'dan türüyor).
@@ -156,9 +223,9 @@ dist/assets/index-BNEZMSAM.js   1,100.46 kB │ gzip: 333.77 kB
 **Çözüm:** Mevcut property'ler (`UserName`, `Email`, `PhoneNumber`, vb.) kullanıldı.
 
 ### 3. Dynamic Query Builder Eksikliği
-**Sorun:** Activity logs için dynamic query builder kullanılmaya çalışılmış ancak bu implementasyon mevcut değil.
+**Sorun:** Activity logs için `IDynamicQueryBuilder` referansı vardı ancak uygulamada böyle bir servis yoktu.
 
-**Çözüm:** Manual pagination ve filtering implementasyonu yapıldı.
+**Çözüm:** `DynamicQuery` nesnesi isteğin parçası olarak alınarak `_activityLogRepository.GetPaginatedListByDynamicAsync` çağrısına aktarıldı, varsayılan sıralama handler içerisinde tanımlandı.
 
 ### 4. Pagination Model Tutarsızlığı
 **Sorun:** `DataGridRequest.PageRequest` yerine `DataGridRequest.PaginatedRequest` kullanılmalı.

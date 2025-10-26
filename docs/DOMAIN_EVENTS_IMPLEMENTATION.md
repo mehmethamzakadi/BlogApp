@@ -1,281 +1,144 @@
 # Domain Events Pattern - Implementation Guide
 
-## 📊 Özet
+## 1. Amaç
+Domain event'ler, aggregate'lerin önemli değişimlerini ifade eder ve BlogApp'te Outbox Pattern ile birlikte kullanılarak güvenilir audit + entegrasyon akışını besler. Command handler'lar sadece iş mantığını yürütür; event'ler `UnitOfWork.SaveChangesAsync` sırasında Outbox tablosuna kaydedilir ve background servisler tarafından işlenir.
 
-ActivityLogs sistemindeki karmaşık yapıyı çözmek için **Domain Events Pattern** implementasyonu yapıldı. Bu değişiklik sistemi çok daha temiz, test edilebilir ve genişletilebilir hale getirdi.
+## 2. Temel Bileşenler
 
-## 🎯 Yapılan Değişiklikler
+### 2.1 BaseEntity & DomainEvent
+`BaseEntity`, tüm entity'lerde domain event listesini tutar:
 
-### 1. TransactionScopeBehavior Kaldırıldı
-
-**Neden?**
-- Hiçbir command `ITransactionalRequest` implement etmiyordu
-- Kullanılmayan kod repository'de gereksiz yer kaplıyordu
-- UnitOfWork pattern zaten transaction yönetimini yapıyordu
-
-**Silinen Dosyalar:**
-- ❌ `TransactionScopeBehavior<,>` (ApplicationServicesRegistration'dan kaldırıldı)
-- ℹ️ Dosya silinmedi ama pipeline'dan çıkarıldı, gerekirse tekrar eklenebilir
-
-### 2. ActivityLoggingBehavior'dan Domain Events'e Geçiş
-
-**Önceki Karmaşık Yapı:**
 ```csharp
-// ❌ Karmaşık: Reflection ile command name kontrolü
-if (requestName.Contains("CreatePost")) => ("post_created", "Post", true)
+public abstract class BaseEntity : IEntityTimestamps, IHasDomainEvents
+{
+    private readonly List<IDomainEvent> _domainEvents = new();
+    [NotMapped] public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
-// ❌ Ayrı scope kullanımı gerekiyordu
-using var scope = _serviceProvider.CreateScope();
-await activityLogRepository.AddAsync(activityLog);
-await unitOfWork.SaveChangesAsync();
+    public void AddDomainEvent(IDomainEvent domainEvent) => _domainEvents.Add(domainEvent);
+    public void ClearDomainEvents() => _domainEvents.Clear();
+}
 ```
 
-**Yeni Temiz Yapı:**
-```csharp
-// ✅ Basit: Handler'da domain event raise ediyoruz
-post.AddDomainEvent(new PostCreatedEvent(post.Id, post.Title, ...));
+`DomainEvent` soyut sınıfı ve `IDomainEvent : INotification` marker'ı, MediatR uyumluluğunu korur (ileride tekrar publish etmek istersek hazır).
 
-// ✅ Event handler ActivityLog'u kaydediyor
-public class PostCreatedEventHandler : INotificationHandler<PostCreatedEvent>
+### 2.2 StoreInOutbox Attribute
+`[StoreInOutbox]` sadece outbox'a gitmesi gereken event'leri işaretler. Örnek:
+
+```csharp
+[StoreInOutbox]
+public class PostCreatedEvent : DomainEvent
 {
-    public async Task Handle(PostCreatedEvent notification, ...)
+    public Guid PostId { get; }
+    public string Title { get; }
+    public Guid CategoryId { get; }
+    public Guid CreatedById { get; }
+    // ctor...
+}
+```
+
+### 2.3 UnitOfWork Entegrasyonu
+`UnitOfWork.SaveChangesAsync` tracked entity'lerden event'leri toplar, attribute denetimine tabi tutar ve OutboxMessages tablosuna JSON payload olarak yazar:
+
+```csharp
+var domainEvents = GetDomainEvents().ToList();
+foreach (var domainEvent in domainEvents)
+{
+    if (ShouldStoreInOutbox(domainEvent))
     {
-        var activityLog = new ActivityLog { ... };
-        await _activityLogRepository.AddAsync(activityLog);
-        await _unitOfWork.SaveChangesAsync();
+        var outboxMessage = new OutboxMessage
+        {
+            EventType = domainEvent.GetType().Name,
+            Payload = JsonSerializer.Serialize(domainEvent, domainEvent.GetType()),
+            CreatedAt = DateTime.UtcNow
+        };
+        await _context.OutboxMessages.AddAsync(outboxMessage, cancellationToken);
     }
 }
+await _context.SaveChangesAsync(cancellationToken);
+ClearDomainEvents();
 ```
 
-## 🏗️ Domain Events Mimarisi
-
-### Yeni Eklenen Sınıflar
-
-#### Domain Layer (BlogApp.Domain)
+### 2.4 Outbox İşleme Zinciri
 
 ```
-Domain/
-├── Common/
-│   ├── BaseEntity.cs                 # ✅ Domain events desteği eklendi
-│   ├── IDomainEvent.cs               # ✅ Yeni: Event marker interface
-│   ├── DomainEvent.cs                # ✅ Yeni: Base event class
-│   └── IUnitOfWork.cs                # ✅ GetDomainEvents() eklendi
-└── Events/
-    ├── PostCreatedEvent.cs           # ✅ Yeni
-    ├── PostUpdatedEvent.cs           # ✅ Yeni
-    ├── PostDeletedEvent.cs           # ✅ Yeni
-    ├── CategoryCreatedEvent.cs       # ✅ Yeni
-    ├── CategoryUpdatedEvent.cs       # ✅ Yeni
-    └── CategoryDeletedEvent.cs       # ✅ Yeni
+Command Handler
+    → entity.AddDomainEvent(new ...Event(...))
+        → UnitOfWork.SaveChangesAsync (event → outbox payload)
+            → OutboxProcessorService (5sn interval, batch=50)
+                → IIntegrationEventConverterStrategy (event tipi → ActivityLogCreatedIntegrationEvent)
+                    → MassTransit Publish → RabbitMQ (activity-log-queue)
+                        → ActivityLogConsumer → ActivityLogs tablosu
 ```
 
-#### Application Layer (BlogApp.Application)
+Konvertörler `src/BlogApp.Infrastructure/Services/BackgroundServices/Outbox/Converters/ActivityLogIntegrationEventConverters.cs` dosyasında; DI kaydı `InfrastructureServicesRegistration` içinde.
 
-```
-Application/
-├── Behaviors/
-│   ├── DomainEventDispatcherBehavior.cs  # ✅ Yeni: Events dispatcher
-│   └── ActivityLoggingBehavior.cs        # ❌ Kaldırıldı (artık gerekmiyor)
-└── Features/
-    ├── Posts/EventHandlers/
-    │   ├── PostCreatedEventHandler.cs    # ✅ Yeni
-    │   ├── PostUpdatedEventHandler.cs    # ✅ Yeni
-    │   └── PostDeletedEventHandler.cs    # ✅ Yeni
-    └── Categories/EventHandlers/
-        ├── CategoryCreatedEventHandler.cs # ✅ Yeni
-        ├── CategoryUpdatedEventHandler.cs # ✅ Yeni
-        └── CategoryDeletedEventHandler.cs # ✅ Yeni
-```
+## 3. Domain Event Envanteri
 
-#### Persistence Layer (BlogApp.Persistence)
+| Aggregate | Event | Açıklama |
+|-----------|-------|----------|
+| Category | `CategoryCreatedEvent`, `CategoryUpdatedEvent`, `CategoryDeletedEvent` | Kategori yaşam döngüsü |
+| Post | `PostCreatedEvent`, `PostUpdatedEvent`, `PostDeletedEvent` | Blog yazısı operasyonları |
+| User | `UserCreatedEvent`, `UserUpdatedEvent`, `UserDeletedEvent`, `UserRolesAssignedEvent` | Kullanıcı yönetimi |
+| Role | `RoleCreatedEvent`, `RoleUpdatedEvent`, `RoleDeletedEvent`, `PermissionsAssignedToRoleEvent` | Rol ve izin işlemleri |
 
-```
-Persistence/
-└── Repositories/
-    └── UnitOfWork.cs                     # ✅ GetDomainEvents() implementasyonu
-```
+Tüm event dosyaları `src/BlogApp.Domain/Events/*` altında tutulur ve tamamı `[StoreInOutbox]` ile işaretlidir.
 
-### Execution Flow
+## 4. Komutlarda Kullanım Deseni
 
-```
-1. User Request
-   ↓
-2. Controller → MediatR Command
-   ↓
-3. LoggingBehavior (önce log)
-   ↓
-4. Command Handler
-   - Business logic
-   - post.AddDomainEvent(new PostCreatedEvent(...)) ← Domain event raise
-   - await unitOfWork.SaveChangesAsync() ← DB'ye kaydet
-   ↓
-5. DomainEventDispatcherBehavior
-   - unitOfWork.GetDomainEvents() ← Event'leri topla
-   - foreach event → mediator.Publish(event) ← Event handler'ları tetikle
-   ↓
-6. Event Handlers (parallel çalışabilir)
-   - PostCreatedEventHandler → ActivityLog kaydet
-   - Gelecekte: EmailNotificationHandler
-   - Gelecekte: CacheInvalidationHandler
-   ↓
-7. Response to User
-```
-
-## ✅ Avantajlar
-
-### 1. **Separation of Concerns (Sorumlulukların Ayrılması)**
-- ✅ Handler sadece business logic'e odaklanır
-- ✅ Activity logging ayrı bir event handler'da
-- ✅ Gelecekte email, notification, cache invalidation eklemek çok kolay
-
-### 2. **Testability (Test Edilebilirlik)**
 ```csharp
-// ❌ Önceden: ActivityLoggingBehavior'u test etmek zordu
-// Reflection, string matching, scope yönetimi...
-
-// ✅ Şimdi: Event handler'ları ayrı test edilebilir
-[Fact]
-public async Task PostCreatedEvent_Should_Log_Activity()
+public async Task<Guid> Handle(CreatePostCommand request, CancellationToken ct)
 {
-    var handler = new PostCreatedEventHandler(...);
-    await handler.Handle(new PostCreatedEvent(...));
-    // Assert activity log created
+    var post = new Post(request.Title, request.Content, request.CategoryId, currentUserId);
+    post.AddDomainEvent(new PostCreatedEvent(post.Id, post.Title, post.CategoryId, currentUserId));
+
+    await _postRepository.AddAsync(post, ct);
+    await _unitOfWork.SaveChangesAsync(ct);
+
+    return post.Id;
 }
 ```
 
-### 3. **Extensibility (Genişletilebilirlik)**
-```csharp
-// ✅ Yeni bir özellik eklemek çok kolay:
+Event raise etmek için ekstra DI kaydına gerek yoktur; Outbox işleyicisi event'i otomatik yakalar.
 
-// Email notification ekle
-public class PostCreatedEmailHandler : INotificationHandler<PostCreatedEvent>
-{
-    public async Task Handle(PostCreatedEvent notification, ...)
-    {
-        await _emailService.SendAsync("New post created: " + notification.Title);
-    }
-}
+## 5. Avantajlar
 
-// Cache invalidation ekle
-public class PostCreatedCacheInvalidationHandler : INotificationHandler<PostCreatedEvent>
-{
-    public async Task Handle(PostCreatedEvent notification, ...)
-    {
-        await _cache.Remove($"post-{notification.PostId}");
-    }
-}
+- **Separation of Concerns:** Handler'lar sadece aggregate mutasyonundan sorumlu, yan etkiler (activity log, bildirim) outbox tüketicileriyle yönetiliyor.
+- **Testability:** Komut/handler testleri domain event raise edildiğini doğrular; converter/consumer testleri yan etkileri kapsar.
+- **Eventual Consistency:** Activity log gibi operasyonlar ana transaction'ı bloklamaz, retry + dead-letter desteğiyle güvenilirlik artar.
+- **Future-Proof:** `IDomainEvent` hâlâ `INotification`; gerekirse tekrar MediatR publish pipeline'ı eklenebilir.
 
-// MediatR otomatik olarak TÜM handler'ları çalıştırır!
-```
+## 6. Yeni Domain Event Eklemek İçin Adımlar
 
-### 4. **Single Responsibility Principle**
-- ✅ CreatePostCommandHandler → Sadece post oluşturur
-- ✅ PostCreatedEventHandler → Sadece activity log'lar
-- ✅ Her sınıf tek bir işten sorumlu
+1. `Domain/Events/<Aggregate>` altında yeni sınıf oluştur, `DomainEvent`ten türet ve `[StoreInOutbox]` ekle.
+2. Command handler'da uygun noktada `entity.AddDomainEvent(new ...)` çağır.
+3. Eğer activity log üretilecekse `ActivityLogIntegrationEventConverters` içinde yeni converter yaz ve DI'a ekle.
+4. Gerekirse yeni integration event/consumer oluştur (`ActivityLog` dışındaki senaryolar için).
+5. Unit/integration testlerini güncelle.
 
-### 5. **Domain-Driven Design (DDD)**
-- ✅ Domain events, domain expert'lerin konuştuğu şeylerdir
-- ✅ "Post oluşturuldu", "Category silindi" gibi business event'ler
-- ✅ Domain layer business logic'i ifade eder
+## 7. Test Önerileri
 
-## ⚠️ Dezavantajlar (ve Çözümleri)
+- **Command Testi:** Event raise edildi mi?
+  ```csharp
+  post.DomainEvents.Should().ContainSingle(e => e is PostCreatedEvent);
+  ```
+- **Converter Testi:** JSON payload doğru integration event'e dönüşüyor mu?
+- **Consumer Testi:** Mesaj işlendiğinde beklenen veri tabanına yazılıyor mu?
 
-### 1. **Complexity (Karmaşıklık)**
-**Sorun:** Daha fazla dosya, daha fazla sınıf
-**Çözüm:** 
-- Feature folder organization ile organize edildi
-- Her event handler tek bir dosyada
-- Naming convention tutarlı: `{Entity}{Action}EventHandler`
+## 8. Checklist (Güncel Durum)
 
-### 2. **Performance**
-**Sorun:** Her event için ayrı handler çalışır
-**Çözüm:**
-- Event handler'lar parallel çalışabilir (MediatR destekler)
-- Database transaction içinde değiller (async)
-- Gerçek dünyada minimal overhead (<1ms)
+- [x] BaseEntity domain event koleksiyonu
+- [x] `[StoreInOutbox]` attribute
+- [x] UnitOfWork → Outbox entegrasyonu
+- [x] OutboxProcessorService + MassTransit publish
+- [x] ActivityLog converter'ları
+- [x] ActivityLogConsumer
+- [ ] Domain event raise eden komutlar için unit testler (eklenmeli)
+- [ ] Outbox converter/consumer senaryoları için entegrasyon testleri
 
-### 3. **Debugging**
-**Sorun:** Event flow'u takip etmek zor olabilir
-**Çözüm:**
-- LoggingBehavior zaten her şeyi logluyoruz
-- Event handler'larda da loglama eklenebilir
-- Visual Studio debugger event handler'lara breakpoint koyabilir
+## 9. İlgili Dokümanlar
+- `docs/OUTBOX_PATTERN_IMPLEMENTATION.md`
+- `docs/OUTBOX_PATTERN_SETUP_SUMMARY.md`
+- `docs/ACTIVITY_LOGGING_README.md`
+- `docs/TRANSACTION_MANAGEMENT_STRATEGY.md`
 
-### 4. **Transaction Management**
-**Sorun:** Event handler'lar farklı transaction'da çalışır
-**Çözüm:**
-- ActivityLog kaydı ayrı transaction'da (istenen davranış)
-- Ana işlem başarısız olursa event handler çalışmaz (DomainEventDispatcherBehavior'un konumu sayesinde)
-
-## 🚀 Gelecek İyileştirmeler
-
-### 1. Outbox Pattern (Eventual Consistency için)
-```csharp
-// Event'leri önce OutboxMessage tablosuna yaz
-// Background worker event'leri işle
-// Böylece distributed transaction sorunları çözülür
-```
-
-### 2. Event Sourcing
-```csharp
-// Tüm domain event'leri EventStore'a kaydet
-// State'i event'lerden yeniden oluştur
-// Audit trail ve time-travel debugging
-```
-
-### 3. Domain Event Versioning
-```csharp
-public class PostCreatedEvent_V2 : DomainEvent
-{
-    // Breaking change olursa yeni versiyon
-}
-```
-
-## 📋 Migration Checklist
-
-- [x] Domain layer'a MediatR.Contracts eklendi
-- [x] BaseEntity'ye domain events desteği eklendi
-- [x] Domain event'ler oluşturuldu (Post, Category)
-- [x] IUnitOfWork'e GetDomainEvents() eklendi
-- [x] UnitOfWork implementasyonu güncellendi
-- [x] DomainEventDispatcherBehavior eklendi
-- [x] Event handler'lar oluşturuldu
-- [x] Command handler'lar güncellendi (domain event raise)
-- [x] ActivityLoggingBehavior kaldırıldı
-- [x] TransactionScopeBehavior pipeline'dan çıkarıldı
-- [ ] Test yazılması (Unit tests for event handlers)
-- [ ] Integration test'ler güncellenmesi
-- [ ] Performance test'leri
-
-## 🎓 Öğrendiklerimiz
-
-### Domain Events Ne Zaman Kullanılmalı?
-
-✅ **Kullan:**
-- Side effect'ler olduğunda (logging, email, cache invalidation)
-- Birden fazla bounded context etkileniyorsa
-- Eventual consistency kabul edilebilirse
-- Audit trail gerekiyorsa
-
-❌ **Kullanma:**
-- Basit CRUD işlemlerinde (overhead yaratır)
-- Immediate consistency şart ise
-- Single responsibility zaten sağlanıyorsa
-
-### Alternatifler
-
-1. **Mediator Pattern** (zaten kullanıyoruz - MediatR)
-2. **Observer Pattern** (Domain events bunun bir türü)
-3. **Command Pattern** (Commands için kullanıyoruz)
-4. **Repository Pattern** (Data access için kullanıyoruz)
-
-## 🔗 İlgili Kaynaklar
-
-- [Domain Events - Martin Fowler](https://martinfowler.com/eaaDev/DomainEvent.html)
-- [MediatR Documentation](https://github.com/jbogard/MediatR)
-- [Domain-Driven Design - Eric Evans](https://www.domainlanguage.com/ddd/)
-- [Clean Architecture - Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
-
----
-
-**Sonuç:** Domain Events pattern, karmaşık ActivityLogging behavior'unu basit, test edilebilir ve genişletilebilir bir yapıya dönüştürdü. Sistem artık daha SOLID ve maintainable! 🎉
+Domain events sayesinde BlogApp’teki yan etkiler tamamen outbox pipeline'ına devredildi. Yeni aggregate'ler eklerken aynı yaklaşımı izlediğinizde hem audit akışı hem de entegrasyon süreci otomatik olarak genişleyecektir.

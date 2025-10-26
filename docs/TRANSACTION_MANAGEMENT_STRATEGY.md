@@ -1,264 +1,97 @@
 # Transaction Management Strategy
 
-## ?? BlogApp Transaction Y�netimi
+## 1. Amaç
+BlogApp tek bir PostgreSQL veritabanı etrafında dönen, domain-event tabanlı bir mimari kullanır. Transaction yönetimi; Entity Framework Core’un birimsel transaction desteği, UnitOfWork soyutlaması ve Outbox Pattern ile sağlanan eventual consistency üzerinden kurgulanmıştır. Bu doküman güncel stratejiyi ve geliştirici rehberini özetler.
 
-BlogApp'te **iki farkl� transaction y�netim stratejisi** mevcuttur:
+## 2. Birincil Strateji: UnitOfWork
 
-### 1?? Unit of Work (Primary Strategy)
+- `IUnitOfWork.SaveChangesAsync` EF Core `DbContext` üzerinde tek bir transaction açar; tüm entity değişiklikleri ve eşzamanlı outbox mesajları aynı ACID transaction içinde persist edilir.
+- Domain event’ler `BaseEntity.DomainEvents` koleksiyonunda tutulur. `SaveChangesAsync` çağrısı sırasında `[StoreInOutbox]` ile işaretli event’ler Outbox tablosuna yazılır; commit başarılıysa veriler kalıcı hale gelir.
+- Bu yaklaşım, komut başına tek `SaveChangesAsync` çağrısı yapıldığı sürece otomatik transaction yönetimi sağlar.
 
-**Kullan�m Alan�:** Standart CRUD i�lemleri (tek DbContext)
-
-**Nas�l Kullan�l�r:**
 ```csharp
-public sealed class CreatePostCommandHandler(
-    IPostRepository postRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreatePostCommand, IResult>
+public sealed class CreatePostCommandHandler(IPostRepository postRepository, IUnitOfWork unitOfWork)
+  : IRequestHandler<CreatePostCommand, Guid>
 {
-    public async Task<IResult> Handle(CreatePostCommand request, CancellationToken cancellationToken)
-    {
-  var post = new Post { ... };
-  await postRepository.AddAsync(post);
-        await unitOfWork.SaveChangesAsync(cancellationToken); // ? DB transaction
-        
-    return new SuccessResult("...");
-    }
+  public async Task<Guid> Handle(CreatePostCommand request, CancellationToken ct)
+  {
+    var post = new Post(request.Title, request.Content, request.CategoryId, currentUserId: request.ActorId);
+    post.AddDomainEvent(new PostCreatedEvent(post.Id, post.Title, post.CategoryId, request.ActorId));
+
+    await postRepository.AddAsync(post, ct);
+    await unitOfWork.SaveChangesAsync(ct); // Tek transaction
+
+    return post.Id;
+  }
 }
 ```
 
-**Avantajlar�:**
-- ? Lightweight
-- ? Performansl�
-- ? Platform agnostic
-- ? EF Core native transaction
+### 2.1 Ne Sağlar?
+- **Basitlik:** Transaction yönetimi uygulama katmanına sızmaz.
+- **ACID Garantisi:** Domain verisi ve Outbox mesajları aynı commit altında.
+- **Performans:** EF Core’un doğal transaction desteği kullanılır.
 
----
+## 3. Destekleyici Araçlar
 
-### 2?? TransactionScope Behavior (Advanced Strategy)
+### 3.1 Outbox Pattern
+- Cross-resource tutarlılık artık TransactionScope yerine Outbox ile sağlanır.
+- `OutboxProcessorService` işlenmemiş mesajları RabbitMQ’ya publish eder; MassTransit tüketicileri (örn. `ActivityLogConsumer`) asenkron olarak yan etkileri gerçekleştirir.
+- Böylece veritabanı transaction’ı kısa tutulur, message broker veya e-posta gibi sistemlerle eventual consistency sağlanır.
 
-**Kullan�m Alan�:** Distributed transactions (DB + Message Queue + Cache vs.)
+### 3.2 Manuel Transaction Yönetimi (Gerekirse)
+`UnitOfWork` gerektiğinde elle transaction başlatmak için `BeginTransactionAsync`, `CommitTransactionAsync`, `RollbackTransactionAsync` metodlarını sunar. Bu yöntem sadece tek `DbContext` ile çalışır; farklı kaynaklara uzanmaz.
 
-**Nas�l Kullan�l�r:**
-
-**Ad�m 1:** Command'a `ITransactionalRequest` marker interface'ini ekle:
 ```csharp
-using BlogApp.Application.Behaviors.Transaction;
-using BlogApp.Domain.Common.Results;
-using MediatR;
-
-namespace BlogApp.Application.Features.Orders.Commands.Process;
-
-public sealed record ProcessOrderCommand(
-    int OrderId,
-  decimal Amount,
-    string PaymentMethod
-) : IRequest<IResult>, ITransactionalRequest; // ? Marker interface
-```
-
-**Ad�m 2:** Handler'da birden fazla kaynak kullan:
-```csharp
-public sealed class ProcessOrderCommandHandler(
-    IOrderRepository orderRepository,
-    IPaymentService paymentService,
-    IPublishEndpoint publishEndpoint, // RabbitMQ
-  ICacheService cacheService,       // Redis
-    IUnitOfWork unitOfWork
-) : IRequestHandler<ProcessOrderCommand, IResult>
+await unitOfWork.BeginTransactionAsync(ct);
+try
 {
-    public async Task<IResult> Handle(ProcessOrderCommand request, CancellationToken cancellationToken)
-    {
-        // 1. DB'ye sipari� kaydet
-    var order = new Order { ... };
-   await orderRepository.AddAsync(order);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+  await repositoryOne.AddAsync(entityA, ct);
+  await repositoryTwo.UpdateAsync(entityB, ct);
 
-        // 2. �deme i�lemini yap (External API)
-  await paymentService.ProcessPayment(request.Amount, request.PaymentMethod);
-
-        // 3. RabbitMQ'ya mesaj g�nder
-        await publishEndpoint.Publish(new OrderProcessedEvent(order.Id), cancellationToken);
-
-   // 4. Redis cache'i g�ncelle
-   await cacheService.Remove($"order:{order.Id}");
-
-        return new SuccessResult("Sipari� ba�ar�yla i�lendi.");
-        
-        // TransactionScopeBehavior sayesinde yukar�daki T�M� ayn� transaction i�inde!
-        // Herhangi biri ba�ar�s�z olursa hepsi rollback olur!
-    }
+  await unitOfWork.CommitTransactionAsync(ct);
+}
+catch
+{
+  await unitOfWork.RollbackTransactionAsync(ct);
+  throw;
 }
 ```
 
-**TransactionScopeBehavior Pipeline:**
-```csharp
-// ApplicationServicesRegistration.cs
-configuration.AddOpenBehavior(typeof(TransactionScopeBehavior<,>));
+## 4. Artık Kullanılmayan Yaklaşımlar
 
-// Sadece ITransactionalRequest implement eden Command'lar i�in �al���r!
-```
+- **TransactionScopeBehavior, ITransactionalRequest:** Kod tabanından kaldırıldı. Ambient `TransactionScope` kullanımı platform bağımlılığı ve performans kaygıları nedeniyle tercih edilmiyor.
+- **Distributed Transaction:** DB + RabbitMQ + Redis gibi kaynakları tek transaction altında toplamak yerine Outbox + retry mekanizmaları benimseniyor.
 
-**Avantajlar�:**
-- ? Distributed transaction deste�i
-- ? Otomatik rollback (t�m kaynaklar)
-- ? Merkezi transaction y�netimi (Pipeline Behavior)
-- ? Cross-resource atomicity garantisi
+## 5. Geliştirici Rehberi
 
-**Dezavantajlar�:**
-- ?? MSDTC gerektirebilir (Windows)
-- ?? Performance overhead
-- ?? Complexity
+- Komutlarda **tek `SaveChangesAsync` çağrısı** yapın; ara `SaveChanges` çağrıları transaction bütünlüğünü böler.
+- Uzun süren dış servis çağrılarını transaction dışında gerçekleştirin; sonuçlarını kaydetmek gerekiyorsa operasyonu iki aşamaya bölün (ör. önce kaydet → outbox → consumer external call tetikler).
+- Aynı handler içinde birden fazla repository işlemi gerekiyorsa, `UnitOfWork` zaten hepsini tek transaction’da toplar; ekstra `BeginTransaction` çağrısı gerekmez.
+- `OutboxMessages` tablosundaki RetryCount/Error alanları üzerinden başarısız yan etkileri takip edin; tekrarlanan hatalar için consumer tarafında idempotent davranış sağlayın.
 
----
+## 6. Senaryo Tabloları
 
-## ?? Karar A�ac�: Hangi Stratejiyi Kullanmal�y�m?
+| Senaryo | Önerilen Strateji | Not |
+|---------|-------------------|-----|
+| CRUD (Post, Category, Role, User) | `SaveChangesAsync` (otomatik transaction) | Varsayılan yaklaşım |
+| Domain event + Activity log | `SaveChangesAsync` + Outbox | Activity log asenkron oluşur |
+| External API çağrısı (ödeme, e-posta) | Önce local DB commit → outbox → consumer | Dış sistem hataları retry edilir |
+| Aynı request içinde iki ayrı `DbContext` | Desteklenmez | Gerekirse orchestration veya saga düşünün |
 
-```
-        Transaction gerekiyor mu?
-         ?
-      ?????????????????????
-       Evet      Hay�r
-     ?       ?
-       ?   ?
-       Birden fazla kaynak var m�?    Transaction'a gerek yok
-       (DB + RabbitMQ + Redis vs.)
-   ?
-      ?????????????????????
-         Evet          Hay�r
-   ?             ?
-  ?        ?
-   TransactionScope     UnitOfWork
-   (ITransactionalRequest)   (Standart)
-```
+## 7. İzleme ve Bakım
 
-### �rnekler:
+- `OutboxMessages` tablosunu düzenli izleyin; yüksek `RetryCount` değerleri transaction sonrası yan etkilerin başarısız olduğuna işaret eder.
+- `ActivityLogs` tablosu ana transaction tamamlandıktan sonra doldurulur; kullanıcı geri bildirimi (response) gönderildikten sonra bile yeni kayıtlar görünebilir.
+- Gerektiğinde `unitOfWork.BeginTransactionAsync` ile manual transaction açıldığında, `CommitTransactionAsync` çağrısının gerçekten sonunda yapıldığından emin olun; aksi halde EF Core pending değişiklikleri commit etmez.
 
-| Senaryo | Strateji | A��klama |
-|---------|----------|----------|
-| Post olu�turma | UnitOfWork | Sadece DB i�lemi |
-| Kategori g�ncelleme | UnitOfWork | Sadece DB i�lemi |
-| Sipari� i�leme (DB + Payment + RabbitMQ) | TransactionScope | Distributed |
-| Kullan�c� kayd� (DB + Email + RabbitMQ) | TransactionScope | Distributed |
-| Post listeleme (Query) | Yok | Read-only operation |
+## 8. İlgili Dosyalar
+- `src/BlogApp.Domain/Common/BaseEntity.cs`
+- `src/BlogApp.Domain/Common/IUnitOfWork.cs`
+- `src/BlogApp.Persistence/Repositories/UnitOfWork.cs`
+- `src/BlogApp.Infrastructure/Services/BackgroundServices/OutboxProcessorService.cs`
+- `src/BlogApp.Infrastructure/Services/BackgroundServices/Outbox/Converters/ActivityLogIntegrationEventConverters.cs`
+- `docs/OUTBOX_PATTERN_IMPLEMENTATION.md`
+- `docs/ACTIVITY_LOGGING_README.md`
 
----
-
-## ?? Best Practices
-
-### ? DO (Yap�lmas� Gerekenler)
-
-1. **Basit CRUD i�lemleri i�in UnitOfWork kullan:**
-   ```csharp
- await repository.AddAsync(entity);
-   await unitOfWork.SaveChangesAsync(cancellationToken);
-   ```
-
-2. **Distributed i�lemler i�in ITransactionalRequest kullan:**
-   ```csharp
-   public record ComplexCommand(...) : IRequest<IResult>, ITransactionalRequest;
-   ```
-
-3. **Transaction scope'lar� minimize et:**
-   ```csharp
-   // ? K�t�
-   using var transaction = new TransactionScope(...);
-   await Task.Delay(5000); // Long-running operation
-   transaction.Complete();
-   
-   // ? �yi
-   var data = await PrepareData(); // Transaction d���nda
-   using var transaction = new TransactionScope(...);
-   await SaveData(data); // H�zl� DB i�lemi
-   transaction.Complete();
-   ```
-
-4. **Timeout ayarlar�n� yap�land�r:**
-   ```csharp
-   var options = new TransactionOptions
-   {
-       IsolationLevel = IsolationLevel.ReadCommitted,
-   Timeout = TimeSpan.FromSeconds(30)
-   };
-   using var scope = new TransactionScope(TransactionScopeOption.Required, options, TransactionScopeAsyncFlowOption.Enabled);
-   ```
-
-### ? DON'T (Yap�lmamas� Gerekenler)
-
-1. **Her Command'a ITransactionalRequest ekleme:**
-   ```csharp
-   // ? Gereksiz overhead
-   public record GetPostByIdQuery(...) : IRequest<...>, ITransactionalRequest;
- ```
-
-2. **TransactionScope i�inde uzun i�lemler:**
-   ```csharp
-   // ? Deadlock riski
-   using var scope = new TransactionScope(...);
-   await SendEmailAsync(); // External API call
-   await Task.Delay(10000);
-   scope.Complete();
-   ```
-
-3. **Nested TransactionScope'lar (dikkatli kullan�lmal�):**
-   ```csharp
-   // ?? Dikkat
-   using var outer = new TransactionScope(...);
-   using var inner = new TransactionScope(...); // Nested
-   ```
-
----
-
-## ?? Yap�land�rma
-
-### TransactionScope i�in Windows MSDTC
-
-E�er distributed transaction kullanacaksan�z (production ortam�nda), MSDTC'yi etkinle�tirin:
-
-```powershell
-# Windows'ta MSDTC'yi ba�lat
-net start msdtc
-
-# G�venlik ayarlar�
-# Component Services ? Computers ? My Computer ? Distributed Transaction Coordinator ? Local DTC
-# ? Properties ? Security
-# ? Network DTC Access
-# ? Allow Inbound / Allow Outbound
-# ? No Authentication Required (Development)
-```
-
-### Linux/Docker i�in Alternatif
-
-TransactionScope Linux'ta baz� sorunlara yol a�abilir. Bu durumda:
-- Sadece UnitOfWork kullan�n
-- Saga pattern implementasyonu d���n�n
-- Outbox pattern kullan�n (eventual consistency)
-
----
-
-## ?? Performance Kar��la�t�rmas�
-
-| Metrik | UnitOfWork | TransactionScope |
-|--------|------------|------------------|
-| Latency | ~5-10ms | ~20-50ms |
-| Resource Usage | D���k | Orta |
-| Scalability | Y�ksek | Orta |
-| Complexity | D���k | Orta |
-| Cross-DB Support | Hay�r | Evet |
-
----
-
-## ?? �lgili Dosyalar
-
-- `src/BlogApp.Domain/Common/IUnitOfWork.cs` - UnitOfWork interface
-- `src/BlogApp.Persistence/Repositories/UnitOfWork.cs` - UnitOfWork implementation
-- `src/BlogApp.Application/Behaviors/Transaction/TransactionScopeBehavior.cs` - TransactionScope behavior
-- `src/BlogApp.Application/Behaviors/Transaction/ITransactionalRequest.cs` - Marker interface
-
----
-
-## ?? Sonu�
-
-**BlogApp'te iki strateji de mevcut ve ikisi de kullan�lmal�d�r:**
-
-1. **%95 durumlarda UnitOfWork kullan�n** (basit CRUD)
-2. **Complex senaryolarda TransactionScope kullan�n** (distributed transactions)
-
-Bu hybrid yakla��m size hem performans hem de esneklik sa�lar! ??
+## 9. Özet
+BlogApp’te transaction yönetimi EF Core’un yerleşik kabiliyetleri üzerine kurulu olup Outbox Pattern ile desteklenir. TransactionScope tabanlı dağıtık transaction yaklaşımı kaldırıldı. Geliştiricilerin odak noktası, tek `DbContext` değişikliklerini `SaveChangesAsync` ile commit etmek ve cross-resource tutarlılığı Outbox üzerinden sağlamaktır.

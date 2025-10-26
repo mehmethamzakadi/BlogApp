@@ -7,11 +7,11 @@
 #### 1. **Tüm Event Handler Sınıfları (13 dosya)**
 ```
 src/BlogApp.Application/Features/
-├─ AppRoles/EventHandlers/              ❌ KALDIRILDl
+├─ Roles/EventHandlers/                 ❌ KALDIRILDI
 │  ├─ RoleCreatedEventHandler.cs
 │  ├─ RoleUpdatedEventHandler.cs
 │  └─ RoleDeletedEventHandler.cs
-├─ AppUsers/EventHandlers/              ❌ KALDIRILDI
+├─ Users/EventHandlers/                 ❌ KALDIRILDI
 │  ├─ UserCreatedEventHandler.cs
 │  ├─ UserUpdatedEventHandler.cs
 │  ├─ UserDeletedEventHandler.cs
