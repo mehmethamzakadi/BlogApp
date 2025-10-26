@@ -14,20 +14,17 @@ public class AssignRolesToUserCommandHandler : IRequestHandler<AssignRolesToUser
 {
     private readonly IUserRepository _userRepository;
     private readonly IRoleRepository _roleRepository;
-    private readonly IMediator _mediator;
     private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
 
     public AssignRolesToUserCommandHandler(
         IUserRepository userRepository,
         IRoleRepository roleRepository,
-        IMediator mediator,
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork)
     {
         _userRepository = userRepository;
         _roleRepository = roleRepository;
-        _mediator = mediator;
         _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
     }

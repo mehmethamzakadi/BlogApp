@@ -12,18 +12,15 @@ namespace BlogApp.Application.Features.Roles.Commands.Update;
 public sealed class UpdateRoleCommandHandler : IRequestHandler<UpdateRoleCommand, IResult>
 {
     private readonly IRoleRepository _roleRepository;
-    private readonly IMediator _mediator;
     private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
 
     public UpdateRoleCommandHandler(
         IRoleRepository roleRepository,
-        IMediator mediator,
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork)
     {
         _roleRepository = roleRepository;
-        _mediator = mediator;
         _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
     }

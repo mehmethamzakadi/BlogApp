@@ -12,18 +12,15 @@ namespace BlogApp.Application.Features.Roles.Commands.Create;
 public sealed class CreateRoleCommandHandler : IRequestHandler<CreateRoleCommand, IResult>
 {
     private readonly IRoleRepository _roleRepository;
-    private readonly IMediator _mediator;
     private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
 
     public CreateRoleCommandHandler(
         IRoleRepository roleRepository,
-        IMediator mediator,
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork)
     {
         _roleRepository = roleRepository;
-        _mediator = mediator;
         _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
     }
