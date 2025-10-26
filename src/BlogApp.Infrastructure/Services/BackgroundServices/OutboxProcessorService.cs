@@ -76,6 +76,8 @@ public class OutboxProcessorService : BackgroundService
 
         _logger.LogInformation("{Count} adet outbox mesajı işleniyor", messages.Count);
 
+        var hasStatusUpdates = false;
+
         foreach (var message in messages)
         {
             try
@@ -151,6 +153,19 @@ public class OutboxProcessorService : BackgroundService
                     _logger.LogError("Mesaj {MessageId} maksimum deneme sayısını aştı. Dead letter'a taşınıyor.",
                         message.Id);
                 }
+            }
+        }
+
+        if (hasStatusUpdates)
+        {
+            try
+            {
+                await unitOfWork.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Outbox mesaj durumları kaydedilirken hata oluştu");
+                throw;
             }
         }
 
