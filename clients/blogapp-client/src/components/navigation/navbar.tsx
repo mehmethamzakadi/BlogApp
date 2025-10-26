@@ -5,6 +5,7 @@ import { Button } from '../ui/button';
 import { useAuth } from '../../hooks/use-auth';
 import { cn } from '../../lib/utils';
 import { useThemeContext } from '../../providers/theme-provider';
+import { logout as logoutRequest } from '../../features/auth/api';
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   cn(
@@ -17,8 +18,14 @@ export function Navbar() {
   const { isAuthenticated, logout, user } = useAuth();
   const { theme, toggleTheme } = useThemeContext();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    try {
+      await logoutRequest();
+    } catch {
+      // Sunucuya ulaşılamasa bile istemci oturumunu kapat
+    } finally {
+      logout();
+    }
   };
 
   return (
@@ -56,7 +63,9 @@ export function Navbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={handleLogout}
+                onClick={() => {
+                  void handleLogout();
+                }}
                 className="h-9 w-9 rounded-full border"
               >
                 <LogOut className="h-4 w-4" />
@@ -138,7 +147,7 @@ export function Navbar() {
                     size="icon"
                     className="h-9 w-9 rounded-full border"
                     onClick={() => {
-                      handleLogout();
+                      void handleLogout();
                       setOpen(false);
                     }}
                   >

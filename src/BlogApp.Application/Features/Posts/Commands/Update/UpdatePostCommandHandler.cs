@@ -1,6 +1,7 @@
 using BlogApp.Application.Abstractions;
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
+using BlogApp.Domain.Constants;
 using BlogApp.Domain.Events.PostEvents;
 using BlogApp.Domain.Repositories;
 using MediatR;
@@ -45,8 +46,8 @@ public sealed class UpdatePostCommandHandler(
         await postRepository.UpdateAsync(entity);
 
         // ✅ Outbox Pattern için SaveChanges'dan ÖNCE domain event'i tetikle
-        var userId = currentUserService.GetCurrentUserId();
-        entity.AddDomainEvent(new PostUpdatedEvent(entity.Id, entity.Title, userId ?? entity.UpdatedById ?? Guid.Empty));
+    var actorId = currentUserService.GetCurrentUserId() ?? SystemUsers.SystemUserId;
+    entity.AddDomainEvent(new PostUpdatedEvent(entity.Id, entity.Title, actorId));
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

@@ -7,7 +7,7 @@ import {
   useReactTable
 } from '@tanstack/react-table';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { PlusCircle, Pencil, Trash2, ArrowUpDown, Shield, Mail, User as UserIcon } from 'lucide-react';
+import { PlusCircle, Pencil, Trash2, Shield, Mail, User as UserIcon } from 'lucide-react';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -84,6 +84,7 @@ export function UsersPage() {
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [assigningRolesUser, setAssigningRolesUser] = useState<User | null>(null);
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+  const [viewingRolesUser, setViewingRolesUser] = useState<User | null>(null);
 
   // Queries
   const usersQuery = useQuery<UserListResponse>({
@@ -176,6 +177,30 @@ export function UsersPage() {
         )
       },
       {
+        id: 'roles',
+        header: 'Roller',
+        cell: ({ row }) => {
+          const roles = row.original.roles ?? [];
+
+          if (!roles.length) {
+            return <span className="text-xs italic text-muted-foreground">Rol atanmadı</span>;
+          }
+
+          return (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setViewingRolesUser(row.original)}
+              className="text-xs"
+              aria-label="Kullanıcı rollerini görüntüle"
+            >
+              Rolleri Gör ({roles.length})
+            </Button>
+          );
+        },
+        enableSorting: false
+      },
+      {
         id: 'actions',
         header: 'İşlemler',
         cell: ({ row }) => (
@@ -215,7 +240,7 @@ export function UsersPage() {
         )
       }
     ],
-    []
+    [hasPermission]
   );
 
   const table = useReactTable({
@@ -560,6 +585,43 @@ export function UsersPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+          {/* View Roles Dialog */}
+          <Dialog open={!!viewingRolesUser} onOpenChange={() => setViewingRolesUser(null)}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Kullanıcı Rolleri</DialogTitle>
+                <DialogDescription>
+                  {viewingRolesUser ? (
+                    <>
+                      <strong>{viewingRolesUser.userName}</strong> kullanıcısına atanmış roller
+                    </>
+                  ) : (
+                    'Bu kullanıcıya ait roller'
+                  )}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-3">
+                {viewingRolesUser?.roles?.length ? (
+                  <div className="space-y-2">
+                    {viewingRolesUser.roles.map((role) => (
+                      <div key={role.id} className="flex items-center gap-2 rounded-md border px-3 py-2">
+                        <Shield className="h-4 w-4 text-primary" />
+                        <span className="text-sm font-medium">{role.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Bu kullanıcıya henüz rol atanmadı.</p>
+                )}
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setViewingRolesUser(null)}>
+                  Kapat
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
       {/* Assign Roles Dialog */}
       <Dialog open={!!assigningRolesUser} onOpenChange={() => setAssigningRolesUser(null)}>

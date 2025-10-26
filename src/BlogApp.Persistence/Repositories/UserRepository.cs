@@ -28,6 +28,8 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
     public async Task<Paginate<User>> GetUsersAsync(int index, int size, CancellationToken cancellationToken)
     {
         return await _context.Users
+            .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
             .OrderBy(u => u.Id)
             .ToPaginateAsync(index, size, cancellationToken);
     }

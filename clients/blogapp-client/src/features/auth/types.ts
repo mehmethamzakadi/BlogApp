@@ -1,4 +1,4 @@
-import { AuthUser } from '../../stores/auth-store';
+import type { AuthUser } from '../../types/auth';
 
 export interface LoginRequest {
   email: string;

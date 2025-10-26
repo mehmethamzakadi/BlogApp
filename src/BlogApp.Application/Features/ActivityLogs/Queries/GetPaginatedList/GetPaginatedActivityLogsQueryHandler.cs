@@ -1,10 +1,13 @@
 using AutoMapper;
+using BlogApp.Domain.Common.Dynamic;
 using BlogApp.Domain.Common.Paging;
 using BlogApp.Domain.Common.Responses;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Repositories;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BlogApp.Application.Features.ActivityLogs.Queries.GetPaginatedList;
 
@@ -25,8 +28,18 @@ public class GetPaginatedActivityLogsQueryHandler : IRequestHandler<GetPaginated
         GetPaginatedActivityLogsQuery request,
         CancellationToken cancellationToken)
     {
-        Paginate<ActivityLog> activityLogs = await _activityLogRepository.GetPaginatedListAsync(
-            orderBy: query => query.OrderByDescending(a => a.Timestamp),
+        DynamicQuery dynamicQuery = request.Request.DynamicQuery ?? new DynamicQuery();
+
+        List<Sort> sortDescriptors = dynamicQuery.Sort?.ToList() ?? new List<Sort>();
+        if (sortDescriptors.Count == 0)
+        {
+            sortDescriptors.Add(new Sort(nameof(ActivityLog.Timestamp), "desc"));
+        }
+
+        dynamicQuery.Sort = sortDescriptors;
+
+        Paginate<ActivityLog> activityLogs = await _activityLogRepository.GetPaginatedListByDynamicAsync(
+            dynamic: dynamicQuery,
             index: request.Request.PaginatedRequest.PageIndex,
             size: request.Request.PaginatedRequest.PageSize,
             include: a => a.Include(a => a.User!),

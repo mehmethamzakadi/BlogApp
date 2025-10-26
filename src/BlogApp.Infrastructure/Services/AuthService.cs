@@ -1,6 +1,7 @@
 using BlogApp.Application.Abstractions;
 using BlogApp.Application.Abstractions.Identity;
 using BlogApp.Application.Features.Auths.Login;
+using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Exceptions;
@@ -16,7 +17,8 @@ public sealed class AuthService(
     ITokenService tokenService,
     IMailService mailService,
     IPasswordHasher passwordHasher,
-    BlogAppDbContext dbContext) : IAuthService
+    BlogAppDbContext dbContext,
+    IUnitOfWork unitOfWork) : IAuthService
 {
     public async Task<IDataResult<LoginResponse>> LoginAsync(string email, string password)
     {
@@ -47,13 +49,17 @@ public sealed class AuthService(
                 user.LockoutEnd = DateTimeOffset.UtcNow.AddMinutes(15);
             }
 
-            await userRepository.UpdateAsync(user);
+            var failureUpdate = await userRepository.UpdateAsync(user);
+            if (failureUpdate.Success)
+            {
+                await unitOfWork.SaveChangesAsync();
+            }
+
             throw new AuthenticationErrorException();
         }
 
         // Reset failed access count on successful login
         user.AccessFailedCount = 0;
-        await userRepository.UpdateAsync(user);
 
         var authClaims = await tokenService.GetAuthClaims(user);
         var tokenResponse = tokenService.GenerateAccessToken(authClaims, user);
@@ -61,7 +67,14 @@ public sealed class AuthService(
         // Store refresh token
         user.RefreshToken = tokenResponse.RefreshToken;
         user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
-        await userRepository.UpdateAsync(user);
+
+        var successUpdate = await userRepository.UpdateAsync(user);
+        if (!successUpdate.Success)
+        {
+            throw new AuthenticationErrorException(successUpdate.Message ?? "Kullanıcı güncelleme hatası.");
+        }
+
+        await unitOfWork.SaveChangesAsync();
 
         return new SuccessDataResult<LoginResponse>(tokenResponse, "Giriş Başarılı");
     }
@@ -90,9 +103,43 @@ public sealed class AuthService(
         // Update refresh token
         user.RefreshToken = tokenResponse.RefreshToken;
         user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
-        await userRepository.UpdateAsync(user);
+
+        var updateResult = await userRepository.UpdateAsync(user);
+        if (!updateResult.Success)
+        {
+            throw new AuthenticationErrorException(updateResult.Message ?? "Token yenileme hatası.");
+        }
+
+        await unitOfWork.SaveChangesAsync();
 
         return new SuccessDataResult<LoginResponse>(tokenResponse, "Token yenilendi");
+    }
+
+    public async Task LogoutAsync(string refreshToken)
+    {
+        if (string.IsNullOrWhiteSpace(refreshToken))
+        {
+            return;
+        }
+
+        var user = await dbContext.Users
+            .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
+
+        if (user == null)
+        {
+            return;
+        }
+
+        user.RefreshToken = null;
+        user.RefreshTokenExpiry = null;
+
+        var updateResult = await userRepository.UpdateAsync(user);
+        if (!updateResult.Success)
+        {
+            return;
+        }
+
+        await unitOfWork.SaveChangesAsync();
     }
 
     public async Task PasswordResetAsync(string email)
@@ -103,8 +150,13 @@ public sealed class AuthService(
             string resetToken = passwordHasher.GeneratePasswordResetToken();
             user.PasswordResetToken = resetToken.UrlEncode();
             user.PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(1);
-            await userRepository.UpdateAsync(user);
-            await mailService.SendPasswordResetMailAsync(email, user.Id, resetToken.UrlEncode());
+
+            var updateResult = await userRepository.UpdateAsync(user);
+            if (updateResult.Success)
+            {
+                await unitOfWork.SaveChangesAsync();
+                await mailService.SendPasswordResetMailAsync(email, user.Id, resetToken.UrlEncode());
+            }
         }
     }
 

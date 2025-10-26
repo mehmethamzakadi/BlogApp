@@ -1,3 +1,4 @@
+using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Constants;
 using BlogApp.Domain.Entities;
@@ -6,7 +7,7 @@ using MediatR;
 
 namespace BlogApp.Application.Features.Auths.Register;
 
-public sealed class RegisterCommandHandler(IUserRepository userRepository) : IRequestHandler<RegisterCommand, IResult>
+public sealed class RegisterCommandHandler(IUserRepository userRepository, IUnitOfWork unitOfWork) : IRequestHandler<RegisterCommand, IResult>
 {
     public async Task<IResult> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
@@ -31,7 +32,13 @@ public sealed class RegisterCommandHandler(IUserRepository userRepository) : IRe
             return creationResult;
         }
 
-        await userRepository.AddToRoleAsync(user, UserRoles.User);
+        IResult roleResult = await userRepository.AddToRoleAsync(user, UserRoles.User);
+        if (!roleResult.Success)
+        {
+            return roleResult;
+        }
+
+        await unitOfWork.SaveChangesAsync(cancellationToken);
         return new SuccessResult("Kayıt işlemi başarılı. Giriş yapabilirsiniz.");
     }
 }

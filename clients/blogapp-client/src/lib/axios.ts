@@ -29,12 +29,12 @@ const processQueue = (error: Error | null, token: string | null = null) => {
 
 api.interceptors.request.use((config) => {
   const token = useAuthStore.getState().token;
-  
-  // Refresh token endpoint'i için Authorization header ekleme
-  if (config.url?.includes('/Auth/RefreshToken')) {
+
+  const requestUrl = config.url?.toLowerCase() ?? '';
+  if (requestUrl.includes('/auth/refresh-token')) {
     return config;
   }
-  
+
   if (token) {
     const headers = AxiosHeaders.from(config.headers ?? {});
     headers.set('Authorization', `Bearer ${token}`);
@@ -47,6 +47,7 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    const requestUrl = originalRequest.url?.toLowerCase() ?? '';
 
     // 403 Forbidden - Yetki hatası
     if (error.response?.status === 403) {
@@ -57,9 +58,18 @@ api.interceptors.response.use(
       return Promise.reject(normalizeApiError(error, 'Bu işlem için yetkiniz bulunmamaktadır.'));
     }
 
+    if (error.response?.status === 401 && requestUrl.includes('/auth/refresh-token')) {
+      const { logout } = useAuthStore.getState();
+      logout();
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+      return Promise.reject(error);
+    }
+
     // Login, register gibi authentication endpoint'leri için 401 hatasını ignore et
     const authEndpoints = ['/auth/login', '/auth/register', '/Auth/Login', '/Auth/Register'];
-    const isAuthEndpoint = authEndpoints.some(endpoint => originalRequest.url?.toLowerCase().includes(endpoint.toLowerCase()));
+    const isAuthEndpoint = authEndpoints.some((endpoint) => requestUrl.includes(endpoint.toLowerCase()));
 
     // 401 hatası ve henüz retry edilmemişse ve auth endpoint değilse
     if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
@@ -80,22 +90,11 @@ api.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
 
-      const { user, logout } = useAuthStore.getState();
-
-      if (!user?.refreshToken) {
-        // Refresh token yoksa çıkış yap
-        logout();
-        if (typeof window !== 'undefined') {
-          window.location.href = '/login';
-        }
-        return Promise.reject(error);
-      }
-
       try {
         // Refresh token API çağrısı - döngüsel bağımlılığı önlemek için doğrudan axios kullan
         const response = await axios.post(
-          `${import.meta.env.VITE_API_URL}/Auth/RefreshToken`,
-          { refreshToken: user.refreshToken },
+          `${import.meta.env.VITE_API_URL}/auth/refresh-token`,
+          {},
           { withCredentials: true }
         );
 
@@ -104,7 +103,6 @@ api.interceptors.response.use(
           userId: response.data.data.userId,
           userName: response.data.data.userName,
           expiration: response.data.data.expiration,
-          refreshToken: response.data.data.refreshToken,
           permissions: response.data.data.permissions || []
         };
 
@@ -123,6 +121,7 @@ api.interceptors.response.use(
       } catch (refreshError) {
         // Refresh token başarısız, çıkış yap
         processQueue(refreshError as Error, null);
+        const { logout } = useAuthStore.getState();
         logout();
         if (typeof window !== 'undefined') {
           window.location.href = '/login';

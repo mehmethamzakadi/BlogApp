@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using AutoMapper;
 using BlogApp.Application.Features.Users.Commands.Create;
 using BlogApp.Application.Features.Users.Queries.GetById;
@@ -19,7 +20,16 @@ public sealed class UserProfile : Profile
 
         CreateMap<Paginate<User>, PaginatedListResponse<GetListUserResponse>>().ReverseMap();
 
-        CreateMap<User, GetPaginatedListByDynamicUsersResponse>().ReverseMap();
+        CreateMap<UserRole, GetPaginatedListByDynamicUserRoleResponse>()
+            .ConstructUsing(src => new GetPaginatedListByDynamicUserRoleResponse(
+                src.RoleId,
+                src.Role != null ? src.Role.Name : string.Empty
+            ));
+
+        CreateMap<User, GetPaginatedListByDynamicUsersResponse>()
+            .ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.UserRoles ?? new List<UserRole>()))
+            .ReverseMap()
+            .ForMember(dest => dest.UserRoles, opt => opt.Ignore());
         CreateMap<Paginate<User>, PaginatedListResponse<GetPaginatedListByDynamicUsersResponse>>().ReverseMap();
     }
 }

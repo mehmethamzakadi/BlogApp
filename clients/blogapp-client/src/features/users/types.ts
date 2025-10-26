@@ -8,6 +8,7 @@ export interface User {
   email: string;
   createdDate: string;
   isDeleted: boolean;
+  roles?: UserRole[];
 }
 
 export interface UserRole {

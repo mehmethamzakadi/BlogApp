@@ -1,6 +1,7 @@
 using BlogApp.Application.Abstractions;
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
+using BlogApp.Domain.Constants;
 using BlogApp.Domain.Events.CategoryEvents;
 using BlogApp.Domain.Repositories;
 using MediatR;
@@ -41,8 +42,8 @@ public sealed class UpdateCategoryCommandHandler(
         await categoryRepository.UpdateAsync(category);
 
         // ✅ Outbox Pattern için SaveChanges'dan ÖNCE domain event'i tetikle
-        var userId = currentUserService.GetCurrentUserId();
-        category.AddDomainEvent(new CategoryUpdatedEvent(category.Id, category.Name, userId ?? category.UpdatedById ?? Guid.Empty));
+    var actorId = currentUserService.GetCurrentUserId() ?? SystemUsers.SystemUserId;
+    category.AddDomainEvent(new CategoryUpdatedEvent(category.Id, category.Name, actorId));
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

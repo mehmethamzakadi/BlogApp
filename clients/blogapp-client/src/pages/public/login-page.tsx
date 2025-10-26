@@ -50,7 +50,6 @@ export function LoginPage() {
           userId: response.data.userId,
           userName: response.data.userName,
           expiration: response.data.expiration,
-          refreshToken: response.data.refreshToken,
           permissions: response.data.permissions || []
         },
         token: response.data.token

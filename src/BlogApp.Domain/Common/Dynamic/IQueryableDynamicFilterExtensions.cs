@@ -1,6 +1,5 @@
 using System.Linq;
 using System.Linq.Dynamic.Core;
-using System.Text;
 
 namespace BlogApp.Domain.Common.Dynamic;
 
@@ -43,10 +42,13 @@ public static class IQueryableDynamicFilterExtensions
     private static IQueryable<T> Filter<T>(IQueryable<T> queryable, Filter filter)
     {
         IList<Filter> filters = GetAllFilters(filter);
-        string?[] values = filters.Select(f => f.Value).ToArray();
         string where = Transform(filter, filters);
-        if (!string.IsNullOrEmpty(where) && values != null)
-            queryable = queryable.Where(where, values);
+
+        if (string.IsNullOrWhiteSpace(where))
+            return queryable;
+
+        object?[] parameters = filters.Select(f => (object?)f.Value).ToArray();
+        queryable = queryable.Where(where, parameters);
 
         return queryable;
     }
@@ -87,42 +89,62 @@ public static class IQueryableDynamicFilterExtensions
 
     public static string Transform(Filter filter, IList<Filter> filters)
     {
-        //tüm harfleri küçüğe çevir.
-        filter.Operator = filter.Operator.ToLower();
+        bool hasChildren = filter.Filters is not null && filter.Filters.Any();
+        if (hasChildren)
+        {
+            string? logic = filter.Logic;
+            if (string.IsNullOrWhiteSpace(logic))
+                throw new ArgumentException("Invalid Logic");
 
-        if (string.IsNullOrEmpty(filter.Field))
+            string logicNormalized = logic.ToLowerInvariant();
+            if (!_logics.Contains(logic) && !_logics.Contains(logicNormalized))
+                throw new ArgumentException("Invalid Logic");
+
+            string[] childExpressions = filter.Filters!
+                .Select(child => Transform(child, filters))
+                .Where(expression => !string.IsNullOrWhiteSpace(expression))
+                .ToArray();
+
+            if (childExpressions.Length == 0)
+                return string.Empty;
+
+            string joinedExpression = string.Join($" {logicNormalized} ", childExpressions);
+            return childExpressions.Length > 1 ? $"({joinedExpression})" : joinedExpression;
+        }
+
+        if (string.IsNullOrWhiteSpace(filter.Field))
             throw new ArgumentException("Invalid Field");
-        if (string.IsNullOrEmpty(filter.Operator) || !_operators.ContainsKey(filter.Operator))
+
+        string operatorToken = (filter.Operator ?? string.Empty).ToLowerInvariant();
+        if (!_operators.TryGetValue(operatorToken, out string? comparison))
             throw new ArgumentException("Invalid Operator");
 
+        string comparisonValue = comparison!;
+
         int index = filters.IndexOf(filter);
-        string comparison = _operators[filter.Operator];
-        StringBuilder where = new();
+        if (index < 0)
+            throw new ArgumentException("Filter could not be located in collection");
 
-        if (!string.IsNullOrEmpty(filter.Value))
+        if (operatorToken is not ("isnull" or "isnotnull") && string.IsNullOrWhiteSpace(filter.Value))
+            return string.Empty;
+
+        if (operatorToken == "doesnotcontain")
         {
-            if (filter.Operator == "doesnotcontain")
-                where.Append($"(!np({filter.Field}).ToLower().{comparison}(@{index.ToString()}))");
-            else if (comparison is "StartsWith" or "EndsWith" or "Contains")
-                where.Append($"(np({filter.Field}).ToLower().{comparison}(@{index.ToString()}))");
-            else
-                where.Append($"np({filter.Field}) {comparison} @{index.ToString()}");
-        }
-        else if (filter.Operator is "isnull" or "isnotnull")
-        {
-            where.Append($"np({filter.Field}) {comparison}");
+            string? loweredValue = filters[index].Value?.ToLowerInvariant();
+            filters[index].Value = loweredValue;
+            return $"(!np({filter.Field}).ToLower().Contains(@{index}))";
         }
 
-        if (filter.Logic is not null && filter.Filters is not null && filter.Filters.Any())
+        if (comparisonValue is "StartsWith" or "EndsWith" or "Contains")
         {
-            //tüm harfleri küçüğe çevir.
-            filter.Logic = filter.Logic.ToLower();
-
-            if (!_logics.Contains(filter.Logic))
-                throw new ArgumentException("Invalid Logic");
-            return $"{where} {filter.Logic} ({string.Join(separator: $" {filter.Logic} ", value: filter.Filters.Select(f => Transform(f, filters)).ToArray())})";
+            string? loweredValue = filters[index].Value?.ToLowerInvariant();
+            filters[index].Value = loweredValue;
+            return $"(np({filter.Field}).ToLower().{comparisonValue}(@{index}))";
         }
 
-        return where.ToString();
+        if (operatorToken is "isnull" or "isnotnull")
+            return $"np({filter.Field}) {comparisonValue}";
+
+        return $"np({filter.Field}) {comparisonValue} @{index}";
     }
 }

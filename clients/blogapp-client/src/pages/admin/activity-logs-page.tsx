@@ -69,7 +69,7 @@ function getActivityColor(activityType: string) {
 
 export function ActivityLogsPage() {
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(20);
+  const pageSize = 10;
   const [searchTerm, setSearchTerm] = useState('');
   const [activityTypeFilter, setActivityTypeFilter] = useState('');
   const [entityTypeFilter, setEntityTypeFilter] = useState('');
@@ -101,26 +101,26 @@ export function ActivityLogsPage() {
       });
     }
 
+    const filterDescriptor = filters.length === 0
+      ? undefined
+      : filters.length === 1
+        ? filters[0]
+        : {
+            field: '',
+            operator: '',
+            logic: 'and',
+            filters
+          } satisfies FilterDescriptor;
+
     return {
       paginatedRequest: {
         pageIndex: page - 1,
         pageSize: pageSize
       },
-      dynamicQuery: filters.length > 0 
-        ? {
-            sort: [{ field: 'Timestamp', dir: 'desc' }],
-            filter: filters.length === 1 
-              ? filters[0]
-              : {
-                  field: '',
-                  operator: 'and',
-                  logic: 'and',
-                  filters
-                }
-          }
-        : {
-            sort: [{ field: 'Timestamp', dir: 'desc' }]
-          }
+      dynamicQuery: {
+        sort: [{ field: 'Timestamp', dir: 'desc' }],
+        ...(filterDescriptor ? { filter: filterDescriptor } : {})
+      }
     };
   };
 
@@ -141,7 +141,7 @@ export function ActivityLogsPage() {
     setPage(1);
   };
 
-  const totalPages = data ? Math.ceil(data.count / pageSize) : 0;
+  const totalPages = data ? data.pages : 0;
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -193,7 +193,10 @@ export function ActivityLogsPage() {
 
             <select
               value={activityTypeFilter}
-              onChange={(e) => setActivityTypeFilter(e.target.value)}
+              onChange={(e) => {
+                setActivityTypeFilter(e.target.value);
+                setPage(1);
+              }}
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               {ACTIVITY_TYPES.map((type) => (
@@ -205,7 +208,10 @@ export function ActivityLogsPage() {
 
             <select
               value={entityTypeFilter}
-              onChange={(e) => setEntityTypeFilter(e.target.value)}
+              onChange={(e) => {
+                setEntityTypeFilter(e.target.value);
+                setPage(1);
+              }}
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               {ENTITY_TYPES.map((type) => (

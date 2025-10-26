@@ -1,6 +1,7 @@
 using BlogApp.Application.Abstractions;
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
+using BlogApp.Domain.Constants;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Events.PostEvents;
 using BlogApp.Domain.Repositories;
@@ -27,7 +28,7 @@ public sealed class CreatePostCommandHandler(
             return new ErrorResult("Geçersiz kategori seçildi!");
         }
 
-        var userId = currentUserService.GetCurrentUserId();
+        var actorId = currentUserService.GetCurrentUserId() ?? SystemUsers.SystemUserId;
 
         var post = new Post
         {
@@ -42,7 +43,7 @@ public sealed class CreatePostCommandHandler(
         await postRepository.AddAsync(post);
 
         // ✅ Outbox Pattern için SaveChanges'dan ÖNCE domain event'i tetikle
-        post.AddDomainEvent(new PostCreatedEvent(post.Id, post.Title, post.CategoryId, userId ?? post.CreatedById));
+    post.AddDomainEvent(new PostCreatedEvent(post.Id, post.Title, post.CategoryId, actorId));
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

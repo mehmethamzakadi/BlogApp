@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace BlogApp.Application.Features.Auths.Login;
 
 public sealed record LoginResponse(
@@ -5,5 +7,5 @@ public sealed record LoginResponse(
     string UserName,
     DateTime Expiration,
     string Token,
-    string RefreshToken,
+    [property: JsonIgnore] string RefreshToken,
     List<string> Permissions);

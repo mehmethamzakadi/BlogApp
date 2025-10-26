@@ -12,9 +12,12 @@ export async function register(request: RegisterRequest): Promise<ApiResult<null
   return normalizeApiResult<null>(response.data);
 }
 
-export async function refreshToken(token: string): Promise<ApiResult<LoginResponse>> {
-  const response = await api.post<ApiResult<LoginResponse>>('/auth/refresh-token', {
-    refreshToken: token
-  });
+export async function refreshSession(): Promise<ApiResult<LoginResponse>> {
+  const response = await api.post<ApiResult<LoginResponse>>('/auth/refresh-token');
   return normalizeApiResult<LoginResponse>(response.data);
+}
+
+export async function logout(): Promise<ApiResult<unknown>> {
+  const response = await api.post<ApiResult<unknown>>('/auth/logout');
+  return normalizeApiResult<unknown>(response.data);
 }
