@@ -9,7 +9,7 @@ using BlogApp.Domain.Events.UserEvents;
 
 namespace BlogApp.Infrastructure.Services.BackgroundServices.Outbox.Converters;
 
-internal interface IIntegrationEventConverterStrategy
+public interface IIntegrationEventConverterStrategy
 {
     string EventType { get; }
     object? Convert(string payload);

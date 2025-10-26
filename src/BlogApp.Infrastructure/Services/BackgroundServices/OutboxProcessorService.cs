@@ -90,7 +90,7 @@ public class OutboxProcessorService : BackgroundService
                         $"Bilinmeyen event tipi: {message.EventType}",
                         null,
                         cancellationToken);
-                    hasStatusUpdates = true;
+                    await PersistStatusChangesAsync(unitOfWork, message.Id, cancellationToken);
                     continue;
                 }
 
@@ -109,7 +109,7 @@ public class OutboxProcessorService : BackgroundService
                         conversionException.Message,
                         null,
                         cancellationToken);
-                    hasStatusUpdates = true;
+                    await PersistStatusChangesAsync(unitOfWork, message.Id, cancellationToken);
                     continue;
                 }
 
@@ -118,7 +118,7 @@ public class OutboxProcessorService : BackgroundService
                     await publishEndpoint.Publish(integrationEvent, cancellationToken);
 
                     await outboxRepository.MarkAsProcessedAsync(message.Id, cancellationToken);
-                    hasStatusUpdates = true;
+                    await PersistStatusChangesAsync(unitOfWork, message.Id, cancellationToken);
 
                     _logger.LogDebug("{MessageId} ID'li {EventType} türündeki outbox mesajı başarıyla yayınlandı",
                         message.Id, message.EventType);
@@ -132,7 +132,7 @@ public class OutboxProcessorService : BackgroundService
                         $"Event dönüştürülemedi: {message.EventType}",
                         null,
                         cancellationToken);
-                    hasStatusUpdates = true;
+                    await PersistStatusChangesAsync(unitOfWork, message.Id, cancellationToken);
                 }
             }
             catch (Exception ex)
@@ -146,7 +146,7 @@ public class OutboxProcessorService : BackgroundService
                         ex.Message,
                         null,
                         cancellationToken);
-                    hasStatusUpdates = true;
+                    await PersistStatusChangesAsync(unitOfWork, message.Id, cancellationToken);
                 }
                 else
                 {
@@ -178,6 +178,19 @@ public class OutboxProcessorService : BackgroundService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Outbox temizleme işlemi sırasında hata oluştu");
+        }
+    }
+
+    private async Task PersistStatusChangesAsync(Domain.Common.IUnitOfWork unitOfWork, Guid messageId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Outbox mesajı {MessageId} durum güncellemeleri kaydedilirken hata oluştu", messageId);
+            throw;
         }
     }
 }
