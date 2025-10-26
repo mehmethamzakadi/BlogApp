@@ -12,18 +12,15 @@ namespace BlogApp.Application.Features.Users.Commands.Update;
 public sealed class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, IResult>
 {
     private readonly IUserRepository _userRepository;
-    private readonly IMediator _mediator;
     private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
 
     public UpdateUserCommandHandler(
         IUserRepository userRepository,
-        IMediator mediator,
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork)
     {
         _userRepository = userRepository;
-        _mediator = mediator;
         _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
     }

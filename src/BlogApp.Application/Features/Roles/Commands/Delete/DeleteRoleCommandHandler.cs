@@ -11,18 +11,15 @@ namespace BlogApp.Application.Features.Roles.Commands.Delete;
 public sealed class DeleteRoleCommandHandler : IRequestHandler<DeleteRoleCommand, IResult>
 {
     private readonly IRoleRepository _roleRepository;
-    private readonly IMediator _mediator;
     private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
 
     public DeleteRoleCommandHandler(
         IRoleRepository roleRepository,
-        IMediator mediator,
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork)
     {
         _roleRepository = roleRepository;
-        _mediator = mediator;
         _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
     }

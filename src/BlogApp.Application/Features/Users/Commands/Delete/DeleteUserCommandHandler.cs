@@ -11,18 +11,15 @@ namespace BlogApp.Application.Features.Users.Commands.Delete;
 public sealed class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, IResult>
 {
     private readonly IUserRepository _userRepository;
-    private readonly IMediator _mediator;
     private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
 
     public DeleteUserCommandHandler(
         IUserRepository userRepository,
-        IMediator mediator,
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork)
     {
         _userRepository = userRepository;
-        _mediator = mediator;
         _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
     }
