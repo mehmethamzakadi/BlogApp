@@ -1,17 +1,94 @@
 import { useMemo, useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { Loader2 } from 'lucide-react';
 import { fetchPublishedPosts } from '../../features/posts/api';
 import { getAllCategories } from '../../features/categories/api';
 import { Button } from '../../components/ui/button';
-import { PostCard, PostCardSkeleton } from '../../components/posts/post-card';
-import { Loader2 } from 'lucide-react';
 import type { PostSummary } from '../../features/posts/types';
+
+function SimplePostCard({ post }: { post: PostSummary }) {
+  const hasThumbnail = Boolean(post.thumbnail);
+
+  const formattedDate = useMemo(() => {
+    if (!post?.createdDate) return null;
+    try {
+      const date = new Date(post.createdDate);
+      if (isNaN(date.getTime())) return null;
+      return new Intl.DateTimeFormat('tr-TR', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      }).format(date);
+    } catch {
+      return null;
+    }
+  }, [post?.createdDate]);
+
+  const readingInfo = useMemo(() => {
+    const text = post.body || post.summary || '';
+    const plainText = text.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    const words = plainText.split(' ').filter(Boolean);
+    const wordCount = words.length;
+    const readingMinutes = Math.max(1, Math.ceil(wordCount / 200));
+    return { readingMinutes };
+  }, [post.body, post.summary]);
+
+  const metaItems = useMemo(() => {
+    const items: string[] = [];
+    if (post.categoryName) {
+      items.push(post.categoryName);
+    }
+    if (formattedDate) {
+      items.push(formattedDate);
+    }
+    return items;
+  }, [post.categoryName, formattedDate]);
+
+  return (
+    <Link to={`/posts/${post.id}`} className="block h-full">
+      <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-border/60 bg-card transition-shadow duration-200 hover:shadow-sm md:flex-row">
+        <div className="relative h-44 w-full overflow-hidden border-b border-border/60 md:h-auto md:w-72 md:border-b-0 md:border-r">
+          {hasThumbnail ? (
+            <img src={post.thumbnail} alt={post.title} className="h-full w-full object-cover" />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-muted text-xs font-medium text-muted-foreground">
+              Görsel bulunmuyor
+            </div>
+          )}
+        </div>
+        <div className="flex flex-1 flex-col gap-3 p-5 md:p-6">
+          {metaItems.length > 0 && (
+            <p className="text-xs text-muted-foreground">{metaItems.join(' • ')}</p>
+          )}
+          <h3 className="text-lg font-semibold leading-snug text-foreground line-clamp-2 md:text-xl">{post.title}</h3>
+          <p className="text-sm text-muted-foreground line-clamp-3 md:flex-1">{post.summary}</p>
+          <span className="text-xs text-muted-foreground">{readingInfo.readingMinutes} dk okuma</span>
+        </div>
+      </article>
+    </Link>
+  );
+}
+
+function SimplePostSkeleton() {
+  return (
+    <div className="flex h-full animate-pulse flex-col overflow-hidden rounded-2xl border border-border/60 bg-muted/30 md:flex-row">
+      <div className="h-44 w-full bg-muted md:h-auto md:w-72" />
+      <div className="flex flex-1 flex-col gap-4 p-5 md:p-6">
+        <div className="h-3 w-24 rounded bg-muted/60" />
+        <div className="h-5 w-3/4 rounded bg-muted/60" />
+        <div className="h-3 w-full rounded bg-muted/60" />
+        <div className="h-3 w-2/3 rounded bg-muted/60" />
+      </div>
+    </div>
+  );
+}
 
 export function HomePage() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [allPosts, setAllPosts] = useState<PostSummary[]>([]);
-  const pageSize = 10; // İlk yüklemede 10 post (1 featured + 9 grid)
+  const pageSize = 10; // İlk yüklemede 10 gönderi getir
 
   const { data: categories, isLoading: isCategoriesLoading } = useQuery({
     queryKey: ['categories', 'all'],
@@ -66,105 +143,85 @@ export function HomePage() {
 
   const hasMore = posts ? (currentPage + 1) * pageSize < posts.count : false;
   const postItems = allPosts;
+  const totalPosts = posts?.count ?? 0;
+  const description = activeCategory === null
+    ? 'BlogApp yazarlarının en güncel paylaşımlarını keşfet.'
+    : `${activeCategoryName} kategorisindeki yazılara göz at.`;
 
   return (
-    <div className="relative min-h-screen bg-background">
-      {/* Background Effects */}
-      <div
-        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(120%_120%_at_50%_0%,hsl(var(--primary)_/_0.05)_0%,transparent_55%)]"
-        aria-hidden
-      />
-      
-      {/* Content Container */}
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="space-y-16">
-          <section className="space-y-10" id="posts">
-            <div className="flex flex-wrap items-end justify-between gap-6">
-              <div className="space-y-2">
-                <h2 className="text-3xl font-semibold tracking-tight text-foreground">Öne çıkan yazılar</h2>
-                <p className="text-muted-foreground">
-                  {activeCategory === null
-                    ? 'Tüm kategorilerden en yeni içerikleri keşfedin.'
-                    : `${activeCategoryName} kategorisindeki güncel gönderileri keşfedin.`}
-                </p>
-              </div>
-              <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border/60 bg-background font-semibold text-foreground">
-                  {posts?.count ?? 0}
-                </span>
-                toplam yayınlanmış yazı
-              </div>
+    <div className="bg-background">
+      <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+        <div className="space-y-12">
+          <header className="space-y-3">
+            <h1 className="text-3xl font-semibold text-foreground sm:text-4xl">BlogApp</h1>
+            <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">{description}</p>
+          </header>
+
+          <section className="space-y-3">
+            <h2 className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground/80">Kategoriler</h2>
+            <div className="flex flex-wrap gap-2">
+              {isCategoriesLoading
+                ? Array.from({ length: 6 }).map((_, index) => (
+                    <div key={index} className="h-9 w-20 animate-pulse rounded-full bg-muted/60" />
+                  ))
+                : categoryOptions.map((option) => {
+                    const isActive = option.id === activeCategory;
+                    return (
+                      <Button
+                        key={option.id ?? 'all'}
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        data-active={isActive}
+                        className="rounded-full border border-transparent px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-border hover:bg-muted/40 hover:text-foreground data-[active=true]:border-border data-[active=true]:bg-muted/70 data-[active=true]:text-foreground"
+                        aria-pressed={isActive}
+                        onClick={() => handleCategoryChange(option.id)}
+                      >
+                        {option.name}
+                      </Button>
+                    );
+                  })}
+            </div>
+          </section>
+
+          <section className="space-y-6" id="posts">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-2xl font-semibold text-foreground sm:text-3xl">Son yazılar</h2>
+              <span className="text-sm text-muted-foreground">{totalPosts} yazı</span>
             </div>
 
-        <div className="flex flex-wrap gap-3">
-          {isCategoriesLoading
-            ? Array.from({ length: 6 }).map((_, index) => (
-                <div key={index} className="h-10 w-24 animate-pulse rounded-full bg-muted/60" />
-              ))
-            : categoryOptions.map((option) => {
-                const isActive = option.id === activeCategory;
-                return (
-                  <Button
-                    key={option.id ?? 'all'}
-                    variant={isActive ? 'default' : 'ghost'}
-                    className="rounded-full border border-border/60 bg-background/80 text-sm font-medium text-muted-foreground transition-colors hover:border-border/80 hover:bg-muted/40 hover:text-foreground"
-                    type="button"
-                    aria-pressed={isActive}
-                    onClick={() => handleCategoryChange(option.id)}
-                  >
-                    {option.name}
-                  </Button>
-                );
-              })}
-        </div>
-
-        {isPostsError && (
-          <div className="rounded-2xl border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
-            Gönderiler yüklenirken bir sorun oluştu. Lütfen daha sonra tekrar deneyin.
-          </div>
-        )}
-
-        {isPostsLoading ? (
-          <div className="space-y-8">
-            {/* Featured Post Skeleton */}
-            <PostCardSkeleton variant="featured" />
-            
-            {/* Grid Posts Skeleton */}
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, index) => (
-                <PostCardSkeleton key={index} variant="compact" />
-              ))}
-            </div>
-          </div>
-        ) : postItems.length === 0 ? (
-          <div className="rounded-3xl border border-border/50 bg-muted/20 p-10 text-center text-muted-foreground">
-            Bu kategoride henüz yayınlanmış gönderi bulunmuyor. Çok yakında yeni içerikler eklenecek!
-          </div>
-        ) : (
-          <div className="space-y-8">
-            {/* Featured Post - İlk Post */}
-            {postItems.length > 0 && (
-              <PostCard post={postItems[0]} variant="featured" />
+            {isPostsError && (
+              <div className="rounded-2xl border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
+                Gönderiler yüklenirken bir sorun oluştu. Lütfen daha sonra tekrar deneyin.
+              </div>
             )}
-            
-            {/* Grid Posts - Kalan Postlar */}
-            {postItems.length > 1 && (
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {postItems.slice(1).map((post) => (
-                  <PostCard key={post.id} post={post} variant="compact" />
+
+            {isPostsLoading ? (
+              <div className="space-y-4">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <SimplePostSkeleton key={index} />
+                ))}
+              </div>
+            ) : postItems.length === 0 ? (
+              <div className="rounded-2xl border border-border/60 bg-muted/20 p-10 text-center text-sm text-muted-foreground">
+                Bu kategoride henüz yayınlanmış gönderi bulunmuyor.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {postItems.map((post) => (
+                  <SimplePostCard key={post.id} post={post} />
                 ))}
               </div>
             )}
 
-            {/* Load More Button */}
             {hasMore && (
-              <div className="flex justify-center pt-4">
+              <div className="flex justify-center">
                 <Button
                   onClick={handleLoadMore}
                   disabled={isFetching}
                   size="lg"
                   variant="outline"
-                  className="group rounded-full border-2 border-border/60 bg-background/80 px-8 py-6 text-base font-semibold transition-all hover:border-primary/60 hover:bg-primary/10 hover:shadow-lg disabled:opacity-50"
+                  className="rounded-full px-6"
                 >
                   {isFetching ? (
                     <>
@@ -172,19 +229,12 @@ export function HomePage() {
                       Yükleniyor...
                     </>
                   ) : (
-                    <>
-                      Daha Fazla Göster
-                      <span className="ml-2 text-sm text-muted-foreground">
-                        ({posts?.count ? posts.count - postItems.length : 0} yazı daha)
-                      </span>
-                    </>
+                    'Daha Fazla Göster'
                   )}
                 </Button>
               </div>
             )}
-          </div>
-        )}
-      </section>
+          </section>
         </div>
       </div>
     </div>
