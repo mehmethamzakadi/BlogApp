@@ -10,8 +10,8 @@ public class UserRoleSeed : IEntityTypeConfiguration<UserRole>
     {
         builder.HasData(new UserRole
         {
-            UserId = 1,
-            RoleId = 1,
+            UserId = Guid.Parse("00000000-0000-0000-0000-000000000001"),
+            RoleId = Guid.Parse("20000000-0000-0000-0000-000000000001"),
             AssignedDate = DateTime.UtcNow
         });
     }

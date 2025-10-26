@@ -33,7 +33,7 @@ export function RolesPage() {
   const [editingRole, setEditingRole] = useState<Role | null>(null);
   const [roleToDelete, setRoleToDelete] = useState<Role | null>(null);
   const [assigningPermissionsRole, setAssigningPermissionsRole] = useState<Role | null>(null);
-  const [selectedPermissions, setSelectedPermissions] = useState<number[]>([]);
+  const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
 
   const rolesQuery = useQuery({
     queryKey: ['roles', page, pageSize],
@@ -59,11 +59,6 @@ export function RolesPage() {
 
   const columns = useMemo<ColumnDef<Role>[]>(
     () => [
-      {
-        accessorKey: 'id',
-        header: 'ID',
-        cell: ({ row }) => <span className="font-mono text-xs text-muted-foreground">#{row.original.id}</span>
-      },
       {
         accessorKey: 'name',
         header: 'Rol Adı',
@@ -125,7 +120,7 @@ export function RolesPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (roleId: number) => deleteRole(roleId),
+    mutationFn: (roleId: string) => deleteRole(roleId),
     onSuccess: () => {
       toast.success('Rol başarıyla silindi');
       setRoleToDelete(null);
@@ -135,7 +130,7 @@ export function RolesPage() {
   });
 
   const assignPermissionsMutation = useMutation({
-    mutationFn: (data: { roleId: number; permissionIds: number[] }) => assignPermissionsToRole(data),
+    mutationFn: (data: { roleId: string; permissionIds: string[] }) => assignPermissionsToRole(data),
     onSuccess: () => {
       toast.success('Yetkiler başarıyla atandı');
       setAssigningPermissionsRole(null);
@@ -170,7 +165,7 @@ export function RolesPage() {
     });
   };
 
-  const togglePermission = (permissionId: number) => {
+  const togglePermission = (permissionId: string) => {
     setSelectedPermissions((prev) =>
       prev.includes(permissionId) ? prev.filter((id) => id !== permissionId) : [...prev, permissionId]
     );

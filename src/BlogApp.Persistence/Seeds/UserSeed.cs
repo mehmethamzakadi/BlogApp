@@ -11,7 +11,7 @@ public class UserSeed : IEntityTypeConfiguration<User>
     {
         var user = new User
         {
-            Id = 1,
+            Id = Guid.Parse("00000000-0000-0000-0000-000000000001"),
             Email = "admin@admin.com",
             NormalizedEmail = "ADMIN@ADMIN.COM",
             UserName = "admin",
@@ -23,6 +23,7 @@ public class UserSeed : IEntityTypeConfiguration<User>
             SecurityStamp = Guid.Parse("b1a1d25f-8a7e-4e9a-bc55-8dca5bfa1234").ToString(),
             ConcurrencyStamp = Guid.NewGuid().ToString(),
             AccessFailedCount = 0,
+            CreatedById = Guid.Empty,
             CreatedDate = DateTime.UtcNow,
             PasswordHash = string.Empty // Will be set below
         };

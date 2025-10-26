@@ -1,8 +1,9 @@
 import { PaginatedListResponse } from '../../types/api';
 
 export interface Category {
-  id: number;
+  id: string;
   name: string;
+  createdDate: string;
 }
 
 export type CategoryListResponse = PaginatedListResponse<Category>;

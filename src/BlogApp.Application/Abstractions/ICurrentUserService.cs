@@ -9,5 +9,5 @@ public interface ICurrentUserService
     /// Mevcut kimliği doğrulanmış kullanıcının ID'sini getirir
     /// </summary>
     /// <returns>Kimlik doğrulanmışsa kullanıcı ID'si, aksi takdirde null</returns>
-    int? GetCurrentUserId();
+    Guid? GetCurrentUserId();
 }

@@ -6,7 +6,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
 export interface Activity {
-  id: number;
+  id: string;
   activityType: string;
   title: string;
   timestamp: Date | string;

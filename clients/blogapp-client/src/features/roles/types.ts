@@ -1,10 +1,11 @@
 import { PaginatedListResponse } from '../../types/api';
 
 export interface Role {
-  id: number;
+  id: string;
   name: string;
   normalizedName?: string;
   concurrencyStamp?: string;
+  createdDate: string;
 }
 
 export type RoleListResponse = PaginatedListResponse<Role>;
@@ -14,7 +15,7 @@ export interface RoleFormValues {
 }
 
 export interface RoleUpdateFormValues {
-  id: number;
+  id: string;
   name: string;
 }
 

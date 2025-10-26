@@ -26,7 +26,7 @@ public class PermissionController(IMediator mediator) : BaseApiController(mediat
     /// </summary>
     [HttpGet("role/{roleId}")]
     [HasPermission(Permissions.RolesRead)]
-    public async Task<IActionResult> GetRolePermissions([FromRoute] int roleId)
+    public async Task<IActionResult> GetRolePermissions([FromRoute] Guid roleId)
     {
         var response = await Mediator.Send(new GetRolePermissionsQuery(roleId));
         return Ok(response);
@@ -37,7 +37,7 @@ public class PermissionController(IMediator mediator) : BaseApiController(mediat
     /// </summary>
     [HttpPost("role/{roleId}")]
     [HasPermission(Permissions.RolesAssignPermissions)]
-    public async Task<IActionResult> AssignPermissionsToRole([FromRoute] int roleId, [FromBody] AssignPermissionsToRoleCommand command)
+    public async Task<IActionResult> AssignPermissionsToRole([FromRoute] Guid roleId, [FromBody] AssignPermissionsToRoleCommand command)
     {
         if (roleId != command.RoleId)
             return BadRequest("ID mismatch");

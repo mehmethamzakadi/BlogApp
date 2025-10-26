@@ -1,7 +1,7 @@
 import { PaginatedListResponse } from '../../types/api';
 
 export interface User {
-  id: number;
+  id: string;
   firstName: string;
   lastName: string;
   userName: string;
@@ -11,12 +11,12 @@ export interface User {
 }
 
 export interface UserRole {
-  id: number;
+  id: string;
   name: string;
 }
 
 export interface UserRolesResponse {
-  userId: number;
+  userId: string;
   userName: string;
   email: string;
   roles: UserRole[];
@@ -31,14 +31,14 @@ export interface UserFormValues {
 }
 
 export interface UserUpdateFormValues {
-  id: number;
+  id: string;
   userName: string;
   email: string;
 }
 
 export interface AssignRolesFormValues {
-  userId: number;
-  roleIds: number[];
+  userId: string;
+  roleIds: string[];
 }
 
 export interface UserTableFilters {

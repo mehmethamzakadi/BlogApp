@@ -9,53 +9,54 @@ namespace BlogApp.Persistence.Seeds
         public void Configure(EntityTypeBuilder<Category> builder)
         {
             var createdDate = new DateTime(2025, 10, 23);
+            var adminUserId = Guid.Parse("00000000-0000-0000-0000-000000000001");
 
             builder.HasData(
                 new Category
                 {
-                    Id = 1,
+                    Id = Guid.Parse("10000000-0000-0000-0000-000000000001"),
                     Name = "ASP .NET Core",
-                    CreatedById = 1,
+                    CreatedById = adminUserId,
                     CreatedDate = createdDate,
                     IsDeleted = false
                 },
                 new Category
                 {
-                    Id = 2,
+                    Id = Guid.Parse("10000000-0000-0000-0000-000000000002"),
                     Name = "Entity Framework Core",
-                    CreatedById = 1,
+                    CreatedById = adminUserId,
                     CreatedDate = createdDate,
                     IsDeleted = false
                 },
                 new Category
                 {
-                    Id = 3,
+                    Id = Guid.Parse("10000000-0000-0000-0000-000000000003"),
                     Name = "Docker",
-                    CreatedById = 1,
+                    CreatedById = adminUserId,
                     CreatedDate = createdDate,
                     IsDeleted = false
                 },
                 new Category
                 {
-                    Id = 4,
+                    Id = Guid.Parse("10000000-0000-0000-0000-000000000004"),
                     Name = "RabbitMQ",
-                    CreatedById = 1,
+                    CreatedById = adminUserId,
                     CreatedDate = createdDate,
                     IsDeleted = false
                 },
                 new Category
                 {
-                    Id = 5,
+                    Id = Guid.Parse("10000000-0000-0000-0000-000000000005"),
                     Name = "Redis",
-                    CreatedById = 1,
+                    CreatedById = adminUserId,
                     CreatedDate = createdDate,
                     IsDeleted = false
                 },
                 new Category
                 {
-                    Id = 6,
+                    Id = Guid.Parse("10000000-0000-0000-0000-000000000006"),
                     Name = "Clean Architecture",
-                    CreatedById = 1,
+                    CreatedById = adminUserId,
                     CreatedDate = createdDate,
                     IsDeleted = false
                 });

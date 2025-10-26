@@ -9,11 +9,11 @@ namespace BlogApp.Domain.Events.RoleEvents;
 [StoreInOutbox]
 public class RoleUpdatedEvent : DomainEvent
 {
-    public int RoleId { get; }
+    public Guid RoleId { get; }
     public string RoleName { get; }
-    public int? UpdatedById { get; }
+    public Guid? UpdatedById { get; }
 
-    public RoleUpdatedEvent(int roleId, string roleName, int? updatedById)
+    public RoleUpdatedEvent(Guid roleId, string roleName, Guid? updatedById)
     {
         RoleId = roleId;
         RoleName = roleName;

@@ -4,5 +4,5 @@ using MediatR;
 
 namespace BlogApp.Application.Features.Posts.Queries.GetListByCategoryId;
 
-public sealed record GetListPostByCategoryIdQuery(PaginatedRequest PageRequest, int CategoryId)
+public sealed record GetListPostByCategoryIdQuery(PaginatedRequest PageRequest, Guid CategoryId)
     : IRequest<PaginatedListResponse<GetListPostByCategoryIdResponse>>;

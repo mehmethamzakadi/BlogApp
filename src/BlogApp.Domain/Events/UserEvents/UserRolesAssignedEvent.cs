@@ -9,12 +9,12 @@ namespace BlogApp.Domain.Events.UserEvents;
 [StoreInOutbox]
 public class UserRolesAssignedEvent : DomainEvent
 {
-    public int UserId { get; }
+    public Guid UserId { get; }
     public string UserName { get; }
     public IReadOnlyList<string> RoleNames { get; }
-    public int? AssignedById { get; }
+    public Guid? AssignedById { get; }
 
-    public UserRolesAssignedEvent(int userId, string userName, IReadOnlyList<string> roleNames, int? assignedById)
+    public UserRolesAssignedEvent(Guid userId, string userName, IReadOnlyList<string> roleNames, Guid? assignedById)
     {
         UserId = userId;
         UserName = userName;

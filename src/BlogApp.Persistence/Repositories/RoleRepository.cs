@@ -21,7 +21,7 @@ public sealed class RoleRepository : EfRepositoryBase<Role, BlogAppDbContext>, I
         return await _dbContext.Roles.ToPaginateAsync(index, size, cancellationToken);
     }
 
-    public Role? GetRoleById(int id)
+    public Role? GetRoleById(Guid id)
     {
         // ✅ Tracking enabled - Entity will be tracked by EF Core
         // This allows domain events to be properly captured and processed

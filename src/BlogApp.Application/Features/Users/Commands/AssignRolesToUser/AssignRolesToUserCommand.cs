@@ -5,6 +5,6 @@ namespace BlogApp.Application.Features.Users.Commands.AssignRolesToUser;
 
 public class AssignRolesToUserCommand : IRequest<IResult>
 {
-    public int UserId { get; set; }
-    public List<int> RoleIds { get; set; } = new();
+    public Guid UserId { get; set; }
+    public List<Guid> RoleIds { get; set; } = new();
 }

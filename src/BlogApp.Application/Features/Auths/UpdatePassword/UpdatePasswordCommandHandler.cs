@@ -11,7 +11,7 @@ public sealed class UpdatePasswordCommandHandler(IUserRepository userRepository)
         if (!request.Password.Equals(request.PasswordConfirm))
             throw new PasswordChangeFailedException("Girilen şifre aynı değil, lütfen şifreyi doğrulayınız!");
 
-        await userRepository.UpdatePasswordAsync(int.Parse(request.UserId), request.ResetToken, request.Password);
+        await userRepository.UpdatePasswordAsync(Guid.Parse(request.UserId), request.ResetToken, request.Password);
         return new();
     }
 }

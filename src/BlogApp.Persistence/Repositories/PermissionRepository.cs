@@ -11,7 +11,7 @@ public class PermissionRepository : EfRepositoryBase<Permission, BlogAppDbContex
     {
     }
 
-    public async Task<List<Permission>> GetPermissionsByRoleIdsAsync(List<int> roleIds, CancellationToken cancellationToken = default)
+    public async Task<List<Permission>> GetPermissionsByRoleIdsAsync(List<Guid> roleIds, CancellationToken cancellationToken = default)
     {
         return await Context.RolePermissions
             .Where(rp => roleIds.Contains(rp.RoleId))
@@ -28,14 +28,14 @@ public class PermissionRepository : EfRepositoryBase<Permission, BlogAppDbContex
             .FirstOrDefaultAsync(p => p.NormalizedName == normalizedName && !p.IsDeleted, cancellationToken);
     }
 
-    public async Task<List<RolePermission>> GetRolePermissionsAsync(int roleId, CancellationToken cancellationToken = default)
+    public async Task<List<RolePermission>> GetRolePermissionsAsync(Guid roleId, CancellationToken cancellationToken = default)
     {
         return await Context.RolePermissions
             .Where(rp => rp.RoleId == roleId)
             .ToListAsync(cancellationToken);
     }
 
-    public async Task AssignPermissionsToRoleAsync(int roleId, List<int> permissionIds, CancellationToken cancellationToken = default)
+    public async Task AssignPermissionsToRoleAsync(Guid roleId, List<Guid> permissionIds, CancellationToken cancellationToken = default)
     {
         // Var olan permission'ları sil
         var existingPermissions = await Context.RolePermissions

@@ -11,7 +11,7 @@ public interface IPermissionRepository : IAsyncRepository<Permission>, IReposito
     /// <summary>
     /// Belirli rol ID'lerine ait tüm permission'ları getirir
     /// </summary>
-    Task<List<Permission>> GetPermissionsByRoleIdsAsync(List<int> roleIds, CancellationToken cancellationToken = default);
+    Task<List<Permission>> GetPermissionsByRoleIdsAsync(List<Guid> roleIds, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// İsme göre permission getirir
@@ -21,10 +21,10 @@ public interface IPermissionRepository : IAsyncRepository<Permission>, IReposito
     /// <summary>
     /// Role ait permission'ları getirir
     /// </summary>
-    Task<List<RolePermission>> GetRolePermissionsAsync(int roleId, CancellationToken cancellationToken = default);
+    Task<List<RolePermission>> GetRolePermissionsAsync(Guid roleId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Bir role permission atar (tüm eski permission'ları replace eder)
     /// </summary>
-    Task AssignPermissionsToRoleAsync(int roleId, List<int> permissionIds, CancellationToken cancellationToken = default);
+    Task AssignPermissionsToRoleAsync(Guid roleId, List<Guid> permissionIds, CancellationToken cancellationToken = default);
 }

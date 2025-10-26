@@ -1,4 +1,3 @@
-
 using FluentValidation;
 
 namespace BlogApp.Application.Features.Posts.Commands.Create
@@ -22,7 +21,7 @@ namespace BlogApp.Application.Features.Posts.Commands.Create
                .MaximumLength(400).WithMessage("Özet bilgisi 400 karakterden fazla olmamalıdır!");
 
             RuleFor(c => c.CategoryId)
-                .GreaterThan(0).WithMessage("Geçerli bir kategori seçilmelidir!");
+                .NotEmpty().WithMessage("Geçerli bir kategori seçilmelidir!");
         }
     }
 }

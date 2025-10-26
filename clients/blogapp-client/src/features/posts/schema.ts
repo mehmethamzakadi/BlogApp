@@ -12,7 +12,7 @@ export const postSchema = z.object({
       'Geçerli bir URL girin'
     ),
   isPublished: z.boolean(),
-  categoryId: z.number().int().positive('Kategori seçilmelidir')
+  categoryId: z.string().min(1, 'Kategori seçilmelidir')
 });
 
 export type PostFormSchema = z.infer<typeof postSchema>;

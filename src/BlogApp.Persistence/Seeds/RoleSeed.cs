@@ -11,23 +11,26 @@ public class RoleSeed : IEntityTypeConfiguration<Role>
         builder.HasData(
             new Role
             {
-                Id = 1,
+                Id = Guid.Parse("20000000-0000-0000-0000-000000000001"),
                 Name = "Admin",
                 NormalizedName = "ADMIN",
+                CreatedById = Guid.Empty,
                 CreatedDate = DateTime.UtcNow
             },
             new Role
             {
-                Id = 2,
+                Id = Guid.Parse("20000000-0000-0000-0000-000000000002"),
                 Name = "User",
                 NormalizedName = "USER",
+                CreatedById = Guid.Empty,
                 CreatedDate = DateTime.UtcNow
             },
             new Role
             {
-                Id = 3,
+                Id = Guid.Parse("20000000-0000-0000-0000-000000000003"),
                 Name = "Moderator",
                 NormalizedName = "MODERATOR",
+                CreatedById = Guid.Empty,
                 CreatedDate = DateTime.UtcNow
             });
     }

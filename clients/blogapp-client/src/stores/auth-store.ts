@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 export interface AuthUser {
-  userId: number;
+  userId: string;
   userName: string;
   expiration: string;
   refreshToken: string;

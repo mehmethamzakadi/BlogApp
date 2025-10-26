@@ -3,4 +3,4 @@ using MediatR;
 
 namespace BlogApp.Application.Features.Users.Commands.Update;
 
-public sealed record UpdateUserCommand(int Id, string UserName, string Email) : IRequest<IResult>;
+public sealed record UpdateUserCommand(Guid Id, string UserName, string Email) : IRequest<IResult>;

@@ -12,7 +12,7 @@ export async function fetchAllPermissions(): Promise<AllPermissionsResponse> {
   return result.data;
 }
 
-export async function fetchRolePermissions(roleId: number): Promise<RolePermissionsResponse> {
+export async function fetchRolePermissions(roleId: string): Promise<RolePermissionsResponse> {
   const response = await api.get<ApiResult<RolePermissionsResponse>>(`/permission/role/${roleId}`);
   const result = normalizeApiResult<RolePermissionsResponse>(response.data);
   return result.data;

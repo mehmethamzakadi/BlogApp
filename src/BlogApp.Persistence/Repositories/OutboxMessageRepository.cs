@@ -32,7 +32,7 @@ public class OutboxMessageRepository : EfRepositoryBase<OutboxMessage, BlogAppDb
             .ToListAsync(cancellationToken);
     }
 
-    public async Task MarkAsProcessedAsync(int messageId, CancellationToken cancellationToken = default)
+    public async Task MarkAsProcessedAsync(Guid messageId, CancellationToken cancellationToken = default)
     {
         var message = await GetAsync(m => m.Id == messageId, cancellationToken: cancellationToken);
         if (message != null)
@@ -43,7 +43,7 @@ public class OutboxMessageRepository : EfRepositoryBase<OutboxMessage, BlogAppDb
         }
     }
 
-    public async Task MarkAsFailedAsync(int messageId, string error, DateTime? nextRetryAt = null, CancellationToken cancellationToken = default)
+    public async Task MarkAsFailedAsync(Guid messageId, string error, DateTime? nextRetryAt = null, CancellationToken cancellationToken = default)
     {
         var message = await GetAsync(m => m.Id == messageId, cancellationToken: cancellationToken);
         if (message != null)

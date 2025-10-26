@@ -47,7 +47,7 @@ export function PostsPage() {
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [sorting, setSorting] = useState<SortingState>([
-    { id: 'id', desc: true }
+    { id: 'createdDate', desc: true }
   ]);
   const [postToDelete, setPostToDelete] = useState<Post | null>(null);
 
@@ -99,12 +99,6 @@ export function PostsPage() {
 
   const columns = useMemo<ColumnDef<Post>[]>(
     () => [
-      {
-        accessorKey: 'id',
-        header: 'ID',
-        cell: ({ row }) => <span className="font-mono text-xs text-muted-foreground">#{row.original.id}</span>,
-        enableSorting: true
-      },
       {
         accessorKey: 'title',
         header: ({ column }) => (
@@ -203,7 +197,7 @@ export function PostsPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (postId: number) => deletePost(postId),
+    mutationFn: (postId: string) => deletePost(postId),
     onSuccess: (result) => {
       if (!result.success) {
         showApiResponseError(result, 'Gönderi silinemedi');

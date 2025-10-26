@@ -9,11 +9,11 @@ namespace BlogApp.Domain.Events.RoleEvents;
 [StoreInOutbox]
 public class RoleCreatedEvent : DomainEvent
 {
-    public int RoleId { get; }
+    public Guid RoleId { get; }
     public string RoleName { get; }
-    public int? CreatedById { get; }
+    public Guid? CreatedById { get; }
 
-    public RoleCreatedEvent(int roleId, string roleName, int? createdById)
+    public RoleCreatedEvent(Guid roleId, string roleName, Guid? createdById)
     {
         RoleId = roleId;
         RoleName = roleName;

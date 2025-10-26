@@ -18,12 +18,12 @@ public interface IOutboxMessageRepository : IAsyncRepository<OutboxMessage>, IRe
     /// <summary>
     /// Mesajı işlenmiş olarak işaretle
     /// </summary>
-    Task MarkAsProcessedAsync(int messageId, CancellationToken cancellationToken = default);
+    Task MarkAsProcessedAsync(Guid messageId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Mesajı hata detaylarıyla birlikte başarısız olarak işaretle
     /// </summary>
-    Task MarkAsFailedAsync(int messageId, string error, DateTime? nextRetryAt = null, CancellationToken cancellationToken = default);
+    Task MarkAsFailedAsync(Guid messageId, string error, DateTime? nextRetryAt = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Eski işlenmiş mesajları temizle (saklama politikası)

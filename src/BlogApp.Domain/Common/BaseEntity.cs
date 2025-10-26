@@ -8,7 +8,7 @@ namespace BlogApp.Domain.Common;
 /// </summary>
 public abstract class BaseEntity : IEntityTimestamps, IHasDomainEvents
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
     /// <summary>
     /// Entity'nin oluşturulma tarihi
@@ -18,7 +18,7 @@ public abstract class BaseEntity : IEntityTimestamps, IHasDomainEvents
     /// <summary>
     /// Entity'yi oluşturan kullanıcının ID'si
     /// </summary>
-    public int CreatedById { get; set; }
+    public Guid CreatedById { get; set; }
 
     /// <summary>
     /// Entity'nin son güncellenme tarihi
@@ -28,7 +28,7 @@ public abstract class BaseEntity : IEntityTimestamps, IHasDomainEvents
     /// <summary>
     /// Entity'yi son güncelleyen kullanıcının ID'si
     /// </summary>
-    public int? UpdatedById { get; set; }
+    public Guid? UpdatedById { get; set; }
 
     /// <summary>
     /// Soft delete için işaretleme (fiziksel silme yerine)

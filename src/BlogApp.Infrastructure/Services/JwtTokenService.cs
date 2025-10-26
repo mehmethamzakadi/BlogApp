@@ -57,11 +57,11 @@ public sealed class JwtTokenService : ITokenService
             .ToList();
 
         var tokenResponse = new LoginResponse(
-            UserId: user.Id,
-            UserName: user.UserName,
-            Expiration: token.ValidTo,
-            Token: new JwtSecurityTokenHandler().WriteToken(token),
-            RefreshToken: refreshToken,
+     UserId: user.Id,
+    UserName: user.UserName,
+ Expiration: token.ValidTo,
+        Token: new JwtSecurityTokenHandler().WriteToken(token),
+      RefreshToken: refreshToken,
             Permissions: permissions);
 
         return tokenResponse;

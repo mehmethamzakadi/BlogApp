@@ -9,12 +9,12 @@ namespace BlogApp.Domain.Events.PermissionEvents;
 [StoreInOutbox]
 public class PermissionsAssignedToRoleEvent : DomainEvent
 {
-    public int RoleId { get; }
+    public Guid RoleId { get; }
     public string RoleName { get; }
     public IReadOnlyList<string> PermissionNames { get; }
-    public int? AssignedById { get; }
+    public Guid? AssignedById { get; }
 
-    public PermissionsAssignedToRoleEvent(int roleId, string roleName, IReadOnlyList<string> permissionNames, int? assignedById)
+    public PermissionsAssignedToRoleEvent(Guid roleId, string roleName, IReadOnlyList<string> permissionNames, Guid? assignedById)
     {
         RoleId = roleId;
         RoleName = roleName;

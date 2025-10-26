@@ -22,7 +22,7 @@ export async function createCategory(values: CategoryFormValues) {
   return normalizeApiResult(response.data);
 }
 
-export async function updateCategory(id: number, values: CategoryFormValues) {
+export async function updateCategory(id: string, values: CategoryFormValues) {
   const response = await api.put<ApiResult>(`/category/${id}`, {
     Id: id,
     Name: values.name
@@ -30,7 +30,7 @@ export async function updateCategory(id: number, values: CategoryFormValues) {
   return normalizeApiResult(response.data);
 }
 
-export async function deleteCategory(id: number) {
+export async function deleteCategory(id: string) {
   const response = await api.delete<ApiResult>(`/category/${id}`);
   return normalizeApiResult(response.data);
 }

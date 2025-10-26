@@ -31,8 +31,8 @@ export function CreatePostPage() {
   const { invalidatePosts } = useInvalidateQueries();
   const [hasSaved, setHasSaved] = useState(false);
   const { postId: postIdParam } = useParams<{ postId?: string }>();
-  const postId = postIdParam ? Number(postIdParam) : undefined;
-  const isEditMode = postId !== undefined && !Number.isNaN(postId);
+  const postId = postIdParam;
+  const isEditMode = postId !== undefined;
 
   const categoriesQuery = useQuery<Category[]>({
     queryKey: ['categories-options'],
@@ -46,7 +46,7 @@ export function CreatePostPage() {
     retry: false
   });
 
-  const defaultCategoryId = useMemo(() => categoriesQuery.data?.[0]?.id ?? 0, [categoriesQuery.data]);
+  const defaultCategoryId = useMemo(() => categoriesQuery.data?.[0]?.id ?? '', [categoriesQuery.data]);
 
   const formMethods = useForm<PostFormSchema>({
     resolver: zodResolver(postSchema),
@@ -78,7 +78,7 @@ export function CreatePostPage() {
       return;
     }
 
-    if (getValues('categoryId') === 0) {
+    if (getValues('categoryId') === '') {
       setValue('categoryId', categoriesQuery.data[0].id, { shouldDirty: false });
     }
   }, [categoriesQuery.data, getValues, setValue]);
@@ -125,7 +125,7 @@ export function CreatePostPage() {
         body: '',
         thumbnail: '',
         isPublished: false,
-        categoryId: categoriesQuery.data?.[0]?.id ?? 0
+        categoryId: categoriesQuery.data?.[0]?.id ?? ''
       });
       navigate('/admin/posts');
     },
@@ -270,9 +270,9 @@ export function CreatePostPage() {
                 <select
                   id="create-post-category"
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  {...register('categoryId', { valueAsNumber: true })}
+                  {...register('categoryId')}
                 >
-                  <option value={0} disabled>
+                  <option value="" disabled>
                     Kategori seçin
                   </option>
                   {categoriesQuery.data?.map((category) => (

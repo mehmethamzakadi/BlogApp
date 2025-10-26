@@ -1,4 +1,3 @@
-
 using BlogApp.Application.Abstractions;
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
@@ -43,7 +42,7 @@ public sealed class UpdateCategoryCommandHandler(
 
         // ✅ Outbox Pattern için SaveChanges'dan ÖNCE domain event'i tetikle
         var userId = currentUserService.GetCurrentUserId();
-        category.AddDomainEvent(new CategoryUpdatedEvent(category.Id, category.Name, userId ?? category.UpdatedById ?? 0));
+        category.AddDomainEvent(new CategoryUpdatedEvent(category.Id, category.Name, userId ?? category.UpdatedById ?? Guid.Empty));
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

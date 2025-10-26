@@ -36,16 +36,15 @@ function convertPlainTextToHtml(text: string): string {
 
 export function PostDetailPage() {
   const { postId } = useParams();
-  const numericId = Number(postId);
-  const isValidId = Number.isInteger(numericId) && numericId > 0;
+  const isValidId = typeof postId === 'string' && postId.length > 0;
 
   const {
     data: post,
     isLoading,
     isError
   } = useQuery({
-    queryKey: ['posts', 'detail', numericId],
-    queryFn: () => getPostById(numericId),
+    queryKey: ['posts', 'detail', postId],
+    queryFn: () => getPostById(postId!),
     enabled: isValidId
   });
 

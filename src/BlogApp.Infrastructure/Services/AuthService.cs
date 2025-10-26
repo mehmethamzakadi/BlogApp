@@ -110,12 +110,12 @@ public sealed class AuthService(
 
     public async Task<IDataResult<bool>> PasswordVerify(string resetToken, string userId)
     {
-        if (!int.TryParse(userId, out int userIdInt))
+        if (!Guid.TryParse(userId, out Guid userIdGuid))
         {
             return new SuccessDataResult<bool>(false);
         }
 
-        User? user = await userRepository.FindByIdAsync(userIdInt);
+        User? user = await userRepository.FindByIdAsync(userIdGuid);
         if (user != null && user.PasswordResetToken != null && user.PasswordResetTokenExpiry != null)
         {
             resetToken = resetToken.UrlDecode();

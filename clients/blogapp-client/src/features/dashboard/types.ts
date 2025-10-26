@@ -11,7 +11,7 @@ export interface DashboardStatCard {
 }
 
 export interface RecentActivity {
-  id: number;
+  id: string;
   type: 'post_created' | 'post_updated' | 'post_deleted' | 'category_created';
   title: string;
   description: string;

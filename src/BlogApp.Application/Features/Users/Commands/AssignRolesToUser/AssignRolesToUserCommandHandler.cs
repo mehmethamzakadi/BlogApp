@@ -38,39 +38,63 @@ public class AssignRolesToUserCommandHandler : IRequestHandler<AssignRolesToUser
             return new ErrorResult("Kullanıcı bulunamadı");
         }
 
-        // Var olan rolleri al ve sil
-        var currentRoles = await _userRepository.GetRolesAsync(user);
-        if (currentRoles.Any())
+        // ✅ BEST PRACTICE: Delta Update - Sadece değişenleri güncelle
+        var currentUserRoles = await _userRepository.GetUserRoleIdsAsync(user.Id, cancellationToken);
+        var requestedRoleIds = request.RoleIds.ToHashSet();
+        var currentRoleIds = currentUserRoles.ToHashSet();
+
+        // Silinecek roller (mevcut ama istenen listede yok)
+        var rolesToRemove = currentRoleIds.Except(requestedRoleIds).ToList();
+        
+        // Eklenecek roller (istenen listede var ama mevcut değil)
+        var rolesToAdd = requestedRoleIds.Except(currentRoleIds).ToList();
+
+        // Değişiklik yoksa erken çık
+        if (!rolesToRemove.Any() && !rolesToAdd.Any())
         {
-            var removeResult = await _userRepository.RemoveFromRolesAsync(user, currentRoles.ToArray());
-            if (!removeResult.Success)
-            {
-                return new ErrorResult("Mevcut roller kaldırılamadı");
-            }
+            return new SuccessResult("Roller zaten güncel");
         }
 
-        // Yeni rolleri ekle
-        if (request.RoleIds.Any())
+        // Silinecek rollerin isimlerini al
+        if (rolesToRemove.Any())
         {
-            var roles = await _roleRepository.Query()
-                .Where(r => request.RoleIds.Contains(r.Id))
+            var roleNamesToRemove = await _roleRepository.Query()
+                .Where(r => rolesToRemove.Contains(r.Id))
                 .Select(r => r.Name!)
                 .ToListAsync(cancellationToken);
 
-            if (!roles.Any())
+            var removeResult = await _userRepository.RemoveFromRolesAsync(user, roleNamesToRemove.ToArray());
+            if (!removeResult.Success)
             {
-                return new ErrorResult("Geçerli rol bulunamadı");
+                return new ErrorResult("Roller kaldırılamadı: " + removeResult.Message);
+            }
+        }
+
+        // Eklenecek rollerin isimlerini al
+        if (rolesToAdd.Any())
+        {
+            var roleNamesToAdd = await _roleRepository.Query()
+                .Where(r => rolesToAdd.Contains(r.Id))
+                .Select(r => r.Name!)
+                .ToListAsync(cancellationToken);
+
+            if (roleNamesToAdd.Count != rolesToAdd.Count)
+            {
+                return new ErrorResult("Bazı roller bulunamadı");
             }
 
-            var addResult = await _userRepository.AddToRolesAsync(user, roles.ToArray());
+            var addResult = await _userRepository.AddToRolesAsync(user, roleNamesToAdd.ToArray());
             if (!addResult.Success)
             {
                 return new ErrorResult("Roller eklenemedi: " + addResult.Message);
             }
 
-            // ✅ User artık AddDomainEvent() metoduna sahip (BaseEntity üzerinden)
+            // ✅ Domain Event - sadece değişiklik olduğunda
             var currentUserId = _currentUserService.GetCurrentUserId();
-            user.AddDomainEvent(new UserRolesAssignedEvent(user.Id, user.UserName!, roles, currentUserId));
+            
+            // Tüm rollerin son halini al (event için)
+            var allCurrentRoleNames = await _userRepository.GetRolesAsync(user);
+            user.AddDomainEvent(new UserRolesAssignedEvent(user.Id, user.UserName!, allCurrentRoleNames, currentUserId));
         }
 
         // UnitOfWork SaveChanges sırasında domain event'leri otomatik olarak Outbox'a kaydeder

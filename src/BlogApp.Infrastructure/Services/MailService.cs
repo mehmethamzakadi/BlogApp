@@ -44,7 +44,7 @@ public sealed class MailService : IMailService
         await smtp.DisconnectAsync(true).ConfigureAwait(false);
     }
 
-    public async Task SendPasswordResetMailAsync(string to, int userId, string resetToken)
+    public async Task SendPasswordResetMailAsync(string to, Guid userId, string resetToken)
     {
         if (string.IsNullOrWhiteSpace(passwordResetOptions.BaseUrl))
         {

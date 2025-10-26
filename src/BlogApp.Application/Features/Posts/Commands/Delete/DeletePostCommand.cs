@@ -3,4 +3,4 @@ using MediatR;
 
 namespace BlogApp.Application.Features.Posts.Commands.Delete;
 
-public sealed record DeletePostCommand(int Id) : IRequest<IResult>;
+public sealed record DeletePostCommand(Guid Id) : IRequest<IResult>;

@@ -7,10 +7,10 @@ public sealed record GetRecentActivitiesResponse
 
 public sealed record ActivityDto
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     public string ActivityType { get; set; } = string.Empty;
     public string EntityType { get; set; } = string.Empty;
-    public int? EntityId { get; set; }
+    public Guid? EntityId { get; set; }
     public string Title { get; set; } = string.Empty;
     public DateTime Timestamp { get; set; }
     public string? UserName { get; set; }

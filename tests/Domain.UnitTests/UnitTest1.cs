@@ -1,4 +1,3 @@
-
 using BlogApp.Domain.Common.Requests;
 using BlogApp.Domain.Entities;
 
@@ -18,12 +17,12 @@ public class CommentTests
     public void Comment_Allows_Assigning_Post_Navigation()
     {
         var comment = new Comment();
-        var post = new Post { Id = 42, Title = "Test", Body = "Body", Summary = "Summary", Thumbnail = "thumb", CategoryId = 1 };
+        var post = new Post { Id = Guid.NewGuid(), Title = "Test", Body = "Body", Summary = "Summary", Thumbnail = "thumb", CategoryId = Guid.NewGuid() };
 
         comment.Post = post;
 
         Assert.That(comment.Post, Is.SameAs(post));
-        Assert.That(comment.PostId, Is.EqualTo(0));
+        Assert.That(comment.PostId, Is.EqualTo(Guid.Empty));
     }
 }
 

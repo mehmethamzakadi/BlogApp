@@ -1,6 +1,5 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -9,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BlogApp.Persistence.Migrations.PostgreSql
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,13 +17,13 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                 name: "Categories",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    NormalizedName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedById = table.Column<int>(type: "integer", nullable: false),
+                    CreatedById = table.Column<Guid>(type: "uuid", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    UpdatedById = table.Column<int>(type: "integer", nullable: true),
+                    UpdatedById = table.Column<Guid>(type: "uuid", nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     DeletedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
@@ -37,17 +36,16 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                 name: "Images",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     Title = table.Column<string>(type: "text", nullable: true),
                     Size = table.Column<int>(type: "integer", nullable: true),
                     Path = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     Type = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedById = table.Column<int>(type: "integer", nullable: false),
+                    CreatedById = table.Column<Guid>(type: "uuid", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    UpdatedById = table.Column<int>(type: "integer", nullable: true),
+                    UpdatedById = table.Column<Guid>(type: "uuid", nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     DeletedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
@@ -60,8 +58,7 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                 name: "OutboxMessages",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     EventType = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
                     Payload = table.Column<string>(type: "text", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -70,9 +67,9 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                     Error = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
                     NextRetryAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedById = table.Column<int>(type: "integer", nullable: false),
+                    CreatedById = table.Column<Guid>(type: "uuid", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    UpdatedById = table.Column<int>(type: "integer", nullable: true),
+                    UpdatedById = table.Column<Guid>(type: "uuid", nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     DeletedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
@@ -85,16 +82,16 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                 name: "Permissions",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    NormalizedName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     Module = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedById = table.Column<int>(type: "integer", nullable: false),
+                    CreatedById = table.Column<Guid>(type: "uuid", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    UpdatedById = table.Column<int>(type: "integer", nullable: true),
+                    UpdatedById = table.Column<Guid>(type: "uuid", nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     DeletedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
@@ -107,16 +104,15 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                 name: "Roles",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
                     NormalizedName = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
                     Description = table.Column<string>(type: "text", nullable: true),
                     ConcurrencyStamp = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedById = table.Column<int>(type: "integer", nullable: false),
+                    CreatedById = table.Column<Guid>(type: "uuid", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    UpdatedById = table.Column<int>(type: "integer", nullable: true),
+                    UpdatedById = table.Column<Guid>(type: "uuid", nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     DeletedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
@@ -129,8 +125,7 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     UserName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     NormalizedUserName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     Email = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
@@ -150,9 +145,9 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                     PasswordResetToken = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     PasswordResetTokenExpiry = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedById = table.Column<int>(type: "integer", nullable: false),
+                    CreatedById = table.Column<Guid>(type: "uuid", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    UpdatedById = table.Column<int>(type: "integer", nullable: true),
+                    UpdatedById = table.Column<Guid>(type: "uuid", nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     DeletedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
@@ -165,18 +160,17 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                 name: "Posts",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Title = table.Column<string>(type: "text", nullable: false),
                     Body = table.Column<string>(type: "text", nullable: false),
                     Summary = table.Column<string>(type: "text", nullable: false),
                     Thumbnail = table.Column<string>(type: "text", nullable: false),
                     IsPublished = table.Column<bool>(type: "boolean", nullable: false),
-                    CategoryId = table.Column<int>(type: "integer", nullable: false),
+                    CategoryId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedById = table.Column<int>(type: "integer", nullable: false),
+                    CreatedById = table.Column<Guid>(type: "uuid", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    UpdatedById = table.Column<int>(type: "integer", nullable: true),
+                    UpdatedById = table.Column<Guid>(type: "uuid", nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     DeletedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
@@ -195,8 +189,8 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                 name: "RolePermissions",
                 columns: table => new
                 {
-                    RoleId = table.Column<int>(type: "integer", nullable: false),
-                    PermissionId = table.Column<int>(type: "integer", nullable: false),
+                    RoleId = table.Column<Guid>(type: "uuid", nullable: false),
+                    PermissionId = table.Column<Guid>(type: "uuid", nullable: false),
                     GrantedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
@@ -220,19 +214,18 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                 name: "ActivityLogs",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     ActivityType = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     EntityType = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    EntityId = table.Column<int>(type: "integer", nullable: true),
+                    EntityId = table.Column<Guid>(type: "uuid", nullable: true),
                     Title = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     Details = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
-                    UserId = table.Column<int>(type: "integer", nullable: true),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: true),
                     Timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedById = table.Column<int>(type: "integer", nullable: false),
+                    CreatedById = table.Column<Guid>(type: "uuid", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    UpdatedById = table.Column<int>(type: "integer", nullable: true),
+                    UpdatedById = table.Column<Guid>(type: "uuid", nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     DeletedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
@@ -251,8 +244,8 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                 name: "UserRoles",
                 columns: table => new
                 {
-                    UserId = table.Column<int>(type: "integer", nullable: false),
-                    RoleId = table.Column<int>(type: "integer", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    RoleId = table.Column<Guid>(type: "uuid", nullable: false),
                     AssignedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
@@ -276,17 +269,16 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                 name: "Comments",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ParentId = table.Column<int>(type: "integer", nullable: true),
-                    PostId = table.Column<int>(type: "integer", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ParentId = table.Column<Guid>(type: "uuid", nullable: true),
+                    PostId = table.Column<Guid>(type: "uuid", nullable: false),
                     Content = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false),
                     CommentOwnerMail = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     IsPublished = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedById = table.Column<int>(type: "integer", nullable: false),
+                    CreatedById = table.Column<Guid>(type: "uuid", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    UpdatedById = table.Column<int>(type: "integer", nullable: true),
+                    UpdatedById = table.Column<Guid>(type: "uuid", nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     DeletedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
@@ -308,15 +300,15 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
 
             migrationBuilder.InsertData(
                 table: "Categories",
-                columns: new[] { "Id", "CreatedById", "CreatedDate", "DeletedDate", "IsDeleted", "Name", "UpdatedById", "UpdatedDate" },
+                columns: new[] { "Id", "CreatedById", "CreatedDate", "DeletedDate", "IsDeleted", "Name", "NormalizedName", "UpdatedById", "UpdatedDate" },
                 values: new object[,]
                 {
-                    { 1, 1, new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc), null, false, "ASP .NET Core", null, null },
-                    { 2, 1, new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc), null, false, "Entity Framework Core", null, null },
-                    { 3, 1, new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc), null, false, "Docker", null, null },
-                    { 4, 1, new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc), null, false, "RabbitMQ", null, null },
-                    { 5, 1, new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc), null, false, "Redis", null, null },
-                    { 6, 1, new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc), null, false, "Clean Architecture", null, null }
+                    { new Guid("10000000-0000-0000-0000-000000000001"), new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc), null, false, "ASP .NET Core", null, null, null },
+                    { new Guid("10000000-0000-0000-0000-000000000002"), new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc), null, false, "Entity Framework Core", null, null, null },
+                    { new Guid("10000000-0000-0000-0000-000000000003"), new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc), null, false, "Docker", null, null, null },
+                    { new Guid("10000000-0000-0000-0000-000000000004"), new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc), null, false, "RabbitMQ", null, null, null },
+                    { new Guid("10000000-0000-0000-0000-000000000005"), new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc), null, false, "Redis", null, null, null },
+                    { new Guid("10000000-0000-0000-0000-000000000006"), new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc), null, false, "Clean Architecture", null, null, null }
                 });
 
             migrationBuilder.InsertData(
@@ -324,20 +316,20 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                 columns: new[] { "Id", "ConcurrencyStamp", "CreatedById", "CreatedDate", "DeletedDate", "Description", "IsDeleted", "Name", "NormalizedName", "UpdatedById", "UpdatedDate" },
                 values: new object[,]
                 {
-                    { 1, "21d9aa3d-3352-4ccd-a099-9c0be98eac2a", 0, new DateTime(2025, 10, 25, 22, 47, 24, 537, DateTimeKind.Utc).AddTicks(340), null, null, false, "Admin", "ADMIN", null, null },
-                    { 2, "f2f2c28b-c023-458c-b44a-769cae779914", 0, new DateTime(2025, 10, 25, 22, 47, 24, 537, DateTimeKind.Utc).AddTicks(368), null, null, false, "User", "USER", null, null },
-                    { 3, "d692f597-494c-4efc-a311-530b561c46c3", 0, new DateTime(2025, 10, 25, 22, 47, 24, 537, DateTimeKind.Utc).AddTicks(372), null, null, false, "Moderator", "MODERATOR", null, null }
+                    { new Guid("20000000-0000-0000-0000-000000000001"), "a31f51f4-6acd-4587-bb39-f40d7c995163", new Guid("00000000-0000-0000-0000-000000000000"), new DateTime(2025, 10, 26, 9, 50, 33, 881, DateTimeKind.Utc).AddTicks(4281), null, null, false, "Admin", "ADMIN", null, null },
+                    { new Guid("20000000-0000-0000-0000-000000000002"), "8bcc6a08-7c62-4524-b42a-03ab6e400280", new Guid("00000000-0000-0000-0000-000000000000"), new DateTime(2025, 10, 26, 9, 50, 33, 881, DateTimeKind.Utc).AddTicks(4303), null, null, false, "User", "USER", null, null },
+                    { new Guid("20000000-0000-0000-0000-000000000003"), "92e951b6-fe7c-4543-ba38-5fefebdc0a87", new Guid("00000000-0000-0000-0000-000000000000"), new DateTime(2025, 10, 26, 9, 50, 33, 881, DateTimeKind.Utc).AddTicks(4308), null, null, false, "Moderator", "MODERATOR", null, null }
                 });
 
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "CreatedById", "CreatedDate", "DeletedDate", "Email", "EmailConfirmed", "IsDeleted", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PasswordResetToken", "PasswordResetTokenExpiry", "PhoneNumber", "PhoneNumberConfirmed", "RefreshToken", "RefreshTokenExpiry", "SecurityStamp", "TwoFactorEnabled", "UpdatedById", "UpdatedDate", "UserName" },
-                values: new object[] { 1, 0, "f79b872a-e9eb-450b-9849-7a01cfcd9e85", 0, new DateTime(2025, 10, 25, 22, 47, 24, 537, DateTimeKind.Utc).AddTicks(6452), null, "admin@admin.com", false, false, false, null, "ADMIN@ADMIN.COM", "ADMIN", "AQAAAAIAAYagAAAAEMKYUqcGebXAfdxBIIPg80gWWaeCUtEVUMrYJ3SJarM8wV02ekruSXTYxLhXYYzbUg==", null, null, null, false, null, null, "b1a1d25f-8a7e-4e9a-bc55-8dca5bfa1234", false, null, null, "admin" });
+                values: new object[] { new Guid("00000000-0000-0000-0000-000000000001"), 0, "36c098d7-22f4-4cb9-98f8-f5cb0261dd97", new Guid("00000000-0000-0000-0000-000000000000"), new DateTime(2025, 10, 26, 9, 50, 33, 882, DateTimeKind.Utc).AddTicks(219), null, "admin@admin.com", false, false, false, null, "ADMIN@ADMIN.COM", "ADMIN", "AQAAAAIAAYagAAAAEP8xlsKNntQQ1SivmqfdllQWKX/655QCNjrVsPYL/Oz4cUgmI8aV55GO0BN9SDNltA==", null, null, null, false, null, null, "b1a1d25f-8a7e-4e9a-bc55-8dca5bfa1234", false, null, null, "admin" });
 
             migrationBuilder.InsertData(
                 table: "UserRoles",
                 columns: new[] { "RoleId", "UserId", "AssignedDate" },
-                values: new object[] { 1, 1, new DateTime(2025, 10, 25, 22, 47, 24, 537, DateTimeKind.Utc).AddTicks(2507) });
+                values: new object[] { new Guid("20000000-0000-0000-0000-000000000001"), new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 26, 9, 50, 33, 881, DateTimeKind.Utc).AddTicks(6424) });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ActivityLogs_Entity",
@@ -355,9 +347,14 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Categories_Name_Unique",
+                name: "IX_Categories_Name",
                 table: "Categories",
-                column: "Name",
+                column: "Name");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Categories_NormalizedName_Unique",
+                table: "Categories",
+                column: "NormalizedName",
                 unique: true,
                 filter: "\"IsDeleted\" = false");
 
@@ -409,7 +406,12 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
             migrationBuilder.CreateIndex(
                 name: "IX_Permissions_Name",
                 table: "Permissions",
-                column: "Name",
+                column: "Name");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Permissions_NormalizedName_Unique",
+                table: "Permissions",
+                column: "NormalizedName",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -484,6 +486,11 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                 table: "Users",
                 column: "NormalizedUserName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_RefreshToken",
+                table: "Users",
+                column: "RefreshToken");
         }
 
         /// <inheritdoc />

@@ -2,7 +2,7 @@ namespace BlogApp.Application.Features.Users.Queries.GetUserRoles;
 
 public class GetUserRolesResponse
 {
-    public int UserId { get; set; }
+    public Guid UserId { get; set; }
     public string UserName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public List<UserRoleDto> Roles { get; set; } = new();
@@ -10,6 +10,6 @@ public class GetUserRolesResponse
 
 public class UserRoleDto
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
 }

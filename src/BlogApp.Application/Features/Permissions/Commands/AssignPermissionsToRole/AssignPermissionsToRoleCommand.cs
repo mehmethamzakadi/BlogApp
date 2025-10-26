@@ -5,6 +5,6 @@ namespace BlogApp.Application.Features.Permissions.Commands.AssignPermissionsToR
 
 public class AssignPermissionsToRoleCommand : IRequest<IResult>
 {
-    public int RoleId { get; set; }
-    public List<int> PermissionIds { get; set; } = new();
+    public Guid RoleId { get; set; }
+    public List<Guid> PermissionIds { get; set; } = new();
 }

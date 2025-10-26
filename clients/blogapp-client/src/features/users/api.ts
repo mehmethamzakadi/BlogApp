@@ -17,7 +17,7 @@ export async function fetchUsers(filters: UserTableFilters): Promise<UserListRes
   return normalizePaginatedResponse<User>(response.data);
 }
 
-export async function fetchUserById(id: number): Promise<User> {
+export async function fetchUserById(id: string): Promise<User> {
   const response = await api.get<ApiResult<User>>(`/user/${id}`);
   const result = normalizeApiResult<User>(response.data);
   return result.data;
@@ -31,11 +31,11 @@ export async function updateUser(data: UserUpdateFormValues): Promise<void> {
   await api.put(`/user/${data.id}`, data);
 }
 
-export async function deleteUser(id: number): Promise<void> {
+export async function deleteUser(id: string): Promise<void> {
   await api.delete(`/user/${id}`);
 }
 
-export async function fetchUserRoles(userId: number): Promise<UserRolesResponse> {
+export async function fetchUserRoles(userId: string): Promise<UserRolesResponse> {
   const response = await api.get<ApiResult<UserRolesResponse>>(`/user/${userId}/roles`);
   const result = normalizeApiResult<UserRolesResponse>(response.data);
   return result.data;

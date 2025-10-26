@@ -10,7 +10,6 @@ public sealed class Post : BaseEntity
     public string Thumbnail { get; set; } = string.Empty;
     public bool IsPublished { get; set; }
     public ICollection<Comment>? Comments { get; set; }
-    public int CategoryId { get; set; }
+    public Guid CategoryId { get; set; }
     public Category Category { get; set; } = default!;
-
 }

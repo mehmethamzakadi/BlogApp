@@ -8,7 +8,7 @@ import { Loader2 } from 'lucide-react';
 import type { PostSummary } from '../../features/posts/types';
 
 export function HomePage() {
-  const [activeCategory, setActiveCategory] = useState<number | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [allPosts, setAllPosts] = useState<PostSummary[]>([]);
   const pageSize = 10; // İlk yüklemede 10 post (1 featured + 9 grid)
@@ -30,7 +30,7 @@ export function HomePage() {
 
   const categoryOptions = useMemo(
     () => [
-      { id: null as number | null, name: 'Tümü' },
+      { id: null as string | null, name: 'Tümü' },
       ...(categories?.map((category) => ({ id: category.id, name: category.name })) ?? [])
     ],
     [categories]
@@ -53,7 +53,7 @@ export function HomePage() {
   }, [posts?.items, currentPage]);
 
   // Kategori değiştiğinde sayfayı sıfırla
-  const handleCategoryChange = (categoryId: number | null) => {
+  const handleCategoryChange = (categoryId: string | null) => {
     setActiveCategory(categoryId);
     setCurrentPage(0);
     setAllPosts([]);

@@ -6,11 +6,11 @@ namespace BlogApp.Domain.Events.CategoryEvents;
 [StoreInOutbox]
 public class CategoryUpdatedEvent : DomainEvent
 {
-    public int CategoryId { get; }
+    public Guid CategoryId { get; }
     public string Name { get; }
-    public int UpdatedById { get; }
+    public Guid UpdatedById { get; }
 
-    public CategoryUpdatedEvent(int categoryId, string name, int updatedById)
+    public CategoryUpdatedEvent(Guid categoryId, string name, Guid updatedById)
     {
         CategoryId = categoryId;
         Name = name;

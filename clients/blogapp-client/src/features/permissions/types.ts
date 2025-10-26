@@ -1,5 +1,5 @@
 export interface Permission {
-  id: number;
+  id: string;
   name: string;
   description: string;
   type: string;
@@ -15,12 +15,12 @@ export interface AllPermissionsResponse {
 }
 
 export interface RolePermissionsResponse {
-  roleId: number;
+  roleId: string;
   roleName: string;
-  permissionIds: number[];
+  permissionIds: string[];
 }
 
 export interface AssignPermissionsFormValues {
-  roleId: number;
-  permissionIds: number[];
+  roleId: string;
+  permissionIds: string[];
 }

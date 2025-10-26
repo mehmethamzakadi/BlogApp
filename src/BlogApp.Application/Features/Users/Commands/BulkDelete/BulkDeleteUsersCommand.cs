@@ -4,5 +4,5 @@ namespace BlogApp.Application.Features.Users.Commands.BulkDelete;
 
 public class BulkDeleteUsersCommand : IRequest<BulkDeleteUsersResponse>
 {
-    public List<int> UserIds { get; set; } = new();
+    public List<Guid> UserIds { get; set; } = new();
 }

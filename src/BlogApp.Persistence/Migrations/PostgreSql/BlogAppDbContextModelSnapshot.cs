@@ -24,19 +24,17 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
 
             modelBuilder.Entity("BlogApp.Domain.Entities.ActivityLog", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<string>("ActivityType")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<int>("CreatedById")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("CreatedById")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
@@ -48,8 +46,8 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)");
 
-                    b.Property<int?>("EntityId")
-                        .HasColumnType("integer");
+                    b.Property<Guid?>("EntityId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("EntityType")
                         .IsRequired()
@@ -67,14 +65,14 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
-                    b.Property<int?>("UpdatedById")
-                        .HasColumnType("integer");
+                    b.Property<Guid?>("UpdatedById")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("UserId")
-                        .HasColumnType("integer");
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -91,14 +89,12 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
 
             modelBuilder.Entity("BlogApp.Domain.Entities.Category", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("uuid");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CreatedById")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("CreatedById")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
@@ -118,8 +114,8 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<int?>("UpdatedById")
-                        .HasColumnType("integer");
+                    b.Property<Guid?>("UpdatedById")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("timestamp with time zone");
@@ -139,48 +135,48 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                     b.HasData(
                         new
                         {
-                            Id = 1,
-                            CreatedById = 1,
+                            Id = new Guid("10000000-0000-0000-0000-000000000001"),
+                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
                             CreatedDate = new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc),
                             IsDeleted = false,
                             Name = "ASP .NET Core"
                         },
                         new
                         {
-                            Id = 2,
-                            CreatedById = 1,
+                            Id = new Guid("10000000-0000-0000-0000-000000000002"),
+                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
                             CreatedDate = new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc),
                             IsDeleted = false,
                             Name = "Entity Framework Core"
                         },
                         new
                         {
-                            Id = 3,
-                            CreatedById = 1,
+                            Id = new Guid("10000000-0000-0000-0000-000000000003"),
+                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
                             CreatedDate = new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc),
                             IsDeleted = false,
                             Name = "Docker"
                         },
                         new
                         {
-                            Id = 4,
-                            CreatedById = 1,
+                            Id = new Guid("10000000-0000-0000-0000-000000000004"),
+                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
                             CreatedDate = new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc),
                             IsDeleted = false,
                             Name = "RabbitMQ"
                         },
                         new
                         {
-                            Id = 5,
-                            CreatedById = 1,
+                            Id = new Guid("10000000-0000-0000-0000-000000000005"),
+                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
                             CreatedDate = new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc),
                             IsDeleted = false,
                             Name = "Redis"
                         },
                         new
                         {
-                            Id = 6,
-                            CreatedById = 1,
+                            Id = new Guid("10000000-0000-0000-0000-000000000006"),
+                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
                             CreatedDate = new DateTime(2025, 10, 22, 21, 0, 0, 0, DateTimeKind.Utc),
                             IsDeleted = false,
                             Name = "Clean Architecture"
@@ -189,11 +185,9 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
 
             modelBuilder.Entity("BlogApp.Domain.Entities.Comment", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<string>("CommentOwnerMail")
                         .IsRequired()
@@ -205,8 +199,8 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         .HasMaxLength(300)
                         .HasColumnType("character varying(300)");
 
-                    b.Property<int>("CreatedById")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("CreatedById")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
@@ -220,14 +214,14 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                     b.Property<bool>("IsPublished")
                         .HasColumnType("boolean");
 
-                    b.Property<int?>("ParentId")
-                        .HasColumnType("integer");
+                    b.Property<Guid?>("ParentId")
+                        .HasColumnType("uuid");
 
-                    b.Property<int>("PostId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uuid");
 
-                    b.Property<int?>("UpdatedById")
-                        .HasColumnType("integer");
+                    b.Property<Guid?>("UpdatedById")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("timestamp with time zone");
@@ -254,14 +248,12 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
 
             modelBuilder.Entity("BlogApp.Domain.Entities.Image", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("uuid");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CreatedById")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("CreatedById")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
@@ -293,8 +285,8 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
-                    b.Property<int?>("UpdatedById")
-                        .HasColumnType("integer");
+                    b.Property<Guid?>("UpdatedById")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("timestamp with time zone");
@@ -306,17 +298,15 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
 
             modelBuilder.Entity("BlogApp.Domain.Entities.OutboxMessage", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("CreatedById")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("CreatedById")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
@@ -351,8 +341,8 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         .HasColumnType("integer")
                         .HasDefaultValue(0);
 
-                    b.Property<int?>("UpdatedById")
-                        .HasColumnType("integer");
+                    b.Property<Guid?>("UpdatedById")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("timestamp with time zone");
@@ -373,14 +363,12 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
 
             modelBuilder.Entity("BlogApp.Domain.Entities.Permission", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("uuid");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CreatedById")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("CreatedById")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
@@ -414,8 +402,8 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<int?>("UpdatedById")
-                        .HasColumnType("integer");
+                    b.Property<Guid?>("UpdatedById")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("timestamp with time zone");
@@ -437,21 +425,19 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
 
             modelBuilder.Entity("BlogApp.Domain.Entities.Post", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Body")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uuid");
 
-                    b.Property<int>("CreatedById")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("CreatedById")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
@@ -477,8 +463,8 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("UpdatedById")
-                        .HasColumnType("integer");
+                    b.Property<Guid?>("UpdatedById")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("timestamp with time zone");
@@ -505,11 +491,9 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
 
             modelBuilder.Entity("BlogApp.Domain.Entities.Role", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -517,8 +501,8 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<int>("CreatedById")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("CreatedById")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
@@ -542,8 +526,8 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
 
-                    b.Property<int?>("UpdatedById")
-                        .HasColumnType("integer");
+                    b.Property<Guid?>("UpdatedById")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("timestamp with time zone");
@@ -562,30 +546,30 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                     b.HasData(
                         new
                         {
-                            Id = 1,
-                            ConcurrencyStamp = "f1b5535b-806c-49f2-bfae-68a80b993ed1",
-                            CreatedById = 0,
-                            CreatedDate = new DateTime(2025, 10, 25, 23, 39, 35, 342, DateTimeKind.Utc).AddTicks(1395),
+                            Id = new Guid("20000000-0000-0000-0000-000000000001"),
+                            ConcurrencyStamp = "a31f51f4-6acd-4587-bb39-f40d7c995163",
+                            CreatedById = new Guid("00000000-0000-0000-0000-000000000000"),
+                            CreatedDate = new DateTime(2025, 10, 26, 9, 50, 33, 881, DateTimeKind.Utc).AddTicks(4281),
                             IsDeleted = false,
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = 2,
-                            ConcurrencyStamp = "b45c1f20-7baf-4f59-b0b3-375ce095e646",
-                            CreatedById = 0,
-                            CreatedDate = new DateTime(2025, 10, 25, 23, 39, 35, 342, DateTimeKind.Utc).AddTicks(1421),
+                            Id = new Guid("20000000-0000-0000-0000-000000000002"),
+                            ConcurrencyStamp = "8bcc6a08-7c62-4524-b42a-03ab6e400280",
+                            CreatedById = new Guid("00000000-0000-0000-0000-000000000000"),
+                            CreatedDate = new DateTime(2025, 10, 26, 9, 50, 33, 881, DateTimeKind.Utc).AddTicks(4303),
                             IsDeleted = false,
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = 3,
-                            ConcurrencyStamp = "81433ecf-9da1-4bba-9728-86af07fcba8d",
-                            CreatedById = 0,
-                            CreatedDate = new DateTime(2025, 10, 25, 23, 39, 35, 342, DateTimeKind.Utc).AddTicks(1435),
+                            Id = new Guid("20000000-0000-0000-0000-000000000003"),
+                            ConcurrencyStamp = "92e951b6-fe7c-4543-ba38-5fefebdc0a87",
+                            CreatedById = new Guid("00000000-0000-0000-0000-000000000000"),
+                            CreatedDate = new DateTime(2025, 10, 26, 9, 50, 33, 881, DateTimeKind.Utc).AddTicks(4308),
                             IsDeleted = false,
                             Name = "Moderator",
                             NormalizedName = "MODERATOR"
@@ -594,11 +578,11 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
 
             modelBuilder.Entity("BlogApp.Domain.Entities.RolePermission", b =>
                 {
-                    b.Property<int>("RoleId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid");
 
-                    b.Property<int>("PermissionId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("PermissionId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("GrantedAt")
                         .HasColumnType("timestamp with time zone");
@@ -616,11 +600,9 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
 
             modelBuilder.Entity("BlogApp.Domain.Entities.User", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
@@ -631,8 +613,8 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<int>("CreatedById")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("CreatedById")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
@@ -701,8 +683,8 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean");
 
-                    b.Property<int?>("UpdatedById")
-                        .HasColumnType("integer");
+                    b.Property<Guid?>("UpdatedById")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("timestamp with time zone");
@@ -733,18 +715,18 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                     b.HasData(
                         new
                         {
-                            Id = 1,
+                            Id = new Guid("00000000-0000-0000-0000-000000000001"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "275d164a-817f-4115-9d4d-41fafebcc862",
-                            CreatedById = 0,
-                            CreatedDate = new DateTime(2025, 10, 25, 23, 39, 35, 342, DateTimeKind.Utc).AddTicks(7602),
+                            ConcurrencyStamp = "36c098d7-22f4-4cb9-98f8-f5cb0261dd97",
+                            CreatedById = new Guid("00000000-0000-0000-0000-000000000000"),
+                            CreatedDate = new DateTime(2025, 10, 26, 9, 50, 33, 882, DateTimeKind.Utc).AddTicks(219),
                             Email = "admin@admin.com",
                             EmailConfirmed = false,
                             IsDeleted = false,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@ADMIN.COM",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEAV5pYoT76cjL8rHpmQDD+29/zs8u/1iViIEuuTDUok1h++JKPGlxUkQpFPXcgKNMw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEP8xlsKNntQQ1SivmqfdllQWKX/655QCNjrVsPYL/Oz4cUgmI8aV55GO0BN9SDNltA==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "b1a1d25f-8a7e-4e9a-bc55-8dca5bfa1234",
                             TwoFactorEnabled = false,
@@ -754,11 +736,11 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
 
             modelBuilder.Entity("BlogApp.Domain.Entities.UserRole", b =>
                 {
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
-                    b.Property<int>("RoleId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("AssignedDate")
                         .HasColumnType("timestamp with time zone");
@@ -776,9 +758,9 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                     b.HasData(
                         new
                         {
-                            UserId = 1,
-                            RoleId = 1,
-                            AssignedDate = new DateTime(2025, 10, 25, 23, 39, 35, 342, DateTimeKind.Utc).AddTicks(3685)
+                            UserId = new Guid("00000000-0000-0000-0000-000000000001"),
+                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
+                            AssignedDate = new DateTime(2025, 10, 26, 9, 50, 33, 881, DateTimeKind.Utc).AddTicks(6424)
                         });
                 });
 

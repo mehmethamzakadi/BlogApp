@@ -34,7 +34,7 @@ namespace BlogApp.API.Controllers
 
         [AllowAnonymous]
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById([FromRoute] int id)
+        public async Task<IActionResult> GetById([FromRoute] Guid id)
         {
             bool includeUnpublished = User.Identity?.IsAuthenticated == true;
             var response = await Mediator.Send(new GetByIdPostQuery(id, includeUnpublished));
@@ -50,7 +50,7 @@ namespace BlogApp.API.Controllers
 
         [HttpPut("{id}")]
         [HasPermission(Permissions.PostsUpdate)]
-        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdatePostCommand command)
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdatePostCommand command)
         {
             if (id != command.Id)
                 return BadRequest("ID mismatch");
@@ -60,7 +60,7 @@ namespace BlogApp.API.Controllers
 
         [HttpDelete("{id}")]
         [HasPermission(Permissions.PostsDelete)]
-        public async Task<IActionResult> Delete([FromRoute] int id)
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             return GetResponseOnlyResultMessage(await Mediator.Send(new DeletePostCommand(id)));
         }

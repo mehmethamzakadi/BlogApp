@@ -40,7 +40,7 @@ function buildPostDataGridPayload(filters: PostTableFilters) {
 export interface FetchPublishedPostsParams {
   pageIndex?: number;
   pageSize?: number;
-  categoryId?: number;
+  categoryId?: string;
 }
 
 export async function fetchPublishedPosts({
@@ -49,7 +49,7 @@ export async function fetchPublishedPosts({
   categoryId
 }: FetchPublishedPostsParams = {}) {
   const endpoint = '/post';
-  const params: Record<string, number> = {
+  const params: Record<string, number | string> = {
     PageIndex: pageIndex,
     PageSize: pageSize
   };
@@ -83,7 +83,7 @@ export async function createPost(values: PostFormValues) {
   return normalizeApiResult(response.data);
 }
 
-export async function updatePost(id: number, values: PostFormValues) {
+export async function updatePost(id: string, values: PostFormValues) {
   const response = await api.put<ApiResult>(`/post/${id}`, {
     Id: id,
     Title: values.title,
@@ -97,12 +97,12 @@ export async function updatePost(id: number, values: PostFormValues) {
   return normalizeApiResult(response.data);
 }
 
-export async function deletePost(id: number) {
+export async function deletePost(id: string) {
   const response = await api.delete<ApiResult>(`/post/${id}`);
   return normalizeApiResult(response.data);
 }
 
-export async function getPostById(id: number): Promise<Post> {
+export async function getPostById(id: string): Promise<Post> {
   const response = await api.get<ApiResult<Post>>(`/post/${id}`);
   const result = normalizeApiResult<Post>(response.data);
 
@@ -131,10 +131,10 @@ export async function fetchStatistics(): Promise<DashboardStatistics> {
 }
 
 export interface ActivityDto {
-  id: number;
+  id: string;
   activityType: string;
   entityType: string;
-  entityId?: number;
+  entityId?: string;
   title: string;
   timestamp: string;
   userName?: string;

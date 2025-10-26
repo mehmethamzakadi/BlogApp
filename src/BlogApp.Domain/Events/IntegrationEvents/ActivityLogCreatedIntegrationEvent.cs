@@ -7,9 +7,9 @@ namespace BlogApp.Domain.Events.IntegrationEvents;
 public record ActivityLogCreatedIntegrationEvent(
     string ActivityType,
     string EntityType,
-    int? EntityId,
+    Guid? EntityId,
     string Title,
     string? Details,
-    int? UserId,
+    Guid? UserId,
     DateTime Timestamp
 );

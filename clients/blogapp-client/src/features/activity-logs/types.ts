@@ -1,11 +1,11 @@
 export interface ActivityLog {
-  id: number;
+  id: string;
   activityType: string;
   entityType: string;
-  entityId: number | null;
+  entityId: string | null;
   title: string;
   details: string | null;
-  userId: number | null;
+  userId: string | null;
   userName: string | null;
   timestamp: string;
 }
@@ -13,7 +13,7 @@ export interface ActivityLog {
 export interface ActivityLogFilters {
   activityType?: string;
   entityType?: string;
-  userId?: number;
+  userId?: string;
   startDate?: string;
   endDate?: string;
 }

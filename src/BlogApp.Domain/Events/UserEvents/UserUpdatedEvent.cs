@@ -9,12 +9,12 @@ namespace BlogApp.Domain.Events.UserEvents;
 [StoreInOutbox]
 public class UserUpdatedEvent : DomainEvent
 {
-    public int UserId { get; }
+    public Guid UserId { get; }
     public string UserName { get; }
     public string Email { get; }
-    public int? UpdatedById { get; }
+    public Guid? UpdatedById { get; }
 
-    public UserUpdatedEvent(int userId, string userName, string email, int? updatedById)
+    public UserUpdatedEvent(Guid userId, string userName, string email, Guid? updatedById)
     {
         UserId = userId;
         UserName = userName;

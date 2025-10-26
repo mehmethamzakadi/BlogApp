@@ -34,7 +34,7 @@ namespace BlogApp.API.Controllers
 
         [HttpGet("{id}")]
         [HasPermission(Permissions.CategoriesRead)]
-        public async Task<IActionResult> GetById([FromRoute] int id)
+        public async Task<IActionResult> GetById([FromRoute] Guid id)
         {
             var response = await Mediator.Send(new GetByIdCategoryQuery(id));
             return Ok(response);
@@ -50,7 +50,7 @@ namespace BlogApp.API.Controllers
 
         [HttpPut("{id}")]
         [HasPermission(Permissions.CategoriesUpdate)]
-        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateCategoryCommand command)
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateCategoryCommand command)
         {
             if (id != command.Id)
                 return BadRequest("ID mismatch");
@@ -61,7 +61,7 @@ namespace BlogApp.API.Controllers
 
         [HttpDelete("{id}")]
         [HasPermission(Permissions.CategoriesDelete)]
-        public async Task<IActionResult> Delete([FromRoute] int id)
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             var response = await Mediator.Send(new DeleteCategoryCommand(id));
             return Ok(response);

@@ -8,7 +8,7 @@ namespace BlogApp.Domain.Repositories;
 public interface IRoleRepository : IAsyncRepository<Role>, IRepository<Role>
 {
     Task<Paginate<Role>> GetRoles(int index, int size, CancellationToken cancellationToken);
-    Role? GetRoleById(int id);
+    Role? GetRoleById(Guid id);
     Task<Role?> FindByNameAsync(string roleName);
     Task<IResult> CreateRole(Role role);
     Task<IResult> DeleteRole(Role role);

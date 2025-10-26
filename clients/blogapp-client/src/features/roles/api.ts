@@ -18,7 +18,7 @@ export async function fetchRoles(
   return normalizePaginatedResponse<Role>(response.data);
 }
 
-export async function fetchRoleById(id: number): Promise<Role> {
+export async function fetchRoleById(id: string): Promise<Role> {
   const response = await api.get<ApiResult<Role>>(`/role/${id}`);
   const result = normalizeApiResult<Role>(response.data);
   return result.data;
@@ -32,6 +32,6 @@ export async function updateRole(data: RoleUpdateFormValues): Promise<void> {
   await api.put(`/role/${data.id}`, data);
 }
 
-export async function deleteRole(id: number): Promise<void> {
+export async function deleteRole(id: string): Promise<void> {
   await api.delete(`/role/${id}`);
 }

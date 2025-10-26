@@ -9,12 +9,12 @@ namespace BlogApp.Domain.Events.UserEvents;
 [StoreInOutbox]
 public class UserCreatedEvent : DomainEvent
 {
-    public int UserId { get; }
+    public Guid UserId { get; }
     public string UserName { get; }
     public string Email { get; }
-    public int? CreatedById { get; }
+    public Guid? CreatedById { get; }
 
-    public UserCreatedEvent(int userId, string userName, string email, int? createdById)
+    public UserCreatedEvent(Guid userId, string userName, string email, Guid? createdById)
     {
         UserId = userId;
         UserName = userName;

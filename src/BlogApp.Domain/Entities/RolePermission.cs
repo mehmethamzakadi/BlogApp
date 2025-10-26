@@ -9,7 +9,7 @@ public sealed class RolePermission
     /// <summary>
     /// Rol ID'si
     /// </summary>
-    public int RoleId { get; set; }
+    public Guid RoleId { get; set; }
 
     /// <summary>
     /// Navigation property: İlişkili rol
@@ -19,7 +19,7 @@ public sealed class RolePermission
     /// <summary>
     /// Permission ID'si
     /// </summary>
-    public int PermissionId { get; set; }
+    public Guid PermissionId { get; set; }
 
     /// <summary>
     /// Navigation property: İlişkili permission

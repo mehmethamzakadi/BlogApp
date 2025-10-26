@@ -29,7 +29,7 @@ namespace BlogApp.API.Controllers
 
         [HttpGet("{id}")]
         [HasPermission(Permissions.UsersRead)]
-        public async Task<IActionResult> GetById([FromRoute] int id)
+        public async Task<IActionResult> GetById([FromRoute] Guid id)
         {
             var response = await Mediator.Send(new GetByIdUserQuery(id));
             return Ok(response);
@@ -45,7 +45,7 @@ namespace BlogApp.API.Controllers
 
         [HttpPut("{id}")]
         [HasPermission(Permissions.UsersUpdate)]
-        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateUserCommand command)
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateUserCommand command)
         {
             if (id != command.Id)
                 return BadRequest("ID mismatch");
@@ -56,7 +56,7 @@ namespace BlogApp.API.Controllers
 
         [HttpDelete("{id}")]
         [HasPermission(Permissions.UsersDelete)]
-        public async Task<IActionResult> Delete([FromRoute] int id)
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             var response = await Mediator.Send(new DeleteUserCommand(id));
             return Ok(response);
@@ -74,7 +74,7 @@ namespace BlogApp.API.Controllers
         /// </summary>
         [HttpGet("{id}/roles")]
         [HasPermission(Permissions.RolesRead)]
-        public async Task<IActionResult> GetUserRoles([FromRoute] int id)
+        public async Task<IActionResult> GetUserRoles([FromRoute] Guid id)
         {
             var response = await Mediator.Send(new GetUserRolesQuery(id));
             return Ok(response);
@@ -85,7 +85,7 @@ namespace BlogApp.API.Controllers
         /// </summary>
         [HttpPost("{id}/roles")]
         [HasPermission(Permissions.RolesAssignPermissions)]
-        public async Task<IActionResult> AssignRolesToUser([FromRoute] int id, [FromBody] AssignRolesToUserCommand command)
+        public async Task<IActionResult> AssignRolesToUser([FromRoute] Guid id, [FromBody] AssignRolesToUserCommand command)
         {
             if (id != command.UserId)
                 return BadRequest("ID mismatch");

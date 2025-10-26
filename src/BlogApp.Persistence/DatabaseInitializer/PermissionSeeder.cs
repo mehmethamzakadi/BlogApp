@@ -63,46 +63,67 @@ public class PermissionSeeder
     private async Task EnsurePermissionsExistAsync()
     {
         var allPermissionNames = Permissions.GetAllPermissions();
+        
+    // Önce tüm mevcut permission'ları al (IsDeleted kontrolü ile)
         var existingPermissions = await _context.Permissions
-            .Where(p => !p.IsDeleted)
-            .Select(p => p.Name)
-            .ToListAsync();
+      .Where(p => !p.IsDeleted)
+    .ToListAsync();
 
-        var missingPermissions = allPermissionNames
-            .Except(existingPermissions)
+        var existingPermissionNames = existingPermissions.Select(p => p.Name).ToHashSet();
+
+   var missingPermissions = allPermissionNames
+            .Except(existingPermissionNames)
             .ToList();
 
         if (!missingPermissions.Any())
         {
-            _logger.LogInformation("All permissions already exist in database");
+     _logger.LogInformation("All permissions already exist in database");
             return;
         }
 
         _logger.LogInformation($"Adding {missingPermissions.Count} missing permissions");
 
         foreach (var permissionName in missingPermissions)
-        {
-            var parts = permissionName.Split('.');
-            var module = parts[0];
-            var type = parts.Length > 1 ? parts[1] : "Custom";
-
-            var permission = new Permission
+  {
+   // Tekrar kontrol et - race condition için
+     var exists = existingPermissions.Any(p => p.Name == permissionName);
+            if (exists)
             {
-                Name = permissionName,
-                NormalizedName = permissionName.ToUpperInvariant(),
-                Module = module,
-                Type = type,
-                Description = GetPermissionDescription(permissionName),
-                CreatedDate = DateTime.UtcNow,
-                CreatedById = 1,
-                IsDeleted = false
+       _logger.LogInformation($"Permission {permissionName} already exists, skipping");
+     continue;
+            }
+
+       var parts = permissionName.Split('.');
+      var module = parts[0];
+     var type = parts.Length > 1 ? parts[1] : "Custom";
+
+        var permission = new Permission
+            {
+     Name = permissionName,
+      NormalizedName = permissionName.ToUpperInvariant(),
+      Module = module,
+         Type = type,
+   Description = GetPermissionDescription(permissionName),
+              CreatedDate = DateTime.UtcNow,
+                CreatedById = Guid.Parse("00000000-0000-0000-0000-000000000001"),
+    IsDeleted = false
             };
 
             _context.Permissions.Add(permission);
-        }
+     }
 
+      // SaveChanges'ı try-catch içinde yap
+        try
+        {
         await _context.SaveChangesAsync();
-        _logger.LogInformation($"Successfully added {missingPermissions.Count} permissions");
+   _logger.LogInformation($"Successfully added {missingPermissions.Count} permissions");
+        }
+        catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("duplicate key") == true)
+        {
+ _logger.LogWarning("Duplicate key detected during permission seeding. Some permissions may already exist.");
+      // Duplicate key hatası gelirse, context'i temizle ve devam et
+         _context.ChangeTracker.Clear();
+    }
     }
 
     private async Task AssignAllPermissionsToAdminAsync()

@@ -9,12 +9,12 @@ namespace BlogApp.Domain.Events.PostEvents;
 [StoreInOutbox]
 public class PostCreatedEvent : DomainEvent
 {
-    public int PostId { get; }
+    public Guid PostId { get; }
     public string Title { get; }
-    public int CategoryId { get; }
-    public int CreatedById { get; }
+    public Guid CategoryId { get; }
+    public Guid CreatedById { get; }
 
-    public PostCreatedEvent(int postId, string title, int categoryId, int createdById)
+    public PostCreatedEvent(Guid postId, string title, Guid categoryId, Guid createdById)
     {
         PostId = postId;
         Title = title;

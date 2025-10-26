@@ -46,7 +46,7 @@ public sealed class UpdatePostCommandHandler(
 
         // ✅ Outbox Pattern için SaveChanges'dan ÖNCE domain event'i tetikle
         var userId = currentUserService.GetCurrentUserId();
-        entity.AddDomainEvent(new PostUpdatedEvent(entity.Id, entity.Title, userId ?? entity.UpdatedById ?? 0));
+        entity.AddDomainEvent(new PostUpdatedEvent(entity.Id, entity.Title, userId ?? entity.UpdatedById ?? Guid.Empty));
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

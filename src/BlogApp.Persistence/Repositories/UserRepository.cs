@@ -17,7 +17,9 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
     private readonly BlogAppDbContext _context;
     private readonly IPasswordHasher<User> _passwordHasher;
 
-    public UserRepository(BlogAppDbContext context, IPasswordHasher<User> passwordHasher) : base(context)
+    public UserRepository(
+        BlogAppDbContext context, 
+        IPasswordHasher<User> passwordHasher) : base(context)
     {
         _context = context;
         _passwordHasher = passwordHasher;
@@ -30,7 +32,7 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
             .ToPaginateAsync(index, size, cancellationToken);
     }
 
-    public User? FindById(int id)
+    public User? FindById(Guid id)
     {
         return _context.Users
             .Include(u => u.UserRoles)
@@ -38,7 +40,7 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
             .FirstOrDefault(u => u.Id == id);
     }
 
-    public async Task<User?> FindByIdAsync(int id)
+    public async Task<User?> FindByIdAsync(Guid id)
     {
         return await _context.Users
             .Include(u => u.UserRoles)
@@ -136,7 +138,7 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
         return new SuccessResult("Rol başarıyla atandı.");
     }
 
-    public async Task<IResult> UpdatePasswordAsync(int userId, string resetToken, string newPassword)
+    public async Task<IResult> UpdatePasswordAsync(Guid userId, string resetToken, string newPassword)
     {
         var user = await _context.Users.FindAsync(userId);
 
@@ -189,6 +191,14 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
             .ToListAsync();
     }
 
+    public async Task<List<Guid>> GetUserRoleIdsAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        return await _context.UserRoles
+            .Where(ur => ur.UserId == userId)
+            .Select(ur => ur.RoleId)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IResult> AddToRolesAsync(User user, params string[] roles)
     {
         var errors = new List<IdentityError>();
@@ -209,25 +219,22 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
                 continue;
             }
 
-            var existingUserRole = await _context.UserRoles
-                .FirstOrDefaultAsync(ur => ur.UserId == user.Id && ur.RoleId == role.Id);
-
-            if (existingUserRole == null)
+            // ✅ BEST PRACTICE: Delta Update yaklaşımıyla artık duplicate check'e gerek yok
+            // Handler zaten sadece eklenecek rolleri gönderiyor
+            var userRole = new UserRole
             {
-                var userRole = new UserRole
-                {
-                    UserId = user.Id,
-                    RoleId = role.Id,
-                    AssignedDate = DateTime.UtcNow
-                };
+                UserId = user.Id,
+                RoleId = role.Id,
+                AssignedDate = DateTime.UtcNow
+            };
 
-                _context.UserRoles.Add(userRole);
-            }
+            _context.UserRoles.Add(userRole);
         }
 
         if (errors.Any())
         {
-            return new ErrorResult(string.Join(", ", errors.Select(e => e.Description)));
+            var errorMessage = string.Join(", ", errors.Select(e => e.Description));
+            return new ErrorResult(errorMessage);
         }
 
         // ✅ REMOVED: SaveChanges - UnitOfWork is responsible for transaction management
@@ -265,7 +272,8 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
 
         if (errors.Any())
         {
-            return new ErrorResult(string.Join(", ", errors.Select(e => e.Description)));
+            var errorMessage = string.Join(", ", errors.Select(e => e.Description));
+            return new ErrorResult(errorMessage);
         }
 
         // ✅ REMOVED: SaveChanges - UnitOfWork is responsible for transaction management

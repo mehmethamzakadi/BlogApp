@@ -58,7 +58,7 @@ export function CategoriesPage() {
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [sorting, setSorting] = useState<SortingState>([
-    { id: 'id', desc: true }
+    { id: 'createdDate', desc: true }
   ]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
@@ -112,12 +112,6 @@ export function CategoriesPage() {
 
   const columns = useMemo<ColumnDef<Category>[]>(
     () => [
-      {
-        accessorKey: 'id',
-        header: 'ID',
-        cell: ({ row }) => <span className="font-mono text-xs text-muted-foreground">#{row.original.id}</span>,
-        enableSorting: true
-      },
       {
         accessorKey: 'name',
         header: ({ column }) => (
@@ -202,7 +196,7 @@ export function CategoriesPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (categoryId: number) => deleteCategory(categoryId),
+    mutationFn: (categoryId: string) => deleteCategory(categoryId),
     onSuccess: (result) => {
       if (!result.success) {
         showApiResponseError(result, 'Kategori silinemedi');

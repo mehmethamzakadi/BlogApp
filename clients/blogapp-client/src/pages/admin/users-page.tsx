@@ -78,12 +78,12 @@ export function UsersPage() {
     pageSize: 10
   });
   const [searchTerm, setSearchTerm] = useState('');
-  const [sorting, setSorting] = useState<SortingState>([{ id: 'id', desc: true }]);
+  const [sorting, setSorting] = useState<SortingState>([{ id: 'createdDate', desc: true }]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [assigningRolesUser, setAssigningRolesUser] = useState<User | null>(null);
-  const [selectedRoles, setSelectedRoles] = useState<number[]>([]);
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
 
   // Queries
   const usersQuery = useQuery<UserListResponse>({
@@ -155,12 +155,6 @@ export function UsersPage() {
   // Columns
   const columns = useMemo<ColumnDef<User>[]>(
     () => [
-      {
-        accessorKey: 'id',
-        header: 'ID',
-        cell: ({ row }) => <span className="font-mono text-xs text-muted-foreground">#{row.original.id}</span>,
-        enableSorting: true
-      },
       {
         accessorKey: 'userName',
         header: 'Kullanıcı Adı',
@@ -261,7 +255,7 @@ export function UsersPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (userId: number) => deleteUser(userId),
+    mutationFn: (userId: string) => deleteUser(userId),
     onSuccess: () => {
       toast.success('Kullanıcı başarıyla silindi');
       setUserToDelete(null);
@@ -273,7 +267,7 @@ export function UsersPage() {
   });
 
   const assignRolesMutation = useMutation({
-    mutationFn: (data: { userId: number; roleIds: number[] }) =>
+    mutationFn: (data: { userId: string; roleIds: string[] }) =>
       assignRolesToUser(data),
     onSuccess: () => {
       toast.success('Roller başarıyla atandı');
@@ -342,7 +336,7 @@ export function UsersPage() {
     });
   };
 
-  const toggleRole = (roleId: number) => {
+  const toggleRole = (roleId: string) => {
     setSelectedRoles((prev) => {
       const currentRoles = prev ?? [];
       return currentRoles.includes(roleId) 

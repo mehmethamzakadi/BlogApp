@@ -9,11 +9,11 @@ namespace BlogApp.Domain.Events.PostEvents;
 [StoreInOutbox]
 public class PostDeletedEvent : DomainEvent
 {
-    public int PostId { get; }
+    public Guid PostId { get; }
     public string Title { get; }
-    public int DeletedById { get; }
+    public Guid DeletedById { get; }
 
-    public PostDeletedEvent(int postId, string title, int deletedById)
+    public PostDeletedEvent(Guid postId, string title, Guid deletedById)
     {
         PostId = postId;
         Title = title;
