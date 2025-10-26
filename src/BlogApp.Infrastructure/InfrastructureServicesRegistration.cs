@@ -7,6 +7,7 @@ using BlogApp.Infrastructure.Authorization;
 using BlogApp.Infrastructure.Consumers;
 using BlogApp.Infrastructure.Services;
 using BlogApp.Infrastructure.Services.Identity;
+using BlogApp.Infrastructure.Services.BackgroundServices.Outbox.Converters;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -124,6 +125,21 @@ namespace BlogApp.Infrastructure
 
             // Background Services
             services.AddHostedService<Services.BackgroundServices.OutboxProcessorService>();
+
+            services.AddSingleton<IIntegrationEventConverterStrategy, CategoryCreatedIntegrationEventConverter>();
+            services.AddSingleton<IIntegrationEventConverterStrategy, CategoryUpdatedIntegrationEventConverter>();
+            services.AddSingleton<IIntegrationEventConverterStrategy, CategoryDeletedIntegrationEventConverter>();
+            services.AddSingleton<IIntegrationEventConverterStrategy, PostCreatedIntegrationEventConverter>();
+            services.AddSingleton<IIntegrationEventConverterStrategy, PostUpdatedIntegrationEventConverter>();
+            services.AddSingleton<IIntegrationEventConverterStrategy, PostDeletedIntegrationEventConverter>();
+            services.AddSingleton<IIntegrationEventConverterStrategy, UserCreatedIntegrationEventConverter>();
+            services.AddSingleton<IIntegrationEventConverterStrategy, UserUpdatedIntegrationEventConverter>();
+            services.AddSingleton<IIntegrationEventConverterStrategy, UserDeletedIntegrationEventConverter>();
+            services.AddSingleton<IIntegrationEventConverterStrategy, UserRolesAssignedIntegrationEventConverter>();
+            services.AddSingleton<IIntegrationEventConverterStrategy, RoleCreatedIntegrationEventConverter>();
+            services.AddSingleton<IIntegrationEventConverterStrategy, RoleUpdatedIntegrationEventConverter>();
+            services.AddSingleton<IIntegrationEventConverterStrategy, RoleDeletedIntegrationEventConverter>();
+            services.AddSingleton<IIntegrationEventConverterStrategy, PermissionsAssignedToRoleIntegrationEventConverter>();
 
             services.AddSingleton<ITelegramService, TelegramService>();
             services.AddSingleton<ICacheService, RedisCacheService>();
