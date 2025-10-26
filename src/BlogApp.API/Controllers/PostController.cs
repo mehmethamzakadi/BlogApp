@@ -18,9 +18,9 @@ namespace BlogApp.API.Controllers
     {
         [AllowAnonymous]
         [HttpGet]
-        public async Task<IActionResult> GetList([FromQuery] PaginatedRequest pageRequest)
+        public async Task<IActionResult> GetList([FromQuery] PostListRequest request)
         {
-            PaginatedListResponse<GetListPostResponse> response = await Mediator.Send(new GetListPostQuery(pageRequest));
+            PaginatedListResponse<GetListPostResponse> response = await Mediator.Send(new GetListPostQuery(request));
             return Ok(response);
         }
 
