@@ -244,6 +244,11 @@ public class PermissionSeeder
             Permissions.CommentsDelete => "Yorum silme yetkisi",
             Permissions.CommentsViewAll => "Tüm yorumları görüntüleme yetkisi",
             Permissions.CommentsModerate => "Yorum moderasyon yetkisi",
+            Permissions.BookshelfCreate => "Yeni kitap kaydı oluşturma yetkisi",
+            Permissions.BookshelfRead => "Kitap kayıtlarını görüntüleme yetkisi",
+            Permissions.BookshelfUpdate => "Kitap kayıtlarını güncelleme yetkisi",
+            Permissions.BookshelfDelete => "Kitap kaydı silme yetkisi",
+            Permissions.BookshelfViewAll => "Tüm kitap kayıtlarını görüntüleme yetkisi",
             Permissions.ActivityLogsView => "Aktivite loglarını görüntüleme yetkisi",
             _ => $"{permissionName} permission"
         };

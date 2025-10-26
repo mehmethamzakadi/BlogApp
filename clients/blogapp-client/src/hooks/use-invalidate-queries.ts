@@ -49,6 +49,15 @@ export function useInvalidateQueries() {
   };
 
   /**
+   * Bookshelf kayıtları sonrasında invalidation
+   */
+  const invalidateBookshelf = () => {
+    queryClient.invalidateQueries({ queryKey: ['bookshelf-items'] });
+    queryClient.invalidateQueries({ queryKey: ['activity-logs'] });
+    queryClient.invalidateQueries({ queryKey: ['recent-activities'] });
+  };
+
+  /**
    * Yorum işlemleri sonrası invalidation
    */
   const invalidateComments = () => {
@@ -77,6 +86,7 @@ export function useInvalidateQueries() {
     invalidateRoles,
     invalidatePosts,
     invalidateCategories,
+    invalidateBookshelf,
     invalidateComments,
     invalidateActivityLogs,
     invalidateAll

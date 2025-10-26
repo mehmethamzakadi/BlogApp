@@ -44,6 +44,13 @@ export const Permissions = {
   CommentsViewAll: 'Comments.ViewAll',
   CommentsModerate: 'Comments.Moderate',
 
+  // Bookshelf Management
+  BookshelfCreate: 'Bookshelf.Create',
+  BookshelfRead: 'Bookshelf.Read',
+  BookshelfUpdate: 'Bookshelf.Update',
+  BookshelfDelete: 'Bookshelf.Delete',
+  BookshelfViewAll: 'Bookshelf.ViewAll',
+
   // Activity Logs
   ActivityLogsView: 'ActivityLogs.View'
 } as const;

@@ -129,6 +129,9 @@ namespace BlogApp.Infrastructure
             services.AddSingleton<IIntegrationEventConverterStrategy, CategoryCreatedIntegrationEventConverter>();
             services.AddSingleton<IIntegrationEventConverterStrategy, CategoryUpdatedIntegrationEventConverter>();
             services.AddSingleton<IIntegrationEventConverterStrategy, CategoryDeletedIntegrationEventConverter>();
+            services.AddSingleton<IIntegrationEventConverterStrategy, BookshelfItemCreatedIntegrationEventConverter>();
+            services.AddSingleton<IIntegrationEventConverterStrategy, BookshelfItemUpdatedIntegrationEventConverter>();
+            services.AddSingleton<IIntegrationEventConverterStrategy, BookshelfItemDeletedIntegrationEventConverter>();
             services.AddSingleton<IIntegrationEventConverterStrategy, PostCreatedIntegrationEventConverter>();
             services.AddSingleton<IIntegrationEventConverterStrategy, PostUpdatedIntegrationEventConverter>();
             services.AddSingleton<IIntegrationEventConverterStrategy, PostDeletedIntegrationEventConverter>();

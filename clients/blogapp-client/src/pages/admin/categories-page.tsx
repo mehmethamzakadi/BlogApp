@@ -6,7 +6,7 @@ import {
   getCoreRowModel,
   useReactTable
 } from '@tanstack/react-table';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { PlusCircle, Pencil, Trash2, ArrowUpDown } from 'lucide-react';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -50,7 +50,6 @@ const fieldMap: Record<string, string> = {
 };
 
 export function CategoriesPage() {
-  const queryClient = useQueryClient();
   const { invalidateCategories } = useInvalidateQueries();
   const [filters, setFilters] = useState<CategoryTableFilters>({
     pageIndex: 0,

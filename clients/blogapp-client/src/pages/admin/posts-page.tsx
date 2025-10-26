@@ -6,7 +6,7 @@ import {
   getCoreRowModel,
   useReactTable
 } from '@tanstack/react-table';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
 import { PlusCircle, Pencil, Trash2, ArrowUpDown } from 'lucide-react';
@@ -38,7 +38,6 @@ const fieldMap: Record<string, string> = {
 };
 
 export function PostsPage() {
-  const queryClient = useQueryClient();
   const { invalidatePosts } = useInvalidateQueries();
   const navigate = useNavigate();
   const [filters, setFilters] = useState<PostTableFilters>({

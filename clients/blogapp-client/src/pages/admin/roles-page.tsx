@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { PlusCircle, Pencil, Trash2, Shield } from 'lucide-react';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -25,7 +25,6 @@ const roleSchema = z.object({
 type RoleFormSchema = z.infer<typeof roleSchema>;
 
 export function RolesPage() {
-  const queryClient = useQueryClient();
   const { invalidateRoles } = useInvalidateQueries();
   const [page, setPage] = useState(0);
   const pageSize = 10;

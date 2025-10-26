@@ -81,6 +81,13 @@ public class PermissionSeed : IEntityTypeConfiguration<Permission>
             Permissions.CommentsViewAll => "Tüm yorumları görüntüleme yetkisi.",
             Permissions.CommentsModerate => "Yorum moderasyonu yapma yetkisi.",
 
+            // Bookshelf management
+            Permissions.BookshelfCreate => "Yeni kitap kaydı oluşturma yetkisi.",
+            Permissions.BookshelfRead => "Kitap kayıtlarını görüntüleme yetkisi.",
+            Permissions.BookshelfUpdate => "Kitap kayıtlarını güncelleme yetkisi.",
+            Permissions.BookshelfDelete => "Kitap kaydı silme yetkisi.",
+            Permissions.BookshelfViewAll => "Tüm kitap kayıtlarını görüntüleme yetkisi.",
+
             // Activity logs
             Permissions.ActivityLogsView => "Aktivite loglarını görüntüleme yetkisi.",
 

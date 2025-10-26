@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { FolderKanban, LayoutDashboard, FileText, Users, Shield, Activity } from 'lucide-react';
+import { FolderKanban, LayoutDashboard, FileText, Users, Shield, Activity, BookOpenCheck } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { usePermission } from '../../hooks/use-permission';
 import { Permissions } from '../../lib/permissions';
@@ -40,6 +40,12 @@ const links = [
     label: 'Aktivite Logları',
     icon: Activity,
     requiredPermission: Permissions.ActivityLogsView
+  },
+  {
+    to: '/admin/bookshelf',
+    label: 'Kitaplık',
+    icon: BookOpenCheck,
+    requiredPermission: Permissions.BookshelfViewAll
   }
 ];
 

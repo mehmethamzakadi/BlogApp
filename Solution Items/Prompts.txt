@@ -1,0 +1,11 @@
+Yeni bir admin modülü eklemek istiyorum.
+• Modül adı: Bookshelf
+• Amaç: Okunan kitap kayıtlarını (kitap adı, yazar, yayınevi, sayfa sayısı, okundu/okunmadı, not, okunma tarihi) yönetmek.
+• Sadece admin rolü erişebilsin.
+• API’de CRUD uçları, DTO’lar, validasyonlar ve filtreleme destekli listeleme olsun.
+• Admin panelinde menüye yeni sayfa ekle (clients/blogapp-client içindeki mevcut admin arayüzü kullanılıyor).
+• Gerekli izinleri (Permissions.*) ve seed’lerini güncelle.
+• Gerekli migration, repository, service ve controller katmanlarını projedeki mevcut mimariye sadık kalarak oluştur.
+• Outbox pattern yapısına dahil et.
+• Ünite testleri ekleyip çalıştır.
+Her adımda dosya yollarını ve yapılan değişiklikleri detaylı anlat, gerekli komutları da paylaş.

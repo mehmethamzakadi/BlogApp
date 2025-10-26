@@ -1,5 +1,6 @@
 using System;
 using System.Text.Json;
+using BlogApp.Domain.Events.BookshelfItemEvents;
 using BlogApp.Domain.Events.CategoryEvents;
 using BlogApp.Domain.Events.IntegrationEvents;
 using BlogApp.Domain.Events.PermissionEvents;
@@ -71,6 +72,51 @@ internal sealed class CategoryDeletedIntegrationEventConverter : ActivityLogInte
         Title: $"\"{domainEvent.Name}\" kategorisi silindi",
         Details: null,
         UserId: domainEvent.DeletedById,
+        Timestamp: DateTime.UtcNow
+    );
+}
+
+internal sealed class BookshelfItemCreatedIntegrationEventConverter : ActivityLogIntegrationEventConverter<BookshelfItemCreatedEvent>
+{
+    public override string EventType => nameof(BookshelfItemCreatedEvent);
+
+    protected override ActivityLogCreatedIntegrationEvent Convert(BookshelfItemCreatedEvent domainEvent) => new(
+        ActivityType: "bookshelf_item_created",
+        EntityType: "BookshelfItem",
+        EntityId: domainEvent.ItemId,
+        Title: $"\"{domainEvent.Title}\" kitaplığa eklendi",
+        Details: null,
+        UserId: domainEvent.ActorId,
+        Timestamp: DateTime.UtcNow
+    );
+}
+
+internal sealed class BookshelfItemUpdatedIntegrationEventConverter : ActivityLogIntegrationEventConverter<BookshelfItemUpdatedEvent>
+{
+    public override string EventType => nameof(BookshelfItemUpdatedEvent);
+
+    protected override ActivityLogCreatedIntegrationEvent Convert(BookshelfItemUpdatedEvent domainEvent) => new(
+        ActivityType: "bookshelf_item_updated",
+        EntityType: "BookshelfItem",
+        EntityId: domainEvent.ItemId,
+        Title: $"\"{domainEvent.Title}\" kitabı güncellendi",
+        Details: null,
+        UserId: domainEvent.ActorId,
+        Timestamp: DateTime.UtcNow
+    );
+}
+
+internal sealed class BookshelfItemDeletedIntegrationEventConverter : ActivityLogIntegrationEventConverter<BookshelfItemDeletedEvent>
+{
+    public override string EventType => nameof(BookshelfItemDeletedEvent);
+
+    protected override ActivityLogCreatedIntegrationEvent Convert(BookshelfItemDeletedEvent domainEvent) => new(
+        ActivityType: "bookshelf_item_deleted",
+        EntityType: "BookshelfItem",
+        EntityId: domainEvent.ItemId,
+        Title: $"\"{domainEvent.Title}\" kitabı silindi",
+        Details: null,
+        UserId: domainEvent.ActorId,
         Timestamp: DateTime.UtcNow
     );
 }

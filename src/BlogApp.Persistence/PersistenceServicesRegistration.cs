@@ -29,7 +29,8 @@ public static class PersistenceServicesRegistration
 
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<ICommentRepository, CommentRepository>();
-        services.AddScoped<IImageRepository, ImageRepository>();
+    services.AddScoped<IImageRepository, ImageRepository>();
+    services.AddScoped<IBookshelfItemRepository, BookshelfItemRepository>();
         services.AddScoped<IPostRepository, PostRepository>();
         services.AddScoped<IActivityLogRepository, ActivityLogRepository>();
         services.AddScoped<IPermissionRepository, PermissionRepository>();

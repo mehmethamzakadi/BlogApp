@@ -1,12 +1,6 @@
 import api from '../../lib/axios';
 import { ApiResult, normalizeApiResult, normalizePaginatedResponse } from '../../types/api';
-import {
-  Role,
-  RoleFormValues,
-  RoleUpdateFormValues,
-  RoleListResponse,
-  RoleTableFilters
-} from './types';
+import { Role, RoleFormValues, RoleUpdateFormValues, RoleListResponse } from './types';
 
 export async function fetchRoles(
   pageIndex: number = 0,

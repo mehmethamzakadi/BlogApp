@@ -47,6 +47,13 @@ public static class Permissions
     public const string CommentsViewAll = "Comments.ViewAll";
     public const string CommentsModerate = "Comments.Moderate";
 
+    // Bookshelf Management Permissions
+    public const string BookshelfCreate = "Bookshelf.Create";
+    public const string BookshelfRead = "Bookshelf.Read";
+    public const string BookshelfUpdate = "Bookshelf.Update";
+    public const string BookshelfDelete = "Bookshelf.Delete";
+    public const string BookshelfViewAll = "Bookshelf.ViewAll";
+
     // Activity Logs Permissions
     public const string ActivityLogsView = "ActivityLogs.View";
 
@@ -74,6 +81,9 @@ public static class Permissions
 
             // Comments
             CommentsCreate, CommentsRead, CommentsUpdate, CommentsDelete, CommentsViewAll, CommentsModerate,
+
+            // Bookshelf
+            BookshelfCreate, BookshelfRead, BookshelfUpdate, BookshelfDelete, BookshelfViewAll,
 
             // Activity Logs
             ActivityLogsView

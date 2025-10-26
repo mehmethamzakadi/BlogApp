@@ -6,7 +6,7 @@ import {
   getCoreRowModel,
   useReactTable
 } from '@tanstack/react-table';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { PlusCircle, Pencil, Trash2, Shield, Mail, User as UserIcon } from 'lucide-react';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -20,13 +20,7 @@ import {
   assignRolesToUser
 } from '../../features/users/api';
 import { fetchRoles } from '../../features/roles/api';
-import {
-  User,
-  UserFormValues,
-  UserUpdateFormValues,
-  UserTableFilters,
-  UserListResponse
-} from '../../features/users/types';
+import { User, UserTableFilters, UserListResponse } from '../../features/users/types';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
@@ -70,7 +64,6 @@ const fieldMap: Record<string, string> = {
 };
 
 export function UsersPage() {
-  const queryClient = useQueryClient();
   const { hasPermission } = usePermission();
   const { invalidateUsers } = useInvalidateQueries();
   const [filters, setFilters] = useState<UserTableFilters>({
