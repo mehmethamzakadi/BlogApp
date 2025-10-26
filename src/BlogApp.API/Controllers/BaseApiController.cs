@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using BlogApp.Domain.Common.Results;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using IResult = BlogApp.Domain.Common.Results.IResult;
 
@@ -28,13 +30,19 @@ namespace BlogApp.API.Controllers
         [NonAction]
         public IActionResult GetResponseOnlyResultMessage(IResult result)
         {
-            return result.Success ? Ok(result.Message) : BadRequest(result.Message);
+            var apiResult = CreateApiResult(result, result.Message);
+            var statusCode = result.Success ? StatusCodes.Status200OK : StatusCodes.Status400BadRequest;
+
+            return ApiResponse(result.Success, statusCode, apiResult);
         }
 
         [NonAction]
         public IActionResult GetResponseOnlyResultData<T>(IDataResult<T> result)
         {
-            return result.Success ? Ok(result.Data) : BadRequest(result.Message);
+            var apiResult = CreateApiResult(result);
+            var statusCode = result.Success ? StatusCodes.Status200OK : StatusCodes.Status400BadRequest;
+
+            return ApiResponse(result.Success, statusCode, apiResult);
         }
 
         /// <summary>
@@ -48,13 +56,9 @@ namespace BlogApp.API.Controllers
         [NonAction]
         protected IActionResult Success<T>(string message, string internalMessage, T data)
         {
-            return Success(new ApiResult<T>
-            {
-                Success = true,
-                Message = message,
-                InternalMessage = internalMessage,
-                Data = data
-            });
+            var apiResult = CreateApiResult(true, message, internalMessage, data);
+
+            return ApiResponse(true, StatusCodes.Status200OK, apiResult);
         }
 
         /// <summary>
@@ -66,7 +70,7 @@ namespace BlogApp.API.Controllers
         [NonAction]
         protected IActionResult Success<T>(ApiResult<T> data)
         {
-            return Ok(data);
+            return ApiResponse(true, StatusCodes.Status200OK, data);
         }
 
         /// <summary>
@@ -80,13 +84,9 @@ namespace BlogApp.API.Controllers
         [NonAction]
         protected IActionResult Created<T>(string message, string internalMessage, T data)
         {
-            return Created(new ApiResult<T>
-            {
-                Success = true,
-                Message = message,
-                InternalMessage = internalMessage,
-                Data = data
-            });
+            var apiResult = CreateApiResult(true, message, internalMessage, data);
+
+            return ApiResponse(true, StatusCodes.Status201Created, apiResult);
         }
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace BlogApp.API.Controllers
         [NonAction]
         protected IActionResult Created<T>(ApiResult<T> data)
         {
-            return StatusCode(201, data);
+            return ApiResponse(true, StatusCodes.Status201Created, data);
         }
 
         /// <summary>
@@ -112,13 +112,9 @@ namespace BlogApp.API.Controllers
         [NonAction]
         protected IActionResult NoContent<T>(string message, string internalMessage, T data)
         {
-            return NoContent(new ApiResult<T>
-            {
-                Success = true,
-                Message = message,
-                InternalMessage = internalMessage,
-                Data = data
-            });
+            var apiResult = CreateApiResult(true, message, internalMessage, data);
+
+            return ApiResponse(true, StatusCodes.Status200OK, apiResult);
         }
 
         /// <summary>
@@ -130,7 +126,7 @@ namespace BlogApp.API.Controllers
         [NonAction]
         protected IActionResult NoContent<T>(ApiResult<T> data)
         {
-            return StatusCode(204, data);
+            return ApiResponse(true, StatusCodes.Status200OK, data);
         }
 
         /// <summary>
@@ -144,13 +140,9 @@ namespace BlogApp.API.Controllers
         [NonAction]
         protected IActionResult BadRequest<T>(string message, string internalMessage, T data)
         {
-            return BadRequest(new ApiResult<T>
-            {
-                Success = false,
-                Message = message,
-                InternalMessage = internalMessage,
-                Data = data
-            });
+            var apiResult = CreateApiResult(false, message, internalMessage, data);
+
+            return ApiResponse(false, StatusCodes.Status400BadRequest, apiResult);
         }
 
         /// <summary>
@@ -162,7 +154,7 @@ namespace BlogApp.API.Controllers
         [NonAction]
         protected IActionResult BadRequest<T>(ApiResult<T> data)
         {
-            return StatusCode(400, data);
+            return ApiResponse(false, StatusCodes.Status400BadRequest, data);
         }
 
         /// <summary>
@@ -176,13 +168,9 @@ namespace BlogApp.API.Controllers
         [NonAction]
         protected IActionResult Unauthorized<T>(string message, string internalMessage, T data)
         {
-            return Unauthorized(new ApiResult<T>
-            {
-                Success = false,
-                Message = message,
-                InternalMessage = internalMessage,
-                Data = data
-            });
+            var apiResult = CreateApiResult(false, message, internalMessage, data);
+
+            return ApiResponse(false, StatusCodes.Status401Unauthorized, apiResult);
         }
 
         /// <summary>
@@ -194,7 +182,7 @@ namespace BlogApp.API.Controllers
         [NonAction]
         protected IActionResult Unauthorized<T>(ApiResult<T> data)
         {
-            return StatusCode(401, data);
+            return ApiResponse(false, StatusCodes.Status401Unauthorized, data);
         }
 
         /// <summary>
@@ -208,13 +196,9 @@ namespace BlogApp.API.Controllers
         [NonAction]
         protected IActionResult Forbidden<T>(string message, string internalMessage, T data)
         {
-            return Forbidden(new ApiResult<T>
-            {
-                Success = false,
-                Message = message,
-                InternalMessage = internalMessage,
-                Data = data
-            });
+            var apiResult = CreateApiResult(false, message, internalMessage, data);
+
+            return ApiResponse(false, StatusCodes.Status403Forbidden, apiResult);
         }
 
         /// <summary>
@@ -226,7 +210,7 @@ namespace BlogApp.API.Controllers
         [NonAction]
         protected IActionResult Forbidden<T>(ApiResult<T> data)
         {
-            return StatusCode(403, data);
+            return ApiResponse(false, StatusCodes.Status403Forbidden, data);
         }
 
         /// <summary>
@@ -240,13 +224,9 @@ namespace BlogApp.API.Controllers
         [NonAction]
         protected IActionResult NotFound<T>(string message, string internalMessage, T data)
         {
-            return NotFound(new ApiResult<T>
-            {
-                Success = false,
-                Message = message,
-                InternalMessage = internalMessage,
-                Data = data
-            });
+            var apiResult = CreateApiResult(false, message, internalMessage, data);
+
+            return ApiResponse(false, StatusCodes.Status404NotFound, apiResult);
         }
 
         /// <summary>
@@ -258,7 +238,7 @@ namespace BlogApp.API.Controllers
         [NonAction]
         protected IActionResult NotFound<T>(ApiResult<T> data)
         {
-            return StatusCode(404, data);
+            return ApiResponse(false, StatusCodes.Status404NotFound, data);
         }
 
         /// <summary>
@@ -272,13 +252,9 @@ namespace BlogApp.API.Controllers
         [NonAction]
         protected IActionResult Error<T>(string message, string internalMessage, T data)
         {
-            return Error(new ApiResult<T>
-            {
-                Success = false,
-                Message = message,
-                InternalMessage = internalMessage,
-                Data = data
-            });
+            var apiResult = CreateApiResult(false, message, internalMessage, data);
+
+            return ApiResponse(false, StatusCodes.Status500InternalServerError, apiResult);
         }
 
         /// <summary>
@@ -290,7 +266,46 @@ namespace BlogApp.API.Controllers
         [NonAction]
         protected IActionResult Error<T>(ApiResult<T> data)
         {
-            return StatusCode(500, data);
+            return ApiResponse(false, StatusCodes.Status500InternalServerError, data);
+        }
+
+        private ApiResult<T> CreateApiResult<T>(IDataResult<T> result)
+        {
+            return CreateApiResult(result.Success, result.Message, string.Empty, result.Data, result.Errors);
+        }
+
+        private ApiResult<T> CreateApiResult<T>(IResult result, T data)
+        {
+            return CreateApiResult(result.Success, result.Message, string.Empty, data, result.Errors);
+        }
+
+        private ApiResult<T> CreateApiResult<T>(
+            bool success,
+            string message,
+            string internalMessage,
+            T data,
+            IEnumerable<string>? errors = null)
+        {
+            return new ApiResult<T>
+            {
+                Success = success,
+                Message = message,
+                InternalMessage = internalMessage,
+                Data = data,
+                Errors = errors is null ? new List<string>() : new List<string>(errors)
+            };
+        }
+
+        private IActionResult ApiResponse<T>(bool success, int statusCode, ApiResult<T> result)
+        {
+            result.Success = success;
+
+            if (result.Errors == null)
+            {
+                result.Errors = new List<string>();
+            }
+
+            return StatusCode(statusCode, result);
         }
     }
 }
