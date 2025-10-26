@@ -7,25 +7,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BlogApp.Persistence.Repositories;
 
-public sealed class RoleRepository : EfRepositoryBase<Role, BlogAppDbContext>, IRoleRepository
+public sealed class RoleRepository(BlogAppDbContext context) : EfRepositoryBase<Role, BlogAppDbContext>(context), IRoleRepository
 {
-    private readonly BlogAppDbContext _dbContext;
-
-    public RoleRepository(BlogAppDbContext dbContext) : base(dbContext)
-    {
-        _dbContext = dbContext;
-    }
 
     public async Task<Paginate<Role>> GetRoles(int index, int size, CancellationToken cancellationToken)
     {
-        return await _dbContext.Roles.ToPaginateAsync(index, size, cancellationToken);
+        return await Context.Roles.ToPaginateAsync(index, size, cancellationToken);
     }
 
     public Role? GetRoleById(Guid id)
     {
         // ✅ Tracking enabled - Entity will be tracked by EF Core
         // This allows domain events to be properly captured and processed
-        var result = _dbContext.Roles
+        var result = Context.Roles
             .FirstOrDefault(x => x.Id == id);
         return result;
     }
@@ -34,7 +28,7 @@ public sealed class RoleRepository : EfRepositoryBase<Role, BlogAppDbContext>, I
     {
         try
         {
-            await _dbContext.Roles.AddAsync(role);
+            await Context.Roles.AddAsync(role);
             // ✅ REMOVED: SaveChanges - UnitOfWork is responsible for transaction management
             return new SuccessResult("Rol başarıyla oluşturuldu.");
         }
@@ -48,7 +42,7 @@ public sealed class RoleRepository : EfRepositoryBase<Role, BlogAppDbContext>, I
     {
         try
         {
-            _dbContext.Roles.Remove(role);
+            Context.Roles.Remove(role);
             // ✅ REMOVED: SaveChanges - UnitOfWork is responsible for transaction management
             return new SuccessResult("Rol başarıyla silindi.");
         }
@@ -62,7 +56,7 @@ public sealed class RoleRepository : EfRepositoryBase<Role, BlogAppDbContext>, I
     {
         try
         {
-            _dbContext.Roles.Update(role);
+            Context.Roles.Update(role);
             // ✅ REMOVED: SaveChanges - UnitOfWork is responsible for transaction management
             return new SuccessResult("Rol başarıyla güncellendi.");
         }
@@ -77,7 +71,7 @@ public sealed class RoleRepository : EfRepositoryBase<Role, BlogAppDbContext>, I
         // ✅ Tracking enabled - Entity will be tracked by EF Core
         // ✅ NormalizedName üzerinden case-insensitive karşılaştırma
         var normalizedName = roleName.ToUpperInvariant();
-        return await _dbContext.Roles
+        return await Context.Roles
             .FirstOrDefaultAsync(x => x.NormalizedName == normalizedName);
     }
 
@@ -85,7 +79,7 @@ public sealed class RoleRepository : EfRepositoryBase<Role, BlogAppDbContext>, I
     {
         // ✅ NormalizedName üzerinden case-insensitive karşılaştırma
         var normalizedName = name.ToUpperInvariant();
-        var result = _dbContext.Roles
+        var result = Context.Roles
             .Any(x => x.NormalizedName == normalizedName);
 
         return result;

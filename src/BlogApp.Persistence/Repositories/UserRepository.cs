@@ -14,20 +14,18 @@ namespace BlogApp.Persistence.Repositories;
 /// </summary>
 public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, IUserRepository
 {
-    private readonly BlogAppDbContext _context;
     private readonly IPasswordHasher<User> _passwordHasher;
 
     public UserRepository(
         BlogAppDbContext context, 
         IPasswordHasher<User> passwordHasher) : base(context)
     {
-        _context = context;
         _passwordHasher = passwordHasher;
     }
 
     public async Task<Paginate<User>> GetUsersAsync(int index, int size, CancellationToken cancellationToken)
     {
-        return await _context.Users
+        return await Context.Users
             .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
             .OrderBy(u => u.Id)
@@ -36,7 +34,7 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
 
     public User? FindById(Guid id)
     {
-        return _context.Users
+        return Context.Users
             .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
             .FirstOrDefault(u => u.Id == id);
@@ -44,7 +42,7 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
 
     public async Task<User?> FindByIdAsync(Guid id)
     {
-        return await _context.Users
+        return await Context.Users
             .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
             .FirstOrDefaultAsync(u => u.Id == id);
@@ -53,7 +51,7 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
     public async Task<User?> FindByEmailAsync(string email)
     {
         var normalizedEmail = email.ToUpperInvariant();
-        return await _context.Users
+        return await Context.Users
             .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
             .FirstOrDefaultAsync(u => u.NormalizedEmail == normalizedEmail);
@@ -62,7 +60,7 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
     public async Task<User?> FindByUserNameAsync(string userName)
     {
         var normalizedUserName = userName.ToUpperInvariant();
-        return await _context.Users
+        return await Context.Users
             .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
             .FirstOrDefaultAsync(u => u.NormalizedUserName == normalizedUserName);
@@ -88,7 +86,7 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
             user.LockoutEnabled = true;
             user.AccessFailedCount = 0;
 
-            _context.Users.Add(user);
+            Context.Users.Add(user);
             // ✅ REMOVED: SaveChanges - UnitOfWork is responsible for transaction management
 
             return new SuccessResult("Kullanıcı başarıyla oluşturuldu.");
@@ -111,7 +109,7 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
     public async Task<IResult> AddToRoleAsync(User user, string roleName)
     {
         var normalizedRoleName = roleName.ToUpperInvariant();
-        var role = await _context.Roles
+        var role = await Context.Roles
             .FirstOrDefaultAsync(r => r.NormalizedName == normalizedRoleName);
 
         if (role == null)
@@ -119,7 +117,7 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
             return new ErrorResult($"'{roleName}' rolü bulunamadı.");
         }
 
-        var existingUserRole = await _context.UserRoles
+        var existingUserRole = await Context.UserRoles
             .FirstOrDefaultAsync(ur => ur.UserId == user.Id && ur.RoleId == role.Id);
 
         if (existingUserRole != null)
@@ -134,7 +132,7 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
             AssignedDate = DateTime.UtcNow
         };
 
-        _context.UserRoles.Add(userRole);
+        Context.UserRoles.Add(userRole);
         // ✅ REMOVED: SaveChanges - UnitOfWork is responsible for transaction management
 
         return new SuccessResult("Rol başarıyla atandı.");
@@ -142,7 +140,7 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
 
     public async Task<IResult> UpdatePasswordAsync(Guid userId, string resetToken, string newPassword)
     {
-        var user = await _context.Users.FindAsync(userId);
+        var user = await Context.Users.FindAsync(userId);
 
         if (user == null)
         {
@@ -171,7 +169,7 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
         user.PasswordResetToken = null;
         user.PasswordResetTokenExpiry = null;
 
-        _context.Users.Update(user);
+        Context.Users.Update(user);
         // ✅ REMOVED: SaveChanges - UnitOfWork is responsible for transaction management
 
         return new SuccessResult("Şifre başarıyla güncellendi.");
@@ -186,7 +184,7 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
 
     public async Task<List<string>> GetRolesAsync(User user)
     {
-        return await _context.UserRoles
+        return await Context.UserRoles
             .Where(ur => ur.UserId == user.Id)
             .Include(ur => ur.Role)
             .Select(ur => ur.Role.Name)
@@ -195,7 +193,7 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
 
     public async Task<List<Guid>> GetUserRoleIdsAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        return await _context.UserRoles
+        return await Context.UserRoles
             .Where(ur => ur.UserId == userId)
             .Select(ur => ur.RoleId)
             .ToListAsync(cancellationToken);
@@ -208,7 +206,7 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
         foreach (var roleName in roles)
         {
             var normalizedRoleName = roleName.ToUpperInvariant();
-            var role = await _context.Roles
+            var role = await Context.Roles
                 .FirstOrDefaultAsync(r => r.NormalizedName == normalizedRoleName);
 
             if (role == null)
@@ -230,7 +228,7 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
                 AssignedDate = DateTime.UtcNow
             };
 
-            _context.UserRoles.Add(userRole);
+            Context.UserRoles.Add(userRole);
         }
 
         if (errors.Any())
@@ -250,7 +248,7 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
         foreach (var roleName in roles)
         {
             var normalizedRoleName = roleName.ToUpperInvariant();
-            var role = await _context.Roles
+            var role = await Context.Roles
                 .FirstOrDefaultAsync(r => r.NormalizedName == normalizedRoleName);
 
             if (role == null)
@@ -263,12 +261,12 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
                 continue;
             }
 
-            var userRole = await _context.UserRoles
+            var userRole = await Context.UserRoles
                 .FirstOrDefaultAsync(ur => ur.UserId == user.Id && ur.RoleId == role.Id);
 
             if (userRole != null)
             {
-                _context.UserRoles.Remove(userRole);
+                Context.UserRoles.Remove(userRole);
             }
         }
 
@@ -291,7 +289,7 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
             user.NormalizedEmail = user.Email.ToUpperInvariant();
             user.ConcurrencyStamp = Guid.NewGuid().ToString();
 
-            _context.Users.Update(user);
+            Context.Users.Update(user);
             // ✅ REMOVED: SaveChanges - UnitOfWork is responsible for transaction management
 
             return new SuccessResult("Kullanıcı başarıyla güncellendi.");
@@ -314,7 +312,7 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
     {
         try
         {
-            _context.Users.Remove(user);
+            Context.Users.Remove(user);
             // ✅ REMOVED: SaveChanges - UnitOfWork is responsible for transaction management
 
             return new SuccessResult("Kullanıcı başarıyla silindi.");

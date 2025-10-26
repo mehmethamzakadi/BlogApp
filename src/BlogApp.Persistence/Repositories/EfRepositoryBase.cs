@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Query;
 using System.Collections;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -26,8 +27,7 @@ where TContext : DbContext
 
     public async Task<ICollection<TEntity>> AddRangeAsync(ICollection<TEntity> entities)
     {
-        foreach (TEntity entity in entities)
-            entity.CreatedDate = DateTime.UtcNow;
+        MarkCreatedDates(entities);
         await Context.AddRangeAsync(entities);
         // SaveChanges kaldırıldı
         return entities;
@@ -35,13 +35,7 @@ where TContext : DbContext
 
     public async Task<bool> AnyAsync(Expression<Func<TEntity, bool>>? predicate = null, bool withDeleted = false, bool enableTracking = true, CancellationToken cancellationToken = default)
     {
-        IQueryable<TEntity> queryable = Query();
-        if (!enableTracking)
-            queryable = queryable.AsNoTracking();
-        if (withDeleted)
-            queryable = queryable.IgnoreQueryFilters();
-        if (predicate != null)
-            queryable = queryable.Where(predicate);
+        IQueryable<TEntity> queryable = BuildQueryable(predicate, include: null, withDeleted, enableTracking);
         return await queryable.AnyAsync(cancellationToken);
     }
 
@@ -53,17 +47,8 @@ where TContext : DbContext
         bool enableTracking = true,
         CancellationToken cancellationToken = default)
     {
-        IQueryable<TEntity> queryable = Query();
-        if (!enableTracking)
-            queryable = queryable.AsNoTracking();
-        if (include != null)
-            queryable = include(queryable);
-        if (withDeleted)
-            queryable = queryable.IgnoreQueryFilters();
-        if (predicate != null)
-            queryable = queryable.Where(predicate);
-        if (orderBy != null)
-            queryable = orderBy(queryable);
+        IQueryable<TEntity> queryable = BuildQueryable(predicate, include, withDeleted, enableTracking);
+        queryable = ApplyOrdering(queryable, orderBy);
         return await queryable.ToListAsync(cancellationToken);
     }
 
@@ -83,43 +68,26 @@ where TContext : DbContext
 
     public async Task<TEntity?> GetAsync(Expression<Func<TEntity, bool>> predicate, Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null, bool withDeleted = false, bool enableTracking = true, CancellationToken cancellationToken = default)
     {
-        IQueryable<TEntity> queryable = Query();
-        if (!enableTracking)
-            queryable = queryable.AsNoTracking();
-        if (include != null)
-            queryable = include(queryable);
-        if (withDeleted)
-            queryable = queryable.IgnoreQueryFilters();
+        IQueryable<TEntity> queryable = BuildQueryable(predicate, include, withDeleted, enableTracking);
         return await queryable.FirstOrDefaultAsync(predicate, cancellationToken);
     }
 
     public async Task<Paginate<TEntity>> GetPaginatedListAsync(Expression<Func<TEntity, bool>>? predicate = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null, Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null, int index = 0, int size = 10, bool withDeleted = false, bool enableTracking = true, CancellationToken cancellationToken = default)
     {
-        IQueryable<TEntity> queryable = Query();
-        if (!enableTracking)
-            queryable = queryable.AsNoTracking();
-        if (include != null)
-            queryable = include(queryable);
-        if (withDeleted)
-            queryable = queryable.IgnoreQueryFilters();
-        if (predicate != null)
-            queryable = queryable.Where(predicate);
-        if (orderBy != null)
-            return await orderBy(queryable).ToPaginateAsync(index, size, cancellationToken);
+        IQueryable<TEntity> queryable = BuildQueryable(predicate, include, withDeleted, enableTracking);
+        queryable = ApplyOrdering(queryable, orderBy);
         return await queryable.ToPaginateAsync(index, size, cancellationToken);
     }
 
     public async Task<Paginate<TEntity>> GetPaginatedListByDynamicAsync(DynamicQuery? dynamic, Expression<Func<TEntity, bool>>? predicate = null, Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null, int index = 0, int size = 10, bool withDeleted = false, bool enableTracking = true, CancellationToken cancellationToken = default)
     {
-        IQueryable<TEntity> queryable = Query().ToDynamic(dynamic);
-        if (!enableTracking)
-            queryable = queryable.AsNoTracking();
-        if (include != null)
-            queryable = include(queryable);
-        if (withDeleted)
-            queryable = queryable.IgnoreQueryFilters();
-        if (predicate != null)
-            queryable = queryable.Where(predicate);
+        IQueryable<TEntity> queryable = BuildQueryable(
+            predicate,
+            include,
+            withDeleted,
+            enableTracking,
+            queryModifier: dynamic is not null ? q => q.ToDynamic(dynamic) : null
+        );
         return await queryable.ToPaginateAsync(index, size, cancellationToken);
     }
 
@@ -127,7 +95,7 @@ where TContext : DbContext
 
     public Task<TEntity> UpdateAsync(TEntity entity)
     {
-        entity.UpdatedDate = DateTime.UtcNow;
+        MarkUpdatedDate(entity);
         Context.Update(entity);
         // SaveChanges kaldırıldı
         return Task.FromResult(entity);
@@ -135,8 +103,7 @@ where TContext : DbContext
 
     Task<ICollection<TEntity>> IAsyncRepository<TEntity>.UpdateRange(ICollection<TEntity> entities)
     {
-        foreach (TEntity entity in entities)
-            entity.UpdatedDate = DateTime.UtcNow;
+        MarkUpdatedDates(entities);
         Context.UpdateRange(entities);
         // SaveChanges kaldırıldı
         return Task.FromResult(entities);
@@ -310,61 +277,38 @@ where TContext : DbContext
 
     public TEntity? Get(Expression<Func<TEntity, bool>> predicate, Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null, bool withDeleted = false, bool enableTracking = true)
     {
-        IQueryable<TEntity> queryable = Query();
-        if (!enableTracking)
-            queryable = queryable.AsNoTracking();
-        if (include != null)
-            queryable = include(queryable);
-        if (withDeleted)
-            queryable = queryable.IgnoreQueryFilters();
+        IQueryable<TEntity> queryable = BuildQueryable(predicate, include, withDeleted, enableTracking);
         return queryable.FirstOrDefault(predicate);
     }
 
     public Paginate<TEntity> GetList(Expression<Func<TEntity, bool>>? predicate = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null, Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null, int index = 0, int size = 10, bool withDeleted = false, bool enableTracking = true)
     {
-        IQueryable<TEntity> queryable = Query();
-        if (!enableTracking)
-            queryable = queryable.AsNoTracking();
-        if (include != null)
-            queryable = include(queryable);
-        if (withDeleted)
-            queryable = queryable.IgnoreQueryFilters();
-        if (predicate != null)
-            queryable = queryable.Where(predicate);
-        if (orderBy != null)
-            return orderBy(queryable).ToPaginate(index, size);
+        IQueryable<TEntity> queryable = BuildQueryable(predicate, include, withDeleted, enableTracking);
+        queryable = ApplyOrdering(queryable, orderBy);
         return queryable.ToPaginate(index, size);
     }
 
     public Paginate<TEntity> GetListByDynamic(DynamicQuery dynamic, Expression<Func<TEntity, bool>>? predicate = null, Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null, int index = 0, int size = 10, bool withDeleted = false, bool enableTracking = true)
     {
-        IQueryable<TEntity> queryable = Query().ToDynamic(dynamic);
-        if (!enableTracking)
-            queryable = queryable.AsNoTracking();
-        if (include != null)
-            queryable = include(queryable);
-        if (withDeleted)
-            queryable = queryable.IgnoreQueryFilters();
-        if (predicate != null)
-            queryable = queryable.Where(predicate);
+        IQueryable<TEntity> queryable = BuildQueryable(
+            predicate,
+            include,
+            withDeleted,
+            enableTracking,
+            queryModifier: q => q.ToDynamic(dynamic)
+        );
         return queryable.ToPaginate(index, size);
     }
 
     public bool Any(Expression<Func<TEntity, bool>>? predicate = null, bool withDeleted = false, bool enableTracking = true)
     {
-        IQueryable<TEntity> queryable = Query();
-        if (!enableTracking)
-            queryable = queryable.AsNoTracking();
-        if (withDeleted)
-            queryable = queryable.IgnoreQueryFilters();
-        if (predicate != null)
-            queryable = queryable.Where(predicate);
+        IQueryable<TEntity> queryable = BuildQueryable(predicate, include: null, withDeleted, enableTracking);
         return queryable.Any();
     }
 
     public TEntity Add(TEntity entity)
     {
-        entity.CreatedDate = DateTime.UtcNow;
+        MarkCreatedDate(entity);
         Context.Add(entity);
         // SaveChanges kaldırıldı
         return entity;
@@ -372,8 +316,7 @@ where TContext : DbContext
 
     public ICollection<TEntity> AddRange(ICollection<TEntity> entities)
     {
-        foreach (TEntity entity in entities)
-            entity.CreatedDate = DateTime.UtcNow;
+        MarkCreatedDates(entities);
         Context.AddRange(entities);
         // SaveChanges kaldırıldı
         return entities;
@@ -381,7 +324,7 @@ where TContext : DbContext
 
     public TEntity Update(TEntity entity)
     {
-        entity.UpdatedDate = DateTime.UtcNow;
+        MarkUpdatedDate(entity);
         Context.Update(entity);
         // SaveChanges kaldırıldı
         return entity;
@@ -389,8 +332,7 @@ where TContext : DbContext
 
     public ICollection<TEntity> UpdateRange(ICollection<TEntity> entities)
     {
-        foreach (TEntity entity in entities)
-            entity.UpdatedDate = DateTime.UtcNow;
+        MarkUpdatedDates(entities);
         Context.UpdateRange(entities);
         // SaveChanges kaldırıldı
         return entities;
@@ -411,5 +353,57 @@ where TContext : DbContext
         }
         // SaveChanges kaldırıldı
         return entities;
+    }
+
+    private static void MarkCreatedDate(TEntity entity)
+    {
+        entity.CreatedDate = DateTime.UtcNow;
+    }
+
+    private static void MarkCreatedDates(IEnumerable<TEntity> entities)
+    {
+        DateTime now = DateTime.UtcNow;
+        foreach (TEntity entity in entities)
+            entity.CreatedDate = now;
+    }
+
+    private static void MarkUpdatedDate(TEntity entity)
+    {
+        entity.UpdatedDate = DateTime.UtcNow;
+    }
+
+    private static void MarkUpdatedDates(IEnumerable<TEntity> entities)
+    {
+        DateTime now = DateTime.UtcNow;
+        foreach (TEntity entity in entities)
+            entity.UpdatedDate = now;
+    }
+
+    private IQueryable<TEntity> BuildQueryable(
+        Expression<Func<TEntity, bool>>? predicate,
+        Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include,
+        bool withDeleted,
+        bool enableTracking,
+        Func<IQueryable<TEntity>, IQueryable<TEntity>>? queryModifier = null)
+    {
+        IQueryable<TEntity> queryable = Query();
+        if (queryModifier != null)
+            queryable = queryModifier(queryable);
+        if (!enableTracking)
+            queryable = queryable.AsNoTracking();
+        if (include != null)
+            queryable = include(queryable);
+        if (withDeleted)
+            queryable = queryable.IgnoreQueryFilters();
+        if (predicate != null)
+            queryable = queryable.Where(predicate);
+        return queryable;
+    }
+
+    private static IQueryable<TEntity> ApplyOrdering(
+        IQueryable<TEntity> queryable,
+        Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy)
+    {
+        return orderBy != null ? orderBy(queryable) : queryable;
     }
 }
