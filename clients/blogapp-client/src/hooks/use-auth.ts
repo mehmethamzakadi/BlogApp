@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useAuthStore } from '../stores/auth-store';
-import { refreshSession, logout as logoutRequest } from '../features/auth/api';
+import { logout as logoutRequest } from '../features/auth/api';
+import { refreshAccessToken } from '../lib/axios';
 
 const SILENT_REFRESH_WINDOW_MS = 60_000;
-const AUTH_STORAGE_KEY = 'auth.session';
 let sessionRestorePromise: Promise<boolean> | null = null;
 
 export function useAuth() {
@@ -35,56 +35,64 @@ export function useAuth() {
     }
   }, [logoutStore]);
 
+  const tryRestoreSession = useCallback(async (): Promise<boolean> => {
+    try {
+      await refreshAccessToken();
+      return true;
+    } catch (error) {
+      await logout();
+      return false;
+    }
+  }, [logout]);
+
+  const ensureSession = useCallback(async () => {
+    const state = useAuthStore.getState();
+    if (state.token && state.user) {
+      if (!state.hydrated) {
+        setHydrated(true);
+      }
+      return true;
+    }
+
+    if (sessionRestorePromise) {
+      return sessionRestorePromise;
+    }
+
+    sessionRestorePromise = (async () => {
+      try {
+        return await tryRestoreSession();
+      } finally {
+        sessionRestorePromise = null;
+      }
+    })();
+
+    return sessionRestorePromise;
+  }, [setHydrated, tryRestoreSession]);
+
   useEffect(() => {
     if (hydrated || typeof window === 'undefined') {
       return;
     }
 
-    const raw = window.sessionStorage.getItem(AUTH_STORAGE_KEY);
-    if (!raw) {
-      setHydrated(true);
-      return;
-    }
+    let cancelled = false;
 
-    try {
-      const stored = JSON.parse(raw) as { user: typeof user; token: string };
-      const expiresAt = new Date(stored.user?.expiration ?? '').getTime();
-      if (Number.isNaN(expiresAt) || expiresAt <= Date.now()) {
-        window.sessionStorage.removeItem(AUTH_STORAGE_KEY);
-        setHydrated(true);
-        return;
+    (async () => {
+      try {
+        await ensureSession();
+      } finally {
+        if (!cancelled) {
+          const currentState = useAuthStore.getState();
+          if (!currentState.hydrated) {
+            setHydrated(true);
+          }
+        }
       }
+    })();
 
-      if (stored.user && stored.token) {
-        loginStore({ user: stored.user, token: stored.token });
-        return;
-      }
-
-      setHydrated(true);
-    } catch {
-      window.sessionStorage.removeItem(AUTH_STORAGE_KEY);
-      setHydrated(true);
-    }
-  }, [hydrated, loginStore, setHydrated]);
-
-  useEffect(() => {
-    if (!hydrated || typeof window === 'undefined') {
-      return;
-    }
-
-    if (token && user) {
-      window.sessionStorage.setItem(
-        AUTH_STORAGE_KEY,
-        JSON.stringify({
-          user,
-          token
-        })
-      );
-      return;
-    }
-
-    window.sessionStorage.removeItem(AUTH_STORAGE_KEY);
-  }, [hydrated, token, user]);
+    return () => {
+      cancelled = true;
+    };
+  }, [ensureSession, hydrated, setHydrated]);
 
   useEffect(() => {
     if (refreshTimerRef.current) {
@@ -105,20 +113,7 @@ export function useAuth() {
 
     refreshTimerRef.current = window.setTimeout(async () => {
       try {
-        const response = await refreshSession();
-        if (response.success && response.data) {
-          loginStore({
-            user: {
-              userId: response.data.userId,
-              userName: response.data.userName,
-              expiration: response.data.expiration,
-              permissions: response.data.permissions
-            },
-            token: response.data.token
-          });
-          return;
-        }
-        await logout();
+        await tryRestoreSession();
       } catch {
         await logout();
       }
@@ -130,45 +125,7 @@ export function useAuth() {
         refreshTimerRef.current = undefined;
       }
     };
-  }, [hydrated, token, user, loginStore, logout]);
-
-  const ensureSession = useCallback(async () => {
-    const state = useAuthStore.getState();
-    if (state.token && state.user) {
-      return true;
-    }
-
-    if (sessionRestorePromise) {
-      return sessionRestorePromise;
-    }
-
-    sessionRestorePromise = (async () => {
-      try {
-        const response = await refreshSession();
-        if (response.success && response.data) {
-          loginStore({
-            user: {
-              userId: response.data.userId,
-              userName: response.data.userName,
-              expiration: response.data.expiration,
-              permissions: response.data.permissions
-            },
-            token: response.data.token
-          });
-          return true;
-        }
-        await logout();
-        return false;
-      } catch {
-        await logout();
-        return false;
-      } finally {
-        sessionRestorePromise = null;
-      }
-    })();
-
-    return sessionRestorePromise;
-  }, [loginStore, logout]);
+  }, [hydrated, token, user, logout, tryRestoreSession]);
 
   return {
     user,

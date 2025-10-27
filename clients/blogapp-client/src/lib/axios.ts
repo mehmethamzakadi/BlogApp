@@ -30,7 +30,7 @@ const processQueue = (error: Error | null, token?: string) => {
   failedQueue = [];
 };
 
-const refreshAccessToken = async (): Promise<string> => {
+export const refreshAccessToken = async (): Promise<string> => {
   if (isRefreshing) {
     return new Promise<string>((resolve, reject) => {
       failedQueue.push({ resolve, reject });
