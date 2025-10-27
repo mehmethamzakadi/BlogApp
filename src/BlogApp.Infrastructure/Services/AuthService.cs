@@ -2,23 +2,25 @@ using BlogApp.Application.Abstractions;
 using BlogApp.Application.Abstractions.Identity;
 using BlogApp.Application.Features.Auths.Login;
 using BlogApp.Domain.Common;
-using BlogApp.Domain.Constants;
 using BlogApp.Domain.Common.Results;
+using BlogApp.Domain.Constants;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Exceptions;
 using BlogApp.Domain.Extentions;
 using BlogApp.Domain.Repositories;
-using BlogApp.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace BlogApp.Infrastructure.Services.Identity;
 
 public sealed class AuthService(
     IUserRepository userRepository,
     ITokenService tokenService,
+    IRefreshSessionRepository refreshSessionRepository,
     IMailService mailService,
     IPasswordHasher passwordHasher,
-    BlogAppDbContext dbContext,
     IUnitOfWork unitOfWork) : IAuthService
 {
     public async Task<IDataResult<LoginResponse>> LoginAsync(string email, string password)
@@ -63,11 +65,8 @@ public sealed class AuthService(
         user.AccessFailedCount = 0;
 
         var authClaims = await tokenService.GetAuthClaims(user);
-        var tokenResponse = tokenService.GenerateAccessToken(authClaims, user);
-
-        // Store refresh token
-        user.RefreshToken = tokenResponse.RefreshToken;
-        user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
+        var accessToken = tokenService.CreateAccessToken(authClaims, user);
+        var refreshToken = tokenService.CreateRefreshToken();
 
         var successUpdate = await userRepository.UpdateAsync(user);
         if (!successUpdate.Success)
@@ -75,41 +74,116 @@ public sealed class AuthService(
             throw new AuthenticationErrorException(successUpdate.Message ?? "Kullanıcı güncelleme hatası.");
         }
 
+        var session = new RefreshSession
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            Jti = accessToken.Jti,
+            TokenHash = HashRefreshToken(refreshToken.Token),
+            DeviceId = null,
+            ExpiresAt = refreshToken.ExpiresAt,
+            Revoked = false,
+            CreatedDate = DateTime.UtcNow,
+            CreatedById = SystemUsers.SystemUserId
+        };
+
+        await refreshSessionRepository.AddAsync(session);
         await SaveChangesWithConcurrencyHandlingAsync();
 
-        return new SuccessDataResult<LoginResponse>(tokenResponse, "Giriş Başarılı");
+        var response = new LoginResponse(
+            user.Id,
+            user.UserName,
+            accessToken.ExpiresAt,
+            accessToken.Token,
+            refreshToken.Token,
+            refreshToken.ExpiresAt,
+            accessToken.Permissions.ToList());
+
+        return new SuccessDataResult<LoginResponse>(response, "Giriş Başarılı");
     }
 
     public async Task<IDataResult<LoginResponse>> RefreshTokenAsync(string refreshToken)
     {
-        var user = await dbContext.Users
-            .Where(u => !u.IsDeleted) // Soft delete kontrolü
-            .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
-
-        if (user == null || user.RefreshTokenExpiry == null || user.RefreshTokenExpiry < DateTime.UtcNow)
+        if (string.IsNullOrWhiteSpace(refreshToken))
         {
             throw new AuthenticationErrorException("Geçersiz refresh token.");
         }
 
-        // Check if account is locked
+        var tokenHash = HashRefreshToken(refreshToken);
+        var session = await refreshSessionRepository.GetByTokenHashAsync(tokenHash, includeDeleted: true);
+
+        if (session is null)
+        {
+            throw new AuthenticationErrorException("Geçersiz refresh token.");
+        }
+
+        if (session.Revoked)
+        {
+            session.RevokedReason ??= "Replay detected";
+            session.UpdatedDate = DateTime.UtcNow;
+            session.UpdatedById = SystemUsers.SystemUserId;
+            await RevokeAllSessionsAsync(session.UserId, "Replay detected");
+            await SaveChangesWithConcurrencyHandlingAsync();
+            throw new AuthenticationErrorException("Refresh token kullanılamaz durumda.");
+        }
+
+        if (session.ExpiresAt <= DateTime.UtcNow)
+        {
+            session.Revoked = true;
+            session.RevokedAt = DateTime.UtcNow;
+            session.RevokedReason = "Expired";
+            session.UpdatedDate = DateTime.UtcNow;
+            session.UpdatedById = SystemUsers.SystemUserId;
+            await SaveChangesWithConcurrencyHandlingAsync();
+            throw new AuthenticationErrorException("Refresh token süresi dolmuş.");
+        }
+
+        var user = await userRepository.FindByIdAsync(session.UserId)
+            ?? throw new AuthenticationErrorException("Kullanıcı bulunamadı.");
+
         if (user.IsLockedOut())
         {
             throw new AuthenticationErrorException("Hesabınız kilitlenmiş.");
         }
 
-        // Generate new tokens
-        var authClaims = await tokenService.GetAuthClaims(user);
-        var tokenResponse = tokenService.GenerateAccessToken(authClaims, user);
+        var claims = await tokenService.GetAuthClaims(user);
+        var newAccess = tokenService.CreateAccessToken(claims, user);
+        var newRefresh = tokenService.CreateRefreshToken();
 
-        var refreshExpiry = DateTime.UtcNow.AddDays(7);
+        session.Revoked = true;
+        session.RevokedAt = DateTime.UtcNow;
+        session.RevokedReason = "Rotated";
+        session.UpdatedDate = DateTime.UtcNow;
+        session.UpdatedById = SystemUsers.SystemUserId;
 
-        var rotationSucceeded = await TryRotateRefreshTokenAsync(user.Id, refreshToken, tokenResponse.RefreshToken, refreshExpiry);
-        if (!rotationSucceeded)
+        var replacement = new RefreshSession
         {
-            throw new AuthenticationErrorException("Geçersiz veya süresi dolmuş refresh token.");
-        }
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            Jti = newAccess.Jti,
+            TokenHash = HashRefreshToken(newRefresh.Token),
+            DeviceId = session.DeviceId,
+            ExpiresAt = newRefresh.ExpiresAt,
+            Revoked = false,
+            CreatedDate = DateTime.UtcNow,
+            CreatedById = SystemUsers.SystemUserId
+        };
 
-        return new SuccessDataResult<LoginResponse>(tokenResponse, "Token yenilendi");
+        session.ReplacedById = replacement.Id;
+
+        await refreshSessionRepository.AddAsync(replacement);
+        await SaveChangesWithConcurrencyHandlingAsync();
+
+        var response = new LoginResponse(
+            user.Id,
+            user.UserName,
+            newAccess.ExpiresAt,
+            newAccess.Token,
+            newRefresh.Token,
+            newRefresh.ExpiresAt,
+            newAccess.Permissions.ToList());
+
+        return new SuccessDataResult<LoginResponse>(response, "Token yenilendi");
     }
 
     public async Task LogoutAsync(string refreshToken)
@@ -119,15 +193,20 @@ public sealed class AuthService(
             return;
         }
 
-        var user = await dbContext.Users
-            .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
-
-        if (user == null)
+        var tokenHash = HashRefreshToken(refreshToken);
+        var session = await refreshSessionRepository.GetByTokenHashAsync(tokenHash);
+        if (session is null)
         {
             return;
         }
 
-        await ClearRefreshTokenAsync(refreshToken);
+        session.Revoked = true;
+        session.RevokedAt = DateTime.UtcNow;
+        session.RevokedReason = "Logout";
+        session.UpdatedDate = DateTime.UtcNow;
+        session.UpdatedById = SystemUsers.SystemUserId;
+
+        await SaveChangesWithConcurrencyHandlingAsync();
     }
 
     public async Task PasswordResetAsync(string email)
@@ -161,36 +240,17 @@ public sealed class AuthService(
         }
     }
 
-    private async Task<bool> TryRotateRefreshTokenAsync(Guid userId, string currentRefreshToken, string newRefreshToken, DateTime newExpiryUtc)
+    private async Task RevokeAllSessionsAsync(Guid userId, string reason)
     {
-        var nowUtc = DateTime.UtcNow;
-        var newConcurrencyStamp = Guid.NewGuid().ToString();
-
-        var affectedRows = await dbContext.Users
-            .Where(u => u.Id == userId && u.RefreshToken == currentRefreshToken && !u.IsDeleted)
-            .ExecuteUpdateAsync(setters => setters
-                .SetProperty(u => u.RefreshToken, _ => newRefreshToken)
-                .SetProperty(u => u.RefreshTokenExpiry, _ => newExpiryUtc)
-                .SetProperty(u => u.UpdatedDate, _ => nowUtc)
-                .SetProperty(u => u.UpdatedById, _ => SystemUsers.SystemUserId)
-                .SetProperty(u => u.ConcurrencyStamp, _ => newConcurrencyStamp));
-
-        return affectedRows > 0;
-    }
-
-    private async Task ClearRefreshTokenAsync(string refreshToken)
-    {
-        var nowUtc = DateTime.UtcNow;
-        var newConcurrencyStamp = Guid.NewGuid().ToString();
-
-        await dbContext.Users
-            .Where(u => u.RefreshToken == refreshToken && !u.IsDeleted)
-            .ExecuteUpdateAsync(setters => setters
-                .SetProperty(u => u.RefreshToken, _ => (string?)null)
-                .SetProperty(u => u.RefreshTokenExpiry, _ => (DateTime?)null)
-                .SetProperty(u => u.UpdatedDate, _ => nowUtc)
-                .SetProperty(u => u.UpdatedById, _ => SystemUsers.SystemUserId)
-                .SetProperty(u => u.ConcurrencyStamp, _ => newConcurrencyStamp));
+        var sessions = await refreshSessionRepository.GetActiveSessionsAsync(userId);
+        foreach (var session in sessions)
+        {
+            session.Revoked = true;
+            session.RevokedAt = DateTime.UtcNow;
+            session.RevokedReason = reason;
+            session.UpdatedDate = DateTime.UtcNow;
+            session.UpdatedById = SystemUsers.SystemUserId;
+        }
     }
 
     public async Task<IDataResult<bool>> PasswordVerify(string resetToken, string userId)
@@ -212,5 +272,11 @@ public sealed class AuthService(
             }
         }
         return new SuccessDataResult<bool>(false);
+    }
+
+    private static string HashRefreshToken(string value)
+    {
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(value));
+        return Convert.ToHexString(bytes);
     }
 }

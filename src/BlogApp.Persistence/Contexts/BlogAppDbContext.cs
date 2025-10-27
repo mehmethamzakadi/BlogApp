@@ -41,5 +41,6 @@ namespace BlogApp.Persistence.Contexts
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<RolePermission> RolePermissions { get; set; }
         public DbSet<OutboxMessage> OutboxMessages { get; set; }
+        public DbSet<RefreshSession> RefreshSessions { get; set; }
     }
 }

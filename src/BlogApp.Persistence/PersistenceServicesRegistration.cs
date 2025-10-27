@@ -29,14 +29,15 @@ public static class PersistenceServicesRegistration
 
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<ICommentRepository, CommentRepository>();
-    services.AddScoped<IImageRepository, ImageRepository>();
-    services.AddScoped<IBookshelfItemRepository, BookshelfItemRepository>();
+        services.AddScoped<IImageRepository, ImageRepository>();
+        services.AddScoped<IBookshelfItemRepository, BookshelfItemRepository>();
         services.AddScoped<IPostRepository, PostRepository>();
         services.AddScoped<IActivityLogRepository, ActivityLogRepository>();
         services.AddScoped<IPermissionRepository, PermissionRepository>();
         services.AddScoped<IOutboxMessageRepository, OutboxMessageRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
+        services.AddScoped<IRefreshSessionRepository, RefreshSessionRepository>();
         services.AddScoped<IDbInitializer, DbInitializer>();
 
         // Unit of Work kaydı

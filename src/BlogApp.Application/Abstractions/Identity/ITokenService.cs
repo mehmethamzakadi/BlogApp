@@ -1,13 +1,16 @@
-using BlogApp.Application.Features.Auths.Login;
-using BlogApp.Domain.Entities;
+using System.Collections.Generic;
 using System.Security.Claims;
+using BlogApp.Domain.Entities;
 
 namespace BlogApp.Application.Abstractions.Identity;
 
 public interface ITokenService
 {
-    LoginResponse GenerateAccessToken(IEnumerable<Claim> claims, User user);
-    string GenerateRefreshToken();
+    AccessTokenResult CreateAccessToken(IEnumerable<Claim> claims, User user);
+    RefreshTokenResult CreateRefreshToken();
     Task<List<Claim>> GetAuthClaims(User user);
-    ClaimsPrincipal GetPrincipalFromExpiredToken(string token);
 }
+
+public sealed record AccessTokenResult(string Token, DateTime ExpiresAt, Guid Jti, IReadOnlyList<string> Permissions);
+
+public sealed record RefreshTokenResult(string Token, DateTime ExpiresAt);

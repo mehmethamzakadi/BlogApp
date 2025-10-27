@@ -21,7 +21,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlogApp.Persistence", "src\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{437AD101-3127-4256-B274-8BEEF8E0C779}"
 	ProjectSection(SolutionItems) = preProject
+		Solution Items\DockerCli.txt = Solution Items\DockerCli.txt
 		Solution Items\Migrations.txt = Solution Items\Migrations.txt
+		Solution Items\Prompts.txt = Solution Items\Prompts.txt
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application.UnitTests", "tests\Application.UnitTests\Application.UnitTests.csproj", "{46B7F50C-AA04-453F-B0E3-2420982F6E94}"

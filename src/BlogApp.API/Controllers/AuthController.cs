@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using BlogApp.Application.Features.Auths.Login;
 using BlogApp.Application.Features.Auths.Logout;
 using BlogApp.Application.Features.Auths.PasswordReset;
@@ -17,7 +16,6 @@ namespace BlogApp.API.Controllers
     public class AuthController(IMediator mediator) : BaseApiController(mediator)
     {
         private const string RefreshTokenCookieName = "blogapp_refresh_token";
-        private const int RefreshTokenLifetimeDays = 7;
 
         [AllowAnonymous]
         [HttpPost("register")]
@@ -39,7 +37,7 @@ namespace BlogApp.API.Controllers
                 return Unauthorized(result);
             }
 
-            SetRefreshTokenCookie(result.Data.RefreshToken);
+            SetRefreshTokenCookie(result.Data);
             return Ok(result);
         }
 
@@ -61,7 +59,7 @@ namespace BlogApp.API.Controllers
                 return Unauthorized(result);
             }
 
-            SetRefreshTokenCookie(result.Data.RefreshToken);
+            SetRefreshTokenCookie(result.Data);
             return Ok(result);
         }
 
@@ -108,16 +106,15 @@ namespace BlogApp.API.Controllers
             return Ok(response);
         }
 
-        private void SetRefreshTokenCookie(string refreshToken)
+        private void SetRefreshTokenCookie(LoginResponse response)
         {
-            var options = CreateRefreshTokenCookieOptions();
-            Response.Cookies.Append(RefreshTokenCookieName, refreshToken, options);
+            var options = CreateRefreshTokenCookieOptions(response.RefreshTokenExpiration);
+            Response.Cookies.Append(RefreshTokenCookieName, response.RefreshToken, options);
         }
 
         private void ClearRefreshTokenCookie()
         {
-            var options = CreateRefreshTokenCookieOptions();
-            options.Expires = DateTimeOffset.UtcNow.AddDays(-1);
+            var options = CreateRefreshTokenCookieOptions(DateTime.UtcNow.AddYears(-1));
             Response.Cookies.Append(RefreshTokenCookieName, string.Empty, options);
         }
 
@@ -133,31 +130,21 @@ namespace BlogApp.API.Controllers
             return false;
         }
 
-        private CookieOptions CreateRefreshTokenCookieOptions()
+        private CookieOptions CreateRefreshTokenCookieOptions(DateTime refreshExpirationUtc)
         {
+            var host = Request.Host.Host;
+            var cookieDomain = string.IsNullOrWhiteSpace(host) ? null : host;
+
             return new CookieOptions
             {
                 HttpOnly = true,
-                Secure = IsSecureRequest(),
+                Secure = true,
                 SameSite = SameSiteMode.Strict,
                 Path = "/",
-                Expires = DateTimeOffset.UtcNow.AddDays(RefreshTokenLifetimeDays)
+                Expires = new DateTimeOffset(DateTime.SpecifyKind(refreshExpirationUtc, DateTimeKind.Utc)),
+                Domain = cookieDomain
             };
         }
 
-        private bool IsSecureRequest()
-        {
-            if (Request.IsHttps)
-            {
-                return true;
-            }
-
-            if (Request.Headers.TryGetValue("X-Forwarded-Proto", out var protoValues))
-            {
-                return protoValues.Any(value => string.Equals(value, "https", StringComparison.OrdinalIgnoreCase));
-            }
-
-            return false;
-        }
     }
 }

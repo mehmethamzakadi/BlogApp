@@ -8,4 +8,5 @@ public sealed record LoginResponse(
     DateTime Expiration,
     string Token,
     [property: JsonIgnore] string RefreshToken,
+    [property: JsonIgnore] DateTime RefreshTokenExpiration,
     List<string> Permissions);

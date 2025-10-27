@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/use-auth';
 import { usePermission } from '../hooks/use-permission';
@@ -20,10 +21,46 @@ export function ProtectedRoute({
   requiredAllPermissions
 }: ProtectedRouteProps) {
   const location = useLocation();
-  const { isAuthenticated, hydrated } = useAuth();
+  const { isAuthenticated, hydrated, ensureSession } = useAuth();
   const { hasPermission, hasAnyPermission, hasAllPermissions } = usePermission();
+  const [sessionChecked, setSessionChecked] = useState(false);
 
-  if (!hydrated) {
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!hydrated) {
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    if (isAuthenticated) {
+      if (!sessionChecked) {
+        setSessionChecked(true);
+      }
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    if (sessionChecked) {
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    ensureSession().finally(() => {
+      if (!cancelled) {
+        setSessionChecked(true);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [hydrated, isAuthenticated, ensureSession, sessionChecked]);
+
+  if (!hydrated || (!isAuthenticated && !sessionChecked)) {
     return null;
   }
 

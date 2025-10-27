@@ -8,38 +8,97 @@ const api = axios.create({
   withCredentials: true
 });
 
-// Token yenilenirken aynı anda birden fazla istek yapılmasını önlemek için
-let isRefreshing = false;
-let failedQueue: Array<{
-  resolve: (value?: unknown) => void;
-  reject: (reason?: unknown) => void;
-}> = [];
+const REFRESH_THRESHOLD_MS = 60_000;
 
-const processQueue = (error: Error | null, token: string | null = null) => {
-  failedQueue.forEach((prom) => {
+type QueueEntry = {
+  resolve: (value: string) => void;
+  reject: (reason?: unknown) => void;
+};
+
+let isRefreshing = false;
+let failedQueue: QueueEntry[] = [];
+
+const processQueue = (error: Error | null, token?: string) => {
+  failedQueue.forEach((entry) => {
     if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
+      entry.reject(error);
+    } else if (token) {
+      entry.resolve(token);
     }
   });
 
   failedQueue = [];
 };
 
-api.interceptors.request.use((config) => {
-  const token = useAuthStore.getState().token;
+const refreshAccessToken = async (): Promise<string> => {
+  if (isRefreshing) {
+    return new Promise<string>((resolve, reject) => {
+      failedQueue.push({ resolve, reject });
+    });
+  }
 
+  isRefreshing = true;
+
+  try {
+    const response = await axios.post(
+      `${import.meta.env.VITE_API_URL}/auth/refresh-token`,
+      {},
+      { withCredentials: true }
+    );
+
+    const payload = response.data?.data;
+    if (!payload?.token) {
+      throw new Error('Geçersiz refresh yanıtı alındı.');
+    }
+
+    const newToken = payload.token as string;
+    const newUser = {
+      userId: payload.userId,
+      userName: payload.userName,
+      expiration: payload.expiration,
+      permissions: payload.permissions || []
+    };
+
+    useAuthStore.getState().login({ user: newUser, token: newToken });
+
+    processQueue(null, newToken);
+    return newToken;
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error('Refresh token talebi başarısız oldu.');
+    processQueue(error);
+    useAuthStore.getState().logout();
+    throw error;
+  } finally {
+    isRefreshing = false;
+  }
+};
+
+api.interceptors.request.use(async (config) => {
   const requestUrl = config.url?.toLowerCase() ?? '';
   if (requestUrl.includes('/auth/refresh-token')) {
     return config;
   }
 
-  if (token) {
+  const { token, user } = useAuthStore.getState();
+  let authToken = token ?? undefined;
+
+  if (token && user) {
+    const expiresAt = new Date(user.expiration).getTime();
+    if (!Number.isNaN(expiresAt) && expiresAt - Date.now() <= REFRESH_THRESHOLD_MS) {
+      try {
+        authToken = await refreshAccessToken();
+      } catch {
+        authToken = undefined;
+      }
+    }
+  }
+
+  if (authToken) {
     const headers = AxiosHeaders.from(config.headers ?? {});
-    headers.set('Authorization', `Bearer ${token}`);
+    headers.set('Authorization', `Bearer ${authToken}`);
     config.headers = headers;
   }
+
   return config;
 });
 
@@ -70,59 +129,15 @@ api.interceptors.response.use(
 
     // 401 hatası ve henüz retry edilmemişse ve auth endpoint değilse
     if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
-      if (isRefreshing) {
-        // Zaten token yenileniyor, sıraya ekle
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then((token) => {
-            const headers = AxiosHeaders.from(originalRequest.headers ?? {});
-            headers.set('Authorization', `Bearer ${token}`);
-            originalRequest.headers = headers;
-            return api(originalRequest);
-          })
-          .catch((err) => Promise.reject(err));
-      }
-
       originalRequest._retry = true;
-      isRefreshing = true;
-
       try {
-        // Refresh token API çağrısı - döngüsel bağımlılığı önlemek için doğrudan axios kullan
-        const response = await axios.post(
-          `${import.meta.env.VITE_API_URL}/auth/refresh-token`,
-          {},
-          { withCredentials: true }
-        );
-
-        const newToken = response.data.data.token;
-        const newUser = {
-          userId: response.data.data.userId,
-          userName: response.data.data.userName,
-          expiration: response.data.data.expiration,
-          permissions: response.data.data.permissions || []
-        };
-
-        // Store'u güncelle
-        useAuthStore.getState().login({ user: newUser, token: newToken });
-
-        // Başarılı olan istekleri işle
-        processQueue(null, newToken);
-
-        // Orijinal isteği yeni token ile tekrar dene
+        const newToken = await refreshAccessToken();
         const headers = AxiosHeaders.from(originalRequest.headers ?? {});
         headers.set('Authorization', `Bearer ${newToken}`);
         originalRequest.headers = headers;
-
         return api(originalRequest);
       } catch (refreshError) {
-        // Refresh token başarısız, çıkış yap
-        processQueue(refreshError as Error, null);
-        const { logout } = useAuthStore.getState();
-        logout();
         return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
       }
     }
 

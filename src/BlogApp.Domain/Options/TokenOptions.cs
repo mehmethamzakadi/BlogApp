@@ -9,4 +9,5 @@ public sealed class TokenOptions
     public string Issuer { get; set; } = string.Empty;
     public int AccessTokenExpiration { get; set; }
     public string SecurityKey { get; set; } = string.Empty;
+    public int RefreshTokenExpirationDays { get; set; } = 14;
 }
