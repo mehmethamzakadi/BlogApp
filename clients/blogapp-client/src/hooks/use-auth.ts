@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useAuthStore } from '../stores/auth-store';
-import { refreshSession } from '../features/auth/api';
+import { refreshSession, logout as logoutRequest } from '../features/auth/api';
 
 const SILENT_REFRESH_WINDOW_MS = 60_000;
 const AUTH_STORAGE_KEY = 'auth.session';
@@ -10,11 +10,30 @@ export function useAuth() {
   const user = useAuthStore((state) => state.user);
   const token = useAuthStore((state) => state.token);
   const hydrated = useAuthStore((state) => state.hydrated);
-  const login = useAuthStore((state) => state.login);
-  const logout = useAuthStore((state) => state.logout);
+  const loginStore = useAuthStore((state) => state.login);
+  const logoutStore = useAuthStore((state) => state.logout);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const setHydrated = useAuthStore((state) => state.setHydrated);
   const refreshTimerRef = useRef<number>();
+
+  const logout = useCallback(async () => {
+    try {
+      await logoutRequest();
+    } catch {
+      // Sunucuya ulaşılamasa bile istemci oturumunu kapat
+    } finally {
+      logoutStore();
+      if (typeof window !== 'undefined') {
+        const attributes = ['Max-Age=0', 'Path=/'];
+        const domain = window.location.hostname;
+        if (domain && domain.includes('.')) {
+          attributes.push(`Domain=${domain}`);
+        }
+
+        document.cookie = `${encodeURIComponent('blogapp_refresh_token')}=; ${attributes.join('; ')};`;
+      }
+    }
+  }, [logoutStore]);
 
   useEffect(() => {
     if (hydrated || typeof window === 'undefined') {
@@ -37,7 +56,7 @@ export function useAuth() {
       }
 
       if (stored.user && stored.token) {
-        login({ user: stored.user, token: stored.token });
+        loginStore({ user: stored.user, token: stored.token });
         return;
       }
 
@@ -46,7 +65,7 @@ export function useAuth() {
       window.sessionStorage.removeItem(AUTH_STORAGE_KEY);
       setHydrated(true);
     }
-  }, [hydrated, login, setHydrated]);
+  }, [hydrated, loginStore, setHydrated]);
 
   useEffect(() => {
     if (!hydrated || typeof window === 'undefined') {
@@ -88,7 +107,7 @@ export function useAuth() {
       try {
         const response = await refreshSession();
         if (response.success && response.data) {
-          login({
+          loginStore({
             user: {
               userId: response.data.userId,
               userName: response.data.userName,
@@ -99,9 +118,9 @@ export function useAuth() {
           });
           return;
         }
-        logout();
+        await logout();
       } catch {
-        logout();
+        await logout();
       }
     }, delay);
 
@@ -111,7 +130,7 @@ export function useAuth() {
         refreshTimerRef.current = undefined;
       }
     };
-  }, [hydrated, token, user, login, logout]);
+  }, [hydrated, token, user, loginStore, logout]);
 
   const ensureSession = useCallback(async () => {
     const state = useAuthStore.getState();
@@ -127,7 +146,7 @@ export function useAuth() {
       try {
         const response = await refreshSession();
         if (response.success && response.data) {
-          login({
+          loginStore({
             user: {
               userId: response.data.userId,
               userName: response.data.userName,
@@ -138,10 +157,10 @@ export function useAuth() {
           });
           return true;
         }
-        logout();
+        await logout();
         return false;
       } catch {
-        logout();
+        await logout();
         return false;
       } finally {
         sessionRestorePromise = null;
@@ -149,13 +168,13 @@ export function useAuth() {
     })();
 
     return sessionRestorePromise;
-  }, [login, logout]);
+  }, [loginStore, logout]);
 
   return {
     user,
     token,
     hydrated,
-    login,
+    login: loginStore,
     logout,
     isAuthenticated,
     ensureSession

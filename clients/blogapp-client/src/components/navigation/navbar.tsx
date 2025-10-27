@@ -5,7 +5,6 @@ import { Button } from '../ui/button';
 import { useAuth } from '../../hooks/use-auth';
 import { cn } from '../../lib/utils';
 import { useThemeContext } from '../../providers/theme-provider';
-import { logout as logoutRequest } from '../../features/auth/api';
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   cn(
@@ -19,13 +18,7 @@ export function Navbar() {
   const { theme, toggleTheme } = useThemeContext();
 
   const handleLogout = async () => {
-    try {
-      await logoutRequest();
-    } catch {
-      // Sunucuya ulaşılamasa bile istemci oturumunu kapat
-    } finally {
-      logout();
-    }
+    await logout();
   };
 
   return (
