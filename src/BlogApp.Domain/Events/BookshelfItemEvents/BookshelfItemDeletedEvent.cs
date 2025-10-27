@@ -6,14 +6,14 @@ namespace BlogApp.Domain.Events.BookshelfItemEvents;
 [StoreInOutbox]
 public sealed class BookshelfItemDeletedEvent : DomainEvent
 {
-	public Guid ItemId { get; }
-	public string Title { get; }
-	public Guid ActorId { get; }
+    public Guid ItemId { get; }
+    public string Title { get; }
+    public Guid ActorId { get; }
 
-	public BookshelfItemDeletedEvent(Guid itemId, string title, Guid actorId)
-	{
-		ItemId = itemId;
-		Title = title;
-		ActorId = actorId;
-	}
+    public BookshelfItemDeletedEvent(Guid itemId, string title, Guid actorId)
+    {
+        ItemId = itemId;
+        Title = title;
+        ActorId = actorId;
+    }
 }

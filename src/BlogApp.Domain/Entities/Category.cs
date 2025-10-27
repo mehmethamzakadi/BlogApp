@@ -5,7 +5,7 @@ namespace BlogApp.Domain.Entities;
 public sealed class Category : BaseEntity
 {
     public string Name { get; set; } = default!;
-    
+
     /// <summary>
     /// Normalize edilmiş kategori adı (case-insensitive arama için)
     /// </summary>

@@ -1,8 +1,6 @@
-using System.Collections.Generic;
 using BlogApp.Domain.Common.Results;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using IResult = BlogApp.Domain.Common.Results.IResult;
 

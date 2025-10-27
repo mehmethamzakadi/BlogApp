@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using AutoMapper;
 using BlogApp.Application.Features.Users.Commands.Create;
 using BlogApp.Application.Features.Users.Queries.GetById;

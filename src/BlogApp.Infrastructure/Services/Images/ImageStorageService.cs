@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-using System.Text.RegularExpressions;
 using BlogApp.Application.Abstractions.Images;
 using BlogApp.Domain.Exceptions;
 using BlogApp.Domain.Options;
@@ -9,6 +7,8 @@ using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Processing;
+using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 
 namespace BlogApp.Infrastructure.Services.Images;
 

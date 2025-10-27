@@ -1,4 +1,3 @@
-using System;
 using BlogApp.Application.Common;
 
 namespace BlogApp.Application.Features.BookshelfItems.Queries.GetById;

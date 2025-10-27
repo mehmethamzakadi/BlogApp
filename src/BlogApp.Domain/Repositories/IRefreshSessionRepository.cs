@@ -1,7 +1,5 @@
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Entities;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace BlogApp.Domain.Repositories;
 

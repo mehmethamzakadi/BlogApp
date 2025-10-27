@@ -1,7 +1,7 @@
 using BlogApp.Application.Abstractions.Identity;
 using System.Security.Cryptography;
 
-namespace BlogApp.Infrastructure.Services.Identity;
+namespace BlogApp.Infrastructure.Services;
 
 public sealed class PasswordHasher : IPasswordHasher
 {

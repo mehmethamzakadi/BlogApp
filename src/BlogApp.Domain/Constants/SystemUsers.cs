@@ -1,5 +1,3 @@
-using System;
-
 namespace BlogApp.Domain.Constants;
 
 /// <summary>

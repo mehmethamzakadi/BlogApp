@@ -1,5 +1,3 @@
-using System;
-using System.Text.Json;
 using BlogApp.Domain.Events.BookshelfItemEvents;
 using BlogApp.Domain.Events.CategoryEvents;
 using BlogApp.Domain.Events.IntegrationEvents;
@@ -7,6 +5,7 @@ using BlogApp.Domain.Events.PermissionEvents;
 using BlogApp.Domain.Events.PostEvents;
 using BlogApp.Domain.Events.RoleEvents;
 using BlogApp.Domain.Events.UserEvents;
+using System.Text.Json;
 
 namespace BlogApp.Infrastructure.Services.BackgroundServices.Outbox.Converters;
 

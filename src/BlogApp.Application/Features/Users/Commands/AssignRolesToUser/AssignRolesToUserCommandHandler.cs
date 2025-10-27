@@ -1,7 +1,6 @@
 using BlogApp.Application.Abstractions;
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
-using BlogApp.Domain.Entities;
 using BlogApp.Domain.Events.UserEvents;
 using BlogApp.Domain.Repositories;
 using MediatR;
@@ -45,7 +44,7 @@ public class AssignRolesToUserCommandHandler : IRequestHandler<AssignRolesToUser
 
         // Silinecek roller (mevcut ama istenen listede yok)
         var rolesToRemove = currentRoleIds.Except(requestedRoleIds).ToList();
-        
+
         // Eklenecek roller (istenen listede var ama mevcut değil)
         var rolesToAdd = requestedRoleIds.Except(currentRoleIds).ToList();
 
@@ -91,7 +90,7 @@ public class AssignRolesToUserCommandHandler : IRequestHandler<AssignRolesToUser
 
             // ✅ Domain Event - sadece değişiklik olduğunda
             var currentUserId = _currentUserService.GetCurrentUserId();
-            
+
             // Tüm rollerin son halini al (event için)
             var allCurrentRoleNames = await _userRepository.GetRolesAsync(user);
             user.AddDomainEvent(new UserRolesAssignedEvent(user.Id, user.UserName!, allCurrentRoleNames, currentUserId));

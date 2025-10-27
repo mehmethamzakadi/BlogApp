@@ -22,8 +22,8 @@ public sealed class DeleteCategoryCommandHandler(
             return new ErrorResult("Kategori bilgisi bulunamadı!");
 
         // ✅ Silme işleminden ÖNCE domain event'i tetikle
-    var actorId = currentUserService.GetCurrentUserId() ?? SystemUsers.SystemUserId;
-    category.AddDomainEvent(new CategoryDeletedEvent(category.Id, category.Name, actorId));
+        var actorId = currentUserService.GetCurrentUserId() ?? SystemUsers.SystemUserId;
+        category.AddDomainEvent(new CategoryDeletedEvent(category.Id, category.Name, actorId));
 
         await categoryRepository.DeleteAsync(category);
         await unitOfWork.SaveChangesAsync(cancellationToken);

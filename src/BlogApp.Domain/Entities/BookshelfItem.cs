@@ -1,4 +1,3 @@
-using System;
 using BlogApp.Domain.Common;
 
 namespace BlogApp.Domain.Entities;

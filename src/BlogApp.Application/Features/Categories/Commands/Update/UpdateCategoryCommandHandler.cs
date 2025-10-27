@@ -17,9 +17,9 @@ public sealed class UpdateCategoryCommandHandler(
     public async Task<IResult> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
     {
         var category = await categoryRepository.GetAsync(
-            predicate: x => x.Id == request.Id, 
+            predicate: x => x.Id == request.Id,
             cancellationToken: cancellationToken);
-            
+
         if (category is null)
         {
             return new ErrorResult("Kategori bilgisi bulunamadı!");
@@ -28,9 +28,9 @@ public sealed class UpdateCategoryCommandHandler(
         // Başka bir kategoride aynı isim var mı kontrol et (mevcut kategori hariç)
         var normalizedName = request.Name.ToUpperInvariant();
         bool nameExists = await categoryRepository.AnyAsync(
-            x => x.NormalizedName == normalizedName && x.Id != request.Id, 
+            x => x.NormalizedName == normalizedName && x.Id != request.Id,
             cancellationToken: cancellationToken);
-            
+
         if (nameExists)
         {
             return new ErrorResult("Bu kategori adı zaten kullanılıyor!");
@@ -42,8 +42,8 @@ public sealed class UpdateCategoryCommandHandler(
         await categoryRepository.UpdateAsync(category);
 
         // ✅ Outbox Pattern için SaveChanges'dan ÖNCE domain event'i tetikle
-    var actorId = currentUserService.GetCurrentUserId() ?? SystemUsers.SystemUserId;
-    category.AddDomainEvent(new CategoryUpdatedEvent(category.Id, category.Name, actorId));
+        var actorId = currentUserService.GetCurrentUserId() ?? SystemUsers.SystemUserId;
+        category.AddDomainEvent(new CategoryUpdatedEvent(category.Id, category.Name, actorId));
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

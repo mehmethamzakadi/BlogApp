@@ -1,4 +1,3 @@
-using System;
 using FluentValidation;
 
 namespace BlogApp.Application.Features.BookshelfItems.Commands.Update;

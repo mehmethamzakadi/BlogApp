@@ -20,12 +20,12 @@ public class CreateCategoryCommandHandlerTests
 
         var cacheMock = new Mock<ICacheService>();
         var unitOfWorkMock = new Mock<BlogApp.Domain.Common.IUnitOfWork>();
-      var currentUserServiceMock = new Mock<ICurrentUserService>();
+        var currentUserServiceMock = new Mock<ICurrentUserService>();
 
         var handler = new CreateCategoryCommandHandler(repositoryMock.Object, cacheMock.Object, unitOfWorkMock.Object, currentUserServiceMock.Object);
         IResult result = await handler.Handle(new CreateCategoryCommand("Test"), CancellationToken.None);
 
-   Assert.That(result.Success, Is.False);
+        Assert.That(result.Success, Is.False);
         cacheMock.Verify(cache => cache.Add(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTimeOffset?>(), It.IsAny<TimeSpan?>()), Times.Never);
     }
 
@@ -37,28 +37,28 @@ public class CreateCategoryCommandHandlerTests
             .Setup(repo => repo.AnyAsync(It.IsAny<System.Linq.Expressions.Expression<Func<Category, bool>>>(), false, true, It.IsAny<CancellationToken>()))
          .ReturnsAsync(false);
         var testCategoryId = Guid.NewGuid();
-   repositoryMock
-    .Setup(repo => repo.AddAsync(It.IsAny<Category>()))
-       .ReturnsAsync(new Category { Id = testCategoryId, Name = "Test" });
+        repositoryMock
+         .Setup(repo => repo.AddAsync(It.IsAny<Category>()))
+            .ReturnsAsync(new Category { Id = testCategoryId, Name = "Test" });
 
         var cacheMock = new Mock<ICacheService>();
-  cacheMock
-    .Setup(cache => cache.Add(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTimeOffset?>(), It.IsAny<TimeSpan?>()))
-       .Returns(Task.CompletedTask)
-       .Verifiable();
+        cacheMock
+          .Setup(cache => cache.Add(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTimeOffset?>(), It.IsAny<TimeSpan?>()))
+             .Returns(Task.CompletedTask)
+             .Verifiable();
 
         var unitOfWorkMock = new Mock<BlogApp.Domain.Common.IUnitOfWork>();
         unitOfWorkMock
        .Setup(uow => uow.SaveChangesAsync(It.IsAny<CancellationToken>()))
          .ReturnsAsync(1);
 
-    var currentUserServiceMock = new Mock<ICurrentUserService>();
+        var currentUserServiceMock = new Mock<ICurrentUserService>();
 
         var handler = new CreateCategoryCommandHandler(repositoryMock.Object, cacheMock.Object, unitOfWorkMock.Object, currentUserServiceMock.Object);
         IResult result = await handler.Handle(new CreateCategoryCommand("Test"), CancellationToken.None);
 
-   Assert.That(result.Success, Is.True);
-  cacheMock.Verify(cache => cache.Add($"category-{testCategoryId}", It.IsAny<object>(), It.IsAny<DateTimeOffset?>(), It.IsAny<TimeSpan?>()), Times.Once);
+        Assert.That(result.Success, Is.True);
+        cacheMock.Verify(cache => cache.Add($"category-{testCategoryId}", It.IsAny<object>(), It.IsAny<DateTimeOffset?>(), It.IsAny<TimeSpan?>()), Times.Once);
     }
 }
 
@@ -68,30 +68,30 @@ public class CreatePostCommandHandlerTests
     public async Task Handle_ShouldPersistPost_WithProvidedCategoryId()
     {
         var repositoryMock = new Mock<IPostRepository>();
- repositoryMock
-    .Setup(repo => repo.AddAsync(It.IsAny<Post>()))
-       .ReturnsAsync((Post post) => post);
+        repositoryMock
+           .Setup(repo => repo.AddAsync(It.IsAny<Post>()))
+              .ReturnsAsync((Post post) => post);
 
         var categoryRepositoryMock = new Mock<BlogApp.Domain.Repositories.ICategoryRepository>();
         categoryRepositoryMock
       .Setup(repo => repo.AnyAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<Category, bool>>>(), It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
           .ReturnsAsync(true);
 
- var unitOfWorkMock = new Mock<BlogApp.Domain.Common.IUnitOfWork>();
-unitOfWorkMock
-            .Setup(uow => uow.SaveChangesAsync(It.IsAny<CancellationToken>()))
-         .ReturnsAsync(1);
+        var unitOfWorkMock = new Mock<BlogApp.Domain.Common.IUnitOfWork>();
+        unitOfWorkMock
+                    .Setup(uow => uow.SaveChangesAsync(It.IsAny<CancellationToken>()))
+                 .ReturnsAsync(1);
 
         var currentUserServiceMock = new Mock<ICurrentUserService>();
 
-    var handler = new CreatePostCommandHandler(repositoryMock.Object, categoryRepositoryMock.Object, unitOfWorkMock.Object, currentUserServiceMock.Object);
- var testCategoryId = Guid.NewGuid();
-  var command = new CreatePostCommand("Title", "Body", "Summary", "thumb", true, testCategoryId);
+        var handler = new CreatePostCommandHandler(repositoryMock.Object, categoryRepositoryMock.Object, unitOfWorkMock.Object, currentUserServiceMock.Object);
+        var testCategoryId = Guid.NewGuid();
+        var command = new CreatePostCommand("Title", "Body", "Summary", "thumb", true, testCategoryId);
 
         IResult result = await handler.Handle(command, CancellationToken.None);
 
         Assert.That(result.Success, Is.True);
-   repositoryMock.Verify(repo => repo.AddAsync(It.Is<Post>(post => post.CategoryId == testCategoryId && post.Title == "Title")), Times.Once);
+        repositoryMock.Verify(repo => repo.AddAsync(It.Is<Post>(post => post.CategoryId == testCategoryId && post.Title == "Title")), Times.Once);
         unitOfWorkMock.Verify(uow => uow.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 }

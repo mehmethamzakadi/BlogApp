@@ -9,7 +9,7 @@ public sealed class UserRole
     /// <summary>
     /// Kullanıcı ID'si
     /// </summary>
-  public Guid UserId { get; set; }
+    public Guid UserId { get; set; }
 
     /// <summary>
     /// Navigation property: İlişkili kullanıcı
@@ -29,5 +29,5 @@ public sealed class UserRole
     /// <summary>
     /// Rolün kullanıcıya atandığı tarih
     /// </summary>
- public DateTime AssignedDate { get; set; } = DateTime.UtcNow;
+    public DateTime AssignedDate { get; set; } = DateTime.UtcNow;
 }

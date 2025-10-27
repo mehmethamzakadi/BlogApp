@@ -53,10 +53,6 @@ public class UserConfiguration : BaseConfiguraiton<User>
         builder.Property(u => u.PhoneNumber)
             .HasMaxLength(50);
 
-        // Refresh Token
-        builder.Property(u => u.RefreshToken)
-            .HasMaxLength(500);
-
         // Password Reset Token
         builder.Property(u => u.PasswordResetToken)
             .HasMaxLength(500);
@@ -72,9 +68,5 @@ public class UserConfiguration : BaseConfiguraiton<User>
 
         builder.HasIndex(u => u.Email)
             .HasDatabaseName("IX_Users_Email");
-
-        // RefreshToken için index - RefreshTokenAsync metodunda kullanılıyor
-        builder.HasIndex(u => u.RefreshToken)
-            .HasDatabaseName("IX_Users_RefreshToken");
     }
 }

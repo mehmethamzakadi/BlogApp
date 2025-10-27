@@ -20,9 +20,9 @@ public sealed class CreatePostCommandHandler(
     {
         // Kategori geçerliliğini kontrol et
         var categoryExists = await categoryRepository.AnyAsync(
-            x => x.Id == request.CategoryId && !x.IsDeleted, 
+            x => x.Id == request.CategoryId && !x.IsDeleted,
             cancellationToken: cancellationToken);
-            
+
         if (!categoryExists)
         {
             return new ErrorResult("Geçersiz kategori seçildi!");
@@ -43,7 +43,7 @@ public sealed class CreatePostCommandHandler(
         await postRepository.AddAsync(post);
 
         // ✅ Outbox Pattern için SaveChanges'dan ÖNCE domain event'i tetikle
-    post.AddDomainEvent(new PostCreatedEvent(post.Id, post.Title, post.CategoryId, actorId));
+        post.AddDomainEvent(new PostCreatedEvent(post.Id, post.Title, post.CategoryId, actorId));
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

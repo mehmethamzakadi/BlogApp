@@ -1,17 +1,16 @@
-using System.IO;
 using AspNetCoreRateLimit;
 using BlogApp.API.Configuration;
 using BlogApp.API.Filters;
 using BlogApp.API.Middlewares;
 using BlogApp.Application;
 using BlogApp.Domain.Common.Results;
-using BlogApp.Infrastructure;
 using BlogApp.Domain.Options;
+using BlogApp.Infrastructure;
 using BlogApp.Persistence;
-using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Options;
 using BlogApp.Persistence.DatabaseInitializer;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Options;
 using Scalar.AspNetCore;
 using Serilog;
 

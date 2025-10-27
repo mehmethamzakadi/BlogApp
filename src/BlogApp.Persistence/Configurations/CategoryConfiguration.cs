@@ -12,7 +12,7 @@ namespace BlogApp.Persistence.Configurations
             base.Configure(builder);
 
             builder.Property(x => x.Name).IsRequired().HasMaxLength(100);
-            
+
             builder.Property(x => x.NormalizedName)
                 .HasMaxLength(100);  // Geçici olarak nullable - migration sonrası required yapılacak
 
@@ -22,7 +22,7 @@ namespace BlogApp.Persistence.Configurations
                 .IsUnique()
                 .HasFilter("\"IsDeleted\" = false")
                 .HasDatabaseName("IX_Categories_NormalizedName_Unique");
-                
+
             // Name için normal index (arama için)
             builder.HasIndex(x => x.Name)
                 .HasDatabaseName("IX_Categories_Name");

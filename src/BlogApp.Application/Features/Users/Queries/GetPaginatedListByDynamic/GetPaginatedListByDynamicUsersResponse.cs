@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using BlogApp.Application.Common;
 
 namespace BlogApp.Application.Features.Users.Queries.GetPaginatedListByDynamic;

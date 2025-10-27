@@ -1,6 +1,6 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using Microsoft.AspNetCore.Http;
 
 namespace BlogApp.Persistence.Contexts;
 
@@ -12,7 +12,7 @@ public class BlogAppDbContextFactory : IDesignTimeDbContextFactory<BlogAppDbCont
     public BlogAppDbContext CreateDbContext(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<BlogAppDbContext>();
-        
+
         // PostgreSQL connection string for migrations
         optionsBuilder.UseNpgsql(
             "Host=localhost;Database=BlogAppDb;Username=postgres;Password=postgres",

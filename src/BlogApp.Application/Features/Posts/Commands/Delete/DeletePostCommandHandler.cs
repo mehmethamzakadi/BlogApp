@@ -22,8 +22,8 @@ public sealed class DeletePostCommandHandler(
             return new ErrorResult("Post bilgisi bulunamadı!");
 
         // ✅ Silme işleminden ÖNCE domain event'i tetikle (title bilgisini yakalamak için)
-    var actorId = currentUserService.GetCurrentUserId() ?? SystemUsers.SystemUserId;
-    post.AddDomainEvent(new PostDeletedEvent(post.Id, post.Title, actorId));
+        var actorId = currentUserService.GetCurrentUserId() ?? SystemUsers.SystemUserId;
+        post.AddDomainEvent(new PostDeletedEvent(post.Id, post.Title, actorId));
 
         await postRepository.DeleteAsync(post);
         await unitOfWork.SaveChangesAsync(cancellationToken);

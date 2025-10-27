@@ -6,8 +6,6 @@ using BlogApp.Domain.Entities;
 using BlogApp.Domain.Repositories;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace BlogApp.Application.Features.ActivityLogs.Queries.GetPaginatedList;
 

@@ -17,7 +17,7 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
     private readonly IPasswordHasher<User> _passwordHasher;
 
     public UserRepository(
-        BlogAppDbContext context, 
+        BlogAppDbContext context,
         IPasswordHasher<User> passwordHasher) : base(context)
     {
         _passwordHasher = passwordHasher;

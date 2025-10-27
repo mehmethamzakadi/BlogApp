@@ -27,9 +27,9 @@ public sealed class UpdatePostCommandHandler(
         if (entity.CategoryId != request.CategoryId)
         {
             var categoryExists = await categoryRepository.AnyAsync(
-                x => x.Id == request.CategoryId && !x.IsDeleted, 
+                x => x.Id == request.CategoryId && !x.IsDeleted,
                 cancellationToken: cancellationToken);
-                
+
             if (!categoryExists)
             {
                 return new ErrorResult("Geçersiz kategori seçildi!");
@@ -46,8 +46,8 @@ public sealed class UpdatePostCommandHandler(
         await postRepository.UpdateAsync(entity);
 
         // ✅ Outbox Pattern için SaveChanges'dan ÖNCE domain event'i tetikle
-    var actorId = currentUserService.GetCurrentUserId() ?? SystemUsers.SystemUserId;
-    entity.AddDomainEvent(new PostUpdatedEvent(entity.Id, entity.Title, actorId));
+        var actorId = currentUserService.GetCurrentUserId() ?? SystemUsers.SystemUserId;
+        entity.AddDomainEvent(new PostUpdatedEvent(entity.Id, entity.Title, actorId));
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

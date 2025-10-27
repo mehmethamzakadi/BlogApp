@@ -1,6 +1,5 @@
-using System.Collections.Generic;
-using System.Security.Claims;
 using BlogApp.Domain.Entities;
+using System.Security.Claims;
 
 namespace BlogApp.Application.Abstractions.Identity;
 

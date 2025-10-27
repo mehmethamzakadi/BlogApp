@@ -63,74 +63,74 @@ public class PermissionSeeder
     private async Task EnsurePermissionsExistAsync()
     {
         var allPermissionNames = Permissions.GetAllPermissions();
-        
-    // Önce tüm mevcut permission'ları al (IsDeleted kontrolü ile)
+
+        // Önce tüm mevcut permission'ları al (IsDeleted kontrolü ile)
         var existingPermissions = await _context.Permissions
       .Where(p => !p.IsDeleted)
     .ToListAsync();
 
         var existingPermissionNames = existingPermissions.Select(p => p.Name).ToHashSet();
 
-   var missingPermissions = allPermissionNames
-            .Except(existingPermissionNames)
-            .ToList();
+        var missingPermissions = allPermissionNames
+                 .Except(existingPermissionNames)
+                 .ToList();
 
         if (!missingPermissions.Any())
         {
-     _logger.LogInformation("All permissions already exist in database");
+            _logger.LogInformation("All permissions already exist in database");
             return;
         }
 
         _logger.LogInformation($"Adding {missingPermissions.Count} missing permissions");
 
         foreach (var permissionName in missingPermissions)
-  {
-   // Tekrar kontrol et - race condition için
-     var exists = existingPermissions.Any(p => p.Name == permissionName);
+        {
+            // Tekrar kontrol et - race condition için
+            var exists = existingPermissions.Any(p => p.Name == permissionName);
             if (exists)
             {
-       _logger.LogInformation($"Permission {permissionName} already exists, skipping");
-     continue;
+                _logger.LogInformation($"Permission {permissionName} already exists, skipping");
+                continue;
             }
 
-       var parts = permissionName.Split('.');
-      var module = parts[0];
-     var type = parts.Length > 1 ? parts[1] : "Custom";
+            var parts = permissionName.Split('.');
+            var module = parts[0];
+            var type = parts.Length > 1 ? parts[1] : "Custom";
 
-        var permission = new Permission
+            var permission = new Permission
             {
-     Name = permissionName,
-      NormalizedName = permissionName.ToUpperInvariant(),
-      Module = module,
-         Type = type,
-   Description = GetPermissionDescription(permissionName),
-              CreatedDate = DateTime.UtcNow,
+                Name = permissionName,
+                NormalizedName = permissionName.ToUpperInvariant(),
+                Module = module,
+                Type = type,
+                Description = GetPermissionDescription(permissionName),
+                CreatedDate = DateTime.UtcNow,
                 CreatedById = Guid.Parse("00000000-0000-0000-0000-000000000001"),
-    IsDeleted = false
+                IsDeleted = false
             };
 
             _context.Permissions.Add(permission);
-     }
+        }
 
-      // SaveChanges'ı try-catch içinde yap
+        // SaveChanges'ı try-catch içinde yap
         try
         {
-        await _context.SaveChangesAsync();
-   _logger.LogInformation($"Successfully added {missingPermissions.Count} permissions");
+            await _context.SaveChangesAsync();
+            _logger.LogInformation($"Successfully added {missingPermissions.Count} permissions");
         }
         catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("duplicate key") == true)
         {
- _logger.LogWarning("Duplicate key detected during permission seeding. Some permissions may already exist.");
-      // Duplicate key hatası gelirse, context'i temizle ve devam et
-         _context.ChangeTracker.Clear();
-    }
+            _logger.LogWarning("Duplicate key detected during permission seeding. Some permissions may already exist.");
+            // Duplicate key hatası gelirse, context'i temizle ve devam et
+            _context.ChangeTracker.Clear();
+        }
     }
 
     private async Task AssignAllPermissionsToAdminAsync()
     {
         var adminRole = await _roleRepository.Query()
             .FirstOrDefaultAsync(r => r.NormalizedName == UserRoles.Admin.ToUpper());
-        
+
         if (adminRole == null)
         {
             _logger.LogWarning("Admin role not found");
@@ -172,7 +172,7 @@ public class PermissionSeeder
     {
         var userRole = await _roleRepository.Query()
             .FirstOrDefaultAsync(r => r.NormalizedName == UserRoles.User.ToUpper());
-        
+
         if (userRole == null)
         {
             _logger.LogWarning("User role not found");

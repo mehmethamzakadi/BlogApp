@@ -9,11 +9,10 @@ using BlogApp.Domain.Exceptions;
 using BlogApp.Domain.Extentions;
 using BlogApp.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace BlogApp.Infrastructure.Services.Identity;
+namespace BlogApp.Infrastructure.Services;
 
 public sealed class AuthService(
     IUserRepository userRepository,

@@ -22,23 +22,23 @@ public sealed class CreateCategoryCommandHandler(
         // NormalizedName ile case-insensitive kontrol (database index kullanarak)
         var normalizedName = request.Name.ToUpperInvariant();
         bool categoryExists = await categoryRepository.AnyAsync(
-            x => x.NormalizedName == normalizedName, 
+            x => x.NormalizedName == normalizedName,
             cancellationToken: cancellationToken);
-            
+
         if (categoryExists)
         {
             return new ErrorResult("Bu kategori adı zaten mevcut!");
         }
 
-        var category = await categoryRepository.AddAsync(new Category 
-        { 
+        var category = await categoryRepository.AddAsync(new Category
+        {
             Name = request.Name,
             NormalizedName = normalizedName
         });
 
         // ✅ Outbox Pattern için SaveChanges'dan ÖNCE domain event'i tetikle
-    var actorId = currentUserService.GetCurrentUserId() ?? SystemUsers.SystemUserId;
-    category.AddDomainEvent(new CategoryCreatedEvent(category.Id, category.Name, actorId));
+        var actorId = currentUserService.GetCurrentUserId() ?? SystemUsers.SystemUserId;
+        category.AddDomainEvent(new CategoryCreatedEvent(category.Id, category.Name, actorId));
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

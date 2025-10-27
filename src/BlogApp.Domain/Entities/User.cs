@@ -80,16 +80,6 @@ public sealed class User : BaseEntity
     public int AccessFailedCount { get; set; }
 
     /// <summary>
-    /// Aktif refresh token
-    /// </summary>
-    public string? RefreshToken { get; set; }
-
-    /// <summary>
-    /// Refresh token son kullanma tarihi
-    /// </summary>
-    public DateTime? RefreshTokenExpiry { get; set; }
-
-    /// <summary>
     /// Şifre sıfırlama token'ı
     /// </summary>
     public string? PasswordResetToken { get; set; }

@@ -1,5 +1,3 @@
-using System.IO;
-
 namespace BlogApp.Application.Abstractions.Images;
 
 public interface IImageStorageService

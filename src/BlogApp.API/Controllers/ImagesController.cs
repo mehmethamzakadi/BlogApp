@@ -1,4 +1,3 @@
-using System.IO;
 using BlogApp.API.Contracts.Images;
 using BlogApp.Application.Features.Images.Commands.Upload;
 using BlogApp.Domain.Constants;

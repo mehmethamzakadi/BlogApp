@@ -1,5 +1,4 @@
 using BlogApp.Application.Abstractions.Identity;
-using BlogApp.Application.Features.Auths.Login;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Repositories;
 using BlogApp.Persistence.Contexts;
@@ -12,7 +11,7 @@ using System.Security.Cryptography;
 using System.Text;
 using TokenOptions = BlogApp.Domain.Options.TokenOptions;
 
-namespace BlogApp.Infrastructure.Services.Identity;
+namespace BlogApp.Infrastructure.Services;
 
 public sealed class JwtTokenService : ITokenService
 {

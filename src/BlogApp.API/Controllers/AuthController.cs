@@ -1,4 +1,3 @@
-using System;
 using BlogApp.Application.Features.Auths.Login;
 using BlogApp.Application.Features.Auths.Logout;
 using BlogApp.Application.Features.Auths.PasswordReset;
@@ -8,10 +7,7 @@ using BlogApp.Application.Features.Auths.Register;
 using BlogApp.Domain.Common.Results;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace BlogApp.API.Controllers
 {
