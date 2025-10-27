@@ -2,6 +2,7 @@ using BlogApp.Application.Abstractions;
 using BlogApp.Application.Abstractions.Identity;
 using BlogApp.Application.Features.Auths.Login;
 using BlogApp.Domain.Common;
+using BlogApp.Domain.Constants;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Exceptions;
@@ -52,7 +53,7 @@ public sealed class AuthService(
             var failureUpdate = await userRepository.UpdateAsync(user);
             if (failureUpdate.Success)
             {
-                await unitOfWork.SaveChangesAsync();
+                await SaveChangesWithConcurrencyHandlingAsync();
             }
 
             throw new AuthenticationErrorException();
@@ -74,7 +75,7 @@ public sealed class AuthService(
             throw new AuthenticationErrorException(successUpdate.Message ?? "Kullanıcı güncelleme hatası.");
         }
 
-        await unitOfWork.SaveChangesAsync();
+        await SaveChangesWithConcurrencyHandlingAsync();
 
         return new SuccessDataResult<LoginResponse>(tokenResponse, "Giriş Başarılı");
     }
@@ -100,17 +101,13 @@ public sealed class AuthService(
         var authClaims = await tokenService.GetAuthClaims(user);
         var tokenResponse = tokenService.GenerateAccessToken(authClaims, user);
 
-        // Update refresh token
-        user.RefreshToken = tokenResponse.RefreshToken;
-        user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
+        var refreshExpiry = DateTime.UtcNow.AddDays(7);
 
-        var updateResult = await userRepository.UpdateAsync(user);
-        if (!updateResult.Success)
+        var rotationSucceeded = await TryRotateRefreshTokenAsync(user.Id, refreshToken, tokenResponse.RefreshToken, refreshExpiry);
+        if (!rotationSucceeded)
         {
-            throw new AuthenticationErrorException(updateResult.Message ?? "Token yenileme hatası.");
+            throw new AuthenticationErrorException("Geçersiz veya süresi dolmuş refresh token.");
         }
-
-        await unitOfWork.SaveChangesAsync();
 
         return new SuccessDataResult<LoginResponse>(tokenResponse, "Token yenilendi");
     }
@@ -130,16 +127,7 @@ public sealed class AuthService(
             return;
         }
 
-        user.RefreshToken = null;
-        user.RefreshTokenExpiry = null;
-
-        var updateResult = await userRepository.UpdateAsync(user);
-        if (!updateResult.Success)
-        {
-            return;
-        }
-
-        await unitOfWork.SaveChangesAsync();
+        await ClearRefreshTokenAsync(refreshToken);
     }
 
     public async Task PasswordResetAsync(string email)
@@ -154,10 +142,55 @@ public sealed class AuthService(
             var updateResult = await userRepository.UpdateAsync(user);
             if (updateResult.Success)
             {
-                await unitOfWork.SaveChangesAsync();
+                await SaveChangesWithConcurrencyHandlingAsync();
                 await mailService.SendPasswordResetMailAsync(email, user.Id, resetToken.UrlEncode());
             }
         }
+    }
+
+    private async Task SaveChangesWithConcurrencyHandlingAsync()
+    {
+        try
+        {
+            await unitOfWork.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            // Tekrarlanan refresh token isteklerinde oluşabilecek çakışmaları yakalayıp kullanıcıyı yeniden girişe yönlendiriyoruz.
+            throw new AuthenticationErrorException("Oturum verileriniz başka bir işlem tarafından güncellendi. Lütfen tekrar giriş yapın.", ex);
+        }
+    }
+
+    private async Task<bool> TryRotateRefreshTokenAsync(Guid userId, string currentRefreshToken, string newRefreshToken, DateTime newExpiryUtc)
+    {
+        var nowUtc = DateTime.UtcNow;
+        var newConcurrencyStamp = Guid.NewGuid().ToString();
+
+        var affectedRows = await dbContext.Users
+            .Where(u => u.Id == userId && u.RefreshToken == currentRefreshToken && !u.IsDeleted)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(u => u.RefreshToken, _ => newRefreshToken)
+                .SetProperty(u => u.RefreshTokenExpiry, _ => newExpiryUtc)
+                .SetProperty(u => u.UpdatedDate, _ => nowUtc)
+                .SetProperty(u => u.UpdatedById, _ => SystemUsers.SystemUserId)
+                .SetProperty(u => u.ConcurrencyStamp, _ => newConcurrencyStamp));
+
+        return affectedRows > 0;
+    }
+
+    private async Task ClearRefreshTokenAsync(string refreshToken)
+    {
+        var nowUtc = DateTime.UtcNow;
+        var newConcurrencyStamp = Guid.NewGuid().ToString();
+
+        await dbContext.Users
+            .Where(u => u.RefreshToken == refreshToken && !u.IsDeleted)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(u => u.RefreshToken, _ => (string?)null)
+                .SetProperty(u => u.RefreshTokenExpiry, _ => (DateTime?)null)
+                .SetProperty(u => u.UpdatedDate, _ => nowUtc)
+                .SetProperty(u => u.UpdatedById, _ => SystemUsers.SystemUserId)
+                .SetProperty(u => u.ConcurrencyStamp, _ => newConcurrencyStamp));
     }
 
     public async Task<IDataResult<bool>> PasswordVerify(string resetToken, string userId)

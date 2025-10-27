@@ -287,9 +287,33 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
             // Update normalized fields
             user.NormalizedUserName = user.UserName.ToUpperInvariant();
             user.NormalizedEmail = user.Email.ToUpperInvariant();
-            user.ConcurrencyStamp = Guid.NewGuid().ToString();
 
-            Context.Users.Update(user);
+            var entry = Context.Entry(user);
+
+            if (entry.State == EntityState.Detached)
+            {
+                var concurrencyStamp = await Context.Users
+                    .AsNoTracking()
+                    .Where(u => u.Id == user.Id)
+                    .Select(u => u.ConcurrencyStamp)
+                    .FirstOrDefaultAsync();
+
+                if (concurrencyStamp is null)
+                {
+                    return new ErrorResult("Kullanıcı bulunamadı.");
+                }
+
+                Context.Users.Attach(user);
+                entry = Context.Entry(user);
+                entry.State = EntityState.Modified;
+                entry.Property(u => u.ConcurrencyStamp).OriginalValue = concurrencyStamp;
+            }
+
+            var newConcurrencyStamp = Guid.NewGuid().ToString();
+            entry.Property(u => u.ConcurrencyStamp).CurrentValue = newConcurrencyStamp;
+            entry.Property(u => u.ConcurrencyStamp).IsModified = true;
+            user.ConcurrencyStamp = newConcurrencyStamp;
+
             // ✅ REMOVED: SaveChanges - UnitOfWork is responsible for transaction management
 
             return new SuccessResult("Kullanıcı başarıyla güncellendi.");

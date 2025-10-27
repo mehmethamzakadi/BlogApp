@@ -1,6 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useAuthStore } from '../stores/auth-store';
 import { refreshSession } from '../features/auth/api';
+
+let hydrationPromise: Promise<void> | null = null;
 
 export function useAuth() {
   const user = useAuthStore((state) => state.user);
@@ -10,41 +12,39 @@ export function useAuth() {
   const logout = useAuthStore((state) => state.logout);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const setHydrated = useAuthStore((state) => state.setHydrated);
-  const hasInitialized = useRef(false);
 
   useEffect(() => {
-    if (hydrated || hasInitialized.current) {
+    if (hydrated) {
       return;
     }
 
-    hasInitialized.current = true;
+    if (!hydrationPromise) {
+      hydrationPromise = (async () => {
+        try {
+          const response = await refreshSession();
 
-    const hydrateFromSession = async () => {
-      try {
-        const response = await refreshSession();
+          if (response.success && response.data) {
+            login({
+              user: {
+                userId: response.data.userId,
+                userName: response.data.userName,
+                expiration: response.data.expiration,
+                permissions: response.data.permissions
+              },
+              token: response.data.token
+            });
+            return;
+          }
 
-        if (response.success && response.data) {
-          login({
-            user: {
-              userId: response.data.userId,
-              userName: response.data.userName,
-              expiration: response.data.expiration,
-              permissions: response.data.permissions
-            },
-            token: response.data.token
-          });
-          return;
+          logout();
+        } catch {
+          logout();
+        } finally {
+          setHydrated(true);
+          hydrationPromise = null;
         }
-
-        logout();
-      } catch {
-        logout();
-      } finally {
-        setHydrated(true);
-      }
-    };
-
-    void hydrateFromSession();
+      })();
+    }
   }, [hydrated, login, logout, setHydrated]);
 
   return {
