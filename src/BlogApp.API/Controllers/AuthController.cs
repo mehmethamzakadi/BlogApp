@@ -8,8 +8,10 @@ using BlogApp.Application.Features.Auths.Register;
 using BlogApp.Domain.Common.Results;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BlogApp.API.Controllers
 {
@@ -132,14 +134,51 @@ namespace BlogApp.API.Controllers
 
         private CookieOptions CreateRefreshTokenCookieOptions(DateTime refreshExpirationUtc)
         {
+            var environment = HttpContext?.RequestServices.GetService<IWebHostEnvironment>();
+            var isDevelopment = environment?.IsDevelopment() ?? false;
+
             var host = Request.Host.Host;
-            var cookieDomain = string.IsNullOrWhiteSpace(host) ? null : host;
+            string? cookieDomain = null;
+
+            if (!string.IsNullOrWhiteSpace(host) && host.Contains('.'))
+            {
+                cookieDomain = host;
+            }
+
+            var requestIsHttps = Request.IsHttps;
+
+            var sameSite = SameSiteMode.Strict;
+            var secure = requestIsHttps;
+
+            if (Request.Headers.TryGetValue("Origin", out var originHeader) &&
+                Uri.TryCreate(originHeader.ToString(), UriKind.Absolute, out var originUri) &&
+                !string.Equals(originUri.Host, host, StringComparison.OrdinalIgnoreCase))
+            {
+                if (requestIsHttps)
+                {
+                    sameSite = SameSiteMode.None;
+                    secure = true;
+                }
+                else
+                {
+                    sameSite = SameSiteMode.Lax;
+                }
+            }
+            else if (isDevelopment && !requestIsHttps)
+            {
+                sameSite = SameSiteMode.Lax;
+            }
+
+            if (!requestIsHttps && !isDevelopment)
+            {
+                secure = false;
+            }
 
             return new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
+                Secure = secure,
+                SameSite = sameSite,
                 Path = "/",
                 Expires = new DateTimeOffset(DateTime.SpecifyKind(refreshExpirationUtc, DateTimeKind.Utc)),
                 Domain = cookieDomain
