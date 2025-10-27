@@ -1,5 +1,6 @@
 using AutoMapper;
 using BlogApp.Application.Abstractions;
+using BlogApp.Application.Common.Caching;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Repositories;
@@ -14,7 +15,8 @@ public sealed class GetCategoryByIdQueryHandler(
 {
     public async Task<IDataResult<GetByIdCategoryResponse>> Handle(GetByIdCategoryQuery request, CancellationToken cancellationToken)
     {
-        var cacheValue = await cacheService.Get<GetByIdCategoryResponse>($"category-{request.Id}");
+        var cacheKey = CacheKeys.Category(request.Id);
+        var cacheValue = await cacheService.Get<GetByIdCategoryResponse>(cacheKey);
         if (cacheValue is not null)
             return new SuccessDataResult<GetByIdCategoryResponse>(cacheValue);
 
@@ -23,6 +25,12 @@ public sealed class GetCategoryByIdQueryHandler(
             return new ErrorDataResult<GetByIdCategoryResponse>("Kategori bilgisi bulunamadı.");
 
         GetByIdCategoryResponse response = mapper.Map<GetByIdCategoryResponse>(category);
+
+        await cacheService.Add(
+            cacheKey,
+            response,
+            DateTimeOffset.UtcNow.Add(CacheDurations.Category),
+            null);
 
         return new SuccessDataResult<GetByIdCategoryResponse>(response);
     }

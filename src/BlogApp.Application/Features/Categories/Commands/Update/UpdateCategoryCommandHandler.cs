@@ -1,16 +1,20 @@
 using BlogApp.Application.Abstractions;
+using BlogApp.Application.Common.Caching;
+using BlogApp.Application.Features.Categories.Queries.GetById;
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Constants;
 using BlogApp.Domain.Events.CategoryEvents;
 using BlogApp.Domain.Repositories;
 using MediatR;
+using System;
 using IResult = BlogApp.Domain.Common.Results.IResult;
 
 namespace BlogApp.Application.Features.Categories.Commands.Update;
 
 public sealed class UpdateCategoryCommandHandler(
     ICategoryRepository categoryRepository,
+    ICacheService cacheService,
     IUnitOfWork unitOfWork,
     ICurrentUserService currentUserService) : IRequestHandler<UpdateCategoryCommand, IResult>
 {
@@ -46,6 +50,18 @@ public sealed class UpdateCategoryCommandHandler(
         category.AddDomainEvent(new CategoryUpdatedEvent(category.Id, category.Name, actorId));
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await cacheService.Add(
+            CacheKeys.Category(category.Id),
+            new GetByIdCategoryResponse(category.Id, category.Name),
+            DateTimeOffset.UtcNow.Add(CacheDurations.Category),
+            null);
+
+        await cacheService.Add(
+            CacheKeys.CategoryGridVersion(),
+            Guid.NewGuid().ToString("N"),
+            null,
+            null);
 
         return new SuccessResult("Kategori bilgisi başarıyla güncellendi.");
     }

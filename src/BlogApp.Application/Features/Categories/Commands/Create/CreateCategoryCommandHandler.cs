@@ -1,4 +1,5 @@
 using BlogApp.Application.Abstractions;
+using BlogApp.Application.Common.Caching;
 using BlogApp.Application.Features.Categories.Queries.GetById;
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
@@ -7,6 +8,7 @@ using BlogApp.Domain.Entities;
 using BlogApp.Domain.Events.CategoryEvents;
 using BlogApp.Domain.Repositories;
 using MediatR;
+using System;
 using IResult = BlogApp.Domain.Common.Results.IResult;
 
 namespace BlogApp.Application.Features.Categories.Commands.Create;
@@ -43,9 +45,15 @@ public sealed class CreateCategoryCommandHandler(
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         await cache.Add(
-            $"category-{category.Id}",
+            CacheKeys.Category(category.Id),
             new GetByIdCategoryResponse(Id: category.Id, Name: category.Name),
-            DateTimeOffset.UtcNow.AddMonths(1),
+            DateTimeOffset.UtcNow.Add(CacheDurations.Category),
+            null);
+
+        await cache.Add(
+            CacheKeys.CategoryGridVersion(),
+            Guid.NewGuid().ToString("N"),
+            null,
             null);
 
         return new SuccessResult("Kategori bilgisi başarıyla eklendi.");
