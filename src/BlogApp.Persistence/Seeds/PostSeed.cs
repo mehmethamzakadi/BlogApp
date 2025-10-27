@@ -70,7 +70,7 @@ Mesajlaşma altyapısı seçiminde gereksinimleri segmentlere ayırmak kritik.
 RabbitMQ routing esnekliği sağlar; Kafka ise sıralı event log ile akış analitiğine güç katar.
 Makale boyunca tüketici grupları, dead-letter stratejileri ve metrik takip yöntemlerini detaylandırıyoruz.
 """,
-                Thumbnail = "/media/posts/event-driven-rabbitmq-vs-kafka.png",
+                Thumbnail = "https://miro.medium.com/1*BGZy6Puq8X9AQHkJzB7BLA.jpeg",
                 IsPublished = false,
                 CategoryId = Guid.Parse("10000000-0000-0000-0000-000000000004"),
                 CreatedById = Guid.Parse("00000000-0000-0000-0000-000000000004"),
