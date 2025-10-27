@@ -30,6 +30,9 @@ public class BookshelfItemConfiguration : BaseConfiguraiton<BookshelfItem>
 
         builder.Property(x => x.ReadDate);
 
+        builder.Property(x => x.ImageUrl)
+            .HasMaxLength(400);
+
         builder.HasIndex(x => x.IsRead)
             .HasDatabaseName("IX_BookshelfItems_IsRead");
 

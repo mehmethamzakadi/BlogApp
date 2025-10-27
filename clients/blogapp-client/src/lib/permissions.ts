@@ -51,6 +51,9 @@ export const Permissions = {
   BookshelfDelete: 'Bookshelf.Delete',
   BookshelfViewAll: 'Bookshelf.ViewAll',
 
+  // Media Management
+  MediaUpload: 'Media.Upload',
+
   // Activity Logs
   ActivityLogsView: 'ActivityLogs.View'
 } as const;

@@ -1,5 +1,6 @@
 using BlogApp.Application.Abstractions;
 using BlogApp.Application.Abstractions.Identity;
+using BlogApp.Application.Abstractions.Images;
 using BlogApp.Domain.Constants;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Options;
@@ -7,6 +8,7 @@ using BlogApp.Infrastructure.Authorization;
 using BlogApp.Infrastructure.Consumers;
 using BlogApp.Infrastructure.Services;
 using BlogApp.Infrastructure.Services.Identity;
+using BlogApp.Infrastructure.Services.Images;
 using BlogApp.Infrastructure.Services.BackgroundServices.Outbox.Converters;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -30,6 +32,7 @@ namespace BlogApp.Infrastructure
             services.Configure<PasswordResetOptions>(configuration.GetSection(PasswordResetOptions.SectionName));
             services.Configure<TelegramOptions>(configuration.GetSection(TelegramOptions.SectionName));
             services.Configure<RabbitMqOptions>(configuration.GetSection(RabbitMqOptions.SectionName));
+            services.Configure<ImageStorageOptions>(configuration.GetSection(ImageStorageOptions.SectionName));
 
             // Custom Password Hasher for User entity
             services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
@@ -150,6 +153,7 @@ namespace BlogApp.Infrastructure
             services.AddTransient<IMailService, MailService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
+            services.AddScoped<IImageStorageService, ImageStorageService>();
 
             // Authorization
             services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();

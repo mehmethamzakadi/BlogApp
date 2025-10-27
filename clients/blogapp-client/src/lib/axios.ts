@@ -61,9 +61,6 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && requestUrl.includes('/auth/refresh-token')) {
       const { logout } = useAuthStore.getState();
       logout();
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
-      }
       return Promise.reject(error);
     }
 
@@ -123,9 +120,6 @@ api.interceptors.response.use(
         processQueue(refreshError as Error, null);
         const { logout } = useAuthStore.getState();
         logout();
-        if (typeof window !== 'undefined') {
-          window.location.href = '/login';
-        }
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

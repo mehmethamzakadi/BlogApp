@@ -1,3 +1,4 @@
+using System.IO;
 using AspNetCoreRateLimit;
 using BlogApp.API.Configuration;
 using BlogApp.API.Filters;
@@ -5,7 +6,10 @@ using BlogApp.API.Middlewares;
 using BlogApp.Application;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Infrastructure;
+using BlogApp.Domain.Options;
 using BlogApp.Persistence;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Options;
 using BlogApp.Persistence.DatabaseInitializer;
 using Microsoft.AspNetCore.Mvc;
 using Scalar.AspNetCore;
@@ -111,6 +115,37 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 var app = builder.Build();
 
+app.UseStaticFiles();
+
+var imageStorageOptions = app.Services.GetRequiredService<IOptions<ImageStorageOptions>>().Value;
+var imageRootPath = imageStorageOptions.RootPath;
+if (!Path.IsPathRooted(imageRootPath))
+{
+    imageRootPath = Path.Combine(app.Environment.ContentRootPath, imageRootPath);
+}
+
+imageRootPath = Path.GetFullPath(imageRootPath);
+Directory.CreateDirectory(imageRootPath);
+
+if (Directory.Exists(imageRootPath))
+{
+    var requestPathValue = (imageStorageOptions.RequestPath ?? string.Empty).Trim();
+    if (!string.IsNullOrWhiteSpace(requestPathValue) && !requestPathValue.StartsWith('/'))
+    {
+        requestPathValue = "/" + requestPathValue;
+    }
+
+    requestPathValue = requestPathValue.TrimEnd('/');
+
+    var staticFileOptions = new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(imageRootPath),
+        RequestPath = string.IsNullOrWhiteSpace(requestPathValue) ? default : new PathString(requestPathValue)
+    };
+
+    app.UseStaticFiles(staticFileOptions);
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();  // OpenAPI dokümanı için endpoint ekle
@@ -156,22 +191,3 @@ app.UseIpRateLimiting();
 
 app.UseRouting();
 
-app.UseAuthentication();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-try
-{
-    Log.Information("BlogApp API başlatılıyor");
-    app.Run();
-}
-catch (Exception ex)
-{
-    Log.Fatal(ex, "Uygulama beklenmedik bir şekilde sonlandırıldı");
-}
-finally
-{
-    Log.CloseAndFlush();
-}

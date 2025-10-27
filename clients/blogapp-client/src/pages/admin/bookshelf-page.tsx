@@ -44,7 +44,8 @@ import {
   DialogTitle
 } from '../../components/ui/dialog';
 import { Separator } from '../../components/ui/separator';
-import { cn } from '../../lib/utils';
+import { cn, resolveApiAssetUrl } from '../../lib/utils';
+import { ImageUploadField } from '../../components/forms/image-upload-field';
 
 const defaultFilters: BookshelfTableFilters = {
   status: 'all',
@@ -59,7 +60,9 @@ const defaultFormValues: BookshelfItemFormSchema = {
   pageCount: '',
   isRead: false,
   notes: '',
-  readDate: ''
+  readDate: '',
+  imageUrl: '',
+  removeImage: false
 };
 
 const dateFormatter = new Intl.DateTimeFormat('tr-TR', {
@@ -96,6 +99,12 @@ export function BookshelfPage() {
   });
 
   const isReadValue = formMethods.watch('isRead');
+  const imageUrlValue = formMethods.watch('imageUrl');
+  const titleValue = formMethods.watch('title');
+
+  useEffect(() => {
+    formMethods.register('removeImage');
+  }, [formMethods]);
 
   useEffect(() => {
     if (!isReadValue && formMethods.getValues('readDate')) {
@@ -176,7 +185,9 @@ export function BookshelfPage() {
         pageCount: item.pageCount?.toString() ?? '',
         isRead: item.isRead,
         notes: item.notes ?? '',
-        readDate: item.readDate ? new Date(item.readDate).toISOString().slice(0, 10) : ''
+        readDate: item.readDate ? new Date(item.readDate).toISOString().slice(0, 10) : '',
+        imageUrl: item.imageUrl ?? '',
+        removeImage: false
       });
       setIsFormOpen(true);
     } catch (error) {
@@ -189,6 +200,28 @@ export function BookshelfPage() {
 
   const columns = useMemo<ColumnDef<BookshelfItem>[]>(
     () => [
+      {
+        accessorKey: 'imageUrl',
+        header: 'Görsel',
+        cell: ({ row }) => {
+          const imageUrl = row.original.imageUrl;
+          if (!imageUrl) {
+            return <span className="text-xs text-muted-foreground">Yok</span>;
+          }
+
+          return (
+            <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-md border">
+              <img
+                src={resolveApiAssetUrl(imageUrl)}
+                alt={row.original.title}
+                className="h-full w-full object-cover"
+              />
+            </div>
+          );
+        },
+        enableSorting: false,
+        size: 80
+      },
       {
         accessorKey: 'title',
         header: ({ column }) => (
@@ -405,7 +438,9 @@ export function BookshelfPage() {
       pageCount: data.pageCount ?? '',
       isRead: data.isRead,
       notes: data.notes ?? '',
-      readDate: data.readDate ?? ''
+      readDate: data.readDate ?? '',
+      imageUrl: data.imageUrl ?? '',
+      removeImage: data.removeImage ?? false
     };
 
     if (formMode === 'edit' && editingItemId) {
@@ -617,6 +652,30 @@ export function BookshelfPage() {
               <Label htmlFor="book-isRead" className="cursor-pointer">
                 Bu kitabı okudum
               </Label>
+            </div>
+            <div className="space-y-2">
+              <ImageUploadField
+                label="Kapak Görseli"
+                description="Kitap için kapak görseli yükleyin. JPG, PNG veya WEBP formatlarını kullanabilirsiniz."
+                value={imageUrlValue}
+                title={titleValue}
+                onChange={(url) => {
+                  formMethods.setValue('imageUrl', url, { shouldDirty: true });
+                  formMethods.setValue('removeImage', false, { shouldDirty: true });
+                }}
+                onRemove={() => {
+                  formMethods.setValue('imageUrl', '', { shouldDirty: true });
+                  formMethods.setValue('removeImage', true, { shouldDirty: true });
+                }}
+                isDisabled={isFormLoading || isSubmitting}
+                scope="bookshelf"
+                resizeMode="fit"
+                maxWidth={1200}
+                maxHeight={1200}
+              />
+              {formMethods.formState.errors.imageUrl && (
+                <p className="text-sm text-destructive">{formMethods.formState.errors.imageUrl.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="book-notes">Not</Label>

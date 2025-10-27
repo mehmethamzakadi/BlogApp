@@ -39,6 +39,9 @@ export const bookshelfItemSchema = z
       .string()
       .trim()
       .or(z.literal(''))
+      ,
+    imageUrl: optionalText(400, 'Görsel yolu en fazla 400 karakter olabilir'),
+    removeImage: z.boolean()
   })
   .superRefine((data, ctx) => {
     if (data.isRead) {

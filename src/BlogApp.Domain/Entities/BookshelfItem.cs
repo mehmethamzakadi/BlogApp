@@ -12,4 +12,5 @@ public sealed class BookshelfItem : BaseEntity
     public bool IsRead { get; set; }
     public string? Notes { get; set; }
     public DateTime? ReadDate { get; set; }
+    public string? ImageUrl { get; set; }
 }

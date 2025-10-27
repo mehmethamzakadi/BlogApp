@@ -11,6 +11,7 @@ export interface BookshelfItem {
   isRead: boolean;
   notes?: string | null;
   readDate?: Date | null;
+  imageUrl?: string | null;
   createdDate: Date;
 }
 
@@ -24,6 +25,8 @@ export interface BookshelfFormValues {
   isRead: boolean;
   notes: string;
   readDate: string;
+  imageUrl: string;
+  removeImage: boolean;
 }
 
 export interface BookshelfTableFilters {

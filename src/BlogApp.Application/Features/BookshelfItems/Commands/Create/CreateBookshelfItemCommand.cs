@@ -11,5 +11,6 @@ public sealed record CreateBookshelfItemCommand(
     int? PageCount,
     bool IsRead,
     string? Notes,
-    DateTime? ReadDate
+    DateTime? ReadDate,
+    string? ImageUrl
 ) : IRequest<IResult>;

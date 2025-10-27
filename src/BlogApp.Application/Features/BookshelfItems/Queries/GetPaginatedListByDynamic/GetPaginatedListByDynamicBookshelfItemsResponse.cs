@@ -12,4 +12,5 @@ public sealed record GetPaginatedListByDynamicBookshelfItemsResponse : BaseEntit
     public bool IsRead { get; init; }
     public string? Notes { get; init; }
     public DateTime? ReadDate { get; init; }
+    public string? ImageUrl { get; init; }
 }

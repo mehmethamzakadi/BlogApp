@@ -88,6 +88,9 @@ public class PermissionSeed : IEntityTypeConfiguration<Permission>
             Permissions.BookshelfDelete => "Kitap kaydı silme yetkisi.",
             Permissions.BookshelfViewAll => "Tüm kitap kayıtlarını görüntüleme yetkisi.",
 
+            // Media management
+            Permissions.MediaUpload => "Sisteme görsel yükleme yetkisi.",
+
             // Activity logs
             Permissions.ActivityLogsView => "Aktivite loglarını görüntüleme yetkisi.",
 

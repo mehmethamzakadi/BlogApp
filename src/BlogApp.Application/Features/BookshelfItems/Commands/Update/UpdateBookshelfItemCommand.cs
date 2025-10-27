@@ -12,5 +12,7 @@ public sealed record UpdateBookshelfItemCommand(
     int? PageCount,
     bool IsRead,
     string? Notes,
-    DateTime? ReadDate
+    DateTime? ReadDate,
+    string? ImageUrl,
+    bool RemoveImage
 ) : IRequest<IResult>;

@@ -1,5 +1,6 @@
 using System;
 using BlogApp.Application.Abstractions;
+using BlogApp.Application.Abstractions.Images;
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
@@ -13,7 +14,8 @@ namespace BlogApp.Application.Features.BookshelfItems.Commands.Update;
 public sealed class UpdateBookshelfItemCommandHandler(
     IBookshelfItemRepository bookshelfItemRepository,
     IUnitOfWork unitOfWork,
-    ICurrentUserService currentUserService) : IRequestHandler<UpdateBookshelfItemCommand, IResult>
+    ICurrentUserService currentUserService,
+    IImageStorageService imageStorageService) : IRequestHandler<UpdateBookshelfItemCommand, IResult>
 {
     public async Task<IResult> Handle(UpdateBookshelfItemCommand request, CancellationToken cancellationToken)
     {
@@ -30,6 +32,33 @@ public sealed class UpdateBookshelfItemCommandHandler(
         item.IsRead = request.IsRead;
         item.Notes = NormalizeOptionalText(request.Notes);
         item.ReadDate = NormalizeReadDate(request.ReadDate, request.IsRead);
+
+        var originalImageUrl = item.ImageUrl;
+
+        if (request.RemoveImage)
+        {
+            if (!string.IsNullOrWhiteSpace(originalImageUrl))
+            {
+                await imageStorageService.DeleteAsync(originalImageUrl, cancellationToken);
+            }
+
+            item.ImageUrl = null;
+        }
+        else
+        {
+            var normalizedImageUrl = NormalizeOptionalText(request.ImageUrl);
+
+            if (!string.IsNullOrWhiteSpace(normalizedImageUrl) &&
+                !string.Equals(normalizedImageUrl, originalImageUrl, StringComparison.OrdinalIgnoreCase))
+            {
+                if (!string.IsNullOrWhiteSpace(originalImageUrl))
+                {
+                    await imageStorageService.DeleteAsync(originalImageUrl, cancellationToken);
+                }
+
+                item.ImageUrl = normalizedImageUrl;
+            }
+        }
 
         var actorId = currentUserService.GetCurrentUserId() ?? SystemUsers.SystemUserId;
         item.AddDomainEvent(new BookshelfItemUpdatedEvent(item.Id, item.Title, actorId));

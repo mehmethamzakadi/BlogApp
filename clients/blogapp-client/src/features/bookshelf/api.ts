@@ -84,7 +84,8 @@ export async function createBookshelfItem(values: BookshelfFormValues) {
     PageCount: values.pageCount ? Number(values.pageCount) : null,
     IsRead: values.isRead,
     Notes: values.notes?.trim() || null,
-    ReadDate: values.isRead && values.readDate ? new Date(values.readDate).toISOString() : null
+    ReadDate: values.isRead && values.readDate ? new Date(values.readDate).toISOString() : null,
+    ImageUrl: values.imageUrl?.trim() || null
   });
 
   return normalizeApiResult(response.data);
@@ -99,7 +100,9 @@ export async function updateBookshelfItem(id: string, values: BookshelfFormValue
     PageCount: values.pageCount ? Number(values.pageCount) : null,
     IsRead: values.isRead,
     Notes: values.notes?.trim() || null,
-    ReadDate: values.isRead && values.readDate ? new Date(values.readDate).toISOString() : null
+    ReadDate: values.isRead && values.readDate ? new Date(values.readDate).toISOString() : null,
+    ImageUrl: values.imageUrl?.trim() || null,
+    RemoveImage: values.removeImage
   });
 
   return normalizeApiResult(response.data);

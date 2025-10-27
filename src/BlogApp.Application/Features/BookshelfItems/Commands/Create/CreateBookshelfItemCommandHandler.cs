@@ -25,7 +25,8 @@ public sealed class CreateBookshelfItemCommandHandler(
             PageCount = request.PageCount is > 0 ? request.PageCount : null,
             IsRead = request.IsRead,
             Notes = NormalizeOptionalText(request.Notes),
-            ReadDate = NormalizeReadDate(request.ReadDate, request.IsRead)
+            ReadDate = NormalizeReadDate(request.ReadDate, request.IsRead),
+            ImageUrl = NormalizeOptionalText(request.ImageUrl)
         };
 
         var actorId = currentUserService.GetCurrentUserId() ?? SystemUsers.SystemUserId;

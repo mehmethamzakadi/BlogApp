@@ -53,6 +53,9 @@ public static class Permissions
     public const string BookshelfUpdate = "Bookshelf.Update";
     public const string BookshelfDelete = "Bookshelf.Delete";
     public const string BookshelfViewAll = "Bookshelf.ViewAll";
+    
+    // Media Management Permissions
+    public const string MediaUpload = "Media.Upload";
 
     // Activity Logs Permissions
     public const string ActivityLogsView = "ActivityLogs.View";
@@ -84,6 +87,9 @@ public static class Permissions
 
             // Bookshelf
             BookshelfCreate, BookshelfRead, BookshelfUpdate, BookshelfDelete, BookshelfViewAll,
+
+            // Media
+            MediaUpload,
 
             // Activity Logs
             ActivityLogsView
