@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -190,8 +191,6 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                     LockoutEnd = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     LockoutEnabled = table.Column<bool>(type: "boolean", nullable: false),
                     AccessFailedCount = table.Column<int>(type: "integer", nullable: false),
-                    RefreshToken = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    RefreshTokenExpiry = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     PasswordResetToken = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     PasswordResetTokenExpiry = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -417,13 +416,13 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
 
             migrationBuilder.InsertData(
                 table: "Users",
-                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "CreatedById", "CreatedDate", "DeletedDate", "Email", "EmailConfirmed", "IsDeleted", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PasswordResetToken", "PasswordResetTokenExpiry", "PhoneNumber", "PhoneNumberConfirmed", "RefreshToken", "RefreshTokenExpiry", "SecurityStamp", "TwoFactorEnabled", "UpdatedById", "UpdatedDate", "UserName" },
+                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "CreatedById", "CreatedDate", "DeletedDate", "Email", "EmailConfirmed", "IsDeleted", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PasswordResetToken", "PasswordResetTokenExpiry", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UpdatedById", "UpdatedDate", "UserName" },
                 values: new object[,]
                 {
-                    { new Guid("00000000-0000-0000-0000-000000000001"), 0, "55555555-5555-5555-5555-555555555555", new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc), null, "admin@admin.com", true, false, false, null, "ADMIN@ADMIN.COM", "ADMIN", "AQAAAAIAAYagAAAAEP8xlsKNntQQ1SivmqfdllQWKX/655QCNjrVsPYL/Oz4cUgmI8aV55GO0BN9SDNltA==", null, null, null, false, null, null, "b1a1d25f-8a7e-4e9a-bc55-8dca5bfa1234", false, null, null, "admin" },
-                    { new Guid("00000000-0000-0000-0000-000000000002"), 0, "66666666-6666-6666-6666-666666666666", new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc), null, "editor@blogapp.dev", true, false, false, null, "EDITOR@BLOGAPP.DEV", "EDITOR.LARA", "AQAAAAIAAYagAAAAEP8xlsKNntQQ1SivmqfdllQWKX/655QCNjrVsPYL/Oz4cUgmI8aV55GO0BN9SDNltA==", null, null, "+905551112233", true, null, null, "0fa3f1d8-e77f-4aa9-9f12-6f8c7f90a002", false, null, null, "editor.lara" },
-                    { new Guid("00000000-0000-0000-0000-000000000003"), 0, "77777777-7777-7777-7777-777777777777", new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc), null, "moderator@blogapp.dev", true, false, false, null, "MODERATOR@BLOGAPP.DEV", "MODERATOR.SELIM", "AQAAAAIAAYagAAAAEP8xlsKNntQQ1SivmqfdllQWKX/655QCNjrVsPYL/Oz4cUgmI8aV55GO0BN9SDNltA==", null, null, null, false, null, null, "7c1dbdbb-3d91-45a2-8578-5392cda53875", false, null, null, "moderator.selim" },
-                    { new Guid("00000000-0000-0000-0000-000000000004"), 0, "88888888-8888-8888-8888-888888888888", new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc), null, "author@blogapp.dev", true, false, false, null, "AUTHOR@BLOGAPP.DEV", "AUTHOR.MELIKE", "AQAAAAIAAYagAAAAEP8xlsKNntQQ1SivmqfdllQWKX/655QCNjrVsPYL/Oz4cUgmI8aV55GO0BN9SDNltA==", null, null, "+905559998877", true, null, null, "e8de6375-bbb3-4ac6-a5dd-8530b7072d86", false, null, null, "author.melike" }
+                    { new Guid("00000000-0000-0000-0000-000000000001"), 0, "55555555-5555-5555-5555-555555555555", new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc), null, "admin@admin.com", true, false, false, null, "ADMIN@ADMIN.COM", "ADMIN", "AQAAAAIAAYagAAAAEP8xlsKNntQQ1SivmqfdllQWKX/655QCNjrVsPYL/Oz4cUgmI8aV55GO0BN9SDNltA==", null, null, null, false, "b1a1d25f-8a7e-4e9a-bc55-8dca5bfa1234", false, null, null, "admin" },
+                    { new Guid("00000000-0000-0000-0000-000000000002"), 0, "66666666-6666-6666-6666-666666666666", new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc), null, "editor@blogapp.dev", true, false, false, null, "EDITOR@BLOGAPP.DEV", "EDITOR.LARA", "AQAAAAIAAYagAAAAEP8xlsKNntQQ1SivmqfdllQWKX/655QCNjrVsPYL/Oz4cUgmI8aV55GO0BN9SDNltA==", null, null, "+905551112233", true, "0fa3f1d8-e77f-4aa9-9f12-6f8c7f90a002", false, null, null, "editor.lara" },
+                    { new Guid("00000000-0000-0000-0000-000000000003"), 0, "77777777-7777-7777-7777-777777777777", new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc), null, "moderator@blogapp.dev", true, false, false, null, "MODERATOR@BLOGAPP.DEV", "MODERATOR.SELIM", "AQAAAAIAAYagAAAAEP8xlsKNntQQ1SivmqfdllQWKX/655QCNjrVsPYL/Oz4cUgmI8aV55GO0BN9SDNltA==", null, null, null, false, "7c1dbdbb-3d91-45a2-8578-5392cda53875", false, null, null, "moderator.selim" },
+                    { new Guid("00000000-0000-0000-0000-000000000004"), 0, "88888888-8888-8888-8888-888888888888", new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc), null, "author@blogapp.dev", true, false, false, null, "AUTHOR@BLOGAPP.DEV", "AUTHOR.MELIKE", "AQAAAAIAAYagAAAAEP8xlsKNntQQ1SivmqfdllQWKX/655QCNjrVsPYL/Oz4cUgmI8aV55GO0BN9SDNltA==", null, null, "+905559998877", true, "e8de6375-bbb3-4ac6-a5dd-8530b7072d86", false, null, null, "author.melike" }
                 });
 
             migrationBuilder.InsertData(
@@ -722,11 +721,6 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                 table: "Users",
                 column: "NormalizedUserName",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_RefreshToken",
-                table: "Users",
-                column: "RefreshToken");
         }
 
         /// <inheritdoc />

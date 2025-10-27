@@ -3,7 +3,8 @@ import { useAuthStore } from '../stores/auth-store';
 import { logout as logoutRequest } from '../features/auth/api';
 import { refreshAccessToken } from '../lib/axios';
 
-const SILENT_REFRESH_WINDOW_MS = 60_000;
+// Token süresinin son 5 dakikasında refresh yap
+const SILENT_REFRESH_WINDOW_MS = 5 * 60 * 1000; // 5 dakika
 let sessionRestorePromise: Promise<boolean> | null = null;
 
 export function useAuth() {
@@ -40,18 +41,26 @@ export function useAuth() {
       await refreshAccessToken();
       return true;
     } catch (error) {
-      await logout();
+      // Sonsuz döngüyü önlemek için direkt store'dan logout çağır
+      logoutStore();
       return false;
     }
-  }, [logout]);
+  }, [logoutStore]);
 
   const ensureSession = useCallback(async () => {
     const state = useAuthStore.getState();
+    
+    // Eğer token varsa ve henüz süresi dolmamışsa refresh çağırma
     if (state.token && state.user) {
-      if (!state.hydrated) {
-        setHydrated(true);
+      const expiresAt = new Date(state.user.expiration).getTime();
+      const isExpired = Number.isNaN(expiresAt) || expiresAt <= Date.now();
+      
+      if (!isExpired) {
+        if (!state.hydrated) {
+          setHydrated(true);
+        }
+        return true;
       }
-      return true;
     }
 
     if (sessionRestorePromise) {

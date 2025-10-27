@@ -3,4 +3,7 @@ using MediatR;
 
 namespace BlogApp.Application.Features.Auths.Login;
 
-public sealed record LoginCommand(string Email, string Password) : IRequest<IDataResult<LoginResponse>>;
+public sealed record LoginCommand(
+    string Email, 
+    string Password, 
+    string? DeviceId = null) : IRequest<IDataResult<LoginResponse>>;

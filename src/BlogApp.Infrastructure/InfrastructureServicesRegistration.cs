@@ -127,6 +127,7 @@ namespace BlogApp.Infrastructure
 
             // Background Services
             services.AddHostedService<Services.BackgroundServices.OutboxProcessorService>();
+            services.AddHostedService<Services.BackgroundServices.SessionCleanupService>();
 
             services.AddSingleton<IIntegrationEventConverterStrategy, CategoryCreatedIntegrationEventConverter>();
             services.AddSingleton<IIntegrationEventConverterStrategy, CategoryUpdatedIntegrationEventConverter>();

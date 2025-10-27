@@ -12,6 +12,7 @@ import { Label } from '../../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import toast from 'react-hot-toast';
 import { handleApiError, showApiResponseError } from '../../lib/api-error';
+import { getOrCreateDeviceId } from '../../lib/device-id';
 
 const loginSchema = z.object({
   email: z.string().email('Geçerli bir e-posta adresi girin'),
@@ -66,9 +67,12 @@ export function LoginPage() {
   });
 
   const onSubmit = async (values: LoginFormValues) => {
+    const deviceId = getOrCreateDeviceId();
+    
     await mutateAsync({
       email: values.email,
-      password: values.password
+      password: values.password,
+      deviceId
     });
   };
 

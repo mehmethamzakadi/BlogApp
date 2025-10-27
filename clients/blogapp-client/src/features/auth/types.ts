@@ -3,6 +3,7 @@ import type { AuthUser } from '../../types/auth';
 export interface LoginRequest {
   email: string;
   password: string;
+  deviceId?: string;
 }
 
 export interface LoginResponse extends AuthUser {

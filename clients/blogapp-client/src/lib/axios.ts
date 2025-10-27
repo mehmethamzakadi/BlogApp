@@ -8,8 +8,6 @@ const api = axios.create({
   withCredentials: true
 });
 
-const REFRESH_THRESHOLD_MS = 60_000;
-
 type QueueEntry = {
   resolve: (value: string) => void;
   reject: (reason?: unknown) => void;
@@ -66,7 +64,10 @@ export const refreshAccessToken = async (): Promise<string> => {
   } catch (err) {
     const error = err instanceof Error ? err : new Error('Refresh token talebi başarısız oldu.');
     processQueue(error);
-    useAuthStore.getState().logout();
+    
+    // LOGOUT ÇAĞIRMA - Response interceptor halledecek
+    // useAuthStore.getState().logout();
+    
     throw error;
   } finally {
     isRefreshing = false;
@@ -75,27 +76,20 @@ export const refreshAccessToken = async (): Promise<string> => {
 
 api.interceptors.request.use(async (config) => {
   const requestUrl = config.url?.toLowerCase() ?? '';
-  if (requestUrl.includes('/auth/refresh-token')) {
+  
+  // Refresh token endpoint'ine gidiyorsa, token ekleme
+  if (requestUrl.includes('/auth/refresh-token') || 
+      requestUrl.includes('/auth/login') ||
+      requestUrl.includes('/auth/register')) {
     return config;
   }
 
-  const { token, user } = useAuthStore.getState();
-  let authToken = token ?? undefined;
-
-  if (token && user) {
-    const expiresAt = new Date(user.expiration).getTime();
-    if (!Number.isNaN(expiresAt) && expiresAt - Date.now() <= REFRESH_THRESHOLD_MS) {
-      try {
-        authToken = await refreshAccessToken();
-      } catch {
-        authToken = undefined;
-      }
-    }
-  }
-
-  if (authToken) {
+  const { token } = useAuthStore.getState();
+  
+  // Token varsa header'a ekle - expiry kontrolü YAPMA (race condition yaratıyor)
+  if (token) {
     const headers = AxiosHeaders.from(config.headers ?? {});
-    headers.set('Authorization', `Bearer ${authToken}`);
+    headers.set('Authorization', `Bearer ${token}`);
     config.headers = headers;
   }
 
@@ -108,6 +102,12 @@ api.interceptors.response.use(
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
     const requestUrl = originalRequest.url?.toLowerCase() ?? '';
 
+    // 429 Rate Limit hatası - Tekrar deneme YOK
+    if (error.response?.status === 429) {
+      console.warn('⚠️ Rate limit aşıldı:', requestUrl);
+      return Promise.reject(normalizeApiError(error, 'Çok fazla istek gönderildi. Lütfen bekleyin.'));
+    }
+
     // 403 Forbidden - Yetki hatası
     if (error.response?.status === 403) {
       toast.error('Bu işlem için yetkiniz bulunmamaktadır.', {
@@ -117,9 +117,10 @@ api.interceptors.response.use(
       return Promise.reject(normalizeApiError(error, 'Bu işlem için yetkiniz bulunmamaktadır.'));
     }
 
+    // Refresh token endpoint'i başarısız olduysa sadece state temizle
     if (error.response?.status === 401 && requestUrl.includes('/auth/refresh-token')) {
-      const { logout } = useAuthStore.getState();
-      logout();
+      // Logout çağırma - sonsuz döngü yaratır
+      useAuthStore.getState().logout();
       return Promise.reject(error);
     }
 

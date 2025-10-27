@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BlogApp.Persistence.Migrations.PostgreSql
 {
     [DbContext(typeof(BlogAppDbContext))]
-    [Migration("20251027164800_Init")]
+    [Migration("20251027200711_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -1746,13 +1746,6 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("RefreshToken")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<DateTime?>("RefreshTokenExpiry")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("SecurityStamp")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -1784,9 +1777,6 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("IX_Users_NormalizedUserName");
-
-                    b.HasIndex("RefreshToken")
-                        .HasDatabaseName("IX_Users_RefreshToken");
 
                     b.ToTable("Users", (string)null);
 

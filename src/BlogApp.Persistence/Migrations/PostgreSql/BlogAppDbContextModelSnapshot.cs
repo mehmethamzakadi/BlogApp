@@ -1743,13 +1743,6 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("RefreshToken")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<DateTime?>("RefreshTokenExpiry")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("SecurityStamp")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -1781,9 +1774,6 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("IX_Users_NormalizedUserName");
-
-                    b.HasIndex("RefreshToken")
-                        .HasDatabaseName("IX_Users_RefreshToken");
 
                     b.ToTable("Users", (string)null);
 

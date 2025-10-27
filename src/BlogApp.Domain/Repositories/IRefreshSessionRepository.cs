@@ -7,4 +7,5 @@ public interface IRefreshSessionRepository : IAsyncRepository<RefreshSession>, I
 {
     Task<RefreshSession?> GetByTokenHashAsync(string tokenHash, bool includeDeleted = false, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<RefreshSession>> GetActiveSessionsAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task<int> DeleteExpiredSessionsAsync(CancellationToken cancellationToken = default);
 }

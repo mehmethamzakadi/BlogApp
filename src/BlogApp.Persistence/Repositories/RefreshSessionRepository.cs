@@ -29,4 +29,17 @@ public sealed class RefreshSessionRepository : EfRepositoryBase<RefreshSession, 
             .Where(x => x.UserId == userId && !x.Revoked && x.ExpiresAt > DateTime.UtcNow)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<int> DeleteExpiredSessionsAsync(CancellationToken cancellationToken = default)
+    {
+        // Süresi dolmuş veya iptal edilmiş session'ları sil (30 gün üzeri)
+        var cutoffDate = DateTime.UtcNow.AddDays(-30);
+        
+        return await Context.RefreshSessions
+            .IgnoreQueryFilters()
+            .Where(x => 
+                (x.Revoked && x.RevokedAt < cutoffDate) || 
+                (!x.Revoked && x.ExpiresAt < cutoffDate))
+            .ExecuteDeleteAsync(cancellationToken);
+    }
 }

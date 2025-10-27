@@ -22,7 +22,7 @@ public sealed class AuthService(
     IPasswordHasher passwordHasher,
     IUnitOfWork unitOfWork) : IAuthService
 {
-    public async Task<IDataResult<LoginResponse>> LoginAsync(string email, string password)
+    public async Task<IDataResult<LoginResponse>> LoginAsync(string email, string password, string? deviceId = null)
     {
         User? user = await userRepository.FindByEmailAsync(email)
             ?? throw new AuthenticationErrorException();
@@ -79,7 +79,7 @@ public sealed class AuthService(
             UserId = user.Id,
             Jti = accessToken.Jti,
             TokenHash = HashRefreshToken(refreshToken.Token),
-            DeviceId = null,
+            DeviceId = deviceId,
             ExpiresAt = refreshToken.ExpiresAt,
             Revoked = false,
             CreatedDate = DateTime.UtcNow,

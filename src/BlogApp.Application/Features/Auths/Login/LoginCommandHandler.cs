@@ -15,7 +15,7 @@ public sealed class LoginCommandHandler(
 {
     public async Task<IDataResult<LoginResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        var response = await authService.LoginAsync(request.Email, request.Password);
+        var response = await authService.LoginAsync(request.Email, request.Password, request.DeviceId);
         if (response.Success)
         {
             await SendTelegramMessage(response.Data.UserName, cancellationToken);
