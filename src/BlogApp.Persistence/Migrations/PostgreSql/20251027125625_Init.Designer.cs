@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BlogApp.Persistence.Migrations.PostgreSql
 {
     [DbContext(typeof(BlogAppDbContext))]
-    [Migration("20251027102255_AddImageUrlToBookshelfItems")]
-    partial class AddImageUrlToBookshelfItems
+    [Migration("20251027125625_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1088,7 +1088,7 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                             IsDeleted = false,
                             IsPublished = false,
                             Summary = "Etkinlik yönelimli servisler için mesajlaşma altyapısı seçerken throughput, gecikme ve gözlemlenebilirlik kriterlerinin karşılaştırılması.",
-                            Thumbnail = "https://cdn.prod.website-files.com/64a7eed956ba9b9a3c62401d/65098de9a7585d2ff86875c8_Feature%20image%20-%20Kafka%20vs%20RabbitMQ.jpg",
+                            Thumbnail = "https://miro.medium.com/1*BGZy6Puq8X9AQHkJzB7BLA.jpeg",
                             Title = "Event-Driven Mimarilerde RabbitMQ mu Kafka mı?"
                         },
                         new

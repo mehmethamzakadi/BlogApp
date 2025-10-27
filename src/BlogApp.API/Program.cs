@@ -183,11 +183,18 @@ await dbInitializer.EnsurePostgreSqlSerilogTableAsync(builder.Configuration, app
 
 //app.UseHttpsRedirection();
 
-app.UseCors(corsPolicyName); // CORS diğer middleware'lerden önce olmalı
-
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+app.UseRouting();
+
+app.UseCors(corsPolicyName); // CORS, endpoint routing sonrası ve auth öncesi konumlandırılmalı
 
 app.UseIpRateLimiting();
 
-app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+
+await app.RunAsync();
 

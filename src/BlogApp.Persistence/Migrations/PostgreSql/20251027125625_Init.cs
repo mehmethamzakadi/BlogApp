@@ -8,11 +8,36 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BlogApp.Persistence.Migrations.PostgreSql
 {
     /// <inheritdoc />
-    public partial class SeedInitialData : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "BookshelfItems",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Title = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    Author = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
+                    Publisher = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
+                    PageCount = table.Column<int>(type: "integer", nullable: true),
+                    IsRead = table.Column<bool>(type: "boolean", nullable: false),
+                    Notes = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
+                    ReadDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ImageUrl = table.Column<string>(type: "character varying(400)", maxLength: 400, nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedById = table.Column<Guid>(type: "uuid", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedById = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    DeletedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BookshelfItems", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Categories",
                 columns: table => new
@@ -345,7 +370,13 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                     { new Guid("30000000-0000-0000-0000-000000000027"), new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc), null, "Yorum silme yetkisi.", false, "Comments", "Comments.Delete", "COMMENTS.DELETE", "Delete", null, null },
                     { new Guid("30000000-0000-0000-0000-000000000028"), new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc), null, "Tüm yorumları görüntüleme yetkisi.", false, "Comments", "Comments.ViewAll", "COMMENTS.VIEWALL", "ViewAll", null, null },
                     { new Guid("30000000-0000-0000-0000-000000000029"), new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc), null, "Yorum moderasyonu yapma yetkisi.", false, "Comments", "Comments.Moderate", "COMMENTS.MODERATE", "Moderate", null, null },
-                    { new Guid("30000000-0000-0000-0000-000000000030"), new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc), null, "Aktivite loglarını görüntüleme yetkisi.", false, "ActivityLogs", "ActivityLogs.View", "ACTIVITYLOGS.VIEW", "View", null, null }
+                    { new Guid("30000000-0000-0000-0000-000000000030"), new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc), null, "Yeni kitap kaydı oluşturma yetkisi.", false, "Bookshelf", "Bookshelf.Create", "BOOKSHELF.CREATE", "Create", null, null },
+                    { new Guid("30000000-0000-0000-0000-000000000031"), new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc), null, "Kitap kayıtlarını görüntüleme yetkisi.", false, "Bookshelf", "Bookshelf.Read", "BOOKSHELF.READ", "Read", null, null },
+                    { new Guid("30000000-0000-0000-0000-000000000032"), new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc), null, "Kitap kayıtlarını güncelleme yetkisi.", false, "Bookshelf", "Bookshelf.Update", "BOOKSHELF.UPDATE", "Update", null, null },
+                    { new Guid("30000000-0000-0000-0000-000000000033"), new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc), null, "Kitap kaydı silme yetkisi.", false, "Bookshelf", "Bookshelf.Delete", "BOOKSHELF.DELETE", "Delete", null, null },
+                    { new Guid("30000000-0000-0000-0000-000000000034"), new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc), null, "Tüm kitap kayıtlarını görüntüleme yetkisi.", false, "Bookshelf", "Bookshelf.ViewAll", "BOOKSHELF.VIEWALL", "ViewAll", null, null },
+                    { new Guid("30000000-0000-0000-0000-000000000035"), new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc), null, "Sisteme görsel yükleme yetkisi.", false, "Media", "Media.Upload", "MEDIA.UPLOAD", "Upload", null, null },
+                    { new Guid("30000000-0000-0000-0000-000000000036"), new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc), null, "Aktivite loglarını görüntüleme yetkisi.", false, "ActivityLogs", "ActivityLogs.View", "ACTIVITYLOGS.VIEW", "View", null, null }
                 });
 
             migrationBuilder.InsertData(
@@ -375,11 +406,11 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                 columns: new[] { "Id", "Body", "CategoryId", "CreatedById", "CreatedDate", "DeletedDate", "IsDeleted", "IsPublished", "Summary", "Thumbnail", "Title", "UpdatedById", "UpdatedDate" },
                 values: new object[,]
                 {
-                    { new Guid("40000000-0000-0000-0000-000000000001"), "OpenTelemetry Collector, distributed tracing ve yapılandırılmış logging birleştiğinde minimal API'ler üretim ortamında şeffaf hâle geliyor.\nBu rehberde ActivitySource, Meter ve TraceId bağlamlarını nasıl kodladığımızı adım adım ele alıyoruz.\nAyrıca Aspire Dashboard ile gecikme ve hata oranlarını anlık izlemenin püf noktalarını paylaşıyoruz.", new Guid("10000000-0000-0000-0000-000000000001"), new Guid("00000000-0000-0000-0000-000000000002"), new DateTime(2025, 9, 28, 8, 30, 0, 0, DateTimeKind.Utc), null, false, true, "OpenTelemetry ve Aspire ile ASP.NET Core minimal API projelerinde uçtan uca gözlemlenebilirlik altyapısını kurma rehberi.", "/media/posts/dotnet-minimal-api-observability.png", ".NET 9 Minimal API'lerinde Observability Entegrasyonu", null, null },
-                    { new Guid("40000000-0000-0000-0000-000000000002"), "SaaS uygulamalarında sorgu optimizasyonu tenant bazında indeksleme ile başlıyor.\nModel seeding, global query filter'lar ve concurrency token'ları üzerinden performans analizleri paylaşıyoruz.\nAyrıca Npgsql provider'ı ile partitioned table senaryolarını örneklendiriyoruz.", new Guid("10000000-0000-0000-0000-000000000002"), new Guid("00000000-0000-0000-0000-000000000004"), new DateTime(2025, 10, 2, 9, 15, 0, 0, DateTimeKind.Utc), null, false, true, "Tenant bazlı filtreleme, connection pooling ve caching stratejileriyle çoklu tenant SaaS uygulamalarında EF Core'u hızlandırma.", "/media/posts/ef-core-multi-tenant-tips.png", "EF Core 9 ile Çoklu Tenant Mimarisinde Performans İpuçları", null, null },
-                    { new Guid("40000000-0000-0000-0000-000000000003"), "GitOps, manifest kaynağını tek gerçeğin kaynağına dönüştürerek roll-forward ve roll-back süreçlerini sadeleştiriyor.\nFluxCD ile progressive delivery, ArgoCD ile health check politika tanımlarını örnek YAML dosyalarıyla açıklıyoruz.\nPipeline gözlemlenebilirliği için Prometheus ve Grafana entegrasyonlarını da ekliyoruz.", new Guid("10000000-0000-0000-0000-000000000003"), new Guid("00000000-0000-0000-0000-000000000002"), new DateTime(2025, 10, 5, 10, 45, 0, 0, DateTimeKind.Utc), null, false, true, "FluxCD ve ArgoCD karşılaştırmasıyla GitOps pipeline'larını teknoloji blogu projelerine uyarlama.", "/media/posts/gitops-cd-pipelines.png", "GitOps ile Kubernetes Üzerinde Sürekli Teslimat", null, null },
-                    { new Guid("40000000-0000-0000-0000-000000000004"), "Mesajlaşma altyapısı seçiminde gereksinimleri segmentlere ayırmak kritik.\nRabbitMQ routing esnekliği sağlar; Kafka ise sıralı event log ile akış analitiğine güç katar.\nMakale boyunca tüketici grupları, dead-letter stratejileri ve metrik takip yöntemlerini detaylandırıyoruz.", new Guid("10000000-0000-0000-0000-000000000004"), new Guid("00000000-0000-0000-0000-000000000004"), new DateTime(2025, 10, 12, 15, 0, 0, 0, DateTimeKind.Utc), null, false, false, "Etkinlik yönelimli servisler için mesajlaşma altyapısı seçerken throughput, gecikme ve gözlemlenebilirlik kriterlerinin karşılaştırılması.", "/media/posts/event-driven-rabbitmq-vs-kafka.png", "Event-Driven Mimarilerde RabbitMQ mu Kafka mı?", null, null },
-                    { new Guid("40000000-0000-0000-0000-000000000005"), "Tracing zincirleri, metrik korelasyonları ve yapılandırılmış log'lar aynı veri modelinde buluştuğunda kök neden analizi hızlanıyor.\nBu makalede collector konfigürasyonlarını, OTLP protokolünü ve Prometheus remote write senaryolarını harmanlıyoruz.\nEk olarak, kullanıcı segmenti bazlı alert kurallarına dair pratik şablonlar sunuyoruz.", new Guid("10000000-0000-0000-0000-000000000005"), new Guid("00000000-0000-0000-0000-000000000003"), new DateTime(2025, 10, 15, 11, 20, 0, 0, DateTimeKind.Utc), null, false, true, "Teknoloji blogu altyapısı için tracing, metrics ve logging verilerini aynı veri gölünde birleştirme stratejileri.", "/media/posts/opentelemetry-layered-observability.png", "OpenTelemetry ile Katmanlı Gözlemlenebilirlik", null, null }
+                    { new Guid("40000000-0000-0000-0000-000000000001"), "OpenTelemetry Collector, distributed tracing ve yapılandırılmış logging birleştiğinde minimal API'ler üretim ortamında şeffaf hâle geliyor.\r\nBu rehberde ActivitySource, Meter ve TraceId bağlamlarını nasıl kodladığımızı adım adım ele alıyoruz.\r\nAyrıca Aspire Dashboard ile gecikme ve hata oranlarını anlık izlemenin püf noktalarını paylaşıyoruz.", new Guid("10000000-0000-0000-0000-000000000001"), new Guid("00000000-0000-0000-0000-000000000002"), new DateTime(2025, 9, 28, 8, 30, 0, 0, DateTimeKind.Utc), null, false, true, "OpenTelemetry ve Aspire ile ASP.NET Core minimal API projelerinde uçtan uca gözlemlenebilirlik altyapısını kurma rehberi.", "https://miro.medium.com/v2/resize:fit:1286/format:webp/1*chhJLW0ApPDHqmVPRBBUtQ.png", ".NET 9 Minimal API'lerinde Observability Entegrasyonu", null, null },
+                    { new Guid("40000000-0000-0000-0000-000000000002"), "SaaS uygulamalarında sorgu optimizasyonu tenant bazında indeksleme ile başlıyor.\r\nModel seeding, global query filter'lar ve concurrency token'ları üzerinden performans analizleri paylaşıyoruz.\r\nAyrıca Npgsql provider'ı ile partitioned table senaryolarını örneklendiriyoruz.", new Guid("10000000-0000-0000-0000-000000000002"), new Guid("00000000-0000-0000-0000-000000000004"), new DateTime(2025, 10, 2, 9, 15, 0, 0, DateTimeKind.Utc), null, false, true, "Tenant bazlı filtreleme, connection pooling ve caching stratejileriyle çoklu tenant SaaS uygulamalarında EF Core'u hızlandırma.", "https://miro.medium.com/0*V56TEDMUsms9XLBY.jpg", "EF Core 9 ile Çoklu Tenant Mimarisinde Performans İpuçları", null, null },
+                    { new Guid("40000000-0000-0000-0000-000000000003"), "GitOps, manifest kaynağını tek gerçeğin kaynağına dönüştürerek roll-forward ve roll-back süreçlerini sadeleştiriyor.\r\nFluxCD ile progressive delivery, ArgoCD ile health check politika tanımlarını örnek YAML dosyalarıyla açıklıyoruz.\r\nPipeline gözlemlenebilirliği için Prometheus ve Grafana entegrasyonlarını da ekliyoruz.", new Guid("10000000-0000-0000-0000-000000000003"), new Guid("00000000-0000-0000-0000-000000000002"), new DateTime(2025, 10, 5, 10, 45, 0, 0, DateTimeKind.Utc), null, false, true, "FluxCD ve ArgoCD karşılaştırmasıyla GitOps pipeline'larını teknoloji blogu projelerine uyarlama.", "https://miro.medium.com/v2/resize:fit:4800/format:webp/1*9P6wnky3C9xMwaBAElALLQ.png", "GitOps ile Kubernetes Üzerinde Sürekli Teslimat", null, null },
+                    { new Guid("40000000-0000-0000-0000-000000000004"), "Mesajlaşma altyapısı seçiminde gereksinimleri segmentlere ayırmak kritik.\r\nRabbitMQ routing esnekliği sağlar; Kafka ise sıralı event log ile akış analitiğine güç katar.\r\nMakale boyunca tüketici grupları, dead-letter stratejileri ve metrik takip yöntemlerini detaylandırıyoruz.", new Guid("10000000-0000-0000-0000-000000000004"), new Guid("00000000-0000-0000-0000-000000000004"), new DateTime(2025, 10, 12, 15, 0, 0, 0, DateTimeKind.Utc), null, false, false, "Etkinlik yönelimli servisler için mesajlaşma altyapısı seçerken throughput, gecikme ve gözlemlenebilirlik kriterlerinin karşılaştırılması.", "https://miro.medium.com/1*BGZy6Puq8X9AQHkJzB7BLA.jpeg", "Event-Driven Mimarilerde RabbitMQ mu Kafka mı?", null, null },
+                    { new Guid("40000000-0000-0000-0000-000000000005"), "Tracing zincirleri, metrik korelasyonları ve yapılandırılmış log'lar aynı veri modelinde buluştuğunda kök neden analizi hızlanıyor.\r\nBu makalede collector konfigürasyonlarını, OTLP protokolünü ve Prometheus remote write senaryolarını harmanlıyoruz.\r\nEk olarak, kullanıcı segmenti bazlı alert kurallarına dair pratik şablonlar sunuyoruz.", new Guid("10000000-0000-0000-0000-000000000005"), new Guid("00000000-0000-0000-0000-000000000003"), new DateTime(2025, 10, 15, 11, 20, 0, 0, DateTimeKind.Utc), null, false, true, "Teknoloji blogu altyapısı için tracing, metrics ve logging verilerini aynı veri gölünde birleştirme stratejileri.", "https://miro.medium.com/v2/resize:fit:1400/format:webp/1*zHc9d823Uol9SSj8s_uBug.png", "OpenTelemetry ile Katmanlı Gözlemlenebilirlik", null, null }
                 });
 
             migrationBuilder.InsertData(
@@ -417,6 +448,12 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                     { new Guid("30000000-0000-0000-0000-000000000028"), new Guid("20000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc) },
                     { new Guid("30000000-0000-0000-0000-000000000029"), new Guid("20000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc) },
                     { new Guid("30000000-0000-0000-0000-000000000030"), new Guid("20000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("30000000-0000-0000-0000-000000000031"), new Guid("20000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("30000000-0000-0000-0000-000000000032"), new Guid("20000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("30000000-0000-0000-0000-000000000033"), new Guid("20000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("30000000-0000-0000-0000-000000000034"), new Guid("20000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("30000000-0000-0000-0000-000000000035"), new Guid("20000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("30000000-0000-0000-0000-000000000036"), new Guid("20000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc) },
                     { new Guid("30000000-0000-0000-0000-000000000013"), new Guid("20000000-0000-0000-0000-000000000002"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc) },
                     { new Guid("30000000-0000-0000-0000-000000000014"), new Guid("20000000-0000-0000-0000-000000000002"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc) },
                     { new Guid("30000000-0000-0000-0000-000000000015"), new Guid("20000000-0000-0000-0000-000000000002"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc) },
@@ -483,6 +520,26 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                 name: "IX_ActivityLogs_UserId",
                 table: "ActivityLogs",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BookshelfItems_CreatedDate",
+                table: "BookshelfItems",
+                column: "CreatedDate");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BookshelfItems_IsRead",
+                table: "BookshelfItems",
+                column: "IsRead");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BookshelfItems_ReadDate",
+                table: "BookshelfItems",
+                column: "ReadDate");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BookshelfItems_Title",
+                table: "BookshelfItems",
+                column: "Title");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Categories_Name",
@@ -636,6 +693,9 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
         {
             migrationBuilder.DropTable(
                 name: "ActivityLogs");
+
+            migrationBuilder.DropTable(
+                name: "BookshelfItems");
 
             migrationBuilder.DropTable(
                 name: "Comments");
