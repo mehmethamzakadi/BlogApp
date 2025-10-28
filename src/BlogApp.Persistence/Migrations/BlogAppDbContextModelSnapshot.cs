@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace BlogApp.Persistence.Migrations.PostgreSql
+namespace BlogApp.Persistence.Migrations
 {
     [DbContext(typeof(BlogAppDbContext))]
     partial class BlogAppDbContextModelSnapshot : ModelSnapshot
@@ -1039,7 +1039,7 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000001"),
-                            Body = "OpenTelemetry Collector, distributed tracing ve yapılandırılmış logging birleştiğinde minimal API'ler üretim ortamında şeffaf hâle geliyor.\r\nBu rehberde ActivitySource, Meter ve TraceId bağlamlarını nasıl kodladığımızı adım adım ele alıyoruz.\r\nAyrıca Aspire Dashboard ile gecikme ve hata oranlarını anlık izlemenin püf noktalarını paylaşıyoruz.",
+                            Body = "OpenTelemetry Collector, distributed tracing ve yapılandırılmış logging birleştiğinde minimal API'ler üretim ortamında şeffaf hâle geliyor.\nBu rehberde ActivitySource, Meter ve TraceId bağlamlarını nasıl kodladığımızı adım adım ele alıyoruz.\nAyrıca Aspire Dashboard ile gecikme ve hata oranlarını anlık izlemenin püf noktalarını paylaşıyoruz.",
                             CategoryId = new Guid("10000000-0000-0000-0000-000000000001"),
                             CreatedById = new Guid("00000000-0000-0000-0000-000000000002"),
                             CreatedDate = new DateTime(2025, 9, 28, 8, 30, 0, 0, DateTimeKind.Utc),
@@ -1052,7 +1052,7 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000002"),
-                            Body = "SaaS uygulamalarında sorgu optimizasyonu tenant bazında indeksleme ile başlıyor.\r\nModel seeding, global query filter'lar ve concurrency token'ları üzerinden performans analizleri paylaşıyoruz.\r\nAyrıca Npgsql provider'ı ile partitioned table senaryolarını örneklendiriyoruz.",
+                            Body = "SaaS uygulamalarında sorgu optimizasyonu tenant bazında indeksleme ile başlıyor.\nModel seeding, global query filter'lar ve concurrency token'ları üzerinden performans analizleri paylaşıyoruz.\nAyrıca Npgsql provider'ı ile partitioned table senaryolarını örneklendiriyoruz.",
                             CategoryId = new Guid("10000000-0000-0000-0000-000000000002"),
                             CreatedById = new Guid("00000000-0000-0000-0000-000000000004"),
                             CreatedDate = new DateTime(2025, 10, 2, 9, 15, 0, 0, DateTimeKind.Utc),
@@ -1065,7 +1065,7 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000003"),
-                            Body = "GitOps, manifest kaynağını tek gerçeğin kaynağına dönüştürerek roll-forward ve roll-back süreçlerini sadeleştiriyor.\r\nFluxCD ile progressive delivery, ArgoCD ile health check politika tanımlarını örnek YAML dosyalarıyla açıklıyoruz.\r\nPipeline gözlemlenebilirliği için Prometheus ve Grafana entegrasyonlarını da ekliyoruz.",
+                            Body = "GitOps, manifest kaynağını tek gerçeğin kaynağına dönüştürerek roll-forward ve roll-back süreçlerini sadeleştiriyor.\nFluxCD ile progressive delivery, ArgoCD ile health check politika tanımlarını örnek YAML dosyalarıyla açıklıyoruz.\nPipeline gözlemlenebilirliği için Prometheus ve Grafana entegrasyonlarını da ekliyoruz.",
                             CategoryId = new Guid("10000000-0000-0000-0000-000000000003"),
                             CreatedById = new Guid("00000000-0000-0000-0000-000000000002"),
                             CreatedDate = new DateTime(2025, 10, 5, 10, 45, 0, 0, DateTimeKind.Utc),
@@ -1078,7 +1078,7 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000004"),
-                            Body = "Mesajlaşma altyapısı seçiminde gereksinimleri segmentlere ayırmak kritik.\r\nRabbitMQ routing esnekliği sağlar; Kafka ise sıralı event log ile akış analitiğine güç katar.\r\nMakale boyunca tüketici grupları, dead-letter stratejileri ve metrik takip yöntemlerini detaylandırıyoruz.",
+                            Body = "Mesajlaşma altyapısı seçiminde gereksinimleri segmentlere ayırmak kritik.\nRabbitMQ routing esnekliği sağlar; Kafka ise sıralı event log ile akış analitiğine güç katar.\nMakale boyunca tüketici grupları, dead-letter stratejileri ve metrik takip yöntemlerini detaylandırıyoruz.",
                             CategoryId = new Guid("10000000-0000-0000-0000-000000000004"),
                             CreatedById = new Guid("00000000-0000-0000-0000-000000000004"),
                             CreatedDate = new DateTime(2025, 10, 12, 15, 0, 0, 0, DateTimeKind.Utc),
@@ -1091,7 +1091,7 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000005"),
-                            Body = "Tracing zincirleri, metrik korelasyonları ve yapılandırılmış log'lar aynı veri modelinde buluştuğunda kök neden analizi hızlanıyor.\r\nBu makalede collector konfigürasyonlarını, OTLP protokolünü ve Prometheus remote write senaryolarını harmanlıyoruz.\r\nEk olarak, kullanıcı segmenti bazlı alert kurallarına dair pratik şablonlar sunuyoruz.",
+                            Body = "Tracing zincirleri, metrik korelasyonları ve yapılandırılmış log'lar aynı veri modelinde buluştuğunda kök neden analizi hızlanıyor.\nBu makalede collector konfigürasyonlarını, OTLP protokolünü ve Prometheus remote write senaryolarını harmanlıyoruz.\nEk olarak, kullanıcı segmenti bazlı alert kurallarına dair pratik şablonlar sunuyoruz.",
                             CategoryId = new Guid("10000000-0000-0000-0000-000000000005"),
                             CreatedById = new Guid("00000000-0000-0000-0000-000000000003"),
                             CreatedDate = new DateTime(2025, 10, 15, 11, 20, 0, 0, DateTimeKind.Utc),

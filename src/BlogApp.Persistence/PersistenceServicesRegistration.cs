@@ -20,6 +20,7 @@ public static class PersistenceServicesRegistration
         services.AddDbContext<BlogAppDbContext>((sp, options) =>
         {
             options.UseNpgsql(postgreSqlConnectionString);
+            options.EnableServiceProviderCaching();
             options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
         });
 

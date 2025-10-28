@@ -1,3 +1,4 @@
-1- Package Manager Console üzerinde Default Project -src\BlogApp.Persistence seçili olmalýdýr.
+1- Package Manager Console ï¿½zerinde Default Project -src\BlogApp.Persistence seï¿½ili olmalï¿½dï¿½r.
 2- add-migration Init -C BlogAppDbContext -O Migrations/PostgreSql
+3- dotnet ef migrations add Init -c BlogAppDbContext -o Migrations/PostgreSql
 3- update-database -C BlogAppDbContext
