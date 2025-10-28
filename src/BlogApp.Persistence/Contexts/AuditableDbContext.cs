@@ -1,28 +1,23 @@
+using BlogApp.Application.Abstractions;
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Constants;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
 namespace BlogApp.Persistence.Contexts
 {
     public class AuditableDbContext : DbContext
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        public AuditableDbContext(DbContextOptions options, IHttpContextAccessor httpContextAccessor) : base(options)
+        private readonly IExecutionContextAccessor _executionContextAccessor;
+
+        public AuditableDbContext(DbContextOptions options, IExecutionContextAccessor executionContextAccessor) : base(options)
         {
-            _httpContextAccessor = httpContextAccessor;
+            _executionContextAccessor = executionContextAccessor;
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            var userIdClaim = _httpContextAccessor?.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var userId = Guid.TryParse(userIdClaim, out var parsedUserId) ? parsedUserId : Guid.Empty;
-
-            // Eğer kullanıcı yoksa (ör. anonim işlemler) sistem kullanıcısına düş
-            var effectiveUserId = userId == Guid.Empty
-                ? SystemUsers.SystemUserId
-                : userId;
+            var userId = _executionContextAccessor.GetCurrentUserId();
+            var effectiveUserId = userId ?? SystemUsers.SystemUserId;
 
             foreach (var entry in base.ChangeTracker.Entries<BaseEntity>()
                .Where(q => q.State == EntityState.Added || q.State == EntityState.Modified || q.State == EntityState.Deleted))

@@ -52,15 +52,11 @@ public sealed class UnitOfWork : IUnitOfWork
             // - Outbox mesajları (event'ler)
             var result = await _context.SaveChangesAsync(cancellationToken);
 
-            // Başarılı kayıttan sonra domain event'leri temizle
-            // Event'ler artık Outbox tablosunda güvenle saklanıyor
-            ClearDomainEvents();
-
             return result;
         }
         finally
         {
-            // ✅ DÜZELTİLDİ: SaveChanges başarısız olsa bile domain event'lerin her zaman temizlenmesini sağla
+            // SaveChanges başarısız olsa bile domain event'lerin her zaman temizlenmesini sağla
             // Bu, bellek sızıntılarını ve eski event'lerin yeniden işlenmesini önler
             ClearDomainEvents();
         }
