@@ -164,6 +164,26 @@ where TContext : DbContext
             .Metadata.GetNavigations()
             .Where(x => x is { IsOnDependent: false, ForeignKey.DeleteBehavior: DeleteBehavior.ClientCascade or DeleteBehavior.Cascade })
             .ToList();
+
+        // PERFORMANS İYİLEŞTİRMESİ: Tüm ilişkileri eager load et (N+1 sorgu problemi çözümü)
+        foreach (INavigation? navigation in navigations)
+        {
+            if (navigation.TargetEntityType.IsOwned())
+                continue;
+            if (navigation.PropertyInfo == null)
+                continue;
+
+            if (navigation.IsCollection)
+            {
+                await Context.Entry(entity).Collection(navigation.PropertyInfo.Name).LoadAsync();
+            }
+            else
+            {
+                await Context.Entry(entity).Reference(navigation.PropertyInfo.Name).LoadAsync();
+            }
+        }
+
+        // İlişkili entity'leri işle
         foreach (INavigation? navigation in navigations)
         {
             if (navigation.TargetEntityType.IsOwned())
@@ -172,31 +192,21 @@ where TContext : DbContext
                 continue;
 
             object? navValue = navigation.PropertyInfo.GetValue(entity);
+            
             if (navigation.IsCollection)
             {
-                if (navValue == null)
+                if (navValue != null)
                 {
-                    IQueryable query = Context.Entry(entity).Collection(navigation.PropertyInfo.Name).Query();
-                    navValue = await GetRelationLoaderQuery(query, navigationPropertyType: navigation.PropertyInfo.GetType()).ToListAsync();
-                    if (navValue == null)
-                        continue;
+                    foreach (BaseEntity navValueItem in (IEnumerable)navValue)
+                        await setEntityAsSoftDeletedAsync(navValueItem);
                 }
-
-                foreach (BaseEntity navValueItem in (IEnumerable)navValue)
-                    await setEntityAsSoftDeletedAsync(navValueItem);
             }
             else
             {
-                if (navValue == null)
+                if (navValue != null)
                 {
-                    IQueryable query = Context.Entry(entity).Reference(navigation.PropertyInfo.Name).Query();
-                    navValue = await GetRelationLoaderQuery(query, navigationPropertyType: navigation.PropertyInfo.GetType())
-                        .FirstOrDefaultAsync();
-                    if (navValue == null)
-                        continue;
+                    await setEntityAsSoftDeletedAsync((BaseEntity)navValue);
                 }
-
-                await setEntityAsSoftDeletedAsync((BaseEntity)navValue);
             }
         }
 
@@ -215,6 +225,26 @@ where TContext : DbContext
             .Metadata.GetNavigations()
             .Where(x => x is { IsOnDependent: false, ForeignKey.DeleteBehavior: DeleteBehavior.ClientCascade or DeleteBehavior.Cascade })
             .ToList();
+
+        // PERFORMANS İYİLEŞTİRMESİ: Tüm ilişkileri eager load et (N+1 sorgu problemi çözümü)
+        foreach (INavigation? navigation in navigations)
+        {
+            if (navigation.TargetEntityType.IsOwned())
+                continue;
+            if (navigation.PropertyInfo == null)
+                continue;
+
+            if (navigation.IsCollection)
+            {
+                Context.Entry(entity).Collection(navigation.PropertyInfo.Name).Load();
+            }
+            else
+            {
+                Context.Entry(entity).Reference(navigation.PropertyInfo.Name).Load();
+            }
+        }
+
+        // İlişkili entity'leri işle
         foreach (INavigation? navigation in navigations)
         {
             if (navigation.TargetEntityType.IsOwned())
@@ -223,31 +253,21 @@ where TContext : DbContext
                 continue;
 
             object? navValue = navigation.PropertyInfo.GetValue(entity);
+            
             if (navigation.IsCollection)
             {
-                if (navValue == null)
+                if (navValue != null)
                 {
-                    IQueryable query = Context.Entry(entity).Collection(navigation.PropertyInfo.Name).Query();
-                    navValue = GetRelationLoaderQuery(query, navigationPropertyType: navigation.PropertyInfo.GetType()).ToList();
-                    if (navValue == null)
-                        continue;
+                    foreach (BaseEntity navValueItem in (IEnumerable)navValue)
+                        setEntityAsSoftDeleted(navValueItem);
                 }
-
-                foreach (BaseEntity navValueItem in (IEnumerable)navValue)
-                    setEntityAsSoftDeleted(navValueItem);
             }
             else
             {
-                if (navValue == null)
+                if (navValue != null)
                 {
-                    IQueryable query = Context.Entry(entity).Reference(navigation.PropertyInfo.Name).Query();
-                    navValue = GetRelationLoaderQuery(query, navigationPropertyType: navigation.PropertyInfo.GetType())
-                        .FirstOrDefault();
-                    if (navValue == null)
-                        continue;
+                    setEntityAsSoftDeleted((BaseEntity)navValue);
                 }
-
-                setEntityAsSoftDeleted((BaseEntity)navValue);
             }
         }
 
