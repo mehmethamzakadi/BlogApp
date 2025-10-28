@@ -17,11 +17,9 @@ public static class PersistenceServicesRegistration
         #region DbContext Yapılandırması
         var postgreSqlConnectionString = configuration.GetConnectionString("BlogAppPostgreConnectionString");
 
-        services.AddDbContextPool<BlogAppDbContext>((sp, options) =>
+        services.AddDbContext<BlogAppDbContext>((sp, options) =>
         {
             options.UseNpgsql(postgreSqlConnectionString);
-            // ✅ DÜZELTİLDİ: EnableServiceProviderCaching() kaldırıldı - AddDbContextPool ile çakışır
-            // DbContextPool zaten dahili olarak service provider caching'i yönetir
             options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
         });
 
