@@ -1,3 +1,5 @@
+using BlogApp.Application.Abstractions;
+using BlogApp.Domain.Constants;
 using BlogApp.Domain.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -52,6 +54,9 @@ public class SessionCleanupService : BackgroundService
         {
             using var scope = _serviceProvider.CreateScope();
             var repository = scope.ServiceProvider.GetRequiredService<IRefreshSessionRepository>();
+            var executionContextAccessor = scope.ServiceProvider.GetRequiredService<IExecutionContextAccessor>();
+
+            using var auditScope = executionContextAccessor.BeginScope(SystemUsers.SystemUserId);
 
             var deletedCount = await repository.DeleteExpiredSessionsAsync(cancellationToken);
 

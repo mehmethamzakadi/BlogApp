@@ -151,6 +151,7 @@ namespace BlogApp.Infrastructure
             services.AddSingleton<ICacheService, RedisCacheService>();
             services.AddTransient<ITokenService, JwtTokenService>();
             services.AddTransient<IMailService, MailService>();
+            services.AddScoped<IExecutionContextAccessor, ExecutionContextAccessor>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IImageStorageService, ImageStorageService>();

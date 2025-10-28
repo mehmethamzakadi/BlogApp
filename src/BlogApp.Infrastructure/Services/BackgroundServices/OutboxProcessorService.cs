@@ -1,3 +1,5 @@
+using BlogApp.Application.Abstractions;
+using BlogApp.Domain.Constants;
 using BlogApp.Domain.Repositories;
 using BlogApp.Infrastructure.Services.BackgroundServices.Outbox.Converters;
 using MassTransit;
@@ -60,6 +62,7 @@ public class OutboxProcessorService : BackgroundService
         var outboxRepository = scope.ServiceProvider.GetRequiredService<IOutboxMessageRepository>();
         var publishEndpoint = scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<Domain.Common.IUnitOfWork>();
+        var executionContextAccessor = scope.ServiceProvider.GetRequiredService<IExecutionContextAccessor>();
 
         // İşlenmemiş mesajları getir
         var messages = await outboxRepository.GetUnprocessedMessagesAsync(BatchSize, cancellationToken);
@@ -71,7 +74,7 @@ public class OutboxProcessorService : BackgroundService
 
         _logger.LogInformation("{Count} adet outbox mesajı işleniyor", messages.Count);
 
-        var hasStatusUpdates = false;
+        using var auditScope = executionContextAccessor.BeginScope(SystemUsers.SystemUserId);
 
         foreach (var message in messages)
         {
@@ -85,7 +88,6 @@ public class OutboxProcessorService : BackgroundService
                         $"Bilinmeyen event tipi: {message.EventType}",
                         null,
                         cancellationToken);
-                    hasStatusUpdates = true;
                     continue;
                 }
 
@@ -104,7 +106,6 @@ public class OutboxProcessorService : BackgroundService
                         conversionException.Message,
                         null,
                         cancellationToken);
-                    hasStatusUpdates = true;
                     continue;
                 }
 
@@ -113,7 +114,6 @@ public class OutboxProcessorService : BackgroundService
                     await publishEndpoint.Publish(integrationEvent, cancellationToken);
 
                     await outboxRepository.MarkAsProcessedAsync(message.Id, cancellationToken);
-                    hasStatusUpdates = true;
 
                     _logger.LogDebug("{MessageId} ID'li {EventType} türündeki outbox mesajı başarıyla yayınlandı",
                         message.Id, message.EventType);
@@ -127,7 +127,6 @@ public class OutboxProcessorService : BackgroundService
                         $"Event dönüştürülemedi: {message.EventType}",
                         null,
                         cancellationToken);
-                    hasStatusUpdates = true;
                 }
             }
             catch (Exception ex)
@@ -141,7 +140,6 @@ public class OutboxProcessorService : BackgroundService
                         ex.Message,
                         null,
                         cancellationToken);
-                    hasStatusUpdates = true;
                 }
                 else
                 {
@@ -152,18 +150,15 @@ public class OutboxProcessorService : BackgroundService
         }
 
         // Tüm batch'i tek seferde kaydet - PERFORMANS İYİLEŞTİRMESİ
-        if (hasStatusUpdates)
+        try
         {
-            try
-            {
-                await unitOfWork.SaveChangesAsync(cancellationToken);
-                _logger.LogDebug("Batch içindeki tüm mesaj durum güncellemeleri toplu olarak kaydedildi");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Outbox mesaj durumları kaydedilirken hata oluştu");
-                throw;
-            }
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+            _logger.LogDebug("Batch içindeki tüm mesaj durum güncellemeleri toplu olarak kaydedildi");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Outbox mesaj durumları kaydedilirken hata oluştu");
+            throw;
         }
 
         // Eski işlenmiş mesajları temizle (7 günden eski)
