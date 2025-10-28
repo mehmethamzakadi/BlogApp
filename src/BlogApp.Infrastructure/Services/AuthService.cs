@@ -213,14 +213,19 @@ public sealed class AuthService(
         User? user = await userRepository.FindByEmailAsync(email);
         if (user != null)
         {
+            // Rastgele token oluştur
             string resetToken = passwordHasher.GeneratePasswordResetToken();
-            user.PasswordResetToken = resetToken.UrlEncode();
+            
+            // Token'ı hash'le ve veritabanına hash'i sakla
+            string tokenHash = HashPasswordResetToken(resetToken);
+            user.PasswordResetToken = tokenHash;
             user.PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(1);
 
             var updateResult = await userRepository.UpdateAsync(user);
             if (updateResult.Success)
             {
                 await SaveChangesWithConcurrencyHandlingAsync();
+                // Kullanıcıya orijinal token'ı gönder (hash'i değil!)
                 await mailService.SendPasswordResetMailAsync(email, user.Id, resetToken.UrlEncode());
             }
         }
@@ -262,18 +267,25 @@ public sealed class AuthService(
         User? user = await userRepository.FindByIdAsync(userIdGuid);
         if (user != null && user.PasswordResetToken != null && user.PasswordResetTokenExpiry != null)
         {
-            resetToken = resetToken.UrlDecode();
-            var storedToken = user.PasswordResetToken.UrlDecode();
+                resetToken = resetToken.UrlDecode();
+                string tokenHash = HashPasswordResetToken(resetToken);
+                var storedTokenHash = user.PasswordResetToken;
 
-            if (storedToken == resetToken && user.PasswordResetTokenExpiry > DateTime.UtcNow)
-            {
-                return new SuccessDataResult<bool>(true);
-            }
+                if (storedTokenHash == tokenHash && user.PasswordResetTokenExpiry > DateTime.UtcNow)
+                {
+                    return new SuccessDataResult<bool>(true);
+                }
         }
         return new SuccessDataResult<bool>(false);
     }
 
     private static string HashRefreshToken(string value)
+    {
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(value));
+        return Convert.ToHexString(bytes);
+    }
+
+    private static string HashPasswordResetToken(string value)
     {
         var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(value));
         return Convert.ToHexString(bytes);
