@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http;
+using BlogApp.Application.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
@@ -19,9 +19,25 @@ public class BlogAppDbContextFactory : IDesignTimeDbContextFactory<BlogAppDbCont
             b => b.MigrationsHistoryTable("__EFMigrationsHistory", "public")
         );
 
-        // Create a mock HttpContextAccessor for design-time (null is acceptable for migrations)
-        IHttpContextAccessor httpContextAccessor = null!;
+        // Use a lightweight execution context accessor for design-time operations
+        IExecutionContextAccessor executionContextAccessor = new DesignTimeExecutionContextAccessor();
 
-        return new BlogAppDbContext(optionsBuilder.Options, httpContextAccessor);
+        return new BlogAppDbContext(optionsBuilder.Options, executionContextAccessor);
+    }
+
+    private sealed class DesignTimeExecutionContextAccessor : IExecutionContextAccessor
+    {
+        public Guid? GetCurrentUserId() => null;
+
+        public IDisposable BeginScope(Guid userId) => NullScope.Instance;
+
+        private sealed class NullScope : IDisposable
+        {
+            public static readonly NullScope Instance = new();
+
+            public void Dispose()
+            {
+            }
+        }
     }
 }
