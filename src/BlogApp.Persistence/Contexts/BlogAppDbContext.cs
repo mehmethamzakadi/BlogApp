@@ -1,5 +1,5 @@
+using BlogApp.Application.Abstractions;
 using BlogApp.Domain.Entities;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
@@ -7,7 +7,10 @@ namespace BlogApp.Persistence.Contexts
 {
     public class BlogAppDbContext : AuditableDbContext
     {
-        public BlogAppDbContext(DbContextOptions<BlogAppDbContext> options, IHttpContextAccessor httpContextAccessor) : base(options, httpContextAccessor)
+        public BlogAppDbContext(
+            DbContextOptions<BlogAppDbContext> options,
+            IExecutionContextAccessor executionContextAccessor)
+            : base(options, executionContextAccessor)
         {
         }
 
