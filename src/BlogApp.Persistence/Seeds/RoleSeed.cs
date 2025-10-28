@@ -38,8 +38,8 @@ public class RoleSeed : IEntityTypeConfiguration<Role>
             new Role
             {
                 Id = Guid.Parse("20000000-0000-0000-0000-000000000003"),
-                Name = "Moderator",
-                NormalizedName = "MODERATOR",
+                Name = UserRoles.Moderator,
+                NormalizedName = UserRoles.Moderator.ToUpperInvariant(),
                 Description = "Yorumları ve topluluk etkileşimlerini yöneten rol.",
                 ConcurrencyStamp = "33333333-3333-3333-3333-333333333333",
                 CreatedById = systemUserId,
@@ -49,8 +49,8 @@ public class RoleSeed : IEntityTypeConfiguration<Role>
             new Role
             {
                 Id = Guid.Parse("20000000-0000-0000-0000-000000000004"),
-                Name = "Editor",
-                NormalizedName = "EDITOR",
+                Name = UserRoles.Editor,
+                NormalizedName = UserRoles.Editor.ToUpperInvariant(),
                 Description = "Yayın akışını yöneten, içerikleri yayımlayan ve kategorileri düzenleyen rol.",
                 ConcurrencyStamp = "44444444-4444-4444-4444-444444444444",
                 CreatedById = systemUserId,

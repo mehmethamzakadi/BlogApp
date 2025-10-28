@@ -66,8 +66,8 @@ public class PermissionSeeder
 
         // Önce tüm mevcut permission'ları al (IsDeleted kontrolü ile)
         var existingPermissions = await _context.Permissions
-      .Where(p => !p.IsDeleted)
-    .ToListAsync();
+            .Where(p => !p.IsDeleted)
+            .ToListAsync();
 
         var existingPermissionNames = existingPermissions.Select(p => p.Name).ToHashSet();
 
