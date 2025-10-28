@@ -373,4 +373,4 @@ FodyWeavers.xsd
 # Uploaded files
 **/wwwroot/uploads/
 
-.idea/
+.idea
