@@ -7,7 +7,6 @@ using BlogApp.Domain.Entities;
 using BlogApp.Domain.Events.CategoryEvents;
 using BlogApp.Domain.Repositories;
 using MediatR;
-using System;
 using IResult = BlogApp.Domain.Common.Results.IResult;
 
 namespace BlogApp.Application.Features.Categories.Commands.Delete;

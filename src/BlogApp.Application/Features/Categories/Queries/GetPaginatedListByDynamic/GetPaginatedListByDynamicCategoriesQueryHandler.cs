@@ -6,7 +6,6 @@ using BlogApp.Domain.Common.Responses;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Repositories;
 using MediatR;
-using System;
 
 namespace BlogApp.Application.Features.Categories.Queries.GetPaginatedListByDynamic;
 
