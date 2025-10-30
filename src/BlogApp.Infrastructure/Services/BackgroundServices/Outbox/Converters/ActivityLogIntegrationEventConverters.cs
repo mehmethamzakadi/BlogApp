@@ -1,3 +1,5 @@
+using BlogApp.Application.Abstractions;
+using BlogApp.Domain.Constants;
 using BlogApp.Domain.Events.BookshelfItemEvents;
 using BlogApp.Domain.Events.CategoryEvents;
 using BlogApp.Domain.Events.IntegrationEvents;
@@ -30,7 +32,7 @@ internal abstract class ActivityLogIntegrationEventConverter<TDomainEvent> : IIn
     protected abstract ActivityLogCreatedIntegrationEvent Convert(TDomainEvent domainEvent);
 }
 
-internal sealed class CategoryCreatedIntegrationEventConverter : ActivityLogIntegrationEventConverter<CategoryCreatedEvent>
+internal sealed class CategoryCreatedIntegrationEventConverter(IExecutionContextAccessor executionContextAccessor) : ActivityLogIntegrationEventConverter<CategoryCreatedEvent>
 {
     public override string EventType => nameof(CategoryCreatedEvent);
 
@@ -40,12 +42,12 @@ internal sealed class CategoryCreatedIntegrationEventConverter : ActivityLogInte
         EntityId: domainEvent.CategoryId,
         Title: $"\"{domainEvent.Name}\" kategorisi oluşturuldu",
         Details: null,
-        UserId: domainEvent.CreatedById,
+        UserId: executionContextAccessor.GetCurrentUserId() ?? SystemUsers.SystemUserId,
         Timestamp: DateTime.UtcNow
     );
 }
 
-internal sealed class CategoryUpdatedIntegrationEventConverter : ActivityLogIntegrationEventConverter<CategoryUpdatedEvent>
+internal sealed class CategoryUpdatedIntegrationEventConverter(IExecutionContextAccessor executionContextAccessor) : ActivityLogIntegrationEventConverter<CategoryUpdatedEvent>
 {
     public override string EventType => nameof(CategoryUpdatedEvent);
 
@@ -55,12 +57,12 @@ internal sealed class CategoryUpdatedIntegrationEventConverter : ActivityLogInte
         EntityId: domainEvent.CategoryId,
         Title: $"\"{domainEvent.Name}\" kategorisi güncellendi",
         Details: null,
-        UserId: domainEvent.UpdatedById,
+        UserId: executionContextAccessor.GetCurrentUserId() ?? SystemUsers.SystemUserId,
         Timestamp: DateTime.UtcNow
     );
 }
 
-internal sealed class CategoryDeletedIntegrationEventConverter : ActivityLogIntegrationEventConverter<CategoryDeletedEvent>
+internal sealed class CategoryDeletedIntegrationEventConverter(IExecutionContextAccessor executionContextAccessor) : ActivityLogIntegrationEventConverter<CategoryDeletedEvent>
 {
     public override string EventType => nameof(CategoryDeletedEvent);
 
@@ -70,12 +72,12 @@ internal sealed class CategoryDeletedIntegrationEventConverter : ActivityLogInte
         EntityId: domainEvent.CategoryId,
         Title: $"\"{domainEvent.Name}\" kategorisi silindi",
         Details: null,
-        UserId: domainEvent.DeletedById,
+        UserId: executionContextAccessor.GetCurrentUserId() ?? SystemUsers.SystemUserId,
         Timestamp: DateTime.UtcNow
     );
 }
 
-internal sealed class BookshelfItemCreatedIntegrationEventConverter : ActivityLogIntegrationEventConverter<BookshelfItemCreatedEvent>
+internal sealed class BookshelfItemCreatedIntegrationEventConverter(IExecutionContextAccessor executionContextAccessor) : ActivityLogIntegrationEventConverter<BookshelfItemCreatedEvent>
 {
     public override string EventType => nameof(BookshelfItemCreatedEvent);
 
@@ -85,12 +87,12 @@ internal sealed class BookshelfItemCreatedIntegrationEventConverter : ActivityLo
         EntityId: domainEvent.ItemId,
         Title: $"\"{domainEvent.Title}\" kitaplığa eklendi",
         Details: null,
-        UserId: domainEvent.ActorId,
+        UserId: executionContextAccessor.GetCurrentUserId() ?? SystemUsers.SystemUserId,
         Timestamp: DateTime.UtcNow
     );
 }
 
-internal sealed class BookshelfItemUpdatedIntegrationEventConverter : ActivityLogIntegrationEventConverter<BookshelfItemUpdatedEvent>
+internal sealed class BookshelfItemUpdatedIntegrationEventConverter(IExecutionContextAccessor executionContextAccessor) : ActivityLogIntegrationEventConverter<BookshelfItemUpdatedEvent>
 {
     public override string EventType => nameof(BookshelfItemUpdatedEvent);
 
@@ -100,12 +102,12 @@ internal sealed class BookshelfItemUpdatedIntegrationEventConverter : ActivityLo
         EntityId: domainEvent.ItemId,
         Title: $"\"{domainEvent.Title}\" kitabı güncellendi",
         Details: null,
-        UserId: domainEvent.ActorId,
+        UserId: executionContextAccessor.GetCurrentUserId() ?? SystemUsers.SystemUserId,
         Timestamp: DateTime.UtcNow
     );
 }
 
-internal sealed class BookshelfItemDeletedIntegrationEventConverter : ActivityLogIntegrationEventConverter<BookshelfItemDeletedEvent>
+internal sealed class BookshelfItemDeletedIntegrationEventConverter(IExecutionContextAccessor executionContextAccessor) : ActivityLogIntegrationEventConverter<BookshelfItemDeletedEvent>
 {
     public override string EventType => nameof(BookshelfItemDeletedEvent);
 
@@ -115,12 +117,12 @@ internal sealed class BookshelfItemDeletedIntegrationEventConverter : ActivityLo
         EntityId: domainEvent.ItemId,
         Title: $"\"{domainEvent.Title}\" kitabı silindi",
         Details: null,
-        UserId: domainEvent.ActorId,
+        UserId: executionContextAccessor.GetCurrentUserId() ?? SystemUsers.SystemUserId,
         Timestamp: DateTime.UtcNow
     );
 }
 
-internal sealed class PostCreatedIntegrationEventConverter : ActivityLogIntegrationEventConverter<PostCreatedEvent>
+internal sealed class PostCreatedIntegrationEventConverter(IExecutionContextAccessor executionContextAccessor) : ActivityLogIntegrationEventConverter<PostCreatedEvent>
 {
     public override string EventType => nameof(PostCreatedEvent);
 
@@ -130,12 +132,12 @@ internal sealed class PostCreatedIntegrationEventConverter : ActivityLogIntegrat
         EntityId: domainEvent.PostId,
         Title: $"\"{domainEvent.Title}\" oluşturuldu",
         Details: $"Kategori ID: {domainEvent.CategoryId}",
-        UserId: domainEvent.CreatedById,
+        UserId: executionContextAccessor.GetCurrentUserId() ?? SystemUsers.SystemUserId,
         Timestamp: DateTime.UtcNow
     );
 }
 
-internal sealed class PostUpdatedIntegrationEventConverter : ActivityLogIntegrationEventConverter<PostUpdatedEvent>
+internal sealed class PostUpdatedIntegrationEventConverter(IExecutionContextAccessor executionContextAccessor) : ActivityLogIntegrationEventConverter<PostUpdatedEvent>
 {
     public override string EventType => nameof(PostUpdatedEvent);
 
@@ -145,12 +147,12 @@ internal sealed class PostUpdatedIntegrationEventConverter : ActivityLogIntegrat
         EntityId: domainEvent.PostId,
         Title: $"\"{domainEvent.Title}\" güncellendi",
         Details: null,
-        UserId: domainEvent.UpdatedById,
+        UserId: executionContextAccessor.GetCurrentUserId() ?? SystemUsers.SystemUserId,
         Timestamp: DateTime.UtcNow
     );
 }
 
-internal sealed class PostDeletedIntegrationEventConverter : ActivityLogIntegrationEventConverter<PostDeletedEvent>
+internal sealed class PostDeletedIntegrationEventConverter(IExecutionContextAccessor executionContextAccessor) : ActivityLogIntegrationEventConverter<PostDeletedEvent>
 {
     public override string EventType => nameof(PostDeletedEvent);
 
@@ -160,12 +162,12 @@ internal sealed class PostDeletedIntegrationEventConverter : ActivityLogIntegrat
         EntityId: domainEvent.PostId,
         Title: $"\"{domainEvent.Title}\" silindi",
         Details: null,
-        UserId: domainEvent.DeletedById,
+        UserId: executionContextAccessor.GetCurrentUserId() ?? SystemUsers.SystemUserId,
         Timestamp: DateTime.UtcNow
     );
 }
 
-internal sealed class UserCreatedIntegrationEventConverter : ActivityLogIntegrationEventConverter<UserCreatedEvent>
+internal sealed class UserCreatedIntegrationEventConverter(IExecutionContextAccessor executionContextAccessor) : ActivityLogIntegrationEventConverter<UserCreatedEvent>
 {
     public override string EventType => nameof(UserCreatedEvent);
 
@@ -175,12 +177,12 @@ internal sealed class UserCreatedIntegrationEventConverter : ActivityLogIntegrat
         EntityId: domainEvent.UserId,
         Title: $"Kullanıcı \"{domainEvent.UserName}\" oluşturuldu",
         Details: $"Email: {domainEvent.Email}",
-        UserId: domainEvent.CreatedById,
+        UserId: executionContextAccessor.GetCurrentUserId() ?? SystemUsers.SystemUserId,
         Timestamp: DateTime.UtcNow
     );
 }
 
-internal sealed class UserUpdatedIntegrationEventConverter : ActivityLogIntegrationEventConverter<UserUpdatedEvent>
+internal sealed class UserUpdatedIntegrationEventConverter(IExecutionContextAccessor executionContextAccessor) : ActivityLogIntegrationEventConverter<UserUpdatedEvent>
 {
     public override string EventType => nameof(UserUpdatedEvent);
 
@@ -190,12 +192,12 @@ internal sealed class UserUpdatedIntegrationEventConverter : ActivityLogIntegrat
         EntityId: domainEvent.UserId,
         Title: $"Kullanıcı \"{domainEvent.UserName}\" güncellendi",
         Details: null,
-        UserId: domainEvent.UpdatedById,
+        UserId: executionContextAccessor.GetCurrentUserId() ?? SystemUsers.SystemUserId,
         Timestamp: DateTime.UtcNow
     );
 }
 
-internal sealed class UserDeletedIntegrationEventConverter : ActivityLogIntegrationEventConverter<UserDeletedEvent>
+internal sealed class UserDeletedIntegrationEventConverter(IExecutionContextAccessor executionContextAccessor) : ActivityLogIntegrationEventConverter<UserDeletedEvent>
 {
     public override string EventType => nameof(UserDeletedEvent);
 
@@ -205,12 +207,12 @@ internal sealed class UserDeletedIntegrationEventConverter : ActivityLogIntegrat
         EntityId: domainEvent.UserId,
         Title: $"Kullanıcı \"{domainEvent.UserName}\" silindi",
         Details: null,
-        UserId: domainEvent.DeletedById,
+        UserId: executionContextAccessor.GetCurrentUserId() ?? SystemUsers.SystemUserId,
         Timestamp: DateTime.UtcNow
     );
 }
 
-internal sealed class UserRolesAssignedIntegrationEventConverter : ActivityLogIntegrationEventConverter<UserRolesAssignedEvent>
+internal sealed class UserRolesAssignedIntegrationEventConverter(IExecutionContextAccessor executionContextAccessor) : ActivityLogIntegrationEventConverter<UserRolesAssignedEvent>
 {
     public override string EventType => nameof(UserRolesAssignedEvent);
 
@@ -220,12 +222,12 @@ internal sealed class UserRolesAssignedIntegrationEventConverter : ActivityLogIn
         EntityId: domainEvent.UserId,
         Title: $"Kullanıcı \"{domainEvent.UserName}\" için roller atandı",
         Details: $"Roller: {string.Join(", ", domainEvent.RoleNames)}",
-        UserId: domainEvent.AssignedById,
+        UserId: executionContextAccessor.GetCurrentUserId() ?? SystemUsers.SystemUserId,
         Timestamp: DateTime.UtcNow
     );
 }
 
-internal sealed class RoleCreatedIntegrationEventConverter : ActivityLogIntegrationEventConverter<RoleCreatedEvent>
+internal sealed class RoleCreatedIntegrationEventConverter(IExecutionContextAccessor executionContextAccessor) : ActivityLogIntegrationEventConverter<RoleCreatedEvent>
 {
     public override string EventType => nameof(RoleCreatedEvent);
 
@@ -235,12 +237,12 @@ internal sealed class RoleCreatedIntegrationEventConverter : ActivityLogIntegrat
         EntityId: domainEvent.RoleId,
         Title: $"Rol \"{domainEvent.RoleName}\" oluşturuldu",
         Details: null,
-        UserId: domainEvent.CreatedById,
+        UserId: executionContextAccessor.GetCurrentUserId() ?? SystemUsers.SystemUserId,
         Timestamp: DateTime.UtcNow
     );
 }
 
-internal sealed class RoleUpdatedIntegrationEventConverter : ActivityLogIntegrationEventConverter<RoleUpdatedEvent>
+internal sealed class RoleUpdatedIntegrationEventConverter(IExecutionContextAccessor executionContextAccessor) : ActivityLogIntegrationEventConverter<RoleUpdatedEvent>
 {
     public override string EventType => nameof(RoleUpdatedEvent);
 
@@ -250,12 +252,12 @@ internal sealed class RoleUpdatedIntegrationEventConverter : ActivityLogIntegrat
         EntityId: domainEvent.RoleId,
         Title: $"Rol \"{domainEvent.RoleName}\" güncellendi",
         Details: null,
-        UserId: domainEvent.UpdatedById,
+        UserId: executionContextAccessor.GetCurrentUserId() ?? SystemUsers.SystemUserId,
         Timestamp: DateTime.UtcNow
     );
 }
 
-internal sealed class RoleDeletedIntegrationEventConverter : ActivityLogIntegrationEventConverter<RoleDeletedEvent>
+internal sealed class RoleDeletedIntegrationEventConverter(IExecutionContextAccessor executionContextAccessor) : ActivityLogIntegrationEventConverter<RoleDeletedEvent>
 {
     public override string EventType => nameof(RoleDeletedEvent);
 
@@ -265,12 +267,12 @@ internal sealed class RoleDeletedIntegrationEventConverter : ActivityLogIntegrat
         EntityId: domainEvent.RoleId,
         Title: $"Rol \"{domainEvent.RoleName}\" silindi",
         Details: null,
-        UserId: domainEvent.DeletedById,
+        UserId: executionContextAccessor.GetCurrentUserId() ?? SystemUsers.SystemUserId,
         Timestamp: DateTime.UtcNow
     );
 }
 
-internal sealed class PermissionsAssignedToRoleIntegrationEventConverter : ActivityLogIntegrationEventConverter<PermissionsAssignedToRoleEvent>
+internal sealed class PermissionsAssignedToRoleIntegrationEventConverter(IExecutionContextAccessor executionContextAccessor) : ActivityLogIntegrationEventConverter<PermissionsAssignedToRoleEvent>
 {
     public override string EventType => nameof(PermissionsAssignedToRoleEvent);
 
@@ -280,7 +282,7 @@ internal sealed class PermissionsAssignedToRoleIntegrationEventConverter : Activ
         EntityId: domainEvent.RoleId,
         Title: $"Rol \"{domainEvent.RoleName}\" için yetkiler atandı",
         Details: $"{domainEvent.PermissionNames.Count} yetki atandı",
-        UserId: domainEvent.AssignedById,
+        UserId: executionContextAccessor.GetCurrentUserId() ?? SystemUsers.SystemUserId,
         Timestamp: DateTime.UtcNow
     );
 }

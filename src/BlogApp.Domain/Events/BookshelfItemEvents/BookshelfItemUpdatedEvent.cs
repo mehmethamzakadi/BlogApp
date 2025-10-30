@@ -8,12 +8,10 @@ public sealed class BookshelfItemUpdatedEvent : DomainEvent
 {
     public Guid ItemId { get; }
     public string Title { get; }
-    public Guid ActorId { get; }
 
-    public BookshelfItemUpdatedEvent(Guid itemId, string title, Guid actorId)
+    public BookshelfItemUpdatedEvent(Guid itemId, string title)
     {
         ItemId = itemId;
         Title = title;
-        ActorId = actorId;
     }
 }

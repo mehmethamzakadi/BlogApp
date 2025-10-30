@@ -46,11 +46,9 @@ public class AssignPermissionsToRoleCommandHandler : IRequestHandler<AssignPermi
         // Repository üzerinden permission'ları ata
         await _permissionRepository.AssignPermissionsToRoleAsync(request.RoleId, request.PermissionIds, cancellationToken);
 
-        // ✅ Role artık AddDomainEvent() metoduna sahip (BaseEntity üzerinden)
-        var currentUserId = _currentUserService.GetCurrentUserId();
-        role.AddDomainEvent(new PermissionsAssignedToRoleEvent(role.Id, role.Name!, permissions, currentUserId));
+        // Domain event ekle
+        role.AddDomainEvent(new PermissionsAssignedToRoleEvent(role.Id, role.Name!, permissions));
 
-        // UnitOfWork SaveChanges sırasında domain event'leri otomatik olarak Outbox'a kaydeder
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new SuccessResult("Permission'lar başarıyla atandı");

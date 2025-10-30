@@ -50,7 +50,7 @@ public sealed class Role : BaseEntity
             Description = description
         };
 
-        role.AddDomainEvent(new Domain.Events.RoleEvents.RoleCreatedEvent(role.Id, name, role.CreatedById ?? Guid.Empty));
+        role.AddDomainEvent(new Domain.Events.RoleEvents.RoleCreatedEvent(role.Id, name));
         return role;
     }
 
@@ -63,7 +63,7 @@ public sealed class Role : BaseEntity
         NormalizedName = name.ToUpperInvariant();
         Description = description;
 
-        AddDomainEvent(new Domain.Events.RoleEvents.RoleUpdatedEvent(Id, name, UpdatedById ?? Guid.Empty));
+        AddDomainEvent(new Domain.Events.RoleEvents.RoleUpdatedEvent(Id, name));
     }
 
     public void Delete()
@@ -71,6 +71,6 @@ public sealed class Role : BaseEntity
         if (IsDeleted)
             throw new InvalidOperationException("Role is already deleted");
 
-        AddDomainEvent(new Domain.Events.RoleEvents.RoleDeletedEvent(Id, Name, UpdatedById ?? Guid.Empty));
+        AddDomainEvent(new Domain.Events.RoleEvents.RoleDeletedEvent(Id, Name));
     }
 }

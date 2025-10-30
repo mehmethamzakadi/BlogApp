@@ -3,20 +3,15 @@ using BlogApp.Domain.Common.Attributes;
 
 namespace BlogApp.Domain.Events.PostEvents;
 
-/// <summary>
-/// Bir gönderi güncellendiğinde tetiklenen domain event
-/// </summary>
 [StoreInOutbox]
 public class PostUpdatedEvent : DomainEvent
 {
     public Guid PostId { get; }
     public string Title { get; }
-    public Guid UpdatedById { get; }
 
-    public PostUpdatedEvent(Guid postId, string title, Guid updatedById)
+    public PostUpdatedEvent(Guid postId, string title)
     {
         PostId = postId;
         Title = title;
-        UpdatedById = updatedById;
     }
 }

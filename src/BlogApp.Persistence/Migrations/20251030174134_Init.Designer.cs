@@ -3,17 +3,20 @@ using System;
 using BlogApp.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace BlogApp.Persistence.Migrations.PostgreSql
+namespace BlogApp.Persistence.Migrations
 {
     [DbContext(typeof(BlogAppDbContext))]
-    partial class BlogAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251030174134_Init")]
+    partial class Init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1021,7 +1024,7 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000001"),
-                            Body = "OpenTelemetry Collector, distributed tracing ve yapılandırılmış logging birleştiğinde minimal API'ler üretim ortamında şeffaf hâle geliyor.\r\nBu rehberde ActivitySource, Meter ve TraceId bağlamlarını nasıl kodladığımızı adım adım ele alıyoruz.\r\nAyrıca Aspire Dashboard ile gecikme ve hata oranlarını anlık izlemenin püf noktalarını paylaşıyoruz.",
+                            Body = "OpenTelemetry Collector, distributed tracing ve yapılandırılmış logging birleştiğinde minimal API'ler üretim ortamında şeffaf hâle geliyor.\nBu rehberde ActivitySource, Meter ve TraceId bağlamlarını nasıl kodladığımızı adım adım ele alıyoruz.\nAyrıca Aspire Dashboard ile gecikme ve hata oranlarını anlık izlemenin püf noktalarını paylaşıyoruz.",
                             CategoryId = new Guid("10000000-0000-0000-0000-000000000001"),
                             CreatedById = new Guid("00000000-0000-0000-0000-000000000002"),
                             CreatedDate = new DateTime(2025, 9, 28, 8, 30, 0, 0, DateTimeKind.Utc),
@@ -1034,7 +1037,7 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000002"),
-                            Body = "SaaS uygulamalarında sorgu optimizasyonu tenant bazında indeksleme ile başlıyor.\r\nModel seeding, global query filter'lar ve concurrency token'ları üzerinden performans analizleri paylaşıyoruz.\r\nAyrıca Npgsql provider'ı ile partitioned table senaryolarını örneklendiriyoruz.",
+                            Body = "SaaS uygulamalarında sorgu optimizasyonu tenant bazında indeksleme ile başlıyor.\nModel seeding, global query filter'lar ve concurrency token'ları üzerinden performans analizleri paylaşıyoruz.\nAyrıca Npgsql provider'ı ile partitioned table senaryolarını örneklendiriyoruz.",
                             CategoryId = new Guid("10000000-0000-0000-0000-000000000002"),
                             CreatedById = new Guid("00000000-0000-0000-0000-000000000004"),
                             CreatedDate = new DateTime(2025, 10, 2, 9, 15, 0, 0, DateTimeKind.Utc),
@@ -1047,7 +1050,7 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000003"),
-                            Body = "GitOps, manifest kaynağını tek gerçeğin kaynağına dönüştürerek roll-forward ve roll-back süreçlerini sadeleştiriyor.\r\nFluxCD ile progressive delivery, ArgoCD ile health check politika tanımlarını örnek YAML dosyalarıyla açıklıyoruz.\r\nPipeline gözlemlenebilirliği için Prometheus ve Grafana entegrasyonlarını da ekliyoruz.",
+                            Body = "GitOps, manifest kaynağını tek gerçeğin kaynağına dönüştürerek roll-forward ve roll-back süreçlerini sadeleştiriyor.\nFluxCD ile progressive delivery, ArgoCD ile health check politika tanımlarını örnek YAML dosyalarıyla açıklıyoruz.\nPipeline gözlemlenebilirliği için Prometheus ve Grafana entegrasyonlarını da ekliyoruz.",
                             CategoryId = new Guid("10000000-0000-0000-0000-000000000003"),
                             CreatedById = new Guid("00000000-0000-0000-0000-000000000002"),
                             CreatedDate = new DateTime(2025, 10, 5, 10, 45, 0, 0, DateTimeKind.Utc),
@@ -1060,7 +1063,7 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000004"),
-                            Body = "Mesajlaşma altyapısı seçiminde gereksinimleri segmentlere ayırmak kritik.\r\nRabbitMQ routing esnekliği sağlar; Kafka ise sıralı event log ile akış analitiğine güç katar.\r\nMakale boyunca tüketici grupları, dead-letter stratejileri ve metrik takip yöntemlerini detaylandırıyoruz.",
+                            Body = "Mesajlaşma altyapısı seçiminde gereksinimleri segmentlere ayırmak kritik.\nRabbitMQ routing esnekliği sağlar; Kafka ise sıralı event log ile akış analitiğine güç katar.\nMakale boyunca tüketici grupları, dead-letter stratejileri ve metrik takip yöntemlerini detaylandırıyoruz.",
                             CategoryId = new Guid("10000000-0000-0000-0000-000000000004"),
                             CreatedById = new Guid("00000000-0000-0000-0000-000000000004"),
                             CreatedDate = new DateTime(2025, 10, 12, 15, 0, 0, 0, DateTimeKind.Utc),
@@ -1073,7 +1076,7 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000005"),
-                            Body = "Tracing zincirleri, metrik korelasyonları ve yapılandırılmış log'lar aynı veri modelinde buluştuğunda kök neden analizi hızlanıyor.\r\nBu makalede collector konfigürasyonlarını, OTLP protokolünü ve Prometheus remote write senaryolarını harmanlıyoruz.\r\nEk olarak, kullanıcı segmenti bazlı alert kurallarına dair pratik şablonlar sunuyoruz.",
+                            Body = "Tracing zincirleri, metrik korelasyonları ve yapılandırılmış log'lar aynı veri modelinde buluştuğunda kök neden analizi hızlanıyor.\nBu makalede collector konfigürasyonlarını, OTLP protokolünü ve Prometheus remote write senaryolarını harmanlıyoruz.\nEk olarak, kullanıcı segmenti bazlı alert kurallarına dair pratik şablonlar sunuyoruz.",
                             CategoryId = new Guid("10000000-0000-0000-0000-000000000005"),
                             CreatedById = new Guid("00000000-0000-0000-0000-000000000003"),
                             CreatedDate = new DateTime(2025, 10, 15, 11, 20, 0, 0, DateTimeKind.Utc),
@@ -1845,16 +1848,38 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
 
             modelBuilder.Entity("BlogApp.Domain.Entities.UserRole", b =>
                 {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("RoleId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("AssignedDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("UserId", "RoleId");
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("UpdatedById")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("RoleId")
                         .HasDatabaseName("IX_UserRoles_RoleId");
@@ -1862,44 +1887,72 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                     b.HasIndex("UserId")
                         .HasDatabaseName("IX_UserRoles_UserId");
 
+                    b.HasIndex("UserId", "RoleId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_UserRoles_UserId_RoleId");
+
                     b.ToTable("UserRoles", (string)null);
 
                     b.HasData(
                         new
                         {
-                            UserId = new Guid("00000000-0000-0000-0000-000000000001"),
+                            Id = new Guid("30000000-0000-0000-0000-000000000001"),
+                            AssignedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
+                            IsDeleted = false,
                             RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            AssignedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
+                            UpdatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
+                            UserId = new Guid("00000000-0000-0000-0000-000000000001")
                         },
                         new
                         {
-                            UserId = new Guid("00000000-0000-0000-0000-000000000002"),
+                            Id = new Guid("30000000-0000-0000-0000-000000000002"),
+                            AssignedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
+                            IsDeleted = false,
                             RoleId = new Guid("20000000-0000-0000-0000-000000000004"),
-                            AssignedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
+                            UpdatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
+                            UserId = new Guid("00000000-0000-0000-0000-000000000002")
                         },
                         new
                         {
-                            UserId = new Guid("00000000-0000-0000-0000-000000000002"),
+                            Id = new Guid("30000000-0000-0000-0000-000000000003"),
+                            AssignedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
+                            IsDeleted = false,
                             RoleId = new Guid("20000000-0000-0000-0000-000000000002"),
-                            AssignedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
+                            UpdatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
+                            UserId = new Guid("00000000-0000-0000-0000-000000000002")
                         },
                         new
                         {
-                            UserId = new Guid("00000000-0000-0000-0000-000000000003"),
+                            Id = new Guid("30000000-0000-0000-0000-000000000004"),
+                            AssignedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
+                            IsDeleted = false,
                             RoleId = new Guid("20000000-0000-0000-0000-000000000003"),
-                            AssignedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
+                            UpdatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
+                            UserId = new Guid("00000000-0000-0000-0000-000000000003")
                         },
                         new
                         {
-                            UserId = new Guid("00000000-0000-0000-0000-000000000003"),
+                            Id = new Guid("30000000-0000-0000-0000-000000000005"),
+                            AssignedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
+                            IsDeleted = false,
                             RoleId = new Guid("20000000-0000-0000-0000-000000000002"),
-                            AssignedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
+                            UpdatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
+                            UserId = new Guid("00000000-0000-0000-0000-000000000003")
                         },
                         new
                         {
-                            UserId = new Guid("00000000-0000-0000-0000-000000000004"),
+                            Id = new Guid("30000000-0000-0000-0000-000000000006"),
+                            AssignedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
+                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
+                            IsDeleted = false,
                             RoleId = new Guid("20000000-0000-0000-0000-000000000002"),
-                            AssignedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
+                            UpdatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
+                            UserId = new Guid("00000000-0000-0000-0000-000000000004")
                         });
                 });
 

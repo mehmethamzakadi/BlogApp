@@ -1,5 +1,6 @@
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Exceptions;
+using FluentValidation;
 
 namespace BlogApp.API.Middlewares
 {
@@ -7,11 +8,13 @@ namespace BlogApp.API.Middlewares
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<ExceptionHandlingMiddleware> _logger;
+        private readonly IWebHostEnvironment _environment;
 
-        public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
+        public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger, IWebHostEnvironment environment)
         {
             _next = next;
             _logger = logger;
+            _environment = environment;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -38,7 +41,7 @@ namespace BlogApp.API.Middlewares
             }
         }
 
-        private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
+        private async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             var response = context.Response;
             response.ContentType = "application/json";
@@ -47,13 +50,14 @@ namespace BlogApp.API.Middlewares
             {
                 Success = false,
                 Message = "İsteğiniz işlenirken bir hata oluştu.",
-                InternalMessage = exception.Message,
+                InternalMessage = _environment.IsDevelopment() ? exception.Message : null,
                 Errors = new List<string>()
             };
 
             response.StatusCode = exception switch
             {
-                ValidationException validationException => BuildValidationError(validationException, apiResult),
+                FluentValidation.ValidationException fluentValidationException => BuildFluentValidationError(fluentValidationException, apiResult),
+                Domain.Exceptions.ValidationException validationException => BuildValidationError(validationException, apiResult),
                 BadRequestException => SetApiResult(apiResult, StatusCodes.Status400BadRequest, exception.Message),
                 NotFoundException => SetApiResult(apiResult, StatusCodes.Status404NotFound, exception.Message),
                 AuthenticationErrorException => SetApiResult(
@@ -71,7 +75,18 @@ namespace BlogApp.API.Middlewares
             await response.WriteAsJsonAsync(apiResult);
         }
 
-        private static int BuildValidationError(ValidationException validationException, ApiResult<object> apiResult)
+        private static int BuildFluentValidationError(FluentValidation.ValidationException fluentValidationException, ApiResult<object> apiResult)
+        {
+            var errors = fluentValidationException.Errors
+                .Select(e => $"{e.PropertyName}: {e.ErrorMessage}")
+                .ToList();
+
+            apiResult.Message = errors.FirstOrDefault() ?? "Geçersiz veya eksik bilgiler mevcut.";
+            apiResult.Errors = errors;
+            return StatusCodes.Status400BadRequest;
+        }
+
+        private static int BuildValidationError(Domain.Exceptions.ValidationException validationException, ApiResult<object> apiResult)
         {
             apiResult.Message = validationException.Errors.FirstOrDefault() ?? "Geçersiz veya eksik bilgiler mevcut.";
             apiResult.Errors = validationException.Errors;

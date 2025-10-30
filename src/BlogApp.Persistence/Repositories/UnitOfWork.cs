@@ -25,12 +25,8 @@ public sealed class UnitOfWork : IUnitOfWork
     {
         try
         {
-            // OUTBOX PATTERN UYGULAMASI
-            // Kaydetmeden önce takip edilen entity'lerden domain event'leri al
             var domainEvents = GetDomainEvents().ToList();
 
-            // Domain event'leri RabbitMQ üzerinden asenkron işleme için outbox mesajlarına dönüştür
-            // Bu, ACID garantilerini sağlar - event'ler business data ile aynı transaction içinde saklanır
             foreach (var domainEvent in domainEvents)
             {
                 if (ShouldStoreInOutbox(domainEvent))
@@ -47,26 +43,17 @@ public sealed class UnitOfWork : IUnitOfWork
                 }
             }
 
-            // Her şeyi tek bir atomik transaction içinde kaydet:
-            // - Business data (entity'ler)
-            // - Outbox mesajları (event'ler)
             var result = await _context.SaveChangesAsync(cancellationToken);
-
             return result;
         }
         finally
         {
-            // SaveChanges başarısız olsa bile domain event'lerin her zaman temizlenmesini sağla
-            // Bu, bellek sızıntılarını ve eski event'lerin yeniden işlenmesini önler
             ClearDomainEvents();
         }
     }
 
     private static bool ShouldStoreInOutbox(IDomainEvent domainEvent)
     {
-        // ✅ DÜZELTİLDİ: Magic string'ler yerine attribute kullanan tip güvenli yaklaşım
-        // Domain event tipinin [StoreInOutbox] attribute'una sahip olup olmadığını kontrol et
-        // Bu, derleme zamanı güvenliği ve daha kolay refactoring sağlar
         var eventType = domainEvent.GetType();
         return eventType.GetCustomAttributes(typeof(StoreInOutboxAttribute), false).Any();
     }
@@ -122,7 +109,6 @@ public sealed class UnitOfWork : IUnitOfWork
 
     public IEnumerable<IDomainEvent> GetDomainEvents()
     {
-        // BaseEntity'den türeyen tüm entity'lerin event'lerini al
         return _context.ChangeTracker
             .Entries<BaseEntity>()
             .Where(e => e.Entity.DomainEvents.Any())
@@ -132,7 +118,6 @@ public sealed class UnitOfWork : IUnitOfWork
 
     public void ClearDomainEvents()
     {
-        // BaseEntity'den türeyen tüm entity'lerin event'lerini temizle
         var entities = _context.ChangeTracker
             .Entries<BaseEntity>()
             .Where(e => e.Entity.DomainEvents.Any())

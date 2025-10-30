@@ -8,12 +8,10 @@ public class CategoryUpdatedEvent : DomainEvent
 {
     public Guid CategoryId { get; }
     public string Name { get; }
-    public Guid UpdatedById { get; }
 
-    public CategoryUpdatedEvent(Guid categoryId, string name, Guid updatedById)
+    public CategoryUpdatedEvent(Guid categoryId, string name)
     {
         CategoryId = categoryId;
         Name = name;
-        UpdatedById = updatedById;
     }
 }

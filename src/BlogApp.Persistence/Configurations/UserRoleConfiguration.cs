@@ -14,8 +14,8 @@ public class UserRoleConfiguration : IEntityTypeConfiguration<UserRole>
         // Table name
         builder.ToTable("UserRoles");
 
-        // Composite primary key
-        builder.HasKey(ur => new { ur.UserId, ur.RoleId });
+        // Primary key (inherited from BaseEntity)
+        builder.HasKey(ur => ur.Id);
 
         // Relationships
         builder.HasOne(ur => ur.User)
@@ -27,6 +27,11 @@ public class UserRoleConfiguration : IEntityTypeConfiguration<UserRole>
             .WithMany(r => r.UserRoles)
             .HasForeignKey(ur => ur.RoleId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Unique constraint for UserId + RoleId combination
+        builder.HasIndex(ur => new { ur.UserId, ur.RoleId })
+            .IsUnique()
+            .HasDatabaseName("IX_UserRoles_UserId_RoleId");
 
         // Indexes
         builder.HasIndex(ur => ur.UserId)

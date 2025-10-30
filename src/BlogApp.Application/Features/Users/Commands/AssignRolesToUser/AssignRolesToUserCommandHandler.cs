@@ -41,7 +41,6 @@ public class AssignRolesToUserCommandHandler : IRequestHandler<AssignRolesToUser
             return new ErrorResult("Kullanıcı bulunamadı");
         }
 
-        // ✅ BEST PRACTICE: Delta Update - Sadece değişenleri güncelle
         var currentUserRoles = await _userRepository.GetUserRoleIdsAsync(user.Id, cancellationToken);
         var requestedRoleIds = request.RoleIds.ToHashSet();
         var currentRoleIds = currentUserRoles.ToHashSet();
@@ -90,15 +89,11 @@ public class AssignRolesToUserCommandHandler : IRequestHandler<AssignRolesToUser
                 return new ErrorResult("Roller eklenemedi: " + addResult.Message);
             }
 
-            // ✅ Domain Event - sadece değişiklik olduğunda
-            var currentUserId = _currentUserService.GetCurrentUserId();
-
-            // Tüm rollerin son halini al (event için)
+            // Domain Event - sadece değişiklik olduğunda
             var allCurrentRoleNames = await _userRepository.GetRolesAsync(user);
-            user.AddDomainEvent(new UserRolesAssignedEvent(user.Id, user.UserName!, allCurrentRoleNames, currentUserId));
+            user.AddDomainEvent(new UserRolesAssignedEvent(user.Id, user.UserName!, allCurrentRoleNames));
         }
 
-        // UnitOfWork SaveChanges sırasında domain event'leri otomatik olarak Outbox'a kaydeder
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new SuccessResult("Roller başarıyla atandı");

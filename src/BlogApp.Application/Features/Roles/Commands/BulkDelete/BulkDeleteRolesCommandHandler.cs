@@ -47,9 +47,8 @@ public class BulkDeleteRolesCommandHandler : IRequestHandler<BulkDeleteRolesComm
                     continue;
                 }
 
-                // ✅ Silme işleminden ÖNCE domain event'i tetikle
-                var currentUserId = _currentUserService.GetCurrentUserId();
-                role.AddDomainEvent(new RoleDeletedEvent(roleId, role.Name!, currentUserId));
+                // Domain event ekle
+                role.AddDomainEvent(new RoleDeletedEvent(roleId, role.Name!));
 
                 var result = await _roleRepository.DeleteRole(role);
 
@@ -70,7 +69,6 @@ public class BulkDeleteRolesCommandHandler : IRequestHandler<BulkDeleteRolesComm
             }
         }
 
-        // Tüm değişiklikleri tek transaction'da kaydet (Silme işlemleri + Outbox)
         if (response.DeletedCount > 0)
         {
             await _unitOfWork.SaveChangesAsync(cancellationToken);

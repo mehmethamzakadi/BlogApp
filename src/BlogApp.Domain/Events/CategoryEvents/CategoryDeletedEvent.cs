@@ -8,12 +8,10 @@ public class CategoryDeletedEvent : DomainEvent
 {
     public Guid CategoryId { get; }
     public string Name { get; }
-    public Guid DeletedById { get; }
 
-    public CategoryDeletedEvent(Guid categoryId, string name, Guid deletedById)
+    public CategoryDeletedEvent(Guid categoryId, string name)
     {
         CategoryId = categoryId;
         Name = name;
-        DeletedById = deletedById;
     }
 }

@@ -13,39 +13,57 @@ public class UserRoleSeed : IEntityTypeConfiguration<UserRole>
         builder.HasData(
             new UserRole
             {
+                Id = Guid.Parse("30000000-0000-0000-0000-000000000001"),
                 UserId = Guid.Parse("00000000-0000-0000-0000-000000000001"),
                 RoleId = Guid.Parse("20000000-0000-0000-0000-000000000001"),
-                AssignedDate = assignedDate
+                AssignedDate = assignedDate,
+                CreatedDate = assignedDate,
+                UpdatedDate = assignedDate
             },
             new UserRole
             {
+                Id = Guid.Parse("30000000-0000-0000-0000-000000000002"),
                 UserId = Guid.Parse("00000000-0000-0000-0000-000000000002"),
                 RoleId = Guid.Parse("20000000-0000-0000-0000-000000000004"),
-                AssignedDate = assignedDate
+                AssignedDate = assignedDate,
+                CreatedDate = assignedDate,
+                UpdatedDate = assignedDate
             },
             new UserRole
             {
+                Id = Guid.Parse("30000000-0000-0000-0000-000000000003"),
                 UserId = Guid.Parse("00000000-0000-0000-0000-000000000002"),
                 RoleId = Guid.Parse("20000000-0000-0000-0000-000000000002"),
-                AssignedDate = assignedDate
+                AssignedDate = assignedDate,
+                CreatedDate = assignedDate,
+                UpdatedDate = assignedDate
             },
             new UserRole
             {
+                Id = Guid.Parse("30000000-0000-0000-0000-000000000004"),
                 UserId = Guid.Parse("00000000-0000-0000-0000-000000000003"),
                 RoleId = Guid.Parse("20000000-0000-0000-0000-000000000003"),
-                AssignedDate = assignedDate
+                AssignedDate = assignedDate,
+                CreatedDate = assignedDate,
+                UpdatedDate = assignedDate
             },
             new UserRole
             {
+                Id = Guid.Parse("30000000-0000-0000-0000-000000000005"),
                 UserId = Guid.Parse("00000000-0000-0000-0000-000000000003"),
                 RoleId = Guid.Parse("20000000-0000-0000-0000-000000000002"),
-                AssignedDate = assignedDate
+                AssignedDate = assignedDate,
+                CreatedDate = assignedDate,
+                UpdatedDate = assignedDate
             },
             new UserRole
             {
+                Id = Guid.Parse("30000000-0000-0000-0000-000000000006"),
                 UserId = Guid.Parse("00000000-0000-0000-0000-000000000004"),
                 RoleId = Guid.Parse("20000000-0000-0000-0000-000000000002"),
-                AssignedDate = assignedDate
+                AssignedDate = assignedDate,
+                CreatedDate = assignedDate,
+                UpdatedDate = assignedDate
             });
     }
 }

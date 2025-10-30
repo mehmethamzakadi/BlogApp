@@ -38,7 +38,7 @@ public sealed class Post : AggregateRoot
             IsPublished = false
         };
 
-        post.AddDomainEvent(new PostCreatedEvent(post.Id, title, categoryId, post.CreatedById ?? Guid.Empty));
+        post.AddDomainEvent(new PostCreatedEvent(post.Id, title, categoryId));
         return post;
     }
 
@@ -56,7 +56,7 @@ public sealed class Post : AggregateRoot
         if (thumbnail != null)
             Thumbnail = thumbnail;
 
-        AddDomainEvent(new PostUpdatedEvent(Id, title, UpdatedById ?? Guid.Empty));
+        AddDomainEvent(new PostUpdatedEvent(Id, title));
     }
 
     public void Publish()
@@ -108,6 +108,6 @@ public sealed class Post : AggregateRoot
         if (IsDeleted)
             throw new InvalidOperationException("Post is already deleted");
 
-        AddDomainEvent(new PostDeletedEvent(Id, Title, UpdatedById ?? Guid.Empty));
+        AddDomainEvent(new PostDeletedEvent(Id, Title));
     }
 }

@@ -1,10 +1,12 @@
+using BlogApp.Domain.Common;
+
 namespace BlogApp.Domain.Entities;
 
 /// <summary>
 /// Kullanıcı ve Rol arasındaki many-to-many ilişkiyi temsil eder.
 /// Bir kullanıcının hangi rollere sahip olduğunu tanımlar.
 /// </summary>
-public sealed class UserRole
+public sealed class UserRole : BaseEntity
 {
     /// <summary>
     /// Kullanıcı ID'si

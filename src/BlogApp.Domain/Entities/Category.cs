@@ -21,7 +21,7 @@ public sealed class Category : BaseEntity
             NormalizedName = name.ToUpperInvariant()
         };
 
-        category.AddDomainEvent(new CategoryCreatedEvent(category.Id, name, category.CreatedById ?? Guid.Empty));
+        category.AddDomainEvent(new CategoryCreatedEvent(category.Id, name));
         return category;
     }
 
@@ -33,7 +33,7 @@ public sealed class Category : BaseEntity
         Name = name;
         NormalizedName = name.ToUpperInvariant();
 
-        AddDomainEvent(new CategoryUpdatedEvent(Id, name, UpdatedById ?? Guid.Empty));
+        AddDomainEvent(new CategoryUpdatedEvent(Id, name));
     }
 
     public void Delete()
@@ -41,6 +41,6 @@ public sealed class Category : BaseEntity
         if (IsDeleted)
             throw new InvalidOperationException("Category is already deleted");
 
-        AddDomainEvent(new CategoryDeletedEvent(Id, Name, UpdatedById ?? Guid.Empty));
+        AddDomainEvent(new CategoryDeletedEvent(Id, Name));
     }
 }

@@ -132,7 +132,7 @@ public sealed class User : BaseEntity
             EmailConfirmed = false
         };
 
-        user.AddDomainEvent(new Domain.Events.UserEvents.UserCreatedEvent(user.Id, userName, email, user.CreatedById ?? Guid.Empty));
+        user.AddDomainEvent(new Domain.Events.UserEvents.UserCreatedEvent(user.Id, userName, email));
         return user;
     }
 
@@ -141,7 +141,7 @@ public sealed class User : BaseEntity
         UserName = userName;
         Email = email;
 
-        AddDomainEvent(new Domain.Events.UserEvents.UserUpdatedEvent(Id, userName, email, UpdatedById ?? Guid.Empty));
+        AddDomainEvent(new Domain.Events.UserEvents.UserUpdatedEvent(Id, userName));
     }
 
     public void Delete()
@@ -149,6 +149,6 @@ public sealed class User : BaseEntity
         if (IsDeleted)
             throw new InvalidOperationException("User is already deleted");
 
-        AddDomainEvent(new Domain.Events.UserEvents.UserDeletedEvent(Id, UserName, Email, UpdatedById));
+        AddDomainEvent(new Domain.Events.UserEvents.UserDeletedEvent(Id, UserName));
     }
 }

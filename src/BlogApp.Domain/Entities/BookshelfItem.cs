@@ -29,7 +29,7 @@ public sealed class BookshelfItem : BaseEntity
             IsRead = false
         };
 
-        item.AddDomainEvent(new BookshelfItemCreatedEvent(item.Id, title, item.CreatedById ?? Guid.Empty));
+        item.AddDomainEvent(new BookshelfItemCreatedEvent(item.Id, title));
         return item;
     }
 
@@ -45,7 +45,7 @@ public sealed class BookshelfItem : BaseEntity
         Notes = notes;
         ImageUrl = imageUrl;
 
-        AddDomainEvent(new BookshelfItemUpdatedEvent(Id, title, UpdatedById ?? Guid.Empty));
+        AddDomainEvent(new BookshelfItemUpdatedEvent(Id, title));
     }
 
     public void Delete()
@@ -53,6 +53,6 @@ public sealed class BookshelfItem : BaseEntity
         if (IsDeleted)
             throw new InvalidOperationException("BookshelfItem is already deleted");
 
-        AddDomainEvent(new BookshelfItemDeletedEvent(Id, Title, UpdatedById ?? Guid.Empty));
+        AddDomainEvent(new BookshelfItemDeletedEvent(Id, Title));
     }
 }

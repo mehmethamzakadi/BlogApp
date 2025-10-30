@@ -17,21 +17,16 @@ public class OutboxProcessorService : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<OutboxProcessorService> _logger;
-    private readonly IReadOnlyDictionary<string, IIntegrationEventConverterStrategy> _converterStrategies;
     private readonly TimeSpan _processingInterval = TimeSpan.FromSeconds(5);
     private const int BatchSize = 50;
     private const int MaxRetryCount = 5;
 
     public OutboxProcessorService(
         IServiceProvider serviceProvider,
-        ILogger<OutboxProcessorService> logger,
-        IEnumerable<IIntegrationEventConverterStrategy> converterStrategies)
+        ILogger<OutboxProcessorService> logger)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
-        _converterStrategies = (converterStrategies ?? throw new ArgumentNullException(nameof(converterStrategies)))
-            .GroupBy(converter => converter.EventType, StringComparer.Ordinal)
-            .ToDictionary(group => group.Key, group => group.First(), StringComparer.Ordinal);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -63,6 +58,9 @@ public class OutboxProcessorService : BackgroundService
         var publishEndpoint = scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<Domain.Common.IUnitOfWork>();
         var executionContextAccessor = scope.ServiceProvider.GetRequiredService<IExecutionContextAccessor>();
+        var converterStrategies = scope.ServiceProvider.GetServices<IIntegrationEventConverterStrategy>()
+            .GroupBy(converter => converter.EventType, StringComparer.Ordinal)
+            .ToDictionary(group => group.Key, group => group.First(), StringComparer.Ordinal);
 
         // İşlenmemiş mesajları getir
         var messages = await outboxRepository.GetUnprocessedMessagesAsync(BatchSize, cancellationToken);
@@ -80,7 +78,7 @@ public class OutboxProcessorService : BackgroundService
         {
             try
             {
-                if (!_converterStrategies.TryGetValue(message.EventType, out var converter))
+                if (!converterStrategies.TryGetValue(message.EventType, out var converter))
                 {
                     _logger.LogWarning("Event tipi için converter bulunamadı: {EventType}", message.EventType);
                     await outboxRepository.MarkAsFailedAsync(
@@ -149,7 +147,7 @@ public class OutboxProcessorService : BackgroundService
             }
         }
 
-        // Tüm batch'i tek seferde kaydet - PERFORMANS İYİLEŞTİRMESİ
+        // Tüm batch'i tek seferde kaydet
         try
         {
             await unitOfWork.SaveChangesAsync(cancellationToken);
