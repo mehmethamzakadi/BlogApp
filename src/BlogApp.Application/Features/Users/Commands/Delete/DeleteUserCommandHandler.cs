@@ -2,6 +2,7 @@ using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Repositories;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using IResult = BlogApp.Domain.Common.Results.IResult;
 
 namespace BlogApp.Application.Features.Users.Commands.Delete;
@@ -22,6 +23,7 @@ public sealed class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand
     public async Task<IResult> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
     {
         var user = await _userRepository.FindByIdAsync(request.Id);
+
         if (user == null)
             return new ErrorResult("Kullanıcı bilgisi bulunamadı!");
 

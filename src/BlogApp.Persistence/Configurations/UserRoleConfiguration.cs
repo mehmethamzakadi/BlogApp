@@ -39,5 +39,8 @@ public class UserRoleConfiguration : IEntityTypeConfiguration<UserRole>
 
         builder.HasIndex(ur => ur.RoleId)
             .HasDatabaseName("IX_UserRoles_RoleId");
+
+        // Query filter for soft delete
+        builder.HasQueryFilter(ur => !ur.IsDeleted);
     }
 }

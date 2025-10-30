@@ -18,6 +18,7 @@ export async function fetchRolePermissions(roleId: string): Promise<RolePermissi
   return result.data;
 }
 
-export async function assignPermissionsToRole(data: AssignPermissionsFormValues): Promise<void> {
-  await api.post(`/permission/role/${data.roleId}`, data);
+export async function assignPermissionsToRole(data: AssignPermissionsFormValues): Promise<ApiResult> {
+  const response = await api.post(`/permission/role/${data.roleId}`, data);
+  return normalizeApiResult(response.data);
 }

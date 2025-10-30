@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BlogApp.Persistence.Migrations
 {
     [DbContext(typeof(BlogAppDbContext))]
-    [Migration("20251030180320_Init")]
+    [Migration("20251030183324_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -1987,9 +1987,9 @@ namespace BlogApp.Persistence.Migrations
             modelBuilder.Entity("BlogApp.Domain.Entities.Post", b =>
                 {
                     b.HasOne("BlogApp.Domain.Entities.Category", "Category")
-                        .WithMany()
+                        .WithMany("Posts")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Category");
@@ -2031,6 +2031,11 @@ namespace BlogApp.Persistence.Migrations
                     b.Navigation("Role");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BlogApp.Domain.Entities.Category", b =>
+                {
+                    b.Navigation("Posts");
                 });
 
             modelBuilder.Entity("BlogApp.Domain.Entities.Permission", b =>

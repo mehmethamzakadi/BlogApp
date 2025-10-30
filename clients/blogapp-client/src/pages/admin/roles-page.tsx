@@ -17,6 +17,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { useInvalidateQueries } from '../../hooks/use-invalidate-queries';
 import toast from 'react-hot-toast';
+import { handleApiError, showApiResponseError } from '../../lib/api-error';
 
 const roleSchema = z.object({
   name: z.string().min(2, 'Rol adı en az 2 karakter olmalıdır')
@@ -98,44 +99,60 @@ export function RolesPage() {
 
   const createMutation = useMutation({
     mutationFn: createRole,
-    onSuccess: () => {
-      toast.success('Rol başarıyla oluşturuldu');
+    onSuccess: (result) => {
+      if (!result.success) {
+        showApiResponseError(result, 'Rol oluşturulamadı');
+        return;
+      }
+      toast.success(result.message || 'Rol oluşturuldu');
       setIsCreateOpen(false);
       invalidateRoles();
       createForm.reset();
     },
-    onError: () => toast.error('Rol oluşturulurken hata oluştu')
+    onError: (error) => handleApiError(error, 'Rol oluşturulurken hata oluştu')
   });
 
   const updateMutation = useMutation({
     mutationFn: (values: RoleFormSchema) =>
       editingRole ? updateRole({ ...values, id: editingRole.id }) : Promise.reject(),
-    onSuccess: () => {
-      toast.success('Rol başarıyla güncellendi');
+    onSuccess: (result) => {
+      if (!result.success) {
+        showApiResponseError(result, 'Rol güncellenemedi');
+        return;
+      }
+      toast.success(result.message || 'Rol güncellendi');
       setEditingRole(null);
       invalidateRoles();
     },
-    onError: () => toast.error('Rol güncellenirken hata oluştu')
+    onError: (error) => handleApiError(error, 'Rol güncellenirken hata oluştu')
   });
 
   const deleteMutation = useMutation({
     mutationFn: (roleId: string) => deleteRole(roleId),
-    onSuccess: () => {
-      toast.success('Rol başarıyla silindi');
+    onSuccess: (result) => {
+      if (!result.success) {
+        showApiResponseError(result, 'Rol silinemedi');
+        return;
+      }
+      toast.success(result.message || 'Rol silindi');
       setRoleToDelete(null);
       invalidateRoles();
     },
-    onError: () => toast.error('Rol silinirken hata oluştu')
+    onError: (error) => handleApiError(error, 'Rol silinirken hata oluştu')
   });
 
   const assignPermissionsMutation = useMutation({
     mutationFn: (data: { roleId: string; permissionIds: string[] }) => assignPermissionsToRole(data),
-    onSuccess: () => {
-      toast.success('Yetkiler başarıyla atandı');
+    onSuccess: (result) => {
+      if (!result.success) {
+        showApiResponseError(result, 'Yetkiler atanamadı');
+        return;
+      }
+      toast.success(result.message || 'Yetkiler atandı');
       setAssigningPermissionsRole(null);
       invalidateRoles();
     },
-    onError: () => toast.error('Yetkiler atanırken hata oluştu')
+    onError: (error) => handleApiError(error, 'Yetkiler atanırken hata oluştu')
   });
 
   const createForm = useForm<RoleFormSchema>({

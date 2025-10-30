@@ -108,8 +108,6 @@ public sealed class Post : AggregateRoot
         if (IsDeleted)
             throw new InvalidOperationException("Post is already deleted");
 
-        IsDeleted = true;
-        DeletedDate = DateTime.UtcNow;
         AddDomainEvent(new PostDeletedEvent(Id, Title));
     }
 }

@@ -40,6 +40,7 @@ import toast from 'react-hot-toast';
 import { PermissionGuard } from '../../components/auth/permission-guard';
 import { Permissions } from '../../lib/permissions';
 import { usePermission } from '../../hooks/use-permission';
+import { handleApiError, showApiResponseError } from '../../lib/api-error';
 
 const userCreateSchema = z.object({
   userName: z.string().min(3, 'Kullanıcı adı en az 3 karakter olmalıdır'),
@@ -248,53 +249,61 @@ export function UsersPage() {
   // Mutations
   const createMutation = useMutation({
     mutationFn: createUser,
-    onSuccess: () => {
-      toast.success('Kullanıcı başarıyla oluşturuldu');
+    onSuccess: (result) => {
+      if (!result.success) {
+        showApiResponseError(result, 'Kullanıcı oluşturulamadı');
+        return;
+      }
+      toast.success(result.message || 'Kullanıcı oluşturuldu');
       setIsCreateOpen(false);
       invalidateUsers();
       createForm.reset();
     },
-    onError: () => {
-      toast.error('Kullanıcı oluşturulurken hata oluştu');
-    }
+    onError: (error) => handleApiError(error, 'Kullanıcı oluşturulurken hata oluştu')
   });
 
   const updateMutation = useMutation({
     mutationFn: (values: UserUpdateFormSchema) =>
       editingUser ? updateUser({ ...values, id: editingUser.id }) : Promise.reject(),
-    onSuccess: () => {
-      toast.success('Kullanıcı başarıyla güncellendi');
+    onSuccess: (result) => {
+      if (!result.success) {
+        showApiResponseError(result, 'Kullanıcı güncellenemedi');
+        return;
+      }
+      toast.success(result.message || 'Kullanıcı güncellendi');
       setEditingUser(null);
       invalidateUsers();
     },
-    onError: () => {
-      toast.error('Kullanıcı güncellenirken hata oluştu');
-    }
+    onError: (error) => handleApiError(error, 'Kullanıcı güncellenirken hata oluştu')
   });
 
   const deleteMutation = useMutation({
     mutationFn: (userId: string) => deleteUser(userId),
-    onSuccess: () => {
-      toast.success('Kullanıcı başarıyla silindi');
+    onSuccess: (result) => {
+      if (!result.success) {
+        showApiResponseError(result, 'Kullanıcı silinemedi');
+        return;
+      }
+      toast.success(result.message || 'Kullanıcı silindi');
       setUserToDelete(null);
       invalidateUsers();
     },
-    onError: () => {
-      toast.error('Kullanıcı silinirken hata oluştu');
-    }
+    onError: (error) => handleApiError(error, 'Kullanıcı silinirken hata oluştu')
   });
 
   const assignRolesMutation = useMutation({
     mutationFn: (data: { userId: string; roleIds: string[] }) =>
       assignRolesToUser(data),
-    onSuccess: () => {
-      toast.success('Roller başarıyla atandı');
+    onSuccess: (result) => {
+      if (!result.success) {
+        showApiResponseError(result, 'Roller atanamadı');
+        return;
+      }
+      toast.success(result.message || 'Roller atandı');
       setAssigningRolesUser(null);
       invalidateUsers();
     },
-    onError: () => {
-      toast.error('Roller atanırken hata oluştu');
-    }
+    onError: (error) => handleApiError(error, 'Roller atanırken hata oluştu')
   });
 
   // Forms

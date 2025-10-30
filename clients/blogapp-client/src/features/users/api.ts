@@ -23,16 +23,19 @@ export async function fetchUserById(id: string): Promise<User> {
   return result.data;
 }
 
-export async function createUser(data: UserFormValues): Promise<void> {
-  await api.post('/user', data);
+export async function createUser(data: UserFormValues): Promise<ApiResult> {
+  const response = await api.post('/user', data);
+  return normalizeApiResult(response.data);
 }
 
-export async function updateUser(data: UserUpdateFormValues): Promise<void> {
-  await api.put(`/user/${data.id}`, data);
+export async function updateUser(data: UserUpdateFormValues): Promise<ApiResult> {
+  const response = await api.put(`/user/${data.id}`, data);
+  return normalizeApiResult(response.data);
 }
 
-export async function deleteUser(id: string): Promise<void> {
-  await api.delete(`/user/${id}`);
+export async function deleteUser(id: string): Promise<ApiResult> {
+  const response = await api.delete(`/user/${id}`);
+  return normalizeApiResult(response.data);
 }
 
 export async function fetchUserRoles(userId: string): Promise<UserRolesResponse> {
@@ -41,6 +44,7 @@ export async function fetchUserRoles(userId: string): Promise<UserRolesResponse>
   return result.data;
 }
 
-export async function assignRolesToUser(data: AssignRolesFormValues): Promise<void> {
-  await api.post(`/user/${data.userId}/roles`, data);
+export async function assignRolesToUser(data: AssignRolesFormValues): Promise<ApiResult> {
+  const response = await api.post(`/user/${data.userId}/roles`, data);
+  return normalizeApiResult(response.data);
 }

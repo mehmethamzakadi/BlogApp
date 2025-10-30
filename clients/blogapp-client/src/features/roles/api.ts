@@ -18,14 +18,17 @@ export async function fetchRoleById(id: string): Promise<Role> {
   return result.data;
 }
 
-export async function createRole(data: RoleFormValues): Promise<void> {
-  await api.post('/role', data);
+export async function createRole(data: RoleFormValues): Promise<ApiResult> {
+  const response = await api.post('/role', data);
+  return normalizeApiResult(response.data);
 }
 
-export async function updateRole(data: RoleUpdateFormValues): Promise<void> {
-  await api.put(`/role/${data.id}`, data);
+export async function updateRole(data: RoleUpdateFormValues): Promise<ApiResult> {
+  const response = await api.put(`/role/${data.id}`, data);
+  return normalizeApiResult(response.data);
 }
 
-export async function deleteRole(id: string): Promise<void> {
-  await api.delete(`/role/${id}`);
+export async function deleteRole(id: string): Promise<ApiResult> {
+  const response = await api.delete(`/role/${id}`);
+  return normalizeApiResult(response.data);
 }

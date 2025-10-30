@@ -16,6 +16,12 @@ namespace BlogApp.Persistence.Configurations
             builder.Property(x => x.Thumbnail).IsRequired();
             builder.Property(x => x.Title).IsRequired();
 
+            // Relationships
+            builder.HasOne(p => p.Category)
+                .WithMany(c => c.Posts)
+                .HasForeignKey(p => p.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // Indexler
             builder.HasIndex(x => x.CategoryId)
                 .HasDatabaseName("IX_Posts_CategoryId");

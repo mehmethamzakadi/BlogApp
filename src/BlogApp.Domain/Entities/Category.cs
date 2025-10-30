@@ -9,6 +9,7 @@ public sealed class Category : BaseEntity
 
     public string Name { get; set; } = default!;
     public string? NormalizedName { get; set; }
+    public ICollection<Post> Posts { get; set; } = new List<Post>();
 
     public static Category Create(string name)
     {
@@ -41,8 +42,6 @@ public sealed class Category : BaseEntity
         if (IsDeleted)
             throw new InvalidOperationException("Category is already deleted");
 
-        IsDeleted = true;
-        DeletedDate = DateTime.UtcNow;
         AddDomainEvent(new CategoryDeletedEvent(Id, Name));
     }
 }

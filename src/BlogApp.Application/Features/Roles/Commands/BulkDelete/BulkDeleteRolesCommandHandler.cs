@@ -1,8 +1,8 @@
 using BlogApp.Application.Abstractions;
 using BlogApp.Domain.Common;
-using BlogApp.Domain.Events.RoleEvents;
 using BlogApp.Domain.Repositories;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlogApp.Application.Features.Roles.Commands.BulkDelete;
 
@@ -30,7 +30,10 @@ public class BulkDeleteRolesCommandHandler : IRequestHandler<BulkDeleteRolesComm
         {
             try
             {
-                var role = _roleRepository.GetRoleById(roleId);
+                var role = await _roleRepository.GetAsync(
+                    predicate: r => r.Id == roleId,
+                    include: r => r.Include(x => x.UserRoles),
+                    cancellationToken: cancellationToken);
 
                 if (role == null)
                 {
@@ -39,7 +42,6 @@ public class BulkDeleteRolesCommandHandler : IRequestHandler<BulkDeleteRolesComm
                     continue;
                 }
 
-                // Admin rolü silinemez (case-insensitive kontrol)
                 if (role.NormalizedName == "ADMIN")
                 {
                     response.Errors.Add($"Admin rolü silinemez");
@@ -47,20 +49,16 @@ public class BulkDeleteRolesCommandHandler : IRequestHandler<BulkDeleteRolesComm
                     continue;
                 }
 
-                // Domain event ekle
-                role.AddDomainEvent(new RoleDeletedEvent(roleId, role.Name!));
-
-                var result = await _roleRepository.DeleteRole(role);
-
-                if (result.Success)
+                if (role.UserRoles.Any(ur => !ur.IsDeleted))
                 {
-                    response.DeletedCount++;
-                }
-                else
-                {
-                    response.Errors.Add($"Rol silinemedi (ID {roleId}): {result.Message}");
+                    response.Errors.Add($"'{role.Name}' rolüne atanmış aktif kullanıcılar bulunmaktadır");
                     response.FailedCount++;
+                    continue;
                 }
+
+                role.Delete();
+                await _roleRepository.DeleteAsync(role);
+                response.DeletedCount++;
             }
             catch (Exception ex)
             {

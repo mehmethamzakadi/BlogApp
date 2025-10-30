@@ -4,6 +4,7 @@ using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Repositories;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using IResult = BlogApp.Domain.Common.Results.IResult;
 
 namespace BlogApp.Application.Features.Categories.Commands.Delete;
@@ -18,6 +19,12 @@ public sealed class DeleteCategoryCommandHandler(
         var category = await categoryRepository.GetAsync(predicate: x => x.Id == request.Id, cancellationToken: cancellationToken);
         if (category is null)
             return new ErrorResult("Kategori bilgisi bulunamadı!");
+
+        var hasActivePosts = await categoryRepository.Query()
+            .AnyAsync(c => c.Id == request.Id && c.Posts.Any(p => !p.IsDeleted), cancellationToken);
+
+        if (hasActivePosts)
+            return new ErrorResult("Bu kategoriye ait aktif postlar bulunmaktadır. Önce postları silmeli veya başka kategoriye taşımalısınız.");
 
         category.Delete();
         await categoryRepository.DeleteAsync(category);

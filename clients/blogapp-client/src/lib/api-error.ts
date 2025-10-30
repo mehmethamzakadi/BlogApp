@@ -20,6 +20,22 @@ export function getApiErrorMessage(error: unknown, fallbackMessage = 'Beklenmeye
     return error;
   }
 
+  // Axios error structure: error.response.data
+  if (typeof error === 'object' && 'response' in error) {
+    const axiosError = error as any;
+    if (axiosError.response?.data) {
+      const apiData = axiosError.response.data;
+      if (isApiError(apiData)) {
+        if (Array.isArray(apiData.errors) && apiData.errors.length > 0) {
+          return apiData.errors.filter(Boolean).join('\n');
+        }
+        if (apiData.message) {
+          return apiData.message;
+        }
+      }
+    }
+  }
+
   if (isApiError(error)) {
     if (Array.isArray(error.errors) && error.errors.length > 0) {
       return error.errors.filter(Boolean).join('\n');
@@ -47,23 +63,31 @@ export function getApiErrorMessage(error: unknown, fallbackMessage = 'Beklenmeye
 export function handleApiError(error: unknown, fallbackMessage = 'Beklenmeyen bir hata oluştu'): string {
   const message = getApiErrorMessage(error, fallbackMessage);
   
+  // Axios error structure check
+  let apiError: ApiError | null = null;
+  if (error && typeof error === 'object' && 'response' in error) {
+    const axiosError = error as any;
+    if (axiosError.response?.data && isApiError(axiosError.response.data)) {
+      apiError = axiosError.response.data;
+    }
+  } else if (error && typeof error === 'object' && 'errors' in error) {
+    apiError = error as ApiError;
+  }
+  
   // Eğer error objesi varsa ve errors array'i varsa, liste halinde göster
-  if (error && typeof error === 'object' && 'errors' in error) {
-    const apiError = error as ApiError;
-    if (Array.isArray(apiError.errors) && apiError.errors.length > 0) {
-      const errorList = apiError.errors.filter(Boolean);
-      if (errorList.length > 0) {
-        // Başlık + bullet liste formatı
-        const formattedMessage = `${apiError.message || fallbackMessage}:\n${errorList.map(err => `• ${err}`).join('\n')}`;
-        toast.error(formattedMessage, { 
-          duration: 5000,
-          style: { 
-            whiteSpace: 'pre-line',
-            maxWidth: '500px'
-          }
-        });
-        return formattedMessage;
-      }
+  if (apiError && Array.isArray(apiError.errors) && apiError.errors.length > 0) {
+    const errorList = apiError.errors.filter(Boolean);
+    if (errorList.length > 0) {
+      // Başlık + bullet liste formatı
+      const formattedMessage = `${apiError.message || fallbackMessage}:\n${errorList.map(err => `• ${err}`).join('\n')}`;
+      toast.error(formattedMessage, { 
+        duration: 5000,
+        style: { 
+          whiteSpace: 'pre-line',
+          maxWidth: '500px'
+        }
+      });
+      return formattedMessage;
     }
   }
   

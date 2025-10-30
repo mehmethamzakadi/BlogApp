@@ -1984,9 +1984,9 @@ namespace BlogApp.Persistence.Migrations
             modelBuilder.Entity("BlogApp.Domain.Entities.Post", b =>
                 {
                     b.HasOne("BlogApp.Domain.Entities.Category", "Category")
-                        .WithMany()
+                        .WithMany("Posts")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Category");
@@ -2028,6 +2028,11 @@ namespace BlogApp.Persistence.Migrations
                     b.Navigation("Role");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BlogApp.Domain.Entities.Category", b =>
+                {
+                    b.Navigation("Posts");
                 });
 
             modelBuilder.Entity("BlogApp.Domain.Entities.Permission", b =>

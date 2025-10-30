@@ -151,8 +151,6 @@ public sealed class User : BaseEntity
         if (IsDeleted)
             throw new InvalidOperationException("User is already deleted");
 
-        IsDeleted = true;
-        DeletedDate = DateTime.UtcNow;
         AddDomainEvent(new Domain.Events.UserEvents.UserDeletedEvent(Id, UserName));
     }
 }

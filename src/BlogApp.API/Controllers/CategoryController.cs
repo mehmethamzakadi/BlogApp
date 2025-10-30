@@ -44,8 +44,7 @@ namespace BlogApp.API.Controllers
         [HasPermission(Permissions.CategoriesCreate)]
         public async Task<IActionResult> Create([FromBody] CreateCategoryCommand command)
         {
-            var response = await Mediator.Send(command);
-            return Ok(response);
+            return ToResponse(await Mediator.Send(command));
         }
 
         [HttpPut("{id}")]
@@ -55,16 +54,14 @@ namespace BlogApp.API.Controllers
             if (id != command.Id)
                 return BadRequest("ID mismatch");
 
-            var response = await Mediator.Send(command);
-            return Ok(response);
+            return ToResponse(await Mediator.Send(command));
         }
 
         [HttpDelete("{id}")]
         [HasPermission(Permissions.CategoriesDelete)]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
-            var response = await Mediator.Send(new DeleteCategoryCommand(id));
-            return Ok(response);
+            return ToResponse(await Mediator.Send(new DeleteCategoryCommand(id)));
         }
     }
 }

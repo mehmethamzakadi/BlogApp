@@ -39,8 +39,7 @@ namespace BlogApp.API.Controllers
         [HasPermission(Permissions.UsersCreate)]
         public async Task<IActionResult> Create([FromBody] CreateUserCommand command)
         {
-            var response = await Mediator.Send(command);
-            return Ok(response);
+            return ToResponse(await Mediator.Send(command));
         }
 
         [HttpPut("{id}")]
@@ -50,16 +49,14 @@ namespace BlogApp.API.Controllers
             if (id != command.Id)
                 return BadRequest("ID mismatch");
 
-            var response = await Mediator.Send(command);
-            return Ok(response);
+            return ToResponse(await Mediator.Send(command));
         }
 
         [HttpDelete("{id}")]
         [HasPermission(Permissions.UsersDelete)]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
-            var response = await Mediator.Send(new DeleteUserCommand(id));
-            return Ok(response);
+            return ToResponse(await Mediator.Send(new DeleteUserCommand(id)));
         }
 
         [HttpPost("password")]
@@ -90,8 +87,7 @@ namespace BlogApp.API.Controllers
             if (id != command.UserId)
                 return BadRequest("ID mismatch");
 
-            var response = await Mediator.Send(command);
-            return Ok(response);
+            return ToResponse(await Mediator.Send(command));
         }
 
         /// <summary>

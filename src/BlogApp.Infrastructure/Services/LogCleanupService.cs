@@ -70,9 +70,8 @@ public class LogCleanupService : BackgroundService
         {
             // Eski Serilog loglarını temizle
             var deletedCount = await dbContext.Database
-                .ExecuteSqlRawAsync(
-                    "DELETE FROM \"Logs\" WHERE raise_date < {0}",
-                    cutoffDate,
+                .ExecuteSqlAsync(
+                    $"DELETE FROM \"Logs\" WHERE raise_date < {cutoffDate}",
                     cancellationToken);
 
             if (deletedCount > 0)
@@ -84,7 +83,7 @@ public class LogCleanupService : BackgroundService
             }
 
             // Optional: Vacuum the table to reclaim disk space (PostgreSQL specific)
-            await dbContext.Database.ExecuteSqlRawAsync("VACUUM ANALYZE \"Logs\"", cancellationToken);
+            await dbContext.Database.ExecuteSqlRawAsync("VACUUM ANALYZE \"Logs\"");
         }
         catch (Exception ex)
         {
