@@ -18,11 +18,7 @@ public sealed class User : BaseEntity
     public string UserName
     {
         get => _userName;
-        set
-        {
-            var userNameVO = ValueObjects.UserName.Create(value);
-            _userName = userNameVO.Value;
-        }
+        private set => _userName = value;
     }
 
     /// <summary>
@@ -36,11 +32,7 @@ public sealed class User : BaseEntity
     public string Email
     {
         get => _email;
-        set
-        {
-            var emailVO = ValueObjects.Email.Create(value);
-            _email = emailVO.Value;
-        }
+        private set => _email = value;
     }
 
     /// <summary>
@@ -124,10 +116,15 @@ public sealed class User : BaseEntity
 
     public static User Create(string userName, string email, string passwordHash)
     {
+        var userNameVO = ValueObjects.UserName.Create(userName);
+        var emailVO = ValueObjects.Email.Create(email);
+
         var user = new User
         {
-            UserName = userName,
-            Email = email,
+            UserName = userNameVO.Value,
+            NormalizedUserName = userNameVO.Value.ToUpperInvariant(),
+            Email = emailVO.Value,
+            NormalizedEmail = emailVO.Value.ToUpperInvariant(),
             PasswordHash = passwordHash,
             EmailConfirmed = false
         };
@@ -138,8 +135,13 @@ public sealed class User : BaseEntity
 
     public void Update(string userName, string email)
     {
-        UserName = userName;
-        Email = email;
+        var userNameVO = ValueObjects.UserName.Create(userName);
+        var emailVO = ValueObjects.Email.Create(email);
+
+        UserName = userNameVO.Value;
+        NormalizedUserName = userNameVO.Value.ToUpperInvariant();
+        Email = emailVO.Value;
+        NormalizedEmail = emailVO.Value.ToUpperInvariant();
 
         AddDomainEvent(new Domain.Events.UserEvents.UserUpdatedEvent(Id, userName));
     }
@@ -149,6 +151,8 @@ public sealed class User : BaseEntity
         if (IsDeleted)
             throw new InvalidOperationException("User is already deleted");
 
+        IsDeleted = true;
+        DeletedDate = DateTime.UtcNow;
         AddDomainEvent(new Domain.Events.UserEvents.UserDeletedEvent(Id, UserName));
     }
 }

@@ -29,9 +29,10 @@ public sealed class RedisCacheService(IDistributedCache distributedCache) : ICac
         await distributedCache.SetStringAsync(key, json, cacheEntryOptions);
     }
 
-    public bool Any(string key)
+    public async Task<bool> AnyAsync(string key)
     {
-        return !string.IsNullOrEmpty(distributedCache.GetString(key));
+        var data = await distributedCache.GetStringAsync(key);
+        return !string.IsNullOrEmpty(data);
     }
 
     public async Task<T?> Get<T>(string key)

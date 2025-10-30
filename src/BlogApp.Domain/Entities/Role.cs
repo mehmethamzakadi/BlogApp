@@ -71,6 +71,8 @@ public sealed class Role : BaseEntity
         if (IsDeleted)
             throw new InvalidOperationException("Role is already deleted");
 
+        IsDeleted = true;
+        DeletedDate = DateTime.UtcNow;
         AddDomainEvent(new Domain.Events.RoleEvents.RoleDeletedEvent(Id, Name));
     }
 }

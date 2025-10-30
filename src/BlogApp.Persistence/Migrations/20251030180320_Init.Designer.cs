@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BlogApp.Persistence.Migrations
 {
     [DbContext(typeof(BlogAppDbContext))]
-    [Migration("20251030174134_Init")]
+    [Migration("20251030180320_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -1776,8 +1776,8 @@ namespace BlogApp.Persistence.Migrations
                             EmailConfirmed = true,
                             IsDeleted = false,
                             LockoutEnabled = false,
-                            NormalizedEmail = "",
-                            NormalizedUserName = "",
+                            NormalizedEmail = "ADMIN@ADMIN.COM",
+                            NormalizedUserName = "ADMIN",
                             PasswordHash = "AQAAAAIAAYagAAAAEP8xlsKNntQQ1SivmqfdllQWKX/655QCNjrVsPYL/Oz4cUgmI8aV55GO0BN9SDNltA==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "b1a1d25f-8a7e-4e9a-bc55-8dca5bfa1234",
@@ -1795,8 +1795,8 @@ namespace BlogApp.Persistence.Migrations
                             EmailConfirmed = true,
                             IsDeleted = false,
                             LockoutEnabled = false,
-                            NormalizedEmail = "",
-                            NormalizedUserName = "",
+                            NormalizedEmail = "EDITOR@BLOGAPP.DEV",
+                            NormalizedUserName = "EDITOR_LARA",
                             PasswordHash = "AQAAAAIAAYagAAAAEP8xlsKNntQQ1SivmqfdllQWKX/655QCNjrVsPYL/Oz4cUgmI8aV55GO0BN9SDNltA==",
                             PhoneNumber = "+905551112233",
                             PhoneNumberConfirmed = true,
@@ -1815,8 +1815,8 @@ namespace BlogApp.Persistence.Migrations
                             EmailConfirmed = true,
                             IsDeleted = false,
                             LockoutEnabled = false,
-                            NormalizedEmail = "",
-                            NormalizedUserName = "",
+                            NormalizedEmail = "MODERATOR@BLOGAPP.DEV",
+                            NormalizedUserName = "MODERATOR_SELIM",
                             PasswordHash = "AQAAAAIAAYagAAAAEP8xlsKNntQQ1SivmqfdllQWKX/655QCNjrVsPYL/Oz4cUgmI8aV55GO0BN9SDNltA==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "7c1dbdbb-3d91-45a2-8578-5392cda53875",
@@ -1834,8 +1834,8 @@ namespace BlogApp.Persistence.Migrations
                             EmailConfirmed = true,
                             IsDeleted = false,
                             LockoutEnabled = false,
-                            NormalizedEmail = "",
-                            NormalizedUserName = "",
+                            NormalizedEmail = "AUTHOR@BLOGAPP.DEV",
+                            NormalizedUserName = "AUTHOR_MELIKE",
                             PasswordHash = "AQAAAAIAAYagAAAAEP8xlsKNntQQ1SivmqfdllQWKX/655QCNjrVsPYL/Oz4cUgmI8aV55GO0BN9SDNltA==",
                             PhoneNumber = "+905559998877",
                             PhoneNumberConfirmed = true,

@@ -74,21 +74,28 @@ public class OutboxProcessorService : BackgroundService
 
         using var auditScope = executionContextAccessor.BeginScope(SystemUsers.SystemUserId);
 
-        foreach (var message in messages)
+        var messagesByType = messages.GroupBy(m => m.EventType);
+
+        foreach (var group in messagesByType)
+        {
+            if (!converterStrategies.TryGetValue(group.Key, out var converter))
+            {
+                _logger.LogWarning("Event tipi için converter bulunamadı: {EventType}", group.Key);
+                foreach (var msg in group)
+                {
+                    await outboxRepository.MarkAsFailedAsync(
+                        msg.Id,
+                        $"Bilinmeyen event tipi: {group.Key}",
+                        null,
+                        cancellationToken);
+                }
+                continue;
+            }
+
+            foreach (var message in group)
         {
             try
             {
-                if (!converterStrategies.TryGetValue(message.EventType, out var converter))
-                {
-                    _logger.LogWarning("Event tipi için converter bulunamadı: {EventType}", message.EventType);
-                    await outboxRepository.MarkAsFailedAsync(
-                        message.Id,
-                        $"Bilinmeyen event tipi: {message.EventType}",
-                        null,
-                        cancellationToken);
-                    continue;
-                }
-
                 object? integrationEvent;
 
                 try
@@ -145,6 +152,7 @@ public class OutboxProcessorService : BackgroundService
                         message.Id);
                 }
             }
+        }
         }
 
         // Tüm batch'i tek seferde kaydet

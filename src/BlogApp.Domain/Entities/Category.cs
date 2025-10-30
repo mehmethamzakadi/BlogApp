@@ -41,6 +41,8 @@ public sealed class Category : BaseEntity
         if (IsDeleted)
             throw new InvalidOperationException("Category is already deleted");
 
+        IsDeleted = true;
+        DeletedDate = DateTime.UtcNow;
         AddDomainEvent(new CategoryDeletedEvent(Id, Name));
     }
 }

@@ -36,6 +36,6 @@ public sealed class ImagesController(IMediator mediator) : BaseApiController(med
             Title: request.Title);
 
         var result = await Mediator.Send(command, cancellationToken);
-        return GetResponseOnlyResultData(result);
+        return ToResponse(result);
     }
 }

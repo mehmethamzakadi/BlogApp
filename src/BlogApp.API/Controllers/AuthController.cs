@@ -46,7 +46,7 @@ namespace BlogApp.API.Controllers
             if (!TryGetRefreshTokenFromCookie(out var refreshToken))
             {
                 ClearRefreshTokenCookie();
-                return Unauthorized<LoginResponse>("Oturum doğrulanamadı.", "RefreshTokenMissing", default);
+                return Unauthorized();
             }
 
             var result = await Mediator.Send(new RefreshTokenCommand(refreshToken));

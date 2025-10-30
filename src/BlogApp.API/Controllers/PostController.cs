@@ -45,7 +45,7 @@ namespace BlogApp.API.Controllers
         [HasPermission(Permissions.PostsCreate)]
         public async Task<IActionResult> Create([FromBody] CreatePostCommand command)
         {
-            return GetResponseOnlyResultMessage(await Mediator.Send(command));
+            return ToResponse(await Mediator.Send(command));
         }
 
         [HttpPut("{id}")]
@@ -55,14 +55,14 @@ namespace BlogApp.API.Controllers
             if (id != command.Id)
                 return BadRequest("ID mismatch");
 
-            return GetResponseOnlyResultMessage(await Mediator.Send(command));
+            return ToResponse(await Mediator.Send(command));
         }
 
         [HttpDelete("{id}")]
         [HasPermission(Permissions.PostsDelete)]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
-            return GetResponseOnlyResultMessage(await Mediator.Send(new DeletePostCommand(id)));
+            return ToResponse(await Mediator.Send(new DeletePostCommand(id)));
         }
     }
 }

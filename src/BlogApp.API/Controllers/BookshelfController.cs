@@ -27,14 +27,14 @@ public class BookshelfController(IMediator mediator) : BaseApiController(mediato
     public async Task<IActionResult> GetById([FromRoute] Guid id)
     {
         var response = await Mediator.Send(new GetByIdBookshelfItemQuery(id));
-        return GetResponseOnlyResultData(response);
+        return ToResponse(response);
     }
 
     [HttpPost]
     [HasPermission(Permissions.BookshelfCreate)]
     public async Task<IActionResult> Create([FromBody] CreateBookshelfItemCommand command)
     {
-        return GetResponseOnlyResultMessage(await Mediator.Send(command));
+        return ToResponse(await Mediator.Send(command));
     }
 
     [HttpPut("{id}")]
@@ -46,13 +46,13 @@ public class BookshelfController(IMediator mediator) : BaseApiController(mediato
             return BadRequest("ID mismatch");
         }
 
-        return GetResponseOnlyResultMessage(await Mediator.Send(command));
+        return ToResponse(await Mediator.Send(command));
     }
 
     [HttpDelete("{id}")]
     [HasPermission(Permissions.BookshelfDelete)]
     public async Task<IActionResult> Delete([FromRoute] Guid id)
     {
-        return GetResponseOnlyResultMessage(await Mediator.Send(new DeleteBookshelfItemCommand(id)));
+        return ToResponse(await Mediator.Send(new DeleteBookshelfItemCommand(id)));
     }
 }

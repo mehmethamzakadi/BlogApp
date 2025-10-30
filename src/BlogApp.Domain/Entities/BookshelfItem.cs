@@ -53,6 +53,8 @@ public sealed class BookshelfItem : BaseEntity
         if (IsDeleted)
             throw new InvalidOperationException("BookshelfItem is already deleted");
 
+        IsDeleted = true;
+        DeletedDate = DateTime.UtcNow;
         AddDomainEvent(new BookshelfItemDeletedEvent(Id, Title));
     }
 }
