@@ -4,7 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { register } from '../../features/auth/api';
+import { register, login } from '../../features/auth/api';
+import { useAuthStore } from '../../stores/auth-store';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
@@ -37,6 +38,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export function RegisterPage() {
   const navigate = useNavigate();
+  const loginStore = useAuthStore((state) => state.login);
 
   const {
     register: registerField,
@@ -53,27 +55,40 @@ export function RegisterPage() {
   });
 
   const { mutateAsync, isPending } = useMutation({
-    mutationFn: register,
-    onSuccess: (response) => {
-      if (!response.success) {
-        showApiResponseError(response, 'Kayıt başarısız oldu');
-        return;
-      }
-
-      toast.success('Kayıt başarılı! Giriş yapabilirsiniz.');
-      navigate('/login', { replace: true });
-    },
-    onError: (error: unknown) => {
-      handleApiError(error, 'Kayıt yapılamadı');
-    }
+    mutationFn: register
   });
 
   const onSubmit = async (values: RegisterFormValues) => {
-    await mutateAsync({
-      userName: values.userName,
-      email: values.email,
-      password: values.password
-    });
+    try {
+      const registerResponse = await mutateAsync({
+        userName: values.userName,
+        email: values.email,
+        password: values.password
+      });
+
+      if (!registerResponse.success) {
+        showApiResponseError(registerResponse, 'Kayıt başarısız oldu');
+        return;
+      }
+
+      const loginResponse = await login({
+        email: values.email,
+        password: values.password
+      });
+
+      if (!loginResponse.success || !loginResponse.data) {
+        toast.success('Kayıt başarılı! Giriş yapabilirsiniz.');
+        navigate('/login', { replace: true });
+        return;
+      }
+
+      const { token, ...user } = loginResponse.data;
+      loginStore({ user, token });
+      toast.success('Hoş geldiniz!');
+      navigate('/admin/dashboard', { replace: true });
+    } catch (error) {
+      handleApiError(error, 'Kayıt yapılamadı');
+    }
   };
 
   return (
