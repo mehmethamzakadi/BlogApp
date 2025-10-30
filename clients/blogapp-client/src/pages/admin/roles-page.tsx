@@ -18,6 +18,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/ca
 import { useInvalidateQueries } from '../../hooks/use-invalidate-queries';
 import toast from 'react-hot-toast';
 import { handleApiError, showApiResponseError } from '../../lib/api-error';
+import { PermissionGuard } from '../../components/auth/permission-guard';
+import { Permissions } from '../../lib/permissions';
+import { usePermission } from '../../hooks/use-permission';
 
 const roleSchema = z.object({
   name: z.string().min(2, 'Rol adı en az 2 karakter olmalıdır')
@@ -26,6 +29,7 @@ const roleSchema = z.object({
 type RoleFormSchema = z.infer<typeof roleSchema>;
 
 export function RolesPage() {
+  const { hasPermission } = usePermission();
   const { invalidateRoles } = useInvalidateQueries();
   const [page, setPage] = useState(0);
   const pageSize = 10;
@@ -69,26 +73,32 @@ export function RolesPage() {
         header: 'İşlemler',
         cell: ({ row }) => (
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setAssigningPermissionsRole(row.original)}
-              aria-label="Yetki Ata"
-              title="Yetki Ata"
-            >
-              <Shield className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => setEditingRole(row.original)} aria-label="Düzenle">
-              <Pencil className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => setRoleToDelete(row.original)} aria-label="Sil">
-              <Trash2 className="h-4 w-4 text-destructive" />
-            </Button>
+            {hasPermission(Permissions.RolesAssignPermissions) && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setAssigningPermissionsRole(row.original)}
+                aria-label="Yetki Ata"
+                title="Yetki Ata"
+              >
+                <Shield className="h-4 w-4" />
+              </Button>
+            )}
+            {hasPermission(Permissions.RolesUpdate) && (
+              <Button variant="ghost" size="icon" onClick={() => setEditingRole(row.original)} aria-label="Düzenle">
+                <Pencil className="h-4 w-4" />
+              </Button>
+            )}
+            {hasPermission(Permissions.RolesDelete) && (
+              <Button variant="ghost" size="icon" onClick={() => setRoleToDelete(row.original)} aria-label="Sil">
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </Button>
+            )}
           </div>
         )
       }
     ],
-    []
+    [hasPermission]
   );
 
   const table = useReactTable({
@@ -194,10 +204,12 @@ export function RolesPage() {
           <h1 className="text-3xl font-bold">Rol & Yetki Yönetimi</h1>
           <p className="text-muted-foreground mt-2">Rolleri ve yetkilerini yönetin</p>
         </div>
-        <Button onClick={() => setIsCreateOpen(true)}>
-          <PlusCircle className="w-4 h-4 mr-2" />
-          Yeni Rol
-        </Button>
+        <PermissionGuard requiredPermission={Permissions.RolesCreate}>
+          <Button onClick={() => setIsCreateOpen(true)}>
+            <PlusCircle className="w-4 h-4 mr-2" />
+            Yeni Rol
+          </Button>
+        </PermissionGuard>
       </div>
 
       <Card>

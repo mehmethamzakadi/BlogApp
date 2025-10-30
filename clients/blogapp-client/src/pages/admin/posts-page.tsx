@@ -29,6 +29,9 @@ import { Badge } from '../../components/ui/badge';
 import { useInvalidateQueries } from '../../hooks/use-invalidate-queries';
 import { handleApiError, showApiResponseError } from '../../lib/api-error';
 import { cn } from '../../lib/utils';
+import { PermissionGuard } from '../../components/auth/permission-guard';
+import { Permissions } from '../../lib/permissions';
+import { usePermission } from '../../hooks/use-permission';
 
 const fieldMap: Record<string, string> = {
   id: 'Id',
@@ -38,6 +41,7 @@ const fieldMap: Record<string, string> = {
 };
 
 export function PostsPage() {
+  const { hasPermission } = usePermission();
   const { invalidatePosts } = useInvalidateQueries();
   const navigate = useNavigate();
   const [filters, setFilters] = useState<PostTableFilters>({
@@ -161,27 +165,31 @@ export function PostsPage() {
         header: 'İşlemler',
         cell: ({ row }) => (
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate(`/admin/posts/${row.original.id}/edit`)}
-              aria-label="Düzenle"
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setPostToDelete(row.original)}
-              aria-label="Sil"
-            >
-              <Trash2 className="h-4 w-4 text-destructive" />
-            </Button>
+            {hasPermission(Permissions.PostsUpdate) && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate(`/admin/posts/${row.original.id}/edit`)}
+                aria-label="Düzenle"
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+            )}
+            {hasPermission(Permissions.PostsDelete) && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setPostToDelete(row.original)}
+                aria-label="Sil"
+              >
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </Button>
+            )}
           </div>
         )
       }
     ],
-    [navigate, setPostToDelete]
+    [hasPermission, navigate, setPostToDelete]
   );
 
   const table = useReactTable({
@@ -242,11 +250,13 @@ export function PostsPage() {
               Gönderilerinizi oluşturun, düzenleyin ve yönetin. Arama, sıralama ve sayfalama özelliklerini kullanın.
             </p>
           </div>
-          <Button className="gap-2" asChild>
-            <Link to="/admin/posts/new">
-              <PlusCircle className="h-4 w-4" /> Yeni Gönderi
-            </Link>
-          </Button>
+          <PermissionGuard requiredPermission={Permissions.PostsCreate}>
+            <Button className="gap-2" asChild>
+              <Link to="/admin/posts/new">
+                <PlusCircle className="h-4 w-4" /> Yeni Gönderi
+              </Link>
+            </Button>
+          </PermissionGuard>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">

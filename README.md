@@ -131,10 +131,7 @@ BlogApp **3-katmanlı loglama mimarisi** kullanır:
 - **File Logs** - CLI araçları (tail, grep) ile hızlı debug
 
 **📖 Detaylı Dokümantasyon:**
-- [LOGGING_ARCHITECTURE.md](LOGGING_ARCHITECTURE.md) - Kapsamlı mimari dokümantasyonu
-- [LOGGING_QUICK_REFERENCE.md](LOGGING_QUICK_REFERENCE.md) - Hızlı referans ve kod örnekleri
-- [LOGGING_COMPARISON.md](LOGGING_COMPARISON.md) - Tek-tier vs Multi-tier karşılaştırması
-- [ACTIVITY_LOGGING_README.md](ACTIVITY_LOGGING_README.md) - Activity logging detayları
+- [DEVELOPER_GUIDE.md](docs/DEVELOPER_GUIDE.md) - Kapsamlı geliştirici kılavuzu
 
 ---
 
@@ -203,15 +200,15 @@ if (hasPermission(Permissions.PostsDelete)) {
 ```
 
 **📖 Detaylı Dokümantasyon:**
-- [PERMISSION_GUARDS_GUIDE.md](PERMISSION_GUARDS_GUIDE.md) - Kapsamlı implementasyon kılavuzu
-- [PERMISSION_CHEATSHEET.md](PERMISSION_CHEATSHEET.md) - Hızlı referans
+- [DEVELOPER_GUIDE.md](docs/DEVELOPER_GUIDE.md) - Permission sistemi ve diğer tüm detaylar
 
 ---
 
-## 📚 Ek Kaynaklar
+## 📚 Dokümantasyon
 
-- [ANALYSIS.md](ANALYSIS.md) - Kod tabanı analizi ve iyileştirme önerileri
-- [Solution Items/Migrations.txt](Solution%20Items/Migrations.txt) - Veritabanı migration notları
+- [DEVELOPER_GUIDE.md](docs/DEVELOPER_GUIDE.md) - Kapsamlı geliştirici kılavuzu (Logging, Permission, Outbox Pattern, Best Practices)
+- [ANALYSIS.md](docs/ANALYSIS.md) - Kod tabanı analizi ve iyileştirme önerileri
+- [tests/README.md](tests/README.md) - Test dokümantasyonu
 
 ---
 

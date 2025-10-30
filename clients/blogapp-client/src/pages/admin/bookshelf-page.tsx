@@ -29,6 +29,9 @@ import {
 import { bookshelfItemSchema, BookshelfItemFormSchema } from '../../features/bookshelf/schema';
 import { useInvalidateQueries } from '../../hooks/use-invalidate-queries';
 import { handleApiError, showApiResponseError } from '../../lib/api-error';
+import { PermissionGuard } from '../../components/auth/permission-guard';
+import { Permissions } from '../../lib/permissions';
+import { usePermission } from '../../hooks/use-permission';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
@@ -82,6 +85,7 @@ const fieldMap: Record<string, string> = {
 };
 
 export function BookshelfPage() {
+  const { hasPermission } = usePermission();
   const { invalidateBookshelf } = useInvalidateQueries();
   const [filters, setFilters] = useState<BookshelfTableFilters>(defaultFilters);
   const [searchTerm, setSearchTerm] = useState('');
@@ -337,22 +341,26 @@ export function BookshelfPage() {
         header: 'İşlemler',
         cell: ({ row }) => (
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={() => handleEdit(row.original.id)} aria-label="Düzenle">
-              <Pencil className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setItemToDelete(row.original)}
-              aria-label="Sil"
-            >
-              <Trash2 className="h-4 w-4 text-destructive" />
-            </Button>
+            {hasPermission(Permissions.BookshelfUpdate) && (
+              <Button variant="ghost" size="icon" onClick={() => handleEdit(row.original.id)} aria-label="Düzenle">
+                <Pencil className="h-4 w-4" />
+              </Button>
+            )}
+            {hasPermission(Permissions.BookshelfDelete) && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setItemToDelete(row.original)}
+                aria-label="Sil"
+              >
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </Button>
+            )}
           </div>
         )
       }
     ],
-    [handleEdit]
+    [hasPermission, handleEdit]
   );
 
   const table = useReactTable({
@@ -480,9 +488,11 @@ export function BookshelfPage() {
               Okuduğunuz veya okumak istediğiniz kitapları yönetin. Arama, filtreleme ve sıralama seçeneklerini kullanın.
             </p>
           </div>
-          <Button className="gap-2" onClick={openCreateForm}>
-            <PlusCircle className="h-4 w-4" /> Yeni Kayıt
-          </Button>
+          <PermissionGuard requiredPermission={Permissions.BookshelfCreate}>
+            <Button className="gap-2" onClick={openCreateForm}>
+              <PlusCircle className="h-4 w-4" /> Yeni Kayıt
+            </Button>
+          </PermissionGuard>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-3 md:grid-cols-[1fr_auto_auto] md:items-center">

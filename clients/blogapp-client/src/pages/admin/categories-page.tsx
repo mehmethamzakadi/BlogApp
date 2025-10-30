@@ -37,6 +37,9 @@ import { useInvalidateQueries } from '../../hooks/use-invalidate-queries';
 import toast from 'react-hot-toast';
 import { handleApiError, showApiResponseError } from '../../lib/api-error';
 import { cn } from '../../lib/utils';
+import { PermissionGuard } from '../../components/auth/permission-guard';
+import { Permissions } from '../../lib/permissions';
+import { usePermission } from '../../hooks/use-permission';
 
 const categorySchema = z.object({
   name: z.string().min(5, 'Kategori adı en az 5 karakter olmalıdır').max(100, 'Kategori adı en fazla 100 karakter olabilir')
@@ -50,6 +53,7 @@ const fieldMap: Record<string, string> = {
 };
 
 export function CategoriesPage() {
+  const { hasPermission } = usePermission();
   const { invalidateCategories } = useInvalidateQueries();
   const [filters, setFilters] = useState<CategoryTableFilters>({
     pageIndex: 0,
@@ -131,27 +135,31 @@ export function CategoriesPage() {
         header: 'İşlemler',
         cell: ({ row }) => (
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setEditingCategory(row.original)}
-              aria-label="Düzenle"
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setCategoryToDelete(row.original)}
-              aria-label="Sil"
-            >
-              <Trash2 className="h-4 w-4 text-destructive" />
-            </Button>
+            {hasPermission(Permissions.CategoriesUpdate) && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setEditingCategory(row.original)}
+                aria-label="Düzenle"
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+            )}
+            {hasPermission(Permissions.CategoriesDelete) && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setCategoryToDelete(row.original)}
+                aria-label="Sil"
+              >
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </Button>
+            )}
           </div>
         )
       }
     ],
-    []
+    [hasPermission]
   );
 
   const table = useReactTable({
@@ -265,20 +273,21 @@ export function CategoriesPage() {
               Kategorilerinizi oluşturun, düzenleyin ve yönetin. Arama, sıralama ve sayfalama özelliklerini kullanın.
             </p>
           </div>
-          <Dialog
-            open={isCreateOpen}
-            onOpenChange={(open) => {
-              setIsCreateOpen(open);
-              if (!open && !editingCategory) {
-                formMethods.reset({ name: '' });
-              }
-            }}
-          >
-            <DialogTrigger asChild>
-              <Button className="gap-2">
-                <PlusCircle className="h-4 w-4" /> Yeni Kategori
-              </Button>
-            </DialogTrigger>
+          <PermissionGuard requiredPermission={Permissions.CategoriesCreate}>
+            <Dialog
+              open={isCreateOpen}
+              onOpenChange={(open) => {
+                setIsCreateOpen(open);
+                if (!open && !editingCategory) {
+                  formMethods.reset({ name: '' });
+                }
+              }}
+            >
+              <DialogTrigger asChild>
+                <Button className="gap-2">
+                  <PlusCircle className="h-4 w-4" /> Yeni Kategori
+                </Button>
+              </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Yeni Kategori</DialogTitle>
@@ -302,7 +311,8 @@ export function CategoriesPage() {
                 </Button>
               </DialogFooter>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+          </PermissionGuard>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
