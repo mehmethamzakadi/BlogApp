@@ -3,6 +3,6 @@ using BlogApp.Domain.Entities;
 
 namespace BlogApp.Domain.Repositories;
 
-public interface ICommentRepository : IAsyncRepository<Comment>, IRepository<Comment>
+public interface ICommentRepository : IRepository<Comment>
 {
 }

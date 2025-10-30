@@ -16,23 +16,33 @@ public class UserConfiguration : BaseConfiguraiton<User>
         // Table name
         builder.ToTable("Users");
 
-        // UserName
-        builder.Property(u => u.UserName)
+        // UserName - backing field only
+        builder.Property("_userName")
+            .HasColumnName("UserName")
             .IsRequired()
             .HasMaxLength(100);
+
+        builder.Ignore(u => u.UserName);
 
         builder.Property(u => u.NormalizedUserName)
             .IsRequired()
-            .HasMaxLength(100);
+            .HasMaxLength(100)
+            .HasComputedColumnSql("UPPER(\"UserName\")", stored: true)
+            .ValueGeneratedOnAddOrUpdate();
 
-        // Email
-        builder.Property(u => u.Email)
+        // Email - backing field only
+        builder.Property("_email")
+            .HasColumnName("Email")
             .IsRequired()
             .HasMaxLength(200);
+
+        builder.Ignore(u => u.Email);
 
         builder.Property(u => u.NormalizedEmail)
             .IsRequired()
-            .HasMaxLength(200);
+            .HasMaxLength(200)
+            .HasComputedColumnSql("UPPER(\"Email\")", stored: true)
+            .ValueGeneratedOnAddOrUpdate();
 
         // Password
         builder.Property(u => u.PasswordHash)
@@ -66,7 +76,6 @@ public class UserConfiguration : BaseConfiguraiton<User>
             .IsUnique()
             .HasDatabaseName("IX_Users_NormalizedEmail");
 
-        builder.HasIndex(u => u.Email)
-            .HasDatabaseName("IX_Users_Email");
+
     }
 }

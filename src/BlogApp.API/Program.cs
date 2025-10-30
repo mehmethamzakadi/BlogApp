@@ -4,7 +4,7 @@ using BlogApp.API.Filters;
 using BlogApp.API.Middlewares;
 using BlogApp.Application;
 using BlogApp.Domain.Common.Results;
-using BlogApp.Domain.Options;
+using BlogApp.Infrastructure.Options;
 using BlogApp.Infrastructure;
 using BlogApp.Persistence;
 using BlogApp.Persistence.DatabaseInitializer;

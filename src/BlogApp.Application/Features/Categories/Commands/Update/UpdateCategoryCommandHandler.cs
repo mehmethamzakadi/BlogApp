@@ -3,8 +3,6 @@ using BlogApp.Application.Common.Caching;
 using BlogApp.Application.Features.Categories.Queries.GetById;
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
-using BlogApp.Domain.Constants;
-using BlogApp.Domain.Events.CategoryEvents;
 using BlogApp.Domain.Repositories;
 using MediatR;
 using IResult = BlogApp.Domain.Common.Results.IResult;
@@ -14,8 +12,7 @@ namespace BlogApp.Application.Features.Categories.Commands.Update;
 public sealed class UpdateCategoryCommandHandler(
     ICategoryRepository categoryRepository,
     ICacheService cacheService,
-    IUnitOfWork unitOfWork,
-    ICurrentUserService currentUserService) : IRequestHandler<UpdateCategoryCommand, IResult>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateCategoryCommand, IResult>
 {
     public async Task<IResult> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
     {
@@ -39,15 +36,8 @@ public sealed class UpdateCategoryCommandHandler(
             return new ErrorResult("Bu kategori adı zaten kullanılıyor!");
         }
 
-        category.Name = request.Name;
-        category.NormalizedName = normalizedName;
-
+        category.Update(request.Name);
         await categoryRepository.UpdateAsync(category);
-
-        // ✅ Outbox Pattern için SaveChanges'dan ÖNCE domain event'i tetikle
-        var actorId = currentUserService.GetCurrentUserId() ?? SystemUsers.SystemUserId;
-        category.AddDomainEvent(new CategoryUpdatedEvent(category.Id, category.Name, actorId));
-
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         await cacheService.Add(

@@ -1,5 +1,4 @@
-
-namespace BlogApp.Domain.Options;
+namespace BlogApp.Application.Options;
 
 public sealed class TelegramOptions
 {

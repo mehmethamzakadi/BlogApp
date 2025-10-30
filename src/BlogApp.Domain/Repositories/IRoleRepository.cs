@@ -5,7 +5,7 @@ using BlogApp.Domain.Entities;
 
 namespace BlogApp.Domain.Repositories;
 
-public interface IRoleRepository : IAsyncRepository<Role>, IRepository<Role>
+public interface IRoleRepository : IRepository<Role>
 {
     Task<Paginate<Role>> GetRoles(int index, int size, CancellationToken cancellationToken);
     Role? GetRoleById(Guid id);

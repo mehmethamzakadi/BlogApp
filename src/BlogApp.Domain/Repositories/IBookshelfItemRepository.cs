@@ -3,6 +3,6 @@ using BlogApp.Domain.Entities;
 
 namespace BlogApp.Domain.Repositories;
 
-public interface IBookshelfItemRepository : IAsyncRepository<BookshelfItem>, IRepository<BookshelfItem>
+public interface IBookshelfItemRepository : IRepository<BookshelfItem>
 {
 }

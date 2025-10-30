@@ -1,5 +1,4 @@
-
-namespace BlogApp.Domain.Options;
+namespace BlogApp.Infrastructure.Options;
 
 public sealed class PasswordResetOptions
 {

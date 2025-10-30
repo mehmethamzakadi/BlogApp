@@ -1,5 +1,5 @@
 using BlogApp.Application.Abstractions;
-using BlogApp.Domain.Options;
+using BlogApp.Infrastructure.Options;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Options;

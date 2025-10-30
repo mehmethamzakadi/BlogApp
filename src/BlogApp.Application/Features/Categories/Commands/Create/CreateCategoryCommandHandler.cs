@@ -3,9 +3,7 @@ using BlogApp.Application.Common.Caching;
 using BlogApp.Application.Features.Categories.Queries.GetById;
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
-using BlogApp.Domain.Constants;
 using BlogApp.Domain.Entities;
-using BlogApp.Domain.Events.CategoryEvents;
 using BlogApp.Domain.Repositories;
 using MediatR;
 using IResult = BlogApp.Domain.Common.Results.IResult;
@@ -15,8 +13,7 @@ namespace BlogApp.Application.Features.Categories.Commands.Create;
 public sealed class CreateCategoryCommandHandler(
     ICategoryRepository categoryRepository,
     ICacheService cache,
-    IUnitOfWork unitOfWork,
-    ICurrentUserService currentUserService) : IRequestHandler<CreateCategoryCommand, IResult>
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateCategoryCommand, IResult>
 {
     public async Task<IResult> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
     {
@@ -31,16 +28,8 @@ public sealed class CreateCategoryCommandHandler(
             return new ErrorResult("Bu kategori adı zaten mevcut!");
         }
 
-        var category = await categoryRepository.AddAsync(new Category
-        {
-            Name = request.Name,
-            NormalizedName = normalizedName
-        });
-
-        // ✅ Outbox Pattern için SaveChanges'dan ÖNCE domain event'i tetikle
-        var actorId = currentUserService.GetCurrentUserId() ?? SystemUsers.SystemUserId;
-        category.AddDomainEvent(new CategoryCreatedEvent(category.Id, category.Name, actorId));
-
+        var category = Category.Create(request.Name);
+        await categoryRepository.AddAsync(category);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         await cache.Add(

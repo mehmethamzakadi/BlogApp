@@ -6,7 +6,8 @@ using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Constants;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Exceptions;
-using BlogApp.Domain.Extentions;
+using BlogApp.Domain.Services;
+using BlogApp.Infrastructure.Extensions;
 using BlogApp.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
@@ -14,17 +15,37 @@ using System.Text;
 
 namespace BlogApp.Infrastructure.Services;
 
-public sealed class AuthService(
-    IUserRepository userRepository,
-    ITokenService tokenService,
-    IRefreshSessionRepository refreshSessionRepository,
-    IMailService mailService,
-    IPasswordHasher passwordHasher,
-    IUnitOfWork unitOfWork) : IAuthService
+public sealed class AuthService : IAuthService
 {
+    private readonly IUserRepository _userRepository;
+    private readonly IUserDomainService _userDomainService;
+    private readonly ITokenService _tokenService;
+    private readonly IRefreshSessionRepository _refreshSessionRepository;
+    private readonly IMailService _mailService;
+    private readonly IPasswordHasher _passwordHasher;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public AuthService(
+        IUserRepository userRepository,
+        IUserDomainService userDomainService,
+        ITokenService tokenService,
+        IRefreshSessionRepository refreshSessionRepository,
+        IMailService mailService,
+        IPasswordHasher passwordHasher,
+        IUnitOfWork unitOfWork)
+    {
+        _userRepository = userRepository;
+        _userDomainService = userDomainService;
+        _tokenService = tokenService;
+        _refreshSessionRepository = refreshSessionRepository;
+        _mailService = mailService;
+        _passwordHasher = passwordHasher;
+        _unitOfWork = unitOfWork;
+    }
+
     public async Task<IDataResult<LoginResponse>> LoginAsync(string email, string password, string? deviceId = null)
     {
-        User? user = await userRepository.FindByEmailAsync(email)
+        User? user = await _userRepository.FindByEmailAsync(email)
             ?? throw new AuthenticationErrorException();
 
         // Check if account is locked
@@ -40,7 +61,7 @@ public sealed class AuthService(
         }
 
         // Verify password
-        if (!await userRepository.CheckPasswordAsync(user, password))
+        if (!_userDomainService.VerifyPassword(user, password))
         {
             // Increment failed access count
             user.AccessFailedCount++;
@@ -51,11 +72,8 @@ public sealed class AuthService(
                 user.LockoutEnd = DateTimeOffset.UtcNow.AddMinutes(15);
             }
 
-            var failureUpdate = await userRepository.UpdateAsync(user);
-            if (failureUpdate.Success)
-            {
-                await SaveChangesWithConcurrencyHandlingAsync();
-            }
+            await _userRepository.UpdateAsync(user);
+            await SaveChangesWithConcurrencyHandlingAsync();
 
             throw new AuthenticationErrorException();
         }
@@ -63,15 +81,11 @@ public sealed class AuthService(
         // Reset failed access count on successful login
         user.AccessFailedCount = 0;
 
-        var authClaims = await tokenService.GetAuthClaims(user);
-        var accessToken = tokenService.CreateAccessToken(authClaims, user);
-        var refreshToken = tokenService.CreateRefreshToken();
+        var authClaims = await _tokenService.GetAuthClaims(user);
+        var accessToken = _tokenService.CreateAccessToken(authClaims, user);
+        var refreshToken = _tokenService.CreateRefreshToken();
 
-        var successUpdate = await userRepository.UpdateAsync(user);
-        if (!successUpdate.Success)
-        {
-            throw new AuthenticationErrorException(successUpdate.Message ?? "Kullanıcı güncelleme hatası.");
-        }
+        await _userRepository.UpdateAsync(user);
 
         var session = new RefreshSession
         {
@@ -86,7 +100,7 @@ public sealed class AuthService(
             CreatedById = SystemUsers.SystemUserId
         };
 
-        await refreshSessionRepository.AddAsync(session);
+        await _refreshSessionRepository.AddAsync(session);
         await SaveChangesWithConcurrencyHandlingAsync();
 
         var response = new LoginResponse(
@@ -109,7 +123,7 @@ public sealed class AuthService(
         }
 
         var tokenHash = HashRefreshToken(refreshToken);
-        var session = await refreshSessionRepository.GetByTokenHashAsync(tokenHash, includeDeleted: true);
+        var session = await _refreshSessionRepository.GetByTokenHashAsync(tokenHash, includeDeleted: true);
 
         if (session is null)
         {
@@ -137,7 +151,7 @@ public sealed class AuthService(
             throw new AuthenticationErrorException("Refresh token süresi dolmuş.");
         }
 
-        var user = await userRepository.FindByIdAsync(session.UserId)
+        var user = await _userRepository.FindByIdAsync(session.UserId)
             ?? throw new AuthenticationErrorException("Kullanıcı bulunamadı.");
 
         if (user.IsLockedOut())
@@ -145,9 +159,9 @@ public sealed class AuthService(
             throw new AuthenticationErrorException("Hesabınız kilitlenmiş.");
         }
 
-        var claims = await tokenService.GetAuthClaims(user);
-        var newAccess = tokenService.CreateAccessToken(claims, user);
-        var newRefresh = tokenService.CreateRefreshToken();
+        var claims = await _tokenService.GetAuthClaims(user);
+        var newAccess = _tokenService.CreateAccessToken(claims, user);
+        var newRefresh = _tokenService.CreateRefreshToken();
 
         session.Revoked = true;
         session.RevokedAt = DateTime.UtcNow;
@@ -170,7 +184,7 @@ public sealed class AuthService(
 
         session.ReplacedById = replacement.Id;
 
-        await refreshSessionRepository.AddAsync(replacement);
+        await _refreshSessionRepository.AddAsync(replacement);
         await SaveChangesWithConcurrencyHandlingAsync();
 
         var response = new LoginResponse(
@@ -193,7 +207,7 @@ public sealed class AuthService(
         }
 
         var tokenHash = HashRefreshToken(refreshToken);
-        var session = await refreshSessionRepository.GetByTokenHashAsync(tokenHash);
+        var session = await _refreshSessionRepository.GetByTokenHashAsync(tokenHash);
         if (session is null)
         {
             return;
@@ -210,24 +224,21 @@ public sealed class AuthService(
 
     public async Task PasswordResetAsync(string email)
     {
-        User? user = await userRepository.FindByEmailAsync(email);
+        User? user = await _userRepository.FindByEmailAsync(email);
         if (user != null)
         {
             // Rastgele token oluştur
-            string resetToken = passwordHasher.GeneratePasswordResetToken();
+            string resetToken = _passwordHasher.GeneratePasswordResetToken();
             
             // Token'ı hash'le ve veritabanına hash'i sakla
             string tokenHash = HashPasswordResetToken(resetToken);
             user.PasswordResetToken = tokenHash;
             user.PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(1);
 
-            var updateResult = await userRepository.UpdateAsync(user);
-            if (updateResult.Success)
-            {
-                await SaveChangesWithConcurrencyHandlingAsync();
-                // Kullanıcıya orijinal token'ı gönder (hash'i değil!)
-                await mailService.SendPasswordResetMailAsync(email, user.Id, resetToken.UrlEncode());
-            }
+            await _userRepository.UpdateAsync(user);
+            await SaveChangesWithConcurrencyHandlingAsync();
+            // Kullanıcıya orijinal token'ı gönder (hash'i değil!)
+            await _mailService.SendPasswordResetMailAsync(email, user.Id, resetToken.UrlEncode());
         }
     }
 
@@ -235,7 +246,7 @@ public sealed class AuthService(
     {
         try
         {
-            await unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
         }
         catch (DbUpdateConcurrencyException ex)
         {
@@ -246,7 +257,7 @@ public sealed class AuthService(
 
     private async Task RevokeAllSessionsAsync(Guid userId, string reason)
     {
-        var sessions = await refreshSessionRepository.GetActiveSessionsAsync(userId);
+        var sessions = await _refreshSessionRepository.GetActiveSessionsAsync(userId);
         foreach (var session in sessions)
         {
             session.Revoked = true;
@@ -264,7 +275,7 @@ public sealed class AuthService(
             return new SuccessDataResult<bool>(false);
         }
 
-        User? user = await userRepository.FindByIdAsync(userIdGuid);
+        User? user = await _userRepository.FindByIdAsync(userIdGuid);
         if (user != null && user.PasswordResetToken != null && user.PasswordResetTokenExpiry != null)
         {
                 resetToken = resetToken.UrlDecode();

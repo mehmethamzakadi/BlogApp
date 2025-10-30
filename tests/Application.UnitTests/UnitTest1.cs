@@ -20,9 +20,8 @@ public class CreateCategoryCommandHandlerTests
 
         var cacheMock = new Mock<ICacheService>();
         var unitOfWorkMock = new Mock<BlogApp.Domain.Common.IUnitOfWork>();
-        var currentUserServiceMock = new Mock<ICurrentUserService>();
 
-        var handler = new CreateCategoryCommandHandler(repositoryMock.Object, cacheMock.Object, unitOfWorkMock.Object, currentUserServiceMock.Object);
+        var handler = new CreateCategoryCommandHandler(repositoryMock.Object, cacheMock.Object, unitOfWorkMock.Object);
         IResult result = await handler.Handle(new CreateCategoryCommand("Test"), CancellationToken.None);
 
         Assert.That(result.Success, Is.False);
@@ -52,9 +51,7 @@ public class CreateCategoryCommandHandlerTests
        .Setup(uow => uow.SaveChangesAsync(It.IsAny<CancellationToken>()))
          .ReturnsAsync(1);
 
-        var currentUserServiceMock = new Mock<ICurrentUserService>();
-
-        var handler = new CreateCategoryCommandHandler(repositoryMock.Object, cacheMock.Object, unitOfWorkMock.Object, currentUserServiceMock.Object);
+        var handler = new CreateCategoryCommandHandler(repositoryMock.Object, cacheMock.Object, unitOfWorkMock.Object);
         IResult result = await handler.Handle(new CreateCategoryCommand("Test"), CancellationToken.None);
 
         Assert.That(result.Success, Is.True);
@@ -82,9 +79,7 @@ public class CreatePostCommandHandlerTests
                     .Setup(uow => uow.SaveChangesAsync(It.IsAny<CancellationToken>()))
                  .ReturnsAsync(1);
 
-        var currentUserServiceMock = new Mock<ICurrentUserService>();
-
-        var handler = new CreatePostCommandHandler(repositoryMock.Object, categoryRepositoryMock.Object, unitOfWorkMock.Object, currentUserServiceMock.Object);
+        var handler = new CreatePostCommandHandler(repositoryMock.Object, categoryRepositoryMock.Object, unitOfWorkMock.Object);
         var testCategoryId = Guid.NewGuid();
         var command = new CreatePostCommand("Title", "Body", "Summary", "thumb", true, testCategoryId);
 

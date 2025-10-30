@@ -3,7 +3,7 @@ using BlogApp.Domain.Entities;
 
 namespace BlogApp.Domain.Repositories;
 
-public interface IRefreshSessionRepository : IAsyncRepository<RefreshSession>, IRepository<RefreshSession>
+public interface IRefreshSessionRepository : IRepository<RefreshSession>
 {
     Task<RefreshSession?> GetByTokenHashAsync(string tokenHash, bool includeDeleted = false, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<RefreshSession>> GetActiveSessionsAsync(Guid userId, CancellationToken cancellationToken = default);

@@ -37,4 +37,40 @@ public sealed class Role : BaseEntity
     /// Bu role sahip kullanıcılar
     /// </summary>
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+
+    public static Role Create(string name, string? description = null)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Role name cannot be empty", nameof(name));
+
+        var role = new Role
+        {
+            Name = name,
+            NormalizedName = name.ToUpperInvariant(),
+            Description = description
+        };
+
+        role.AddDomainEvent(new Domain.Events.RoleEvents.RoleCreatedEvent(role.Id, name, role.CreatedById ?? Guid.Empty));
+        return role;
+    }
+
+    public void Update(string name, string? description = null)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Role name cannot be empty", nameof(name));
+
+        Name = name;
+        NormalizedName = name.ToUpperInvariant();
+        Description = description;
+
+        AddDomainEvent(new Domain.Events.RoleEvents.RoleUpdatedEvent(Id, name, UpdatedById ?? Guid.Empty));
+    }
+
+    public void Delete()
+    {
+        if (IsDeleted)
+            throw new InvalidOperationException("Role is already deleted");
+
+        AddDomainEvent(new Domain.Events.RoleEvents.RoleDeletedEvent(Id, Name, UpdatedById ?? Guid.Empty));
+    }
 }

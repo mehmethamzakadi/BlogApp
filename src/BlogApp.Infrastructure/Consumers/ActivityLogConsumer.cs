@@ -46,12 +46,11 @@ public class ActivityLogConsumer : IConsumer<ActivityLogCreatedIntegrationEvent>
                 EntityId = message.EntityId,
                 Title = message.Title,
                 Details = message.Details,
-                UserId = message.UserId,
+                UserId = message.UserId ?? Guid.Empty,
                 Timestamp = message.Timestamp
             };
 
-            await _activityLogRepository.AddAsync(activityLog);
-            await _unitOfWork.SaveChangesAsync(context.CancellationToken);
+            await _activityLogRepository.AddAsync(activityLog, context.CancellationToken);
 
             _logger.LogInformation(
                 "Successfully processed ActivityLog: {ActivityType} for {EntityType}",

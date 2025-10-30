@@ -1,5 +1,5 @@
 using BlogApp.Application.Behaviors;
-using BlogApp.Domain.Options;
+using BlogApp.Application.Options;
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,6 +19,7 @@ namespace BlogApp.Application
             services.AddMediatR(configuration =>
             {
                 configuration.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+                configuration.AddOpenBehavior(typeof(ValidationBehavior<,>));
                 configuration.AddOpenBehavior(typeof(LoggingBehavior<,>));
             });
 

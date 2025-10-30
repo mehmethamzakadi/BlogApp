@@ -6,7 +6,7 @@ namespace BlogApp.Domain.Repositories;
 /// <summary>
 /// Permission entity için repository interface
 /// </summary>
-public interface IPermissionRepository : IAsyncRepository<Permission>, IRepository<Permission>
+public interface IPermissionRepository : IRepository<Permission>
 {
     /// <summary>
     /// Belirli rol ID'lerine ait tüm permission'ları getirir

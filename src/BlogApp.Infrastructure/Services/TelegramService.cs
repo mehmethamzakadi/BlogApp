@@ -1,5 +1,5 @@
 using BlogApp.Application.Abstractions;
-using BlogApp.Domain.Options;
+using BlogApp.Application.Options;
 using Microsoft.Extensions.Options;
 using Telegram.Bot;
 using Telegram.Bot.Types;

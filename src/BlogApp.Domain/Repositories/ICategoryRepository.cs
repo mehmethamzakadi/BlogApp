@@ -3,6 +3,6 @@ using BlogApp.Domain.Entities;
 
 namespace BlogApp.Domain.Repositories;
 
-public interface ICategoryRepository : IAsyncRepository<Category>, IRepository<Category>
+public interface ICategoryRepository : IRepository<Category>
 {
 }

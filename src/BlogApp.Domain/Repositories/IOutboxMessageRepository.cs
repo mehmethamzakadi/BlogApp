@@ -3,7 +3,7 @@ using BlogApp.Domain.Entities;
 
 namespace BlogApp.Domain.Repositories;
 
-public interface IOutboxMessageRepository : IAsyncRepository<OutboxMessage>, IRepository<OutboxMessage>
+public interface IOutboxMessageRepository : IRepository<OutboxMessage>
 {
     /// <summary>
     /// İşlenmeye hazır, işlenmemiş mesajları getirir

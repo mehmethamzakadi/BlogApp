@@ -1,4 +1,5 @@
 using BlogApp.Domain.Common;
+using BlogApp.Domain.ValueObjects;
 
 namespace BlogApp.Domain.Entities;
 
@@ -8,25 +9,44 @@ namespace BlogApp.Domain.Entities;
 /// </summary>
 public sealed class User : BaseEntity
 {
+    private string _userName = default!;
+    private string _email = default!;
+
     /// <summary>
     /// Kullanıcı adı (benzersiz olmalı)
     /// </summary>
-    public required string UserName { get; set; }
+    public string UserName
+    {
+        get => _userName;
+        set
+        {
+            var userNameVO = ValueObjects.UserName.Create(value);
+            _userName = userNameVO.Value;
+        }
+    }
 
     /// <summary>
     /// Normalize edilmiş kullanıcı adı (case-insensitive arama için)
     /// </summary>
-    public required string NormalizedUserName { get; set; }
+    public string NormalizedUserName { get; private set; } = string.Empty;
 
     /// <summary>
     /// Email adresi (benzersiz olmalı)
     /// </summary>
-    public required string Email { get; set; }
+    public string Email
+    {
+        get => _email;
+        set
+        {
+            var emailVO = ValueObjects.Email.Create(value);
+            _email = emailVO.Value;
+        }
+    }
 
     /// <summary>
     /// Normalize edilmiş email (case-insensitive arama için)
     /// </summary>
-    public required string NormalizedEmail { get; set; }
+    public string NormalizedEmail { get; private set; } = string.Empty;
 
     /// <summary>
     /// Email adresinin doğrulanıp doğrulanmadığı
@@ -100,5 +120,35 @@ public sealed class User : BaseEntity
     public bool IsLockedOut()
     {
         return LockoutEnabled && LockoutEnd.HasValue && LockoutEnd.Value > DateTimeOffset.UtcNow;
+    }
+
+    public static User Create(string userName, string email, string passwordHash)
+    {
+        var user = new User
+        {
+            UserName = userName,
+            Email = email,
+            PasswordHash = passwordHash,
+            EmailConfirmed = false
+        };
+
+        user.AddDomainEvent(new Domain.Events.UserEvents.UserCreatedEvent(user.Id, userName, email, user.CreatedById ?? Guid.Empty));
+        return user;
+    }
+
+    public void Update(string userName, string email)
+    {
+        UserName = userName;
+        Email = email;
+
+        AddDomainEvent(new Domain.Events.UserEvents.UserUpdatedEvent(Id, userName, email, UpdatedById ?? Guid.Empty));
+    }
+
+    public void Delete()
+    {
+        if (IsDeleted)
+            throw new InvalidOperationException("User is already deleted");
+
+        AddDomainEvent(new Domain.Events.UserEvents.UserDeletedEvent(Id, UserName, Email, UpdatedById));
     }
 }

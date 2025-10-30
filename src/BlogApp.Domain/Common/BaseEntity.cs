@@ -18,7 +18,7 @@ public abstract class BaseEntity : IEntityTimestamps, IHasDomainEvents
     /// <summary>
     /// Entity'yi oluşturan kullanıcının ID'si
     /// </summary>
-    public Guid CreatedById { get; set; }
+    public Guid? CreatedById { get; set; }
 
     /// <summary>
     /// Entity'nin son güncellenme tarihi

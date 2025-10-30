@@ -1,8 +1,5 @@
-using BlogApp.Application.Abstractions;
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
-using BlogApp.Domain.Constants;
-using BlogApp.Domain.Events.PostEvents;
 using BlogApp.Domain.Repositories;
 using MediatR;
 using IResult = BlogApp.Domain.Common.Results.IResult;
@@ -12,8 +9,7 @@ namespace BlogApp.Application.Features.Posts.Commands.Update;
 public sealed class UpdatePostCommandHandler(
     IPostRepository postRepository,
     ICategoryRepository categoryRepository,
-    IUnitOfWork unitOfWork,
-    ICurrentUserService currentUserService) : IRequestHandler<UpdatePostCommand, IResult>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdatePostCommand, IResult>
 {
     public async Task<IResult> Handle(UpdatePostCommand request, CancellationToken cancellationToken)
     {
@@ -36,19 +32,25 @@ public sealed class UpdatePostCommandHandler(
             }
         }
 
-        entity.Title = request.Title;
-        entity.Body = request.Body;
-        entity.Summary = request.Summary;
-        entity.Thumbnail = request.Thumbnail;
-        entity.IsPublished = request.IsPublished;
-        entity.CategoryId = request.CategoryId;
+        entity.Update(
+            request.Title,
+            request.Body,
+            request.Summary,
+            request.CategoryId,
+            request.Thumbnail
+        );
+
+        // IsPublished durumunu güncelle
+        if (request.IsPublished && !entity.IsPublished)
+        {
+            entity.Publish();
+        }
+        else if (!request.IsPublished && entity.IsPublished)
+        {
+            entity.Unpublish();
+        }
 
         await postRepository.UpdateAsync(entity);
-
-        // ✅ Outbox Pattern için SaveChanges'dan ÖNCE domain event'i tetikle
-        var actorId = currentUserService.GetCurrentUserId() ?? SystemUsers.SystemUserId;
-        entity.AddDomainEvent(new PostUpdatedEvent(entity.Id, entity.Title, actorId));
-
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new SuccessResult("Post bilgisi başarıyla güncellendi.");

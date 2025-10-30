@@ -1,8 +1,5 @@
-using BlogApp.Application.Abstractions;
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
-using BlogApp.Domain.Entities;
-using BlogApp.Domain.Events.UserEvents;
 using BlogApp.Domain.Repositories;
 using MediatR;
 using IResult = BlogApp.Domain.Common.Results.IResult;
@@ -12,26 +9,22 @@ namespace BlogApp.Application.Features.Users.Commands.Update;
 public sealed class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, IResult>
 {
     private readonly IUserRepository _userRepository;
-    private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
 
     public UpdateUserCommandHandler(
         IUserRepository userRepository,
-        ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork)
     {
         _userRepository = userRepository;
-        _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
     }
 
     public async Task<IResult> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
     {
-        User? user = _userRepository.FindById(request.Id);
+        var user = await _userRepository.FindByIdAsync(request.Id);
         if (user is null)
             return new ErrorResult("Kullanıcı Bilgisi Bulunamadı!");
 
-        // Email değiştiriliyorsa duplicate kontrolü (mevcut kullanıcı hariç)
         if (user.Email != request.Email)
         {
             var existingEmail = await _userRepository.FindByEmailAsync(request.Email);
@@ -39,7 +32,6 @@ public sealed class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand
                 return new ErrorResult("Bu e-posta adresi zaten kullanılıyor!");
         }
 
-        // Username değiştiriliyorsa duplicate kontrolü (mevcut kullanıcı hariç)
         if (user.UserName != request.UserName)
         {
             var existingUserName = await _userRepository.FindByUserNameAsync(request.UserName);
@@ -47,18 +39,8 @@ public sealed class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand
                 return new ErrorResult("Bu kullanıcı adı zaten kullanılıyor!");
         }
 
-        user.Email = request.Email;
-        user.UserName = request.UserName;
-
-        var response = await _userRepository.UpdateAsync(user);
-        if (!response.Success)
-            return response;
-
-        // ✅ User artık AddDomainEvent() metoduna sahip (BaseEntity üzerinden)
-        var currentUserId = _currentUserService.GetCurrentUserId();
-        user.AddDomainEvent(new UserUpdatedEvent(user.Id, user.UserName!, user.Email!, currentUserId));
-
-        // UnitOfWork SaveChanges sırasında domain event'leri otomatik olarak Outbox'a kaydeder
+        user.Update(request.UserName, request.Email);
+        await _userRepository.UpdateAsync(user);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new SuccessResult("Kullanıcı bilgisi başarıyla güncellendi.");

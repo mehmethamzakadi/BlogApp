@@ -19,9 +19,7 @@ public class UserSeed : IEntityTypeConfiguration<User>
             {
                 Id = Guid.Parse("00000000-0000-0000-0000-000000000001"),
                 UserName = "admin",
-                NormalizedUserName = "ADMIN",
                 Email = "admin@admin.com",
-                NormalizedEmail = "ADMIN@ADMIN.COM",
                 EmailConfirmed = true,
                 PasswordHash = DefaultPasswordHash,
                 SecurityStamp = "b1a1d25f-8a7e-4e9a-bc55-8dca5bfa1234",
@@ -38,10 +36,8 @@ public class UserSeed : IEntityTypeConfiguration<User>
             new User
             {
                 Id = Guid.Parse("00000000-0000-0000-0000-000000000002"),
-                UserName = "editor.lara",
-                NormalizedUserName = "EDITOR.LARA",
+                UserName = "editor_lara",
                 Email = "editor@blogapp.dev",
-                NormalizedEmail = "EDITOR@BLOGAPP.DEV",
                 EmailConfirmed = true,
                 PasswordHash = DefaultPasswordHash,
                 SecurityStamp = "0fa3f1d8-e77f-4aa9-9f12-6f8c7f90a002",
@@ -58,10 +54,8 @@ public class UserSeed : IEntityTypeConfiguration<User>
             new User
             {
                 Id = Guid.Parse("00000000-0000-0000-0000-000000000003"),
-                UserName = "moderator.selim",
-                NormalizedUserName = "MODERATOR.SELIM",
+                UserName = "moderator_selim",
                 Email = "moderator@blogapp.dev",
-                NormalizedEmail = "MODERATOR@BLOGAPP.DEV",
                 EmailConfirmed = true,
                 PasswordHash = DefaultPasswordHash,
                 SecurityStamp = "7c1dbdbb-3d91-45a2-8578-5392cda53875",
@@ -78,10 +72,8 @@ public class UserSeed : IEntityTypeConfiguration<User>
             new User
             {
                 Id = Guid.Parse("00000000-0000-0000-0000-000000000004"),
-                UserName = "author.melike",
-                NormalizedUserName = "AUTHOR.MELIKE",
+                UserName = "author_melike",
                 Email = "author@blogapp.dev",
-                NormalizedEmail = "AUTHOR@BLOGAPP.DEV",
                 EmailConfirmed = true,
                 PasswordHash = DefaultPasswordHash,
                 SecurityStamp = "e8de6375-bbb3-4ac6-a5dd-8530b7072d86",

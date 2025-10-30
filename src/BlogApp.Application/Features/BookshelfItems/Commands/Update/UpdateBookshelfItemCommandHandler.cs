@@ -1,10 +1,6 @@
-using BlogApp.Application.Abstractions;
 using BlogApp.Application.Abstractions.Images;
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
-using BlogApp.Domain.Constants;
-using BlogApp.Domain.Entities;
-using BlogApp.Domain.Events.BookshelfItemEvents;
 using BlogApp.Domain.Repositories;
 using MediatR;
 
@@ -13,54 +9,49 @@ namespace BlogApp.Application.Features.BookshelfItems.Commands.Update;
 public sealed class UpdateBookshelfItemCommandHandler(
     IBookshelfItemRepository bookshelfItemRepository,
     IUnitOfWork unitOfWork,
-    ICurrentUserService currentUserService,
     IImageStorageService imageStorageService) : IRequestHandler<UpdateBookshelfItemCommand, IResult>
 {
     public async Task<IResult> Handle(UpdateBookshelfItemCommand request, CancellationToken cancellationToken)
     {
-        BookshelfItem? item = await bookshelfItemRepository.GetAsync(x => x.Id == request.Id, cancellationToken: cancellationToken);
+        var item = await bookshelfItemRepository.GetAsync(x => x.Id == request.Id, cancellationToken: cancellationToken);
         if (item is null)
-        {
             return new ErrorResult("Kitap kaydı bulunamadı.");
-        }
-
-        item.Title = request.Title.Trim();
-        item.Author = NormalizeOptionalText(request.Author);
-        item.Publisher = NormalizeOptionalText(request.Publisher);
-        item.PageCount = request.PageCount is > 0 ? request.PageCount : null;
-        item.IsRead = request.IsRead;
-        item.Notes = NormalizeOptionalText(request.Notes);
-        item.ReadDate = NormalizeReadDate(request.ReadDate, request.IsRead);
 
         var originalImageUrl = item.ImageUrl;
+        string? newImageUrl = null;
 
         if (request.RemoveImage)
         {
             if (!string.IsNullOrWhiteSpace(originalImageUrl))
-            {
                 await imageStorageService.DeleteAsync(originalImageUrl, cancellationToken);
-            }
-
-            item.ImageUrl = null;
         }
         else
         {
             var normalizedImageUrl = NormalizeOptionalText(request.ImageUrl);
-
             if (!string.IsNullOrWhiteSpace(normalizedImageUrl) &&
                 !string.Equals(normalizedImageUrl, originalImageUrl, StringComparison.OrdinalIgnoreCase))
             {
                 if (!string.IsNullOrWhiteSpace(originalImageUrl))
-                {
                     await imageStorageService.DeleteAsync(originalImageUrl, cancellationToken);
-                }
-
-                item.ImageUrl = normalizedImageUrl;
+                newImageUrl = normalizedImageUrl;
+            }
+            else
+            {
+                newImageUrl = originalImageUrl;
             }
         }
 
-        var actorId = currentUserService.GetCurrentUserId() ?? SystemUsers.SystemUserId;
-        item.AddDomainEvent(new BookshelfItemUpdatedEvent(item.Id, item.Title, actorId));
+        item.Update(
+            request.Title.Trim(),
+            NormalizeOptionalText(request.Author),
+            NormalizeOptionalText(request.Publisher),
+            request.PageCount is > 0 ? request.PageCount : null,
+            NormalizeOptionalText(request.Notes),
+            newImageUrl
+        );
+
+        item.IsRead = request.IsRead;
+        item.ReadDate = NormalizeReadDate(request.ReadDate, request.IsRead);
 
         await bookshelfItemRepository.UpdateAsync(item);
         await unitOfWork.SaveChangesAsync(cancellationToken);

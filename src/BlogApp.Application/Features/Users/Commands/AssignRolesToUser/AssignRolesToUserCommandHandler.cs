@@ -3,6 +3,7 @@ using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Events.UserEvents;
 using BlogApp.Domain.Repositories;
+using BlogApp.Domain.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using IResult = BlogApp.Domain.Common.Results.IResult;
@@ -13,17 +14,20 @@ public class AssignRolesToUserCommandHandler : IRequestHandler<AssignRolesToUser
 {
     private readonly IUserRepository _userRepository;
     private readonly IRoleRepository _roleRepository;
+    private readonly IUserDomainService _userDomainService;
     private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
 
     public AssignRolesToUserCommandHandler(
         IUserRepository userRepository,
         IRoleRepository roleRepository,
+        IUserDomainService userDomainService,
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork)
     {
         _userRepository = userRepository;
         _roleRepository = roleRepository;
+        _userDomainService = userDomainService;
         _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
     }
@@ -54,35 +58,33 @@ public class AssignRolesToUserCommandHandler : IRequestHandler<AssignRolesToUser
             return new SuccessResult("Roller zaten güncel");
         }
 
-        // Silinecek rollerin isimlerini al
+        // Silinecek rolleri al
         if (rolesToRemove.Any())
         {
-            var roleNamesToRemove = await _roleRepository.Query()
+            var rolesToRemoveEntities = await _roleRepository.Query()
                 .Where(r => rolesToRemove.Contains(r.Id))
-                .Select(r => r.Name!)
                 .ToListAsync(cancellationToken);
 
-            var removeResult = await _userRepository.RemoveFromRolesAsync(user, roleNamesToRemove.ToArray());
+            var removeResult = _userDomainService.RemoveFromRoles(user, rolesToRemoveEntities);
             if (!removeResult.Success)
             {
                 return new ErrorResult("Roller kaldırılamadı: " + removeResult.Message);
             }
         }
 
-        // Eklenecek rollerin isimlerini al
+        // Eklenecek rolleri al
         if (rolesToAdd.Any())
         {
-            var roleNamesToAdd = await _roleRepository.Query()
+            var rolesToAddEntities = await _roleRepository.Query()
                 .Where(r => rolesToAdd.Contains(r.Id))
-                .Select(r => r.Name!)
                 .ToListAsync(cancellationToken);
 
-            if (roleNamesToAdd.Count != rolesToAdd.Count)
+            if (rolesToAddEntities.Count != rolesToAdd.Count)
             {
                 return new ErrorResult("Bazı roller bulunamadı");
             }
 
-            var addResult = await _userRepository.AddToRolesAsync(user, roleNamesToAdd.ToArray());
+            var addResult = _userDomainService.AddToRoles(user, rolesToAddEntities);
             if (!addResult.Success)
             {
                 return new ErrorResult("Roller eklenemedi: " + addResult.Message);

@@ -3,7 +3,8 @@ using BlogApp.Application.Abstractions.Identity;
 using BlogApp.Application.Abstractions.Images;
 using BlogApp.Domain.Constants;
 using BlogApp.Domain.Entities;
-using BlogApp.Domain.Options;
+using BlogApp.Domain.Services;
+using BlogApp.Infrastructure.Options;
 using BlogApp.Infrastructure.Authorization;
 using BlogApp.Infrastructure.Consumers;
 using BlogApp.Infrastructure.Services;
@@ -18,7 +19,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using TokenOptions = BlogApp.Domain.Options.TokenOptions;
+using TokenOptions = BlogApp.Application.Options.TokenOptions;
 
 namespace BlogApp.Infrastructure
 {
@@ -27,9 +28,9 @@ namespace BlogApp.Infrastructure
         public static IServiceCollection AddConfigureInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<TokenOptions>(configuration.GetSection(TokenOptions.SectionName));
+            services.Configure<Application.Options.TelegramOptions>(configuration.GetSection(Application.Options.TelegramOptions.SectionName));
             services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
             services.Configure<PasswordResetOptions>(configuration.GetSection(PasswordResetOptions.SectionName));
-            services.Configure<TelegramOptions>(configuration.GetSection(TelegramOptions.SectionName));
             services.Configure<RabbitMqOptions>(configuration.GetSection(RabbitMqOptions.SectionName));
             services.Configure<ImageStorageOptions>(configuration.GetSection(ImageStorageOptions.SectionName));
 
@@ -155,6 +156,7 @@ namespace BlogApp.Infrastructure
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IImageStorageService, ImageStorageService>();
+            services.AddScoped<IUserDomainService, UserDomainService>();
 
             // Authorization
             services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();

@@ -3,6 +3,6 @@ using BlogApp.Domain.Entities;
 
 namespace BlogApp.Domain.Repositories;
 
-public interface IImageRepository : IAsyncRepository<Image>, IRepository<Image>
+public interface IImageRepository : IRepository<Image>
 {
 }

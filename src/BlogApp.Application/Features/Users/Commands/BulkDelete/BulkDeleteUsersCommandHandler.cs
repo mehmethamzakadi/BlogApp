@@ -39,23 +39,9 @@ public class BulkDeleteUsersCommandHandler : IRequestHandler<BulkDeleteUsersComm
                     continue;
                 }
 
-                // ✅ Silme işleminden ÖNCE domain event'i tetikle
-                var userName = user.UserName ?? "";
-                var userEmail = user.Email ?? "";
-                var currentUserId = _currentUserService.GetCurrentUserId();
-                user.AddDomainEvent(new UserDeletedEvent(userId, userName, userEmail, currentUserId));
-
-                var result = await _userRepository.DeleteUserAsync(user);
-
-                if (result.Success)
-                {
-                    response.DeletedCount++;
-                }
-                else
-                {
-                    response.Errors.Add($"Kullanıcı silinemedi (ID {userId}): {result.Message}");
-                    response.FailedCount++;
-                }
+                user.Delete();
+                await _userRepository.DeleteAsync(user);
+                response.DeletedCount++;
             }
             catch (Exception ex)
             {

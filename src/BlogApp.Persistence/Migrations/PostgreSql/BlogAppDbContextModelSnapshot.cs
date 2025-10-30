@@ -3,20 +3,17 @@ using System;
 using BlogApp.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace BlogApp.Persistence.Migrations
+namespace BlogApp.Persistence.Migrations.PostgreSql
 {
     [DbContext(typeof(BlogAppDbContext))]
-    [Migration("20251028161848_Init")]
-    partial class Init
+    partial class BlogAppDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -36,15 +33,6 @@ namespace BlogApp.Persistence.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<Guid>("CreatedById")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("Details")
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)");
@@ -57,9 +45,6 @@ namespace BlogApp.Persistence.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("timestamp with time zone");
 
@@ -68,13 +53,7 @@ namespace BlogApp.Persistence.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
-                    b.Property<Guid?>("UpdatedById")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("UserId")
+                    b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
@@ -100,7 +79,7 @@ namespace BlogApp.Persistence.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
 
-                    b.Property<Guid>("CreatedById")
+                    b.Property<Guid?>("CreatedById")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDate")
@@ -167,7 +146,7 @@ namespace BlogApp.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CreatedById")
+                    b.Property<Guid?>("CreatedById")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDate")
@@ -279,7 +258,7 @@ namespace BlogApp.Persistence.Migrations
                         .HasMaxLength(300)
                         .HasColumnType("character varying(300)");
 
-                    b.Property<Guid>("CreatedById")
+                    b.Property<Guid?>("CreatedById")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDate")
@@ -368,7 +347,7 @@ namespace BlogApp.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CreatedById")
+                    b.Property<Guid?>("CreatedById")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDate")
@@ -421,7 +400,7 @@ namespace BlogApp.Persistence.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("CreatedById")
+                    b.Property<Guid?>("CreatedById")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDate")
@@ -483,7 +462,7 @@ namespace BlogApp.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CreatedById")
+                    b.Property<Guid?>("CreatedById")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDate")
@@ -986,7 +965,7 @@ namespace BlogApp.Persistence.Migrations
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CreatedById")
+                    b.Property<Guid?>("CreatedById")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDate")
@@ -1042,7 +1021,7 @@ namespace BlogApp.Persistence.Migrations
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000001"),
-                            Body = "OpenTelemetry Collector, distributed tracing ve yapılandırılmış logging birleştiğinde minimal API'ler üretim ortamında şeffaf hâle geliyor.\nBu rehberde ActivitySource, Meter ve TraceId bağlamlarını nasıl kodladığımızı adım adım ele alıyoruz.\nAyrıca Aspire Dashboard ile gecikme ve hata oranlarını anlık izlemenin püf noktalarını paylaşıyoruz.",
+                            Body = "OpenTelemetry Collector, distributed tracing ve yapılandırılmış logging birleştiğinde minimal API'ler üretim ortamında şeffaf hâle geliyor.\r\nBu rehberde ActivitySource, Meter ve TraceId bağlamlarını nasıl kodladığımızı adım adım ele alıyoruz.\r\nAyrıca Aspire Dashboard ile gecikme ve hata oranlarını anlık izlemenin püf noktalarını paylaşıyoruz.",
                             CategoryId = new Guid("10000000-0000-0000-0000-000000000001"),
                             CreatedById = new Guid("00000000-0000-0000-0000-000000000002"),
                             CreatedDate = new DateTime(2025, 9, 28, 8, 30, 0, 0, DateTimeKind.Utc),
@@ -1055,7 +1034,7 @@ namespace BlogApp.Persistence.Migrations
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000002"),
-                            Body = "SaaS uygulamalarında sorgu optimizasyonu tenant bazında indeksleme ile başlıyor.\nModel seeding, global query filter'lar ve concurrency token'ları üzerinden performans analizleri paylaşıyoruz.\nAyrıca Npgsql provider'ı ile partitioned table senaryolarını örneklendiriyoruz.",
+                            Body = "SaaS uygulamalarında sorgu optimizasyonu tenant bazında indeksleme ile başlıyor.\r\nModel seeding, global query filter'lar ve concurrency token'ları üzerinden performans analizleri paylaşıyoruz.\r\nAyrıca Npgsql provider'ı ile partitioned table senaryolarını örneklendiriyoruz.",
                             CategoryId = new Guid("10000000-0000-0000-0000-000000000002"),
                             CreatedById = new Guid("00000000-0000-0000-0000-000000000004"),
                             CreatedDate = new DateTime(2025, 10, 2, 9, 15, 0, 0, DateTimeKind.Utc),
@@ -1068,7 +1047,7 @@ namespace BlogApp.Persistence.Migrations
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000003"),
-                            Body = "GitOps, manifest kaynağını tek gerçeğin kaynağına dönüştürerek roll-forward ve roll-back süreçlerini sadeleştiriyor.\nFluxCD ile progressive delivery, ArgoCD ile health check politika tanımlarını örnek YAML dosyalarıyla açıklıyoruz.\nPipeline gözlemlenebilirliği için Prometheus ve Grafana entegrasyonlarını da ekliyoruz.",
+                            Body = "GitOps, manifest kaynağını tek gerçeğin kaynağına dönüştürerek roll-forward ve roll-back süreçlerini sadeleştiriyor.\r\nFluxCD ile progressive delivery, ArgoCD ile health check politika tanımlarını örnek YAML dosyalarıyla açıklıyoruz.\r\nPipeline gözlemlenebilirliği için Prometheus ve Grafana entegrasyonlarını da ekliyoruz.",
                             CategoryId = new Guid("10000000-0000-0000-0000-000000000003"),
                             CreatedById = new Guid("00000000-0000-0000-0000-000000000002"),
                             CreatedDate = new DateTime(2025, 10, 5, 10, 45, 0, 0, DateTimeKind.Utc),
@@ -1081,7 +1060,7 @@ namespace BlogApp.Persistence.Migrations
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000004"),
-                            Body = "Mesajlaşma altyapısı seçiminde gereksinimleri segmentlere ayırmak kritik.\nRabbitMQ routing esnekliği sağlar; Kafka ise sıralı event log ile akış analitiğine güç katar.\nMakale boyunca tüketici grupları, dead-letter stratejileri ve metrik takip yöntemlerini detaylandırıyoruz.",
+                            Body = "Mesajlaşma altyapısı seçiminde gereksinimleri segmentlere ayırmak kritik.\r\nRabbitMQ routing esnekliği sağlar; Kafka ise sıralı event log ile akış analitiğine güç katar.\r\nMakale boyunca tüketici grupları, dead-letter stratejileri ve metrik takip yöntemlerini detaylandırıyoruz.",
                             CategoryId = new Guid("10000000-0000-0000-0000-000000000004"),
                             CreatedById = new Guid("00000000-0000-0000-0000-000000000004"),
                             CreatedDate = new DateTime(2025, 10, 12, 15, 0, 0, 0, DateTimeKind.Utc),
@@ -1094,7 +1073,7 @@ namespace BlogApp.Persistence.Migrations
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000005"),
-                            Body = "Tracing zincirleri, metrik korelasyonları ve yapılandırılmış log'lar aynı veri modelinde buluştuğunda kök neden analizi hızlanıyor.\nBu makalede collector konfigürasyonlarını, OTLP protokolünü ve Prometheus remote write senaryolarını harmanlıyoruz.\nEk olarak, kullanıcı segmenti bazlı alert kurallarına dair pratik şablonlar sunuyoruz.",
+                            Body = "Tracing zincirleri, metrik korelasyonları ve yapılandırılmış log'lar aynı veri modelinde buluştuğunda kök neden analizi hızlanıyor.\r\nBu makalede collector konfigürasyonlarını, OTLP protokolünü ve Prometheus remote write senaryolarını harmanlıyoruz.\r\nEk olarak, kullanıcı segmenti bazlı alert kurallarına dair pratik şablonlar sunuyoruz.",
                             CategoryId = new Guid("10000000-0000-0000-0000-000000000005"),
                             CreatedById = new Guid("00000000-0000-0000-0000-000000000003"),
                             CreatedDate = new DateTime(2025, 10, 15, 11, 20, 0, 0, DateTimeKind.Utc),
@@ -1112,7 +1091,7 @@ namespace BlogApp.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CreatedById")
+                    b.Property<Guid?>("CreatedById")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDate")
@@ -1185,7 +1164,7 @@ namespace BlogApp.Persistence.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<Guid>("CreatedById")
+                    b.Property<Guid?>("CreatedById")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDate")
@@ -1691,7 +1670,7 @@ namespace BlogApp.Persistence.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<Guid>("CreatedById")
+                    b.Property<Guid?>("CreatedById")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDate")
@@ -1699,11 +1678,6 @@ namespace BlogApp.Persistence.Migrations
 
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
@@ -1719,13 +1693,17 @@ namespace BlogApp.Persistence.Migrations
 
                     b.Property<string>("NormalizedEmail")
                         .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("character varying(200)")
+                        .HasComputedColumnSql("UPPER(\"Email\")", true);
 
                     b.Property<string>("NormalizedUserName")
                         .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasComputedColumnSql("UPPER(\"UserName\")", true);
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -1760,15 +1738,19 @@ namespace BlogApp.Persistence.Migrations
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("UserName")
+                    b.Property<string>("_email")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("Email");
+
+                    b.Property<string>("_userName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("UserName");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Email")
-                        .HasDatabaseName("IX_Users_Email");
 
                     b.HasIndex("NormalizedEmail")
                         .IsUnique()
@@ -1788,17 +1770,17 @@ namespace BlogApp.Persistence.Migrations
                             ConcurrencyStamp = "55555555-5555-5555-5555-555555555555",
                             CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
                             CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "admin@admin.com",
                             EmailConfirmed = true,
                             IsDeleted = false,
                             LockoutEnabled = false,
-                            NormalizedEmail = "ADMIN@ADMIN.COM",
-                            NormalizedUserName = "ADMIN",
+                            NormalizedEmail = "",
+                            NormalizedUserName = "",
                             PasswordHash = "AQAAAAIAAYagAAAAEP8xlsKNntQQ1SivmqfdllQWKX/655QCNjrVsPYL/Oz4cUgmI8aV55GO0BN9SDNltA==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "b1a1d25f-8a7e-4e9a-bc55-8dca5bfa1234",
                             TwoFactorEnabled = false,
-                            UserName = "admin"
+                            _email = "admin@admin.com",
+                            _userName = "admin"
                         },
                         new
                         {
@@ -1807,18 +1789,18 @@ namespace BlogApp.Persistence.Migrations
                             ConcurrencyStamp = "66666666-6666-6666-6666-666666666666",
                             CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
                             CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "editor@blogapp.dev",
                             EmailConfirmed = true,
                             IsDeleted = false,
                             LockoutEnabled = false,
-                            NormalizedEmail = "EDITOR@BLOGAPP.DEV",
-                            NormalizedUserName = "EDITOR.LARA",
+                            NormalizedEmail = "",
+                            NormalizedUserName = "",
                             PasswordHash = "AQAAAAIAAYagAAAAEP8xlsKNntQQ1SivmqfdllQWKX/655QCNjrVsPYL/Oz4cUgmI8aV55GO0BN9SDNltA==",
                             PhoneNumber = "+905551112233",
                             PhoneNumberConfirmed = true,
                             SecurityStamp = "0fa3f1d8-e77f-4aa9-9f12-6f8c7f90a002",
                             TwoFactorEnabled = false,
-                            UserName = "editor.lara"
+                            _email = "editor@blogapp.dev",
+                            _userName = "editor_lara"
                         },
                         new
                         {
@@ -1827,17 +1809,17 @@ namespace BlogApp.Persistence.Migrations
                             ConcurrencyStamp = "77777777-7777-7777-7777-777777777777",
                             CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
                             CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "moderator@blogapp.dev",
                             EmailConfirmed = true,
                             IsDeleted = false,
                             LockoutEnabled = false,
-                            NormalizedEmail = "MODERATOR@BLOGAPP.DEV",
-                            NormalizedUserName = "MODERATOR.SELIM",
+                            NormalizedEmail = "",
+                            NormalizedUserName = "",
                             PasswordHash = "AQAAAAIAAYagAAAAEP8xlsKNntQQ1SivmqfdllQWKX/655QCNjrVsPYL/Oz4cUgmI8aV55GO0BN9SDNltA==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "7c1dbdbb-3d91-45a2-8578-5392cda53875",
                             TwoFactorEnabled = false,
-                            UserName = "moderator.selim"
+                            _email = "moderator@blogapp.dev",
+                            _userName = "moderator_selim"
                         },
                         new
                         {
@@ -1846,18 +1828,18 @@ namespace BlogApp.Persistence.Migrations
                             ConcurrencyStamp = "88888888-8888-8888-8888-888888888888",
                             CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
                             CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "author@blogapp.dev",
                             EmailConfirmed = true,
                             IsDeleted = false,
                             LockoutEnabled = false,
-                            NormalizedEmail = "AUTHOR@BLOGAPP.DEV",
-                            NormalizedUserName = "AUTHOR.MELIKE",
+                            NormalizedEmail = "",
+                            NormalizedUserName = "",
                             PasswordHash = "AQAAAAIAAYagAAAAEP8xlsKNntQQ1SivmqfdllQWKX/655QCNjrVsPYL/Oz4cUgmI8aV55GO0BN9SDNltA==",
                             PhoneNumber = "+905559998877",
                             PhoneNumberConfirmed = true,
                             SecurityStamp = "e8de6375-bbb3-4ac6-a5dd-8530b7072d86",
                             TwoFactorEnabled = false,
-                            UserName = "author.melike"
+                            _email = "author@blogapp.dev",
+                            _userName = "author_melike"
                         });
                 });
 
@@ -1926,7 +1908,8 @@ namespace BlogApp.Persistence.Migrations
                     b.HasOne("BlogApp.Domain.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
