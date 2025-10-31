@@ -1,5 +1,4 @@
 using BlogApp.Domain.Common;
-using BlogApp.Domain.ValueObjects;
 
 namespace BlogApp.Domain.Entities;
 

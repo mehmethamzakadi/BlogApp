@@ -35,7 +35,7 @@ public sealed class UpdatePasswordCommandHandler : IRequestHandler<UpdatePasswor
         if (!result.Success)
             throw new PasswordChangeFailedException(result.Message ?? "Şifre güncellenemedi.");
 
-        await _userRepository.UpdateAsync(user);
+        _userRepository.Update(user);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return new();
     }

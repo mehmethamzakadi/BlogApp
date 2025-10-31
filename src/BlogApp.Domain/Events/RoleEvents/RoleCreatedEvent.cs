@@ -8,6 +8,7 @@ public class RoleCreatedEvent : DomainEvent
 {
     public Guid RoleId { get; }
     public string RoleName { get; }
+    public override Guid AggregateId => RoleId;
 
     public RoleCreatedEvent(Guid roleId, string roleName)
     {

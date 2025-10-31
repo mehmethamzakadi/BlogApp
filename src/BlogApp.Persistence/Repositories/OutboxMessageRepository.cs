@@ -39,7 +39,7 @@ public class OutboxMessageRepository : EfRepositoryBase<OutboxMessage, BlogAppDb
         {
             message.ProcessedAt = DateTime.UtcNow;
             message.Error = null;
-            await UpdateAsync(message);
+            Update(message);
         }
     }
 
@@ -51,7 +51,7 @@ public class OutboxMessageRepository : EfRepositoryBase<OutboxMessage, BlogAppDb
             message.Error = error;
             message.RetryCount++;
             message.NextRetryAt = nextRetryAt ?? CalculateNextRetryTime(message.RetryCount);
-            await UpdateAsync(message);
+            Update(message);
         }
     }
 

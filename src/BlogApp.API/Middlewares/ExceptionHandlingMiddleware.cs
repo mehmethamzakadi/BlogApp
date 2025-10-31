@@ -1,6 +1,5 @@
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Exceptions;
-using FluentValidation;
 
 namespace BlogApp.API.Middlewares
 {

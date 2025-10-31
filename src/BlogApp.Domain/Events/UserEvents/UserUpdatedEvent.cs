@@ -8,6 +8,7 @@ public class UserUpdatedEvent : DomainEvent
 {
     public Guid UserId { get; }
     public string UserName { get; }
+    public override Guid AggregateId => UserId;
 
     public UserUpdatedEvent(Guid userId, string userName)
     {

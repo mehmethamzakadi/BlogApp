@@ -1,5 +1,6 @@
 using BlogApp.Domain.Repositories;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlogApp.Application.Features.Categories.Queries.GetAll;
 
@@ -10,6 +11,7 @@ public sealed class GetAllCategoriesQueryHandler(ICategoryRepository categoryRep
     {
         IQueryable query = categoryRepository
             .Query()
+            .AsNoTracking()
             .Where(x => x.IsDeleted == false)
             .Select(x => new
             {

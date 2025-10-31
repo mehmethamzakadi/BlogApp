@@ -1,7 +1,6 @@
-using System.Security.Claims;
-using System.Threading;
 using BlogApp.Application.Abstractions;
 using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
 namespace BlogApp.Infrastructure.Services;
 

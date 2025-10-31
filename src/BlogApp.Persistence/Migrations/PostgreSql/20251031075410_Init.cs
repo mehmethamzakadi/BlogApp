@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace BlogApp.Persistence.Migrations
+namespace BlogApp.Persistence.Migrations.PostgreSql
 {
     /// <inheritdoc />
     public partial class Init : Migration
@@ -84,6 +84,7 @@ namespace BlogApp.Persistence.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    IdempotencyKey = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: false),
                     EventType = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
                     Payload = table.Column<string>(type: "text", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -431,11 +432,11 @@ namespace BlogApp.Persistence.Migrations
                 columns: new[] { "Id", "Body", "CategoryId", "CreatedById", "CreatedDate", "DeletedDate", "IsDeleted", "IsPublished", "Summary", "Thumbnail", "Title", "UpdatedById", "UpdatedDate" },
                 values: new object[,]
                 {
-                    { new Guid("40000000-0000-0000-0000-000000000001"), "OpenTelemetry Collector, distributed tracing ve yapılandırılmış logging birleştiğinde minimal API'ler üretim ortamında şeffaf hâle geliyor.\nBu rehberde ActivitySource, Meter ve TraceId bağlamlarını nasıl kodladığımızı adım adım ele alıyoruz.\nAyrıca Aspire Dashboard ile gecikme ve hata oranlarını anlık izlemenin püf noktalarını paylaşıyoruz.", new Guid("10000000-0000-0000-0000-000000000001"), new Guid("00000000-0000-0000-0000-000000000002"), new DateTime(2025, 9, 28, 8, 30, 0, 0, DateTimeKind.Utc), null, false, true, "OpenTelemetry ve Aspire ile ASP.NET Core minimal API projelerinde uçtan uca gözlemlenebilirlik altyapısını kurma rehberi.", "https://miro.medium.com/v2/resize:fit:1286/format:webp/1*chhJLW0ApPDHqmVPRBBUtQ.png", ".NET 9 Minimal API'lerinde Observability Entegrasyonu", null, null },
-                    { new Guid("40000000-0000-0000-0000-000000000002"), "SaaS uygulamalarında sorgu optimizasyonu tenant bazında indeksleme ile başlıyor.\nModel seeding, global query filter'lar ve concurrency token'ları üzerinden performans analizleri paylaşıyoruz.\nAyrıca Npgsql provider'ı ile partitioned table senaryolarını örneklendiriyoruz.", new Guid("10000000-0000-0000-0000-000000000002"), new Guid("00000000-0000-0000-0000-000000000004"), new DateTime(2025, 10, 2, 9, 15, 0, 0, DateTimeKind.Utc), null, false, true, "Tenant bazlı filtreleme, connection pooling ve caching stratejileriyle çoklu tenant SaaS uygulamalarında EF Core'u hızlandırma.", "https://miro.medium.com/0*V56TEDMUsms9XLBY.jpg", "EF Core 9 ile Çoklu Tenant Mimarisinde Performans İpuçları", null, null },
-                    { new Guid("40000000-0000-0000-0000-000000000003"), "GitOps, manifest kaynağını tek gerçeğin kaynağına dönüştürerek roll-forward ve roll-back süreçlerini sadeleştiriyor.\nFluxCD ile progressive delivery, ArgoCD ile health check politika tanımlarını örnek YAML dosyalarıyla açıklıyoruz.\nPipeline gözlemlenebilirliği için Prometheus ve Grafana entegrasyonlarını da ekliyoruz.", new Guid("10000000-0000-0000-0000-000000000003"), new Guid("00000000-0000-0000-0000-000000000002"), new DateTime(2025, 10, 5, 10, 45, 0, 0, DateTimeKind.Utc), null, false, true, "FluxCD ve ArgoCD karşılaştırmasıyla GitOps pipeline'larını teknoloji blogu projelerine uyarlama.", "https://miro.medium.com/v2/resize:fit:4800/format:webp/1*9P6wnky3C9xMwaBAElALLQ.png", "GitOps ile Kubernetes Üzerinde Sürekli Teslimat", null, null },
-                    { new Guid("40000000-0000-0000-0000-000000000004"), "Mesajlaşma altyapısı seçiminde gereksinimleri segmentlere ayırmak kritik.\nRabbitMQ routing esnekliği sağlar; Kafka ise sıralı event log ile akış analitiğine güç katar.\nMakale boyunca tüketici grupları, dead-letter stratejileri ve metrik takip yöntemlerini detaylandırıyoruz.", new Guid("10000000-0000-0000-0000-000000000004"), new Guid("00000000-0000-0000-0000-000000000004"), new DateTime(2025, 10, 12, 15, 0, 0, 0, DateTimeKind.Utc), null, false, false, "Etkinlik yönelimli servisler için mesajlaşma altyapısı seçerken throughput, gecikme ve gözlemlenebilirlik kriterlerinin karşılaştırılması.", "https://miro.medium.com/1*BGZy6Puq8X9AQHkJzB7BLA.jpeg", "Event-Driven Mimarilerde RabbitMQ mu Kafka mı?", null, null },
-                    { new Guid("40000000-0000-0000-0000-000000000005"), "Tracing zincirleri, metrik korelasyonları ve yapılandırılmış log'lar aynı veri modelinde buluştuğunda kök neden analizi hızlanıyor.\nBu makalede collector konfigürasyonlarını, OTLP protokolünü ve Prometheus remote write senaryolarını harmanlıyoruz.\nEk olarak, kullanıcı segmenti bazlı alert kurallarına dair pratik şablonlar sunuyoruz.", new Guid("10000000-0000-0000-0000-000000000005"), new Guid("00000000-0000-0000-0000-000000000003"), new DateTime(2025, 10, 15, 11, 20, 0, 0, DateTimeKind.Utc), null, false, true, "Teknoloji blogu altyapısı için tracing, metrics ve logging verilerini aynı veri gölünde birleştirme stratejileri.", "https://miro.medium.com/v2/resize:fit:1400/format:webp/1*zHc9d823Uol9SSj8s_uBug.png", "OpenTelemetry ile Katmanlı Gözlemlenebilirlik", null, null }
+                    { new Guid("40000000-0000-0000-0000-000000000001"), "OpenTelemetry Collector, distributed tracing ve yapılandırılmış logging birleştiğinde minimal API'ler üretim ortamında şeffaf hâle geliyor.\r\nBu rehberde ActivitySource, Meter ve TraceId bağlamlarını nasıl kodladığımızı adım adım ele alıyoruz.\r\nAyrıca Aspire Dashboard ile gecikme ve hata oranlarını anlık izlemenin püf noktalarını paylaşıyoruz.", new Guid("10000000-0000-0000-0000-000000000001"), new Guid("00000000-0000-0000-0000-000000000002"), new DateTime(2025, 9, 28, 8, 30, 0, 0, DateTimeKind.Utc), null, false, true, "OpenTelemetry ve Aspire ile ASP.NET Core minimal API projelerinde uçtan uca gözlemlenebilirlik altyapısını kurma rehberi.", "https://miro.medium.com/v2/resize:fit:1286/format:webp/1*chhJLW0ApPDHqmVPRBBUtQ.png", ".NET 9 Minimal API'lerinde Observability Entegrasyonu", null, null },
+                    { new Guid("40000000-0000-0000-0000-000000000002"), "SaaS uygulamalarında sorgu optimizasyonu tenant bazında indeksleme ile başlıyor.\r\nModel seeding, global query filter'lar ve concurrency token'ları üzerinden performans analizleri paylaşıyoruz.\r\nAyrıca Npgsql provider'ı ile partitioned table senaryolarını örneklendiriyoruz.", new Guid("10000000-0000-0000-0000-000000000002"), new Guid("00000000-0000-0000-0000-000000000004"), new DateTime(2025, 10, 2, 9, 15, 0, 0, DateTimeKind.Utc), null, false, true, "Tenant bazlı filtreleme, connection pooling ve caching stratejileriyle çoklu tenant SaaS uygulamalarında EF Core'u hızlandırma.", "https://miro.medium.com/0*V56TEDMUsms9XLBY.jpg", "EF Core 9 ile Çoklu Tenant Mimarisinde Performans İpuçları", null, null },
+                    { new Guid("40000000-0000-0000-0000-000000000003"), "GitOps, manifest kaynağını tek gerçeğin kaynağına dönüştürerek roll-forward ve roll-back süreçlerini sadeleştiriyor.\r\nFluxCD ile progressive delivery, ArgoCD ile health check politika tanımlarını örnek YAML dosyalarıyla açıklıyoruz.\r\nPipeline gözlemlenebilirliği için Prometheus ve Grafana entegrasyonlarını da ekliyoruz.", new Guid("10000000-0000-0000-0000-000000000003"), new Guid("00000000-0000-0000-0000-000000000002"), new DateTime(2025, 10, 5, 10, 45, 0, 0, DateTimeKind.Utc), null, false, true, "FluxCD ve ArgoCD karşılaştırmasıyla GitOps pipeline'larını teknoloji blogu projelerine uyarlama.", "https://miro.medium.com/v2/resize:fit:4800/format:webp/1*9P6wnky3C9xMwaBAElALLQ.png", "GitOps ile Kubernetes Üzerinde Sürekli Teslimat", null, null },
+                    { new Guid("40000000-0000-0000-0000-000000000004"), "Mesajlaşma altyapısı seçiminde gereksinimleri segmentlere ayırmak kritik.\r\nRabbitMQ routing esnekliği sağlar; Kafka ise sıralı event log ile akış analitiğine güç katar.\r\nMakale boyunca tüketici grupları, dead-letter stratejileri ve metrik takip yöntemlerini detaylandırıyoruz.", new Guid("10000000-0000-0000-0000-000000000004"), new Guid("00000000-0000-0000-0000-000000000004"), new DateTime(2025, 10, 12, 15, 0, 0, 0, DateTimeKind.Utc), null, false, false, "Etkinlik yönelimli servisler için mesajlaşma altyapısı seçerken throughput, gecikme ve gözlemlenebilirlik kriterlerinin karşılaştırılması.", "https://miro.medium.com/1*BGZy6Puq8X9AQHkJzB7BLA.jpeg", "Event-Driven Mimarilerde RabbitMQ mu Kafka mı?", null, null },
+                    { new Guid("40000000-0000-0000-0000-000000000005"), "Tracing zincirleri, metrik korelasyonları ve yapılandırılmış log'lar aynı veri modelinde buluştuğunda kök neden analizi hızlanıyor.\r\nBu makalede collector konfigürasyonlarını, OTLP protokolünü ve Prometheus remote write senaryolarını harmanlıyoruz.\r\nEk olarak, kullanıcı segmenti bazlı alert kurallarına dair pratik şablonlar sunuyoruz.", new Guid("10000000-0000-0000-0000-000000000005"), new Guid("00000000-0000-0000-0000-000000000003"), new DateTime(2025, 10, 15, 11, 20, 0, 0, DateTimeKind.Utc), null, false, true, "Teknoloji blogu altyapısı için tracing, metrics ve logging verilerini aynı veri gölünde birleştirme stratejileri.", "https://miro.medium.com/v2/resize:fit:1400/format:webp/1*zHc9d823Uol9SSj8s_uBug.png", "OpenTelemetry ile Katmanlı Gözlemlenebilirlik", null, null }
                 });
 
             migrationBuilder.InsertData(
@@ -521,16 +522,6 @@ namespace BlogApp.Persistence.Migrations
                     { new Guid("30000000-0000-0000-0000-000000000006"), new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc), null, new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc), null, false, new Guid("20000000-0000-0000-0000-000000000002"), null, new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc), new Guid("00000000-0000-0000-0000-000000000004") }
                 });
 
-            migrationBuilder.InsertData(
-                table: "Comments",
-                columns: new[] { "Id", "CommentOwnerMail", "Content", "CreatedById", "CreatedDate", "DeletedDate", "IsDeleted", "IsPublished", "ParentId", "PostId", "UpdatedById", "UpdatedDate" },
-                values: new object[,]
-                {
-                    { new Guid("60000000-0000-0000-0000-000000000001"), "techreader@blogapp.dev", "Minimal API'lerde TraceId propagasyonu için örnek kod parçalarını uyguladım, Aspire Dashboard harika çalıştı!", new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 20, 9, 0, 0, 0, DateTimeKind.Utc), null, false, true, null, new Guid("40000000-0000-0000-0000-000000000001"), null, null },
-                    { new Guid("60000000-0000-0000-0000-000000000003"), "community@blogapp.dev", "Kafka bölümündeki partition senaryosunu canlı görmek isterim, yayınlandığında haber verir misiniz?", new Guid("00000000-0000-0000-0000-000000000001"), new DateTime(2025, 10, 20, 9, 40, 0, 0, DateTimeKind.Utc), null, false, false, null, new Guid("40000000-0000-0000-0000-000000000004"), null, null },
-                    { new Guid("60000000-0000-0000-0000-000000000002"), "editor@blogapp.dev", "Trace örneklerinin yanına log seviyeleri ekleyince sorun tespiti çok hızlandı, teşekkürler!", new Guid("00000000-0000-0000-0000-000000000002"), new DateTime(2025, 10, 20, 9, 12, 0, 0, DateTimeKind.Utc), null, false, true, new Guid("60000000-0000-0000-0000-000000000001"), new Guid("40000000-0000-0000-0000-000000000001"), null, null }
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_ActivityLogs_Entity",
                 table: "ActivityLogs",
@@ -542,9 +533,9 @@ namespace BlogApp.Persistence.Migrations
                 column: "Timestamp");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ActivityLogs_UserId",
+                name: "IX_ActivityLogs_UserId_Timestamp",
                 table: "ActivityLogs",
-                column: "UserId");
+                columns: new[] { "UserId", "Timestamp" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_BookshelfItems_CreatedDate",
@@ -609,14 +600,16 @@ namespace BlogApp.Persistence.Migrations
                 column: "CreatedAt");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OutboxMessages_ProcessedAt",
+                name: "IX_OutboxMessages_IdempotencyKey",
                 table: "OutboxMessages",
-                column: "ProcessedAt");
+                column: "IdempotencyKey",
+                unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_OutboxMessages_ProcessedAt_NextRetryAt",
+                name: "IX_OutboxMessages_Unprocessed",
                 table: "OutboxMessages",
-                columns: new[] { "ProcessedAt", "NextRetryAt" });
+                columns: new[] { "ProcessedAt", "NextRetryAt" },
+                filter: "\"ProcessedAt\" IS NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Permissions_Module_Type",
@@ -640,19 +633,15 @@ namespace BlogApp.Persistence.Migrations
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Posts_CreatedDate",
+                name: "IX_Posts_IsPublished_CategoryId_CreatedDate",
                 table: "Posts",
-                column: "CreatedDate");
+                columns: new[] { "IsPublished", "CategoryId", "CreatedDate" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Posts_IsPublished",
+                name: "IX_Posts_NotDeleted",
                 table: "Posts",
-                column: "IsPublished");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Posts_IsPublished_CreatedDate",
-                table: "Posts",
-                columns: new[] { "IsPublished", "CreatedDate" });
+                column: "IsDeleted",
+                filter: "\"IsDeleted\" = false");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Posts_Title",

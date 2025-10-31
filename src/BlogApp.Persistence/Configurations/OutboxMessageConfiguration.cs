@@ -12,6 +12,10 @@ public class OutboxMessageConfiguration : IEntityTypeConfiguration<OutboxMessage
 
         builder.HasKey(x => x.Id);
 
+        builder.Property(x => x.IdempotencyKey)
+            .IsRequired()
+            .HasMaxLength(512);
+
         builder.Property(x => x.EventType)
             .IsRequired()
             .HasMaxLength(256);
@@ -34,14 +38,15 @@ public class OutboxMessageConfiguration : IEntityTypeConfiguration<OutboxMessage
 
         builder.Property(x => x.NextRetryAt);
 
-        // Performans için index'ler
-        builder.HasIndex(x => x.ProcessedAt)
-            .HasDatabaseName("IX_OutboxMessages_ProcessedAt");
+        builder.HasIndex(x => x.IdempotencyKey)
+            .IsUnique()
+            .HasDatabaseName("IX_OutboxMessages_IdempotencyKey");
+
+        builder.HasIndex(x => new { x.ProcessedAt, x.NextRetryAt })
+            .HasFilter("\"ProcessedAt\" IS NULL")
+            .HasDatabaseName("IX_OutboxMessages_Unprocessed");
 
         builder.HasIndex(x => x.CreatedAt)
             .HasDatabaseName("IX_OutboxMessages_CreatedAt");
-
-        builder.HasIndex(x => new { x.ProcessedAt, x.NextRetryAt })
-            .HasDatabaseName("IX_OutboxMessages_ProcessedAt_NextRetryAt");
     }
 }

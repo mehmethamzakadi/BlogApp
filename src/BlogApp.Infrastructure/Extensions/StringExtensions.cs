@@ -10,7 +10,7 @@ public static class StringExtensions
         byte[] bytes = Encoding.UTF8.GetBytes(value);
         return WebEncoders.Base64UrlEncode(bytes);
     }
-    
+
     public static string UrlDecode(this string value)
     {
         byte[] bytes = WebEncoders.Base64UrlDecode(value);

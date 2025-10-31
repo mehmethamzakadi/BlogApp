@@ -9,4 +9,5 @@ namespace BlogApp.Domain.Common;
 public interface IDomainEvent : INotification
 {
     DateTime OccurredOn { get; }
+    Guid AggregateId { get; }
 }

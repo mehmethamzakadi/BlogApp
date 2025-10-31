@@ -2,7 +2,6 @@ using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Dynamic;
 using BlogApp.Domain.Common.Paging;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Query;
 using System.Collections;
 using System.Linq.Expressions;
@@ -50,14 +49,12 @@ where TContext : DbContext
     public async Task<TEntity> DeleteAsync(TEntity entity, bool permanent = false)
     {
         await SetEntityAsDeletedAsync(entity, permanent);
-        // SaveChanges kaldırıldı
         return entity;
     }
 
     public async Task<ICollection<TEntity>> DeleteRangeAsync(ICollection<TEntity> entities, bool permanent = false)
     {
         await SetEntityAsDeletedAsync(entities, permanent);
-        // SaveChanges kaldırıldı
         return entities;
     }
 
@@ -88,16 +85,16 @@ where TContext : DbContext
 
     public IQueryable<TEntity> Query() => Context.Set<TEntity>();
 
-    public Task<TEntity> UpdateAsync(TEntity entity)
+    public TEntity Update(TEntity entity)
     {
         Context.Update(entity);
-        return Task.FromResult(entity);
+        return entity;
     }
 
-    public Task<ICollection<TEntity>> UpdateRangeAsync(ICollection<TEntity> entities)
+    public ICollection<TEntity> UpdateRange(ICollection<TEntity> entities)
     {
         Context.UpdateRange(entities);
-        return Task.FromResult(entities);
+        return entities;
     }
 
     protected async Task SetEntityAsDeletedAsync(TEntity entity, bool permanent)
@@ -112,8 +109,6 @@ where TContext : DbContext
             Context.Remove(entity);
         }
     }
-
-
 
     protected void CheckHasEntityHaveOneToOneRelation(TEntity entity)
     {
@@ -137,6 +132,7 @@ where TContext : DbContext
     {
         if (entity.DeletedDate.HasValue)
             return;
+
         entity.DeletedDate = DateTime.UtcNow;
         entity.IsDeleted = true;
 
@@ -144,50 +140,42 @@ where TContext : DbContext
             .Entry(entity)
             .Metadata.GetNavigations()
             .Where(x => x is { IsOnDependent: false, ForeignKey.DeleteBehavior: DeleteBehavior.ClientCascade or DeleteBehavior.Cascade })
+            .Where(x => !x.TargetEntityType.IsOwned() && x.PropertyInfo != null)
             .ToList();
 
-        // PERFORMANS İYİLEŞTİRMESİ: Tüm ilişkileri eager load et (N+1 sorgu problemi çözümü)
-        foreach (INavigation? navigation in navigations)
+        if (!navigations.Any())
         {
-            if (navigation.TargetEntityType.IsOwned())
-                continue;
-            if (navigation.PropertyInfo == null)
-                continue;
-
-            if (navigation.IsCollection)
-            {
-                await Context.Entry(entity).Collection(navigation.PropertyInfo.Name).LoadAsync();
-            }
-            else
-            {
-                await Context.Entry(entity).Reference(navigation.PropertyInfo.Name).LoadAsync();
-            }
+            Context.Update(entity);
+            return;
         }
 
-        // İlişkili entity'leri işle
-        foreach (INavigation? navigation in navigations)
-        {
-            if (navigation.TargetEntityType.IsOwned())
-                continue;
-            if (navigation.PropertyInfo == null)
-                continue;
+        var query = Context.Set<TEntity>().Where(e => e.Id == entity.Id);
 
-            object? navValue = navigation.PropertyInfo.GetValue(entity);
-            
+        foreach (var navigation in navigations)
+        {
+            query = query.Include(navigation.Name);
+        }
+
+        var loadedEntity = await query.FirstOrDefaultAsync();
+        if (loadedEntity == null)
+        {
+            Context.Update(entity);
+            return;
+        }
+
+        foreach (var navigation in navigations)
+        {
+            var navValue = navigation.PropertyInfo!.GetValue(loadedEntity);
+            if (navValue == null) continue;
+
             if (navigation.IsCollection)
             {
-                if (navValue != null)
-                {
-                    foreach (BaseEntity navValueItem in (IEnumerable)navValue)
-                        await setEntityAsSoftDeletedAsync(navValueItem);
-                }
+                foreach (BaseEntity item in (IEnumerable)navValue)
+                    await setEntityAsSoftDeletedAsync(item);
             }
             else
             {
-                if (navValue != null)
-                {
-                    await setEntityAsSoftDeletedAsync((BaseEntity)navValue);
-                }
+                await setEntityAsSoftDeletedAsync((BaseEntity)navValue);
             }
         }
 

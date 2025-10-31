@@ -36,7 +36,7 @@ public sealed class RegisterCommandHandler : IRequestHandler<RegisterCommand, IR
         }
 
         var user = User.Create(request.UserName, request.Email, string.Empty);
-        
+
         var passwordResult = _userDomainService.SetPassword(user, request.Password);
         if (!passwordResult.Success)
             return passwordResult;

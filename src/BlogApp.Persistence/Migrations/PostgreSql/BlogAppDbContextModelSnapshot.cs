@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace BlogApp.Persistence.Migrations
+namespace BlogApp.Persistence.Migrations.PostgreSql
 {
     [DbContext(typeof(BlogAppDbContext))]
     partial class BlogAppDbContextModelSnapshot : ModelSnapshot
@@ -61,10 +61,11 @@ namespace BlogApp.Persistence.Migrations
                     b.HasIndex("Timestamp")
                         .HasDatabaseName("IX_ActivityLogs_Timestamp");
 
-                    b.HasIndex("UserId");
-
                     b.HasIndex("EntityType", "EntityId")
                         .HasDatabaseName("IX_ActivityLogs_Entity");
+
+                    b.HasIndex("UserId", "Timestamp")
+                        .HasDatabaseName("IX_ActivityLogs_UserId_Timestamp");
 
                     b.ToTable("ActivityLogs", (string)null);
                 });
@@ -303,42 +304,6 @@ namespace BlogApp.Persistence.Migrations
                         .HasDatabaseName("IX_Comments_PostId_IsPublished");
 
                     b.ToTable("Comments");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("60000000-0000-0000-0000-000000000001"),
-                            CommentOwnerMail = "techreader@blogapp.dev",
-                            Content = "Minimal API'lerde TraceId propagasyonu için örnek kod parçalarını uyguladım, Aspire Dashboard harika çalıştı!",
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 20, 9, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
-                            IsPublished = true,
-                            PostId = new Guid("40000000-0000-0000-0000-000000000001")
-                        },
-                        new
-                        {
-                            Id = new Guid("60000000-0000-0000-0000-000000000002"),
-                            CommentOwnerMail = "editor@blogapp.dev",
-                            Content = "Trace örneklerinin yanına log seviyeleri ekleyince sorun tespiti çok hızlandı, teşekkürler!",
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000002"),
-                            CreatedDate = new DateTime(2025, 10, 20, 9, 12, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
-                            IsPublished = true,
-                            ParentId = new Guid("60000000-0000-0000-0000-000000000001"),
-                            PostId = new Guid("40000000-0000-0000-0000-000000000001")
-                        },
-                        new
-                        {
-                            Id = new Guid("60000000-0000-0000-0000-000000000003"),
-                            CommentOwnerMail = "community@blogapp.dev",
-                            Content = "Kafka bölümündeki partition senaryosunu canlı görmek isterim, yayınlandığında haber verir misiniz?",
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 20, 9, 40, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
-                            IsPublished = false,
-                            PostId = new Guid("40000000-0000-0000-0000-000000000004")
-                        });
                 });
 
             modelBuilder.Entity("BlogApp.Domain.Entities.Image", b =>
@@ -418,6 +383,11 @@ namespace BlogApp.Persistence.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
+                    b.Property<string>("IdempotencyKey")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
@@ -447,11 +417,13 @@ namespace BlogApp.Persistence.Migrations
                     b.HasIndex("CreatedAt")
                         .HasDatabaseName("IX_OutboxMessages_CreatedAt");
 
-                    b.HasIndex("ProcessedAt")
-                        .HasDatabaseName("IX_OutboxMessages_ProcessedAt");
+                    b.HasIndex("IdempotencyKey")
+                        .IsUnique()
+                        .HasDatabaseName("IX_OutboxMessages_IdempotencyKey");
 
                     b.HasIndex("ProcessedAt", "NextRetryAt")
-                        .HasDatabaseName("IX_OutboxMessages_ProcessedAt_NextRetryAt");
+                        .HasDatabaseName("IX_OutboxMessages_Unprocessed")
+                        .HasFilter("\"ProcessedAt\" IS NULL");
 
                     b.ToTable("OutboxMessages", (string)null);
                 });
@@ -1000,20 +972,17 @@ namespace BlogApp.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId")
-                        .HasDatabaseName("IX_Posts_CategoryId");
+                    b.HasIndex("CategoryId");
 
-                    b.HasIndex("CreatedDate")
-                        .HasDatabaseName("IX_Posts_CreatedDate");
-
-                    b.HasIndex("IsPublished")
-                        .HasDatabaseName("IX_Posts_IsPublished");
+                    b.HasIndex("IsDeleted")
+                        .HasDatabaseName("IX_Posts_NotDeleted")
+                        .HasFilter("\"IsDeleted\" = false");
 
                     b.HasIndex("Title")
                         .HasDatabaseName("IX_Posts_Title");
 
-                    b.HasIndex("IsPublished", "CreatedDate")
-                        .HasDatabaseName("IX_Posts_IsPublished_CreatedDate");
+                    b.HasIndex("IsPublished", "CategoryId", "CreatedDate")
+                        .HasDatabaseName("IX_Posts_IsPublished_CategoryId_CreatedDate");
 
                     b.ToTable("Posts");
 
@@ -1021,7 +990,7 @@ namespace BlogApp.Persistence.Migrations
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000001"),
-                            Body = "OpenTelemetry Collector, distributed tracing ve yapılandırılmış logging birleştiğinde minimal API'ler üretim ortamında şeffaf hâle geliyor.\nBu rehberde ActivitySource, Meter ve TraceId bağlamlarını nasıl kodladığımızı adım adım ele alıyoruz.\nAyrıca Aspire Dashboard ile gecikme ve hata oranlarını anlık izlemenin püf noktalarını paylaşıyoruz.",
+                            Body = "OpenTelemetry Collector, distributed tracing ve yapılandırılmış logging birleştiğinde minimal API'ler üretim ortamında şeffaf hâle geliyor.\r\nBu rehberde ActivitySource, Meter ve TraceId bağlamlarını nasıl kodladığımızı adım adım ele alıyoruz.\r\nAyrıca Aspire Dashboard ile gecikme ve hata oranlarını anlık izlemenin püf noktalarını paylaşıyoruz.",
                             CategoryId = new Guid("10000000-0000-0000-0000-000000000001"),
                             CreatedById = new Guid("00000000-0000-0000-0000-000000000002"),
                             CreatedDate = new DateTime(2025, 9, 28, 8, 30, 0, 0, DateTimeKind.Utc),
@@ -1034,7 +1003,7 @@ namespace BlogApp.Persistence.Migrations
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000002"),
-                            Body = "SaaS uygulamalarında sorgu optimizasyonu tenant bazında indeksleme ile başlıyor.\nModel seeding, global query filter'lar ve concurrency token'ları üzerinden performans analizleri paylaşıyoruz.\nAyrıca Npgsql provider'ı ile partitioned table senaryolarını örneklendiriyoruz.",
+                            Body = "SaaS uygulamalarında sorgu optimizasyonu tenant bazında indeksleme ile başlıyor.\r\nModel seeding, global query filter'lar ve concurrency token'ları üzerinden performans analizleri paylaşıyoruz.\r\nAyrıca Npgsql provider'ı ile partitioned table senaryolarını örneklendiriyoruz.",
                             CategoryId = new Guid("10000000-0000-0000-0000-000000000002"),
                             CreatedById = new Guid("00000000-0000-0000-0000-000000000004"),
                             CreatedDate = new DateTime(2025, 10, 2, 9, 15, 0, 0, DateTimeKind.Utc),
@@ -1047,7 +1016,7 @@ namespace BlogApp.Persistence.Migrations
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000003"),
-                            Body = "GitOps, manifest kaynağını tek gerçeğin kaynağına dönüştürerek roll-forward ve roll-back süreçlerini sadeleştiriyor.\nFluxCD ile progressive delivery, ArgoCD ile health check politika tanımlarını örnek YAML dosyalarıyla açıklıyoruz.\nPipeline gözlemlenebilirliği için Prometheus ve Grafana entegrasyonlarını da ekliyoruz.",
+                            Body = "GitOps, manifest kaynağını tek gerçeğin kaynağına dönüştürerek roll-forward ve roll-back süreçlerini sadeleştiriyor.\r\nFluxCD ile progressive delivery, ArgoCD ile health check politika tanımlarını örnek YAML dosyalarıyla açıklıyoruz.\r\nPipeline gözlemlenebilirliği için Prometheus ve Grafana entegrasyonlarını da ekliyoruz.",
                             CategoryId = new Guid("10000000-0000-0000-0000-000000000003"),
                             CreatedById = new Guid("00000000-0000-0000-0000-000000000002"),
                             CreatedDate = new DateTime(2025, 10, 5, 10, 45, 0, 0, DateTimeKind.Utc),
@@ -1060,7 +1029,7 @@ namespace BlogApp.Persistence.Migrations
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000004"),
-                            Body = "Mesajlaşma altyapısı seçiminde gereksinimleri segmentlere ayırmak kritik.\nRabbitMQ routing esnekliği sağlar; Kafka ise sıralı event log ile akış analitiğine güç katar.\nMakale boyunca tüketici grupları, dead-letter stratejileri ve metrik takip yöntemlerini detaylandırıyoruz.",
+                            Body = "Mesajlaşma altyapısı seçiminde gereksinimleri segmentlere ayırmak kritik.\r\nRabbitMQ routing esnekliği sağlar; Kafka ise sıralı event log ile akış analitiğine güç katar.\r\nMakale boyunca tüketici grupları, dead-letter stratejileri ve metrik takip yöntemlerini detaylandırıyoruz.",
                             CategoryId = new Guid("10000000-0000-0000-0000-000000000004"),
                             CreatedById = new Guid("00000000-0000-0000-0000-000000000004"),
                             CreatedDate = new DateTime(2025, 10, 12, 15, 0, 0, 0, DateTimeKind.Utc),
@@ -1073,7 +1042,7 @@ namespace BlogApp.Persistence.Migrations
                         new
                         {
                             Id = new Guid("40000000-0000-0000-0000-000000000005"),
-                            Body = "Tracing zincirleri, metrik korelasyonları ve yapılandırılmış log'lar aynı veri modelinde buluştuğunda kök neden analizi hızlanıyor.\nBu makalede collector konfigürasyonlarını, OTLP protokolünü ve Prometheus remote write senaryolarını harmanlıyoruz.\nEk olarak, kullanıcı segmenti bazlı alert kurallarına dair pratik şablonlar sunuyoruz.",
+                            Body = "Tracing zincirleri, metrik korelasyonları ve yapılandırılmış log'lar aynı veri modelinde buluştuğunda kök neden analizi hızlanıyor.\r\nBu makalede collector konfigürasyonlarını, OTLP protokolünü ve Prometheus remote write senaryolarını harmanlıyoruz.\r\nEk olarak, kullanıcı segmenti bazlı alert kurallarına dair pratik şablonlar sunuyoruz.",
                             CategoryId = new Guid("10000000-0000-0000-0000-000000000005"),
                             CreatedById = new Guid("00000000-0000-0000-0000-000000000003"),
                             CreatedDate = new DateTime(2025, 10, 15, 11, 20, 0, 0, DateTimeKind.Utc),

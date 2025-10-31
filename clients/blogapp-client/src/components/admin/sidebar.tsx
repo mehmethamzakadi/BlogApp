@@ -36,17 +36,17 @@ const links = [
     requiredPermission: Permissions.RolesViewAll
   },
   {
-    to: '/admin/activity-logs',
-    label: 'Aktivite Logları',
-    icon: Activity,
-    requiredPermission: Permissions.ActivityLogsView
-  },
-  {
     to: '/admin/bookshelf',
     label: 'Kitaplık',
     icon: BookOpenCheck,
     requiredPermission: Permissions.BookshelfViewAll
-  }
+  },
+  {
+    to: '/admin/activity-logs',
+    label: 'Aktivite Logları',
+    icon: Activity,
+    requiredPermission: Permissions.ActivityLogsView
+  }  
 ];
 
 export function AdminSidebar({ collapsed }: { collapsed: boolean }) {

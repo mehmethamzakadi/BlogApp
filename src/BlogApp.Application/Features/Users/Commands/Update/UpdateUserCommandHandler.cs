@@ -40,7 +40,7 @@ public sealed class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand
         }
 
         user.Update(request.UserName, request.Email);
-        await _userRepository.UpdateAsync(user);
+        _userRepository.Update(user);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new SuccessResult("Kullanıcı bilgisi başarıyla güncellendi.");

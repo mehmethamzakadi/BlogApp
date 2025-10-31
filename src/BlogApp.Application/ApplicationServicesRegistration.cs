@@ -21,6 +21,7 @@ namespace BlogApp.Application
                 configuration.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
                 configuration.AddOpenBehavior(typeof(ValidationBehavior<,>));
                 configuration.AddOpenBehavior(typeof(LoggingBehavior<,>));
+                configuration.AddOpenBehavior(typeof(CacheInvalidationBehavior<,>));
             });
 
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());

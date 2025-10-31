@@ -37,7 +37,7 @@ public sealed class UpdateCategoryCommandHandler(
         }
 
         category.Update(request.Name);
-        await categoryRepository.UpdateAsync(category);
+        categoryRepository.Update(category);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         await cacheService.Add(

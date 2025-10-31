@@ -23,16 +23,28 @@ public sealed class UnitOfWork : IUnitOfWork
 
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
+        var domainEvents = GetDomainEvents().ToList();
+
+        if (!domainEvents.Any())
+        {
+            return await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+
         try
         {
-            var domainEvents = GetDomainEvents().ToList();
+            var result = await _context.SaveChangesAsync(cancellationToken);
 
             foreach (var domainEvent in domainEvents)
             {
                 if (ShouldStoreInOutbox(domainEvent))
                 {
+                    var idempotencyKey = $"{domainEvent.GetType().Name}:{domainEvent.AggregateId}:{domainEvent.OccurredOn.Ticks}";
+
                     var outboxMessage = new OutboxMessage
                     {
+                        IdempotencyKey = idempotencyKey,
                         EventType = domainEvent.GetType().Name,
                         Payload = JsonSerializer.Serialize(domainEvent, domainEvent.GetType()),
                         CreatedAt = DateTime.UtcNow,
@@ -43,8 +55,15 @@ public sealed class UnitOfWork : IUnitOfWork
                 }
             }
 
-            var result = await _context.SaveChangesAsync(cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+
             return result;
+        }
+        catch
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            throw;
         }
         finally
         {

@@ -50,7 +50,7 @@ public class ActivityLogRepository : IActivityLogRepository
         {
             foreach (var sort in dynamic.Sort)
             {
-                queryable = sort.Dir == "asc" 
+                queryable = sort.Dir == "asc"
                     ? queryable.OrderBy(a => EF.Property<object>(a, sort.Field))
                     : queryable.OrderByDescending(a => EF.Property<object>(a, sort.Field));
             }

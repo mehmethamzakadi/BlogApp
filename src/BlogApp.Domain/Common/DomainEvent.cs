@@ -6,4 +6,5 @@ namespace BlogApp.Domain.Common;
 public abstract class DomainEvent : IDomainEvent
 {
     public DateTime OccurredOn { get; } = DateTime.UtcNow;
+    public abstract Guid AggregateId { get; }
 }

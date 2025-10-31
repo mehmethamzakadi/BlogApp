@@ -7,7 +7,7 @@ namespace BlogApp.Domain.Entities;
 public sealed class Post : AggregateRoot
 {
     private readonly List<Comment> _comments = new();
-    
+
     public Post() { }
 
     public string Title { get; set; } = default!;
@@ -77,20 +77,7 @@ public sealed class Post : AggregateRoot
 
     public void AddComment(string content, string ownerEmail, Guid? parentId = null)
     {
-        if (string.IsNullOrWhiteSpace(content))
-            throw new ArgumentException("Content cannot be empty", nameof(content));
-        if (string.IsNullOrWhiteSpace(ownerEmail))
-            throw new ArgumentException("Owner email cannot be empty", nameof(ownerEmail));
-
-        var comment = new Comment
-        {
-            PostId = Id,
-            ParentId = parentId,
-            Content = content,
-            CommentOwnerMail = ownerEmail,
-            IsPublished = false
-        };
-
+        var comment = Comment.Create(Id, content, ownerEmail, parentId);
         _comments.Add(comment);
     }
 

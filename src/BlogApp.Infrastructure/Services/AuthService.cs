@@ -6,9 +6,9 @@ using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Constants;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Exceptions;
+using BlogApp.Domain.Repositories;
 using BlogApp.Domain.Services;
 using BlogApp.Infrastructure.Extensions;
-using BlogApp.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 using System.Text;
@@ -72,7 +72,7 @@ public sealed class AuthService : IAuthService
                 user.LockoutEnd = DateTimeOffset.UtcNow.AddMinutes(15);
             }
 
-            await _userRepository.UpdateAsync(user);
+            _userRepository.Update(user);
             await SaveChangesWithConcurrencyHandlingAsync();
 
             throw new AuthenticationErrorException();
@@ -85,7 +85,7 @@ public sealed class AuthService : IAuthService
         var accessToken = _tokenService.CreateAccessToken(authClaims, user);
         var refreshToken = _tokenService.CreateRefreshToken();
 
-        await _userRepository.UpdateAsync(user);
+        _userRepository.Update(user);
 
         var session = new RefreshSession
         {
@@ -229,13 +229,13 @@ public sealed class AuthService : IAuthService
         {
             // Rastgele token oluştur
             string resetToken = _passwordHasher.GeneratePasswordResetToken();
-            
+
             // Token'ı hash'le ve veritabanına hash'i sakla
             string tokenHash = HashPasswordResetToken(resetToken);
             user.PasswordResetToken = tokenHash;
             user.PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(1);
 
-            await _userRepository.UpdateAsync(user);
+            _userRepository.Update(user);
             await SaveChangesWithConcurrencyHandlingAsync();
             // Kullanıcıya orijinal token'ı gönder (hash'i değil!)
             await _mailService.SendPasswordResetMailAsync(email, user.Id, resetToken.UrlEncode());
@@ -278,14 +278,14 @@ public sealed class AuthService : IAuthService
         User? user = await _userRepository.FindByIdAsync(userIdGuid);
         if (user != null && user.PasswordResetToken != null && user.PasswordResetTokenExpiry != null)
         {
-                resetToken = resetToken.UrlDecode();
-                string tokenHash = HashPasswordResetToken(resetToken);
-                var storedTokenHash = user.PasswordResetToken;
+            resetToken = resetToken.UrlDecode();
+            string tokenHash = HashPasswordResetToken(resetToken);
+            var storedTokenHash = user.PasswordResetToken;
 
-                if (storedTokenHash == tokenHash && user.PasswordResetTokenExpiry > DateTime.UtcNow)
-                {
-                    return new SuccessDataResult<bool>(true);
-                }
+            if (storedTokenHash == tokenHash && user.PasswordResetTokenExpiry > DateTime.UtcNow)
+            {
+                return new SuccessDataResult<bool>(true);
+            }
         }
         return new SuccessDataResult<bool>(false);
     }

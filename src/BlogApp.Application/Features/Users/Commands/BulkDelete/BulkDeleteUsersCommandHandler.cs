@@ -2,7 +2,6 @@ using BlogApp.Application.Abstractions;
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Repositories;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace BlogApp.Application.Features.Users.Commands.BulkDelete;
 

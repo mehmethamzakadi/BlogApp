@@ -1,11 +1,16 @@
+using BlogApp.Domain.Repositories;
 using FluentValidation;
 
 namespace BlogApp.Application.Features.Posts.Commands.Create
 {
     public sealed class CreatePostValidator : AbstractValidator<CreatePostCommand>
     {
-        public CreatePostValidator()
+        private readonly ICategoryRepository _categoryRepository;
+
+        public CreatePostValidator(ICategoryRepository categoryRepository)
         {
+            _categoryRepository = categoryRepository;
+
             RuleFor(c => c.Title)
                 .NotEmpty().WithMessage("Başlık bilgisi boş olmamalıdır!")
                 .MaximumLength(100).WithMessage("Başlık bilgisi 100 karakterden uzun olmamalıdır!");
@@ -21,7 +26,15 @@ namespace BlogApp.Application.Features.Posts.Commands.Create
                .MaximumLength(400).WithMessage("Özet bilgisi 400 karakterden fazla olmamalıdır!");
 
             RuleFor(c => c.CategoryId)
-                .NotEmpty().WithMessage("Geçerli bir kategori seçilmelidir!");
+                .NotEmpty().WithMessage("Geçerli bir kategori seçilmelidir!")
+                .MustAsync(CategoryExists).WithMessage("Geçersiz kategori seçildi!");
+        }
+
+        private async Task<bool> CategoryExists(Guid categoryId, CancellationToken cancellationToken)
+        {
+            return await _categoryRepository.AnyAsync(
+                x => x.Id == categoryId && !x.IsDeleted,
+                cancellationToken: cancellationToken);
         }
     }
 }

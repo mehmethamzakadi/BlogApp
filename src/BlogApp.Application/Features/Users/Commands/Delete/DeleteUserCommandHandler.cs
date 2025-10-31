@@ -2,7 +2,6 @@ using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Repositories;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using IResult = BlogApp.Domain.Common.Results.IResult;
 
 namespace BlogApp.Application.Features.Users.Commands.Delete;

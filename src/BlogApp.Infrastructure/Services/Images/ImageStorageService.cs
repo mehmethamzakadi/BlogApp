@@ -27,7 +27,7 @@ public sealed class ImageStorageService : IImageStorageService
         var filePath = Path.Combine(scopePath, fileName);
 
         using var image = await Image.LoadAsync(context.Content, cancellationToken);
-        
+
         if (_options.DefaultMaxWidth.HasValue || _options.DefaultMaxHeight.HasValue)
         {
             image.Mutate(x => x.Resize(new ResizeOptions

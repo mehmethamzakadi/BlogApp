@@ -35,7 +35,9 @@ public class ActivityLogConfiguration : IEntityTypeConfiguration<ActivityLog>
             .HasForeignKey(a => a.UserId)
             .OnDelete(DeleteBehavior.SetNull);
 
-        // Index for performance
+        builder.HasIndex(a => new { a.UserId, a.Timestamp })
+            .HasDatabaseName("IX_ActivityLogs_UserId_Timestamp");
+
         builder.HasIndex(a => a.Timestamp)
             .HasDatabaseName("IX_ActivityLogs_Timestamp");
 

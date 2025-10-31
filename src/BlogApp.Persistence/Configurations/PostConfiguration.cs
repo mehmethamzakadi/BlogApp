@@ -22,18 +22,12 @@ namespace BlogApp.Persistence.Configurations
                 .HasForeignKey(p => p.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Indexler
-            builder.HasIndex(x => x.CategoryId)
-                .HasDatabaseName("IX_Posts_CategoryId");
+            builder.HasIndex(x => new { x.IsPublished, x.CategoryId, x.CreatedDate })
+                .HasDatabaseName("IX_Posts_IsPublished_CategoryId_CreatedDate");
 
-            builder.HasIndex(x => x.IsPublished)
-                .HasDatabaseName("IX_Posts_IsPublished");
-
-            builder.HasIndex(x => x.CreatedDate)
-                .HasDatabaseName("IX_Posts_CreatedDate");
-
-            builder.HasIndex(x => new { x.IsPublished, x.CreatedDate })
-                .HasDatabaseName("IX_Posts_IsPublished_CreatedDate");
+            builder.HasIndex(x => x.IsDeleted)
+                .HasFilter("\"IsDeleted\" = false")
+                .HasDatabaseName("IX_Posts_NotDeleted");
 
             builder.HasIndex(x => x.Title)
                 .HasDatabaseName("IX_Posts_Title");

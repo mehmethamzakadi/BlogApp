@@ -50,7 +50,7 @@ public sealed class UpdatePostCommandHandler(
             entity.Unpublish();
         }
 
-        await postRepository.UpdateAsync(entity);
+        postRepository.Update(entity);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new SuccessResult("Post bilgisi başarıyla güncellendi.");

@@ -40,7 +40,7 @@ public sealed class CreateUserCommandHandler : IRequestHandler<CreateUserCommand
             return new ErrorResult("Bu kullanıcı adı zaten kullanılıyor!");
 
         var user = User.Create(request.UserName, request.Email, string.Empty);
-        
+
         var passwordResult = _userDomainService.SetPassword(user, request.Password);
         if (!passwordResult.Success)
             return passwordResult;

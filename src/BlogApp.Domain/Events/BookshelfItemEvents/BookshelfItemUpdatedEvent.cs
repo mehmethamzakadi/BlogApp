@@ -8,6 +8,7 @@ public sealed class BookshelfItemUpdatedEvent : DomainEvent
 {
     public Guid ItemId { get; }
     public string Title { get; }
+    public override Guid AggregateId => ItemId;
 
     public BookshelfItemUpdatedEvent(Guid itemId, string title)
     {

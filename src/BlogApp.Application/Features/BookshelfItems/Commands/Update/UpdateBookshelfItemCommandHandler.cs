@@ -53,7 +53,7 @@ public sealed class UpdateBookshelfItemCommandHandler(
         item.IsRead = request.IsRead;
         item.ReadDate = NormalizeReadDate(request.ReadDate, request.IsRead);
 
-        await bookshelfItemRepository.UpdateAsync(item);
+        bookshelfItemRepository.Update(item);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new SuccessResult("Kitap kaydı başarıyla güncellendi.");

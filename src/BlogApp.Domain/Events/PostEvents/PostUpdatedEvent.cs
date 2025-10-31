@@ -8,6 +8,7 @@ public class PostUpdatedEvent : DomainEvent
 {
     public Guid PostId { get; }
     public string Title { get; }
+    public override Guid AggregateId => PostId;
 
     public PostUpdatedEvent(Guid postId, string title)
     {

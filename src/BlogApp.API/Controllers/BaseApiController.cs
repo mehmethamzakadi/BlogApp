@@ -15,7 +15,7 @@ public abstract class BaseApiController(IMediator mediator) : ControllerBase
 
     [NonAction]
     protected IActionResult ToResponse<T>(IDataResult<T> result) =>
-        StatusCode(result.Success ? StatusCodes.Status200OK : StatusCodes.Status400BadRequest, 
+        StatusCode(result.Success ? StatusCodes.Status200OK : StatusCodes.Status400BadRequest,
             new ApiResult<T>
             {
                 Success = result.Success,

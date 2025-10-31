@@ -8,6 +8,7 @@ public class CategoryUpdatedEvent : DomainEvent
 {
     public Guid CategoryId { get; }
     public string Name { get; }
+    public override Guid AggregateId => CategoryId;
 
     public CategoryUpdatedEvent(Guid categoryId, string name)
     {
