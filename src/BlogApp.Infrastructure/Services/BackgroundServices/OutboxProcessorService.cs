@@ -65,7 +65,7 @@ public class OutboxProcessorService : BackgroundService
         // İşlenmemiş mesajları getir
         var messages = await outboxRepository.GetUnprocessedMessagesAsync(BatchSize, cancellationToken);
 
-        if (!messages.Any())
+        if (messages.Count == 0)
         {
             return; // İşlenecek mesaj yok
         }
@@ -93,66 +93,66 @@ public class OutboxProcessorService : BackgroundService
             }
 
             foreach (var message in group)
-        {
-            try
             {
-                object? integrationEvent;
-
                 try
                 {
-                    integrationEvent = converter.Convert(message.Payload);
+                    object? integrationEvent;
+
+                    try
+                    {
+                        integrationEvent = converter.Convert(message.Payload);
+                    }
+                    catch (Exception conversionException)
+                    {
+                        _logger.LogError(conversionException, "{EventType} event'i dönüştürülürken hata oluştu", message.EventType);
+
+                        await outboxRepository.MarkAsFailedAsync(
+                            message.Id,
+                            conversionException.Message,
+                            null,
+                            cancellationToken);
+                        continue;
+                    }
+
+                    if (integrationEvent != null)
+                    {
+                        await publishEndpoint.Publish(integrationEvent, cancellationToken);
+
+                        await outboxRepository.MarkAsProcessedAsync(message.Id, cancellationToken);
+
+                        _logger.LogDebug("{MessageId} ID'li {EventType} türündeki outbox mesajı başarıyla yayınlandı",
+                            message.Id, message.EventType);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("{EventType} event'i dönüştürülemedi", message.EventType);
+
+                        await outboxRepository.MarkAsFailedAsync(
+                            message.Id,
+                            $"Event dönüştürülemedi: {message.EventType}",
+                            null,
+                            cancellationToken);
+                    }
                 }
-                catch (Exception conversionException)
+                catch (Exception ex)
                 {
-                    _logger.LogError(conversionException, "{EventType} event'i dönüştürülürken hata oluştu", message.EventType);
+                    _logger.LogError(ex, "Outbox mesajı {MessageId} yayınlanırken hata oluştu", message.Id);
 
-                    await outboxRepository.MarkAsFailedAsync(
-                        message.Id,
-                        conversionException.Message,
-                        null,
-                        cancellationToken);
-                    continue;
-                }
-
-                if (integrationEvent != null)
-                {
-                    await publishEndpoint.Publish(integrationEvent, cancellationToken);
-
-                    await outboxRepository.MarkAsProcessedAsync(message.Id, cancellationToken);
-
-                    _logger.LogDebug("{MessageId} ID'li {EventType} türündeki outbox mesajı başarıyla yayınlandı",
-                        message.Id, message.EventType);
-                }
-                else
-                {
-                    _logger.LogWarning("{EventType} event'i dönüştürülemedi", message.EventType);
-
-                    await outboxRepository.MarkAsFailedAsync(
-                        message.Id,
-                        $"Event dönüştürülemedi: {message.EventType}",
-                        null,
-                        cancellationToken);
+                    if (message.RetryCount < MaxRetryCount)
+                    {
+                        await outboxRepository.MarkAsFailedAsync(
+                            message.Id,
+                            ex.Message,
+                            null,
+                            cancellationToken);
+                    }
+                    else
+                    {
+                        _logger.LogError("Mesaj {MessageId} maksimum deneme sayısını aştı. Dead letter'a taşınıyor.",
+                            message.Id);
+                    }
                 }
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Outbox mesajı {MessageId} yayınlanırken hata oluştu", message.Id);
-
-                if (message.RetryCount < MaxRetryCount)
-                {
-                    await outboxRepository.MarkAsFailedAsync(
-                        message.Id,
-                        ex.Message,
-                        null,
-                        cancellationToken);
-                }
-                else
-                {
-                    _logger.LogError("Mesaj {MessageId} maksimum deneme sayısını aştı. Dead letter'a taşınıyor.",
-                        message.Id);
-                }
-            }
-        }
         }
 
         // Tüm batch'i tek seferde kaydet
