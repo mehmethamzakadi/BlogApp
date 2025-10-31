@@ -19,7 +19,13 @@ public static class PersistenceServicesRegistration
 
         services.AddDbContext<BlogAppDbContext>((sp, options) =>
         {
-            options.UseNpgsql(postgreSqlConnectionString);
+            options.UseNpgsql(postgreSqlConnectionString, npgsqlOptions =>
+            {
+                npgsqlOptions.MaxBatchSize(100);
+                npgsqlOptions.CommandTimeout(30);
+                npgsqlOptions.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(5), errorCodesToAdd: null);
+            });
+            options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
             options.EnableServiceProviderCaching();
             options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
         });

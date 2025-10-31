@@ -27,11 +27,21 @@ services:
 
   postgresdb:
     container_name: postgresdb
-    image: postgres:14
+    image: postgres:16
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-BlogAppDb}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=300"
+      - "-c"
+      - "shared_buffers=256MB"
+      - "-c"
+      - "effective_cache_size=1GB"
+      - "-c"
+      - "work_mem=4MB"
     ports:
       - "5435:5432"   # dış dünyadan erişim (opsiyonel)
     volumes:

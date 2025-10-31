@@ -140,7 +140,7 @@ BlogApp **3-katmanlı loglama mimarisi** kullanır:
 ### Backend
 - **Framework:** ASP.NET Core 9.0
 - **ORM:** Entity Framework Core 9.0
-- **Database:** PostgreSQL 16
+- **Database:** PostgreSQL 16 (latest stable)
 - **Cache:** Redis
 - **Message Queue:** RabbitMQ
 - **Authentication:** JWT Bearer
@@ -207,6 +207,10 @@ if (hasPermission(Permissions.PostsDelete)) {
 ## 📚 Dokümantasyon
 
 - [DEVELOPER_GUIDE.md](docs/DEVELOPER_GUIDE.md) - Kapsamlı geliştirici kılavuzu (Logging, Permission, Outbox Pattern, Best Practices)
+- [PERFORMANCE_OPTIMIZATION.md](docs/PERFORMANCE_OPTIMIZATION.md) - Performans optimizasyonları ve ölçüm yöntemleri
+- [LOAD_TEST_GUIDE.md](LOAD_TEST_GUIDE.md) - 500-2000 kullanıcı load test kılavuzu
+- [OPTIMIZATION_CHANGES.md](OPTIMIZATION_CHANGES.md) - Yapılan optimizasyon değişiklikleri
+- [CONFIGURATION_GUIDE.md](CONFIGURATION_GUIDE.md) - Konfigürasyon kılavuzu (Development/Production)
 - [ANALYSIS.md](docs/ANALYSIS.md) - Kod tabanı analizi ve iyileştirme önerileri
 - [tests/README.md](tests/README.md) - Test dokümantasyonu
 

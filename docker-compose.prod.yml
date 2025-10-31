@@ -9,8 +9,8 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://0.0.0.0:8080
-      ConnectionStrings__DefaultConnection: "Host=postgresdb;Port=5432;Database=${POSTGRES_DB:-BlogAppDb};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}"
-      RedisCache: "redis_server:6379"
+      ConnectionStrings__BlogAppPostgreConnectionString: "Host=postgresdb;Port=5432;Database=${POSTGRES_DB:-BlogAppDb};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres};Pooling=true;Minimum Pool Size=10;Maximum Pool Size=200;Connection Idle Lifetime=300;Connection Pruning Interval=10;"
+      ConnectionStrings__RedisCache: "redis_server:6379,abortConnect=false,connectTimeout=5000,syncTimeout=5000,connectRetry=3,keepAlive=60"
       RabbitMQOptions__HostName: rabbitmq
       RabbitMQOptions__UserName: ${RABBITMQ_DEFAULT_USER:-blogapp}
       RabbitMQOptions__Password: ${RABBITMQ_DEFAULT_PASS:-supersecret}
@@ -29,11 +29,21 @@ services:
 
   postgresdb:
     container_name: postgresdb
-    image: postgres:14
+    image: postgres:16
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-BlogAppDb}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=300"
+      - "-c"
+      - "shared_buffers=256MB"
+      - "-c"
+      - "effective_cache_size=1GB"
+      - "-c"
+      - "work_mem=4MB"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:

@@ -13,7 +13,7 @@ public sealed class UpdatePostCommandHandler(
 {
     public async Task<IResult> Handle(UpdatePostCommand request, CancellationToken cancellationToken)
     {
-        var entity = await postRepository.GetAsync(x => x.Id == request.Id, cancellationToken: cancellationToken);
+        var entity = await postRepository.GetAsync(x => x.Id == request.Id, enableTracking: true, cancellationToken: cancellationToken);
         if (entity is null)
         {
             return new ErrorResult("Post bilgisi bulunamadı!");

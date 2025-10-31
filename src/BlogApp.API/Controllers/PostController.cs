@@ -18,6 +18,7 @@ namespace BlogApp.API.Controllers
     {
         [AllowAnonymous]
         [HttpGet]
+        [ResponseCache(Duration = 60, VaryByQueryKeys = new[] { "page", "pageSize", "categoryId" })] // 1 dakika cache - public data
         public async Task<IActionResult> GetList([FromQuery] PostListRequest request)
         {
             PaginatedListResponse<GetListPostResponse> response = await Mediator.Send(new GetListPostQuery(request));

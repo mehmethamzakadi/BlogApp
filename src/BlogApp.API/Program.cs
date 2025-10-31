@@ -16,6 +16,16 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Kestrel Server Optimizations
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.Limits.MaxConcurrentConnections = 1000;
+    serverOptions.Limits.MaxConcurrentUpgradedConnections = 1000;
+    serverOptions.Limits.MaxRequestBodySize = 10 * 1024 * 1024; // 10MB
+    serverOptions.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(2);
+    serverOptions.Limits.RequestHeadersTimeout = TimeSpan.FromSeconds(30);
+});
+
 // Serilog yapılandırmasını yükle
 builder.ConfigureSerilog();
 
@@ -32,6 +42,27 @@ builder.Services.AddConfigureInfrastructureServices(builder.Configuration);
 
 builder.Services.AddOptions();
 builder.Services.AddHttpContextAccessor();
+
+// Response Caching
+builder.Services.AddResponseCaching();
+
+// Response Compression
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.BrotliCompressionProvider>();
+    options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProvider>();
+});
+
+builder.Services.Configure<Microsoft.AspNetCore.ResponseCompression.BrotliCompressionProviderOptions>(options =>
+{
+    options.Level = System.IO.Compression.CompressionLevel.Fastest;
+});
+
+builder.Services.Configure<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProviderOptions>(options =>
+{
+    options.Level = System.IO.Compression.CompressionLevel.Fastest;
+});
 
 // Rate Limit yapılandırması
 builder.Services.AddMemoryCache();
@@ -181,6 +212,9 @@ await dbInitializer.InitializeAsync(scope.ServiceProvider, app.Lifetime.Applicat
 await dbInitializer.EnsurePostgreSqlSerilogTableAsync(builder.Configuration, app.Lifetime.ApplicationStopping);
 
 //app.UseHttpsRedirection();
+
+app.UseResponseCompression();
+app.UseResponseCaching();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 

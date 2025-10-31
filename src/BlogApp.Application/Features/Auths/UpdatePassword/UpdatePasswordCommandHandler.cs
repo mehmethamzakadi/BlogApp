@@ -27,7 +27,7 @@ public sealed class UpdatePasswordCommandHandler : IRequestHandler<UpdatePasswor
         if (!request.Password.Equals(request.PasswordConfirm))
             throw new PasswordChangeFailedException("Girilen şifre aynı değil, lütfen şifreyi doğrulayınız!");
 
-        var user = await _userRepository.GetAsync(u => u.Id == Guid.Parse(request.UserId));
+        var user = await _userRepository.GetAsync(u => u.Id == Guid.Parse(request.UserId), enableTracking: true);
         if (user == null)
             throw new PasswordChangeFailedException("Kullanıcı bulunamadı.");
 

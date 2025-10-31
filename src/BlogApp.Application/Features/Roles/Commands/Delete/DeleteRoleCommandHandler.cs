@@ -25,6 +25,7 @@ public sealed class DeleteRoleCommandHandler : IRequestHandler<DeleteRoleCommand
         var role = await _roleRepository.GetAsync(
             predicate: r => r.Id == request.Id,
             include: r => r.Include(x => x.UserRoles),
+            enableTracking: true,
             cancellationToken: cancellationToken);
 
         if (role == null)

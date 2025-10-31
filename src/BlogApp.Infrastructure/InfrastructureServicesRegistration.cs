@@ -71,7 +71,10 @@ namespace BlogApp.Infrastructure
             if (!string.IsNullOrWhiteSpace(redisConnectionString))
             {
                 services.AddStackExchangeRedisCache(options =>
-                    options.Configuration = redisConnectionString);
+                {
+                    options.Configuration = redisConnectionString;
+                    options.InstanceName = "BlogApp_";
+                });
             }
             else
             {

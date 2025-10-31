@@ -9,8 +9,8 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://0.0.0.0:8080
-      ConnectionStrings__BlogAppPostgreConnectionString: "Host=postgresdb;Port=5432;Database=BlogAppDb;Username=postgres;Password=postgres;Include Error Detail=true;"
-      RedisCache: "redis_server:6379"
+      ConnectionStrings__BlogAppPostgreConnectionString: "Host=postgresdb;Port=5432;Database=BlogAppDb;Username=postgres;Password=postgres;Include Error Detail=true;Pooling=true;Minimum Pool Size=5;Maximum Pool Size=100;Connection Idle Lifetime=300;Connection Pruning Interval=10;"
+      ConnectionStrings__RedisCache: "redis_server:6379,abortConnect=false,connectTimeout=5000,syncTimeout=5000,connectRetry=3,keepAlive=60"
       RabbitMQOptions__HostName: rabbitmq
       RabbitMQOptions__UserName: blogapp
       RabbitMQOptions__Password: supersecret
@@ -31,11 +31,21 @@ services:
   # 🔹 PostgreSQL Veritabanı
   postgresdb:
     container_name: postgresdb
-    image: postgres:14
+    image: postgres:16
     environment:
       POSTGRES_DB: BlogAppDb
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=300"
+      - "-c"
+      - "shared_buffers=256MB"
+      - "-c"
+      - "effective_cache_size=1GB"
+      - "-c"
+      - "work_mem=4MB"
     ports:
       - "5435:5432"   # dış dünyadan erişim (opsiyonel)
     volumes:

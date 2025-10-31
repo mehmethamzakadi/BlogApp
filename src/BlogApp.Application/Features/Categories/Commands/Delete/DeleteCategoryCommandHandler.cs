@@ -16,7 +16,7 @@ public sealed class DeleteCategoryCommandHandler(
 {
     public async Task<IResult> Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
     {
-        var category = await categoryRepository.GetAsync(predicate: x => x.Id == request.Id, cancellationToken: cancellationToken);
+        var category = await categoryRepository.GetAsync(predicate: x => x.Id == request.Id, enableTracking: true, cancellationToken: cancellationToken);
         if (category is null)
             return new ErrorResult("Kategori bilgisi bulunamadı!");
 

@@ -33,6 +33,7 @@ public class BulkDeleteRolesCommandHandler : IRequestHandler<BulkDeleteRolesComm
                 var role = await _roleRepository.GetAsync(
                     predicate: r => r.Id == roleId,
                     include: r => r.Include(x => x.UserRoles),
+                    enableTracking: true,
                     cancellationToken: cancellationToken);
 
                 if (role == null)

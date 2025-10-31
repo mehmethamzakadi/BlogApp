@@ -12,7 +12,7 @@ public sealed class DeletePostCommandHandler(
 {
     public async Task<IResult> Handle(DeletePostCommand request, CancellationToken cancellationToken)
     {
-        var post = await postRepository.GetAsync(x => x.Id == request.Id);
+        var post = await postRepository.GetAsync(x => x.Id == request.Id, enableTracking: true);
         if (post is null)
             return new ErrorResult("Post bilgisi bulunamadı!");
 

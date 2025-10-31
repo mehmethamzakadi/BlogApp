@@ -18,6 +18,7 @@ public sealed class UpdateCategoryCommandHandler(
     {
         var category = await categoryRepository.GetAsync(
             predicate: x => x.Id == request.Id,
+            enableTracking: true,
             cancellationToken: cancellationToken);
 
         if (category is null)

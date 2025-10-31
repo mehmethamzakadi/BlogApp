@@ -11,7 +11,7 @@ public sealed class DeleteBookshelfItemCommandHandler(
 {
     public async Task<IResult> Handle(DeleteBookshelfItemCommand request, CancellationToken cancellationToken)
     {
-        var item = await bookshelfItemRepository.GetAsync(x => x.Id == request.Id, cancellationToken: cancellationToken);
+        var item = await bookshelfItemRepository.GetAsync(x => x.Id == request.Id, enableTracking: true, cancellationToken: cancellationToken);
         if (item is null)
             return new ErrorResult("Kitap kaydı bulunamadı.");
 
