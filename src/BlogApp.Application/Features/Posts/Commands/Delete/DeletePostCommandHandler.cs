@@ -17,7 +17,7 @@ public sealed class DeletePostCommandHandler(
             return new ErrorResult("Post bilgisi bulunamadı!");
 
         post.Delete();
-        await postRepository.DeleteAsync(post);
+        postRepository.Delete(post);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new SuccessResult("Post bilgisi başarıyla silindi.");

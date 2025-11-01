@@ -16,7 +16,7 @@ public sealed class DeleteBookshelfItemCommandHandler(
             return new ErrorResult("Kitap kaydı bulunamadı.");
 
         item.Delete();
-        await bookshelfItemRepository.DeleteAsync(item);
+        bookshelfItemRepository.Delete(item);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new SuccessResult("Kitap kaydı başarıyla silindi.");

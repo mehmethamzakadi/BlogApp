@@ -58,7 +58,7 @@ public class BulkDeleteRolesCommandHandler : IRequestHandler<BulkDeleteRolesComm
                 }
 
                 role.Delete();
-                await _roleRepository.DeleteAsync(role);
+                _roleRepository.Delete(role);
                 response.DeletedCount++;
             }
             catch (Exception ex)

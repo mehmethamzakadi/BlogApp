@@ -6,7 +6,7 @@ namespace BlogApp.Domain.Entities;
 /// Sistemdeki kullanıcıları temsil eder.
 /// Identity'den bağımsız, custom user entity.
 /// </summary>
-public sealed class User : BaseEntity
+public sealed class User : AggregateRoot
 {
     private string _userName = default!;
     private string _email = default!;

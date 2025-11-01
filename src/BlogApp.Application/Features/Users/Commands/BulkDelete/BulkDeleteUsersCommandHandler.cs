@@ -39,7 +39,7 @@ public class BulkDeleteUsersCommandHandler : IRequestHandler<BulkDeleteUsersComm
                 }
 
                 user.Delete();
-                await _userRepository.DeleteAsync(user);
+                _userRepository.Delete(user);
                 response.DeletedCount++;
             }
             catch (Exception ex)

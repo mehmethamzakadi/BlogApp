@@ -3,7 +3,7 @@ using BlogApp.Domain.Events.CategoryEvents;
 
 namespace BlogApp.Domain.Entities;
 
-public sealed class Category : BaseEntity
+public sealed class Category : AggregateRoot
 {
     public Category() { } // EF Core ve seed'ler için
 
@@ -14,7 +14,7 @@ public sealed class Category : BaseEntity
     public static Category Create(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
-            throw new ArgumentException("Category name cannot be empty", nameof(name));
+            throw new Exceptions.DomainValidationException("Category name cannot be empty");
 
         var category = new Category
         {
@@ -29,7 +29,7 @@ public sealed class Category : BaseEntity
     public void Update(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
-            throw new ArgumentException("Category name cannot be empty", nameof(name));
+            throw new Exceptions.DomainValidationException("Category name cannot be empty");
 
         Name = name;
         NormalizedName = name.ToUpperInvariant();

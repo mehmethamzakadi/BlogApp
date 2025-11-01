@@ -36,7 +36,9 @@ namespace BlogApp.Infrastructure
 
             // Custom Password Hasher for User entity
             services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
-            services.AddScoped<IPasswordHasher, PasswordHasher>();
+            services.AddScoped<AspNetCorePasswordHasher>();
+            services.AddScoped<Domain.Services.IPasswordHasher>(sp => sp.GetRequiredService<AspNetCorePasswordHasher>());
+            services.AddScoped<Application.Abstractions.Identity.IPasswordHasher>(sp => sp.GetRequiredService<AspNetCorePasswordHasher>());
 
             TokenOptions tokenOptions = configuration.GetSection(TokenOptions.SectionName).Get<TokenOptions>()
                 ?? throw new InvalidOperationException("Token ayarları yapılandırılmalıdır.");
@@ -159,7 +161,7 @@ namespace BlogApp.Infrastructure
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IImageStorageService, ImageStorageService>();
-            services.AddScoped<IUserDomainService, UserDomainService>();
+            services.AddScoped<IUserDomainService, Domain.Services.UserDomainService>();
 
             // Authorization
             services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();

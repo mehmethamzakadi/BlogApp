@@ -1,8 +1,6 @@
 namespace BlogApp.Application.Abstractions.Identity;
 
-public interface IPasswordHasher
+public interface IPasswordHasher : Domain.Services.IPasswordHasher
 {
-    string HashPassword(string password);
-    bool VerifyPassword(string hashedPassword, string providedPassword);
     string GeneratePasswordResetToken();
 }

@@ -9,7 +9,9 @@ using BlogApp.Domain.Exceptions;
 using BlogApp.Domain.Repositories;
 using BlogApp.Domain.Services;
 using BlogApp.Infrastructure.Extensions;
+using AppPasswordHasher = BlogApp.Application.Abstractions.Identity.IPasswordHasher;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -22,8 +24,9 @@ public sealed class AuthService : IAuthService
     private readonly ITokenService _tokenService;
     private readonly IRefreshSessionRepository _refreshSessionRepository;
     private readonly IMailService _mailService;
-    private readonly IPasswordHasher _passwordHasher;
+    private readonly AppPasswordHasher _passwordHasher;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<AuthService> _logger;
 
     public AuthService(
         IUserRepository userRepository,
@@ -31,8 +34,9 @@ public sealed class AuthService : IAuthService
         ITokenService tokenService,
         IRefreshSessionRepository refreshSessionRepository,
         IMailService mailService,
-        IPasswordHasher passwordHasher,
-        IUnitOfWork unitOfWork)
+        AppPasswordHasher passwordHasher,
+        IUnitOfWork unitOfWork,
+        ILogger<AuthService> logger)
     {
         _userRepository = userRepository;
         _userDomainService = userDomainService;
@@ -41,6 +45,7 @@ public sealed class AuthService : IAuthService
         _mailService = mailService;
         _passwordHasher = passwordHasher;
         _unitOfWork = unitOfWork;
+        _logger = logger;
     }
 
     public async Task<IDataResult<LoginResponse>> LoginAsync(string email, string password, string? deviceId = null)
@@ -81,11 +86,30 @@ public sealed class AuthService : IAuthService
         // Reset failed access count on successful login
         user.AccessFailedCount = 0;
 
+        // Revoke existing active sessions for this device (if deviceId provided)
+        // This ensures only one active session per device while allowing multi-device login
+        if (!string.IsNullOrWhiteSpace(deviceId))
+        {
+            var existingSessions = await _refreshSessionRepository.GetActiveSessionsAsync(user.Id);
+            var deviceSessions = existingSessions.Where(s => s.DeviceId == deviceId).ToList();
+            
+            if (deviceSessions.Count > 0)
+            {
+                foreach (var existingSession in deviceSessions)
+                {
+                    existingSession.Revoked = true;
+                    existingSession.RevokedAt = DateTime.UtcNow;
+                    existingSession.RevokedReason = "Replaced by new login";
+                    existingSession.UpdatedDate = DateTime.UtcNow;
+                    existingSession.UpdatedById = SystemUsers.SystemUserId;
+                }
+                _refreshSessionRepository.UpdateRange(deviceSessions);
+            }
+        }
+
         var authClaims = await _tokenService.GetAuthClaims(user);
         var accessToken = _tokenService.CreateAccessToken(authClaims, user);
         var refreshToken = _tokenService.CreateRefreshToken();
-
-        _userRepository.Update(user);
 
         var session = new RefreshSession
         {
@@ -132,9 +156,6 @@ public sealed class AuthService : IAuthService
 
         if (session.Revoked)
         {
-            session.RevokedReason ??= "Replay detected";
-            session.UpdatedDate = DateTime.UtcNow;
-            session.UpdatedById = SystemUsers.SystemUserId;
             await RevokeAllSessionsAsync(session.UserId, "Replay detected");
             await SaveChangesWithConcurrencyHandlingAsync();
             throw new AuthenticationErrorException("Refresh token kullanılamaz durumda.");
@@ -142,12 +163,6 @@ public sealed class AuthService : IAuthService
 
         if (session.ExpiresAt <= DateTime.UtcNow)
         {
-            session.Revoked = true;
-            session.RevokedAt = DateTime.UtcNow;
-            session.RevokedReason = "Expired";
-            session.UpdatedDate = DateTime.UtcNow;
-            session.UpdatedById = SystemUsers.SystemUserId;
-            await SaveChangesWithConcurrencyHandlingAsync();
             throw new AuthenticationErrorException("Refresh token süresi dolmuş.");
         }
 
@@ -163,12 +178,6 @@ public sealed class AuthService : IAuthService
         var newAccess = _tokenService.CreateAccessToken(claims, user);
         var newRefresh = _tokenService.CreateRefreshToken();
 
-        session.Revoked = true;
-        session.RevokedAt = DateTime.UtcNow;
-        session.RevokedReason = "Rotated";
-        session.UpdatedDate = DateTime.UtcNow;
-        session.UpdatedById = SystemUsers.SystemUserId;
-
         var replacement = new RefreshSession
         {
             Id = Guid.NewGuid(),
@@ -182,8 +191,14 @@ public sealed class AuthService : IAuthService
             CreatedById = SystemUsers.SystemUserId
         };
 
+        session.Revoked = true;
+        session.RevokedAt = DateTime.UtcNow;
+        session.RevokedReason = "Rotated";
         session.ReplacedById = replacement.Id;
+        session.UpdatedDate = DateTime.UtcNow;
+        session.UpdatedById = SystemUsers.SystemUserId;
 
+        _refreshSessionRepository.Update(session);
         await _refreshSessionRepository.AddAsync(replacement);
         await SaveChangesWithConcurrencyHandlingAsync();
 
@@ -219,6 +234,7 @@ public sealed class AuthService : IAuthService
         session.UpdatedDate = DateTime.UtcNow;
         session.UpdatedById = SystemUsers.SystemUserId;
 
+        _refreshSessionRepository.Update(session);
         await SaveChangesWithConcurrencyHandlingAsync();
     }
 
@@ -258,36 +274,59 @@ public sealed class AuthService : IAuthService
     private async Task RevokeAllSessionsAsync(Guid userId, string reason)
     {
         var sessions = await _refreshSessionRepository.GetActiveSessionsAsync(userId);
-        foreach (var session in sessions)
+        if (sessions.Count > 0)
         {
-            session.Revoked = true;
-            session.RevokedAt = DateTime.UtcNow;
-            session.RevokedReason = reason;
-            session.UpdatedDate = DateTime.UtcNow;
-            session.UpdatedById = SystemUsers.SystemUserId;
+            foreach (var session in sessions)
+            {
+                session.Revoked = true;
+                session.RevokedAt = DateTime.UtcNow;
+                session.RevokedReason = reason;
+                session.UpdatedDate = DateTime.UtcNow;
+                session.UpdatedById = SystemUsers.SystemUserId;
+            }
+            _refreshSessionRepository.UpdateRange(sessions.ToList());
         }
     }
 
     public async Task<IDataResult<bool>> PasswordVerify(string resetToken, string userId)
     {
-        if (!Guid.TryParse(userId, out Guid userIdGuid))
+        try
         {
-            return new SuccessDataResult<bool>(false);
-        }
+            if (!Guid.TryParse(userId, out Guid userIdGuid))
+            {
+                _logger.LogWarning("Invalid userId format provided for password verification");
+                return new SuccessDataResult<bool>(false);
+            }
 
-        User? user = await _userRepository.FindByIdAsync(userIdGuid);
-        if (user != null && user.PasswordResetToken != null && user.PasswordResetTokenExpiry != null)
-        {
+            User? user = await _userRepository.FindByIdAsync(userIdGuid);
+            if (user == null)
+            {
+                _logger.LogWarning("Password reset verification failed: User not found {UserId}", userIdGuid);
+                return new SuccessDataResult<bool>(false);
+            }
+
+            if (user.PasswordResetToken == null || user.PasswordResetTokenExpiry == null)
+            {
+                _logger.LogWarning("Password reset verification failed: No reset token found for user {UserId}", userIdGuid);
+                return new SuccessDataResult<bool>(false);
+            }
+
             resetToken = resetToken.UrlDecode();
             string tokenHash = HashPasswordResetToken(resetToken);
-            var storedTokenHash = user.PasswordResetToken;
 
-            if (storedTokenHash == tokenHash && user.PasswordResetTokenExpiry > DateTime.UtcNow)
+            if (user.PasswordResetToken == tokenHash && user.PasswordResetTokenExpiry > DateTime.UtcNow)
             {
                 return new SuccessDataResult<bool>(true);
             }
+
+            _logger.LogWarning("Password reset verification failed: Invalid or expired token for user {UserId}", userIdGuid);
+            return new SuccessDataResult<bool>(false);
         }
-        return new SuccessDataResult<bool>(false);
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred during password reset verification for userId: {UserId}", userId);
+            return new SuccessDataResult<bool>(false);
+        }
     }
 
     private static string HashRefreshToken(string value)

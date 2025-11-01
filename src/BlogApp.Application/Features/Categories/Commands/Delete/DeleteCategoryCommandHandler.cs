@@ -27,7 +27,7 @@ public sealed class DeleteCategoryCommandHandler(
             return new ErrorResult("Bu kategoriye ait aktif postlar bulunmaktadır. Önce postları silmeli veya başka kategoriye taşımalısınız.");
 
         category.Delete();
-        await categoryRepository.DeleteAsync(category);
+        categoryRepository.Delete(category);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         await cacheService.Remove(CacheKeys.Category(category.Id));

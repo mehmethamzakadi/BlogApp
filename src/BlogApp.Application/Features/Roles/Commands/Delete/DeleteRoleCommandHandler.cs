@@ -38,7 +38,7 @@ public sealed class DeleteRoleCommandHandler : IRequestHandler<DeleteRoleCommand
             return new ErrorResult("Bu role atanmış aktif kullanıcılar bulunmaktadır. Önce kullanıcılardan bu rolü kaldırmalısınız.");
 
         role.Delete();
-        await _roleRepository.DeleteAsync(role);
+        _roleRepository.Delete(role);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new SuccessResult("Rol silindi.");

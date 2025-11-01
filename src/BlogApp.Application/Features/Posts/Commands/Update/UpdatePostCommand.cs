@@ -9,8 +9,15 @@ public sealed record UpdatePostCommand(Guid Id, string Title, string Body, strin
 {
     public IEnumerable<string> GetCacheKeysToInvalidate()
     {
+        yield return CacheKeys.Post(Id);
         yield return CacheKeys.PostPublic(Id);
         yield return CacheKeys.PostWithDrafts(Id);
         yield return CacheKeys.CategoryGridVersion();
+        
+        for (int i = 0; i < 10; i++)
+        {
+            yield return CacheKeys.PostList(i, 10);
+            yield return CacheKeys.PostsByCategory(CategoryId, i, 10);
+        }
     }
 }

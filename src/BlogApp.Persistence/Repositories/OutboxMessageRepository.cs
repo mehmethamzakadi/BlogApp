@@ -65,7 +65,7 @@ public class OutboxMessageRepository : EfRepositoryBase<OutboxMessage, BlogAppDb
 
         foreach (var message in oldMessages)
         {
-            await DeleteAsync(message, permanent: true);
+            Delete(message, permanent: true);
         }
     }
 

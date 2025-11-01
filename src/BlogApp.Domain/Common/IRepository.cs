@@ -49,8 +49,8 @@ public interface IRepository<TEntity> : IQuery<TEntity>
     Task<ICollection<TEntity>> AddRangeAsync(ICollection<TEntity> entities);
     TEntity Update(TEntity entity);
     ICollection<TEntity> UpdateRange(ICollection<TEntity> entities);
-    Task<TEntity> DeleteAsync(TEntity entity, bool permanent = false);
-    Task<ICollection<TEntity>> DeleteRangeAsync(ICollection<TEntity> entities, bool permanent = false);
+    TEntity Delete(TEntity entity, bool permanent = false);
+    ICollection<TEntity> DeleteRange(ICollection<TEntity> entities, bool permanent = false);
     Task<List<TEntity>> GetAllAsync(
       Expression<Func<TEntity, bool>>? predicate = null,
       Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,

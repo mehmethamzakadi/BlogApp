@@ -27,7 +27,7 @@ public sealed class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand
             return new ErrorResult("Kullanıcı bilgisi bulunamadı!");
 
         user.Delete();
-        await _userRepository.DeleteAsync(user);
+        _userRepository.Delete(user);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new SuccessResult("Kullanıcı bilgisi başarıyla silindi.");

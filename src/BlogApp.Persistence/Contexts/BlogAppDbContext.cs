@@ -1,7 +1,9 @@
 using BlogApp.Application.Abstractions;
+using BlogApp.Domain.Common;
 using BlogApp.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.Linq.Expressions;
 
 namespace BlogApp.Persistence.Contexts
 {
@@ -27,6 +29,7 @@ namespace BlogApp.Persistence.Contexts
 
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
+                // DateTime converter
                 foreach (var property in entityType.GetProperties())
                 {
                     if (property.ClrType == typeof(DateTime))
@@ -37,6 +40,17 @@ namespace BlogApp.Persistence.Contexts
                     {
                         property.SetValueConverter(nullableDateTimeConverter);
                     }
+                }
+
+                // Global query filter for soft delete
+                if (typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))
+                {
+                    var parameter = Expression.Parameter(entityType.ClrType, "e");
+                    var property = Expression.Property(parameter, nameof(BaseEntity.IsDeleted));
+                    var filter = Expression.Lambda(
+                        Expression.Equal(property, Expression.Constant(false)), 
+                        parameter);
+                    modelBuilder.Entity(entityType.ClrType).HasQueryFilter(filter);
                 }
             }
 

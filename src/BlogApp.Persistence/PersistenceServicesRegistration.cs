@@ -23,7 +23,6 @@ public static class PersistenceServicesRegistration
             {
                 npgsqlOptions.MaxBatchSize(100);
                 npgsqlOptions.CommandTimeout(30);
-                npgsqlOptions.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(5), errorCodesToAdd: null);
             });
             options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
             options.EnableServiceProviderCaching();

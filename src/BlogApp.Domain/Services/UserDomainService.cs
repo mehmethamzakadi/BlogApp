@@ -1,15 +1,14 @@
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
-using BlogApp.Domain.Services;
-using Microsoft.AspNetCore.Identity;
+using System.Linq;
 
-namespace BlogApp.Infrastructure.Services;
+namespace BlogApp.Domain.Services;
 
 public sealed class UserDomainService : IUserDomainService
 {
-    private readonly IPasswordHasher<User> _passwordHasher;
+    private readonly IPasswordHasher _passwordHasher;
 
-    public UserDomainService(IPasswordHasher<User> passwordHasher)
+    public UserDomainService(IPasswordHasher passwordHasher)
     {
         _passwordHasher = passwordHasher;
     }
@@ -19,7 +18,7 @@ public sealed class UserDomainService : IUserDomainService
         if (string.IsNullOrWhiteSpace(password))
             return new ErrorResult("Password cannot be empty");
 
-        user.PasswordHash = _passwordHasher.HashPassword(user, password);
+        user.PasswordHash = _passwordHasher.HashPassword(password);
         user.SecurityStamp = Guid.NewGuid().ToString();
         user.ConcurrencyStamp = Guid.NewGuid().ToString();
         user.EmailConfirmed = false;
@@ -39,7 +38,7 @@ public sealed class UserDomainService : IUserDomainService
         if (user.PasswordResetTokenExpiry == null || user.PasswordResetTokenExpiry < DateTime.UtcNow)
             return new ErrorResult("Reset token has expired");
 
-        user.PasswordHash = _passwordHasher.HashPassword(user, newPassword);
+        user.PasswordHash = _passwordHasher.HashPassword(newPassword);
         user.SecurityStamp = Guid.NewGuid().ToString();
         user.PasswordResetToken = null;
         user.PasswordResetTokenExpiry = null;
@@ -49,9 +48,7 @@ public sealed class UserDomainService : IUserDomainService
 
     public bool VerifyPassword(User user, string password)
     {
-        var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password);
-        return result == PasswordVerificationResult.Success ||
-               result == PasswordVerificationResult.SuccessRehashNeeded;
+        return _passwordHasher.VerifyPassword(user.PasswordHash, password);
     }
 
     public IResult AddToRole(User user, Role role)

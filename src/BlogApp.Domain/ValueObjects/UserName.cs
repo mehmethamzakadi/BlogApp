@@ -20,10 +20,10 @@ public sealed class UserName : IEquatable<UserName>
     public static UserName Create(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
-            throw new ArgumentException("Username cannot be empty", nameof(value));
+            throw new Exceptions.DomainValidationException("Username cannot be empty");
 
         if (!UserNameRegex.IsMatch(value))
-            throw new ArgumentException("Username must be 3-50 characters and contain only letters, numbers, underscore, or hyphen", nameof(value));
+            throw new Exceptions.DomainValidationException("Username must be 3-50 characters and contain only letters, numbers, underscore, or hyphen");
 
         return new UserName(value);
     }

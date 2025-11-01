@@ -22,11 +22,11 @@ public sealed class Post : AggregateRoot
     public static Post Create(string title, string body, string summary, Guid categoryId, string? thumbnail = null)
     {
         if (string.IsNullOrWhiteSpace(title))
-            throw new ArgumentException("Title cannot be empty", nameof(title));
+            throw new Exceptions.DomainValidationException("Title cannot be empty");
         if (string.IsNullOrWhiteSpace(body))
-            throw new ArgumentException("Body cannot be empty", nameof(body));
+            throw new Exceptions.DomainValidationException("Body cannot be empty");
         if (categoryId == Guid.Empty)
-            throw new ArgumentException("CategoryId is required", nameof(categoryId));
+            throw new Exceptions.DomainValidationException("CategoryId is required");
 
         var post = new Post
         {
@@ -45,9 +45,9 @@ public sealed class Post : AggregateRoot
     public void Update(string title, string body, string summary, Guid categoryId, string? thumbnail = null)
     {
         if (string.IsNullOrWhiteSpace(title))
-            throw new ArgumentException("Title cannot be empty", nameof(title));
+            throw new Exceptions.DomainValidationException("Title cannot be empty");
         if (string.IsNullOrWhiteSpace(body))
-            throw new ArgumentException("Body cannot be empty", nameof(body));
+            throw new Exceptions.DomainValidationException("Body cannot be empty");
 
         Title = title;
         Body = body;

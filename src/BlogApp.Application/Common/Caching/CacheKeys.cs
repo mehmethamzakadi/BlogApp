@@ -12,9 +12,15 @@ public static class CacheKeys
 {
     public static string Category(Guid categoryId) => $"category:{categoryId}";
 
+    public static string Post(Guid postId) => $"post:{postId}";
+
     public static string PostPublic(Guid postId) => $"post:public:{postId}";
 
     public static string PostWithDrafts(Guid postId) => $"post:full:{postId}";
+
+    public static string PostList(int pageIndex, int pageSize) => $"posts:list:{pageIndex}:{pageSize}";
+
+    public static string PostsByCategory(Guid categoryId, int pageIndex, int pageSize) => $"posts:category:{categoryId}:{pageIndex}:{pageSize}";
 
     public static string CategoryGridVersion() => "category:grid:version";
 

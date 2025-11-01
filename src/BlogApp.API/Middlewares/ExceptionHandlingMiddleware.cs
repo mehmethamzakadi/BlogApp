@@ -57,6 +57,7 @@ namespace BlogApp.API.Middlewares
             {
                 FluentValidation.ValidationException fluentValidationException => BuildFluentValidationError(fluentValidationException, apiResult),
                 Domain.Exceptions.ValidationException validationException => BuildValidationError(validationException, apiResult),
+                Domain.Exceptions.DomainValidationException domainValidationException => SetApiResult(apiResult, StatusCodes.Status400BadRequest, domainValidationException.Message),
                 BadRequestException => SetApiResult(apiResult, StatusCodes.Status400BadRequest, exception.Message),
                 NotFoundException => SetApiResult(apiResult, StatusCodes.Status404NotFound, exception.Message),
                 AuthenticationErrorException => SetApiResult(

@@ -20,13 +20,13 @@ public sealed class Email : IEquatable<Email>
     public static Email Create(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
-            throw new ArgumentException("Email cannot be empty", nameof(value));
+            throw new Exceptions.DomainValidationException("Email cannot be empty");
 
         if (!EmailRegex.IsMatch(value))
-            throw new ArgumentException("Invalid email format", nameof(value));
+            throw new Exceptions.DomainValidationException("Invalid email format");
 
         if (value.Length > 256)
-            throw new ArgumentException("Email cannot exceed 256 characters", nameof(value));
+            throw new Exceptions.DomainValidationException("Email cannot exceed 256 characters");
 
         return new Email(value);
     }

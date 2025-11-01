@@ -30,34 +30,17 @@ public sealed class UnitOfWork : IUnitOfWork
             return await _context.SaveChangesAsync(cancellationToken);
         }
 
-        await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+        var existingTransaction = _context.Database.CurrentTransaction;
+        if (existingTransaction != null)
+        {
+            return await SaveWithinTransaction(domainEvents, cancellationToken);
+        }
 
+        await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
         try
         {
-            var result = await _context.SaveChangesAsync(cancellationToken);
-
-            foreach (var domainEvent in domainEvents)
-            {
-                if (ShouldStoreInOutbox(domainEvent))
-                {
-                    var idempotencyKey = $"{domainEvent.GetType().Name}:{domainEvent.AggregateId}:{domainEvent.OccurredOn.Ticks}";
-
-                    var outboxMessage = new OutboxMessage
-                    {
-                        IdempotencyKey = idempotencyKey,
-                        EventType = domainEvent.GetType().Name,
-                        Payload = JsonSerializer.Serialize(domainEvent, domainEvent.GetType()),
-                        CreatedAt = DateTime.UtcNow,
-                        RetryCount = 0
-                    };
-
-                    await _context.OutboxMessages.AddAsync(outboxMessage, cancellationToken);
-                }
-            }
-
-            await _context.SaveChangesAsync(cancellationToken);
+            var result = await SaveWithinTransaction(domainEvents, cancellationToken);
             await transaction.CommitAsync(cancellationToken);
-
             return result;
         }
         catch
@@ -69,6 +52,31 @@ public sealed class UnitOfWork : IUnitOfWork
         {
             ClearDomainEvents();
         }
+    }
+
+    private async Task<int> SaveWithinTransaction(List<IDomainEvent> domainEvents, CancellationToken cancellationToken)
+    {
+        var result = await _context.SaveChangesAsync(cancellationToken);
+
+        foreach (var domainEvent in domainEvents)
+        {
+            if (ShouldStoreInOutbox(domainEvent))
+            {
+                var outboxMessage = new OutboxMessage
+                {
+                    IdempotencyKey = domainEvent.EventId.ToString(),
+                    EventType = domainEvent.GetType().Name,
+                    Payload = JsonSerializer.Serialize(domainEvent, domainEvent.GetType()),
+                    CreatedAt = DateTime.UtcNow,
+                    RetryCount = 0
+                };
+
+                await _context.OutboxMessages.AddAsync(outboxMessage, cancellationToken);
+            }
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
+        return result;
     }
 
     private static bool ShouldStoreInOutbox(IDomainEvent domainEvent)
