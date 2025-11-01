@@ -68,13 +68,13 @@ public sealed class AuthService : IAuthService
         // Verify password
         if (!_userDomainService.VerifyPassword(user, password))
         {
-            // Increment failed access count
-            user.AccessFailedCount++;
+            // ✅ SECURITY: Using User entity behavior method for failed access tracking
+            user.IncrementAccessFailedCount();
 
             // Lock account after 5 failed attempts
             if (user.AccessFailedCount >= 5)
             {
-                user.LockoutEnd = DateTimeOffset.UtcNow.AddMinutes(15);
+                user.LockAccount(DateTimeOffset.UtcNow.AddMinutes(15));
             }
 
             _userRepository.Update(user);
@@ -83,8 +83,8 @@ public sealed class AuthService : IAuthService
             throw new AuthenticationErrorException();
         }
 
-        // Reset failed access count on successful login
-        user.AccessFailedCount = 0;
+        // ✅ SECURITY: Reset failed access count on successful login
+        user.ResetAccessFailedCount();
 
         // Revoke existing active sessions for this device (if deviceId provided)
         // This ensures only one active session per device while allowing multi-device login
@@ -248,11 +248,13 @@ public sealed class AuthService : IAuthService
 
             // Token'ı hash'le ve veritabanına hash'i sakla
             string tokenHash = HashPasswordResetToken(resetToken);
-            user.PasswordResetToken = tokenHash;
-            user.PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(1);
+            
+            // ✅ SECURITY: Using User entity behavior method
+            user.SetPasswordResetToken(tokenHash, DateTime.UtcNow.AddHours(1));
 
             _userRepository.Update(user);
             await SaveChangesWithConcurrencyHandlingAsync();
+            
             // Kullanıcıya orijinal token'ı gönder (hash'i değil!)
             await _mailService.SendPasswordResetMailAsync(email, user.Id, resetToken.UrlEncode());
         }
@@ -314,7 +316,8 @@ public sealed class AuthService : IAuthService
             resetToken = resetToken.UrlDecode();
             string tokenHash = HashPasswordResetToken(resetToken);
 
-            if (user.PasswordResetToken == tokenHash && user.PasswordResetTokenExpiry > DateTime.UtcNow)
+            // ✅ SECURITY: Constant-time comparison to prevent timing attacks
+            if (ConstantTimeEquals(user.PasswordResetToken, tokenHash) && user.PasswordResetTokenExpiry > DateTime.UtcNow)
             {
                 return new SuccessDataResult<bool>(true);
             }
@@ -339,5 +342,25 @@ public sealed class AuthService : IAuthService
     {
         var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(value));
         return Convert.ToHexString(bytes);
+    }
+
+    /// <summary>
+    /// Constant-time string comparison to prevent timing attacks
+    /// </summary>
+    private static bool ConstantTimeEquals(string? a, string? b)
+    {
+        if (a == null || b == null)
+            return a == b;
+
+        if (a.Length != b.Length)
+            return false;
+
+        int result = 0;
+        for (int i = 0; i < a.Length; i++)
+        {
+            result |= a[i] ^ b[i];
+        }
+
+        return result == 0;
     }
 }

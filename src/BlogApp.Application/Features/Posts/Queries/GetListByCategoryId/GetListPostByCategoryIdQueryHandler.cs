@@ -1,14 +1,14 @@
-using AutoMapper;
-using BlogApp.Domain.Common.Paging;
 using BlogApp.Domain.Common.Responses;
-using BlogApp.Domain.Entities;
 using BlogApp.Domain.Repositories;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace BlogApp.Application.Features.Posts.Queries.GetListByCategoryId;
 
-public sealed class GetListPostByCategoryIdQueryHandler(IPostRepository postRepository, IMapper mapper)
+/// <summary>
+/// Handler for getting paginated posts by category ID
+/// ✅ PERFORMANCE: Using projection to avoid loading full entities
+/// </summary>
+public sealed class GetListPostByCategoryIdQueryHandler(IPostRepository postRepository)
     : IRequestHandler<GetListPostByCategoryIdQuery, PaginatedListResponse<GetListPostByCategoryIdResponse>>
 {
     public async Task<PaginatedListResponse<GetListPostByCategoryIdResponse>> Handle(
@@ -16,17 +16,33 @@ public sealed class GetListPostByCategoryIdQueryHandler(IPostRepository postRepo
         CancellationToken cancellationToken
     )
     {
-        Paginate<Post> posts = await postRepository.GetPaginatedListAsync(
-            predicate: post => post.IsPublished && post.CategoryId == request.CategoryId,
-            orderBy: query => query.OrderByDescending(post => post.Id),
-            include: p => p.Include(p => p.Category),
-            index: request.PageRequest.PageIndex,
-            size: request.PageRequest.PageSize,
-            cancellationToken: cancellationToken
+        // ✅ PERFORMANCE: Using projection to select only needed fields
+        var paginated = await postRepository.GetPublishedPostsProjectedAsync(
+            query => query.Select(p => new GetListPostByCategoryIdResponse(
+                p.Id,
+                p.Title,
+                p.Body,
+                p.Summary,
+                p.Thumbnail,
+                p.IsPublished,
+                p.Category.Name,
+                p.CategoryId,
+                p.CreatedDate
+            )),
+            request.CategoryId,
+            request.PageRequest.PageIndex,
+            request.PageRequest.PageSize,
+            cancellationToken
         );
 
-        PaginatedListResponse<GetListPostByCategoryIdResponse> response =
-            mapper.Map<PaginatedListResponse<GetListPostByCategoryIdResponse>>(posts);
+        var response = new PaginatedListResponse<GetListPostByCategoryIdResponse>
+        {
+            Items = paginated.Items.ToList(),
+            Index = paginated.Index,
+            Size = paginated.Size,
+            Count = paginated.Count,
+            Pages = paginated.Pages
+        };
 
         return response;
     }

@@ -11,6 +11,13 @@ public abstract class BaseEntity : IEntityTimestamps, IHasDomainEvents
     public Guid Id { get; set; }
 
     /// <summary>
+    /// Optimistic concurrency control için RowVersion
+    /// Timestamp attribute EF Core tarafından otomatik yönetilir
+    /// </summary>
+    [System.ComponentModel.DataAnnotations.Timestamp]
+    public byte[]? RowVersion { get; set; }
+
+    /// <summary>
     /// Entity'nin oluşturulma tarihi
     /// </summary>
     public DateTime CreatedDate { get; set; }

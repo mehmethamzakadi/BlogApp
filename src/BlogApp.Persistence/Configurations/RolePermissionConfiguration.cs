@@ -17,15 +17,17 @@ public class RolePermissionConfiguration : IEntityTypeConfiguration<RolePermissi
         // Composite primary key
         builder.HasKey(rp => new { rp.RoleId, rp.PermissionId });
 
-        // Relationships
+        // Relationships - Optional yapıldı (global query filter uyarısını önlemek için)
         builder.HasOne(rp => rp.Role)
             .WithMany(r => r.RolePermissions)
             .HasForeignKey(rp => rp.RoleId)
+            .IsRequired(false) // ✅ Optional yapıldı
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(rp => rp.Permission)
             .WithMany(p => p.RolePermissions)
             .HasForeignKey(rp => rp.PermissionId)
+            .IsRequired(false) // ✅ Optional yapıldı
             .OnDelete(DeleteBehavior.Cascade);
 
         // Indexes

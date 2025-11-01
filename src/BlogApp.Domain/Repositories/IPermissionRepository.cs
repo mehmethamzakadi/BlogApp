@@ -27,4 +27,9 @@ public interface IPermissionRepository : IRepository<Permission>
     /// Bir role permission atar (tüm eski permission'ları replace eder)
     /// </summary>
     Task AssignPermissionsToRoleAsync(Guid roleId, List<Guid> permissionIds, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get permissions by IDs
+    /// </summary>
+    Task<List<Permission>> GetByIdsAsync(List<Guid> permissionIds, CancellationToken cancellationToken = default);
 }

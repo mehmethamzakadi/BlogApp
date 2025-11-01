@@ -17,10 +17,14 @@ public class ActivityLogRepository : IActivityLogRepository
         _context = context;
     }
 
+    /// <summary>
+    /// Activity log ekler
+    /// NOT: SaveChanges UnitOfWork tarafından yönetilir
+    /// </summary>
     public async Task<ActivityLog> AddAsync(ActivityLog activityLog, CancellationToken cancellationToken = default)
     {
         await _context.ActivityLogs.AddAsync(activityLog, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
+        // ✅ SaveChangesAsync KALDIRILDI - UnitOfWork yönetecek
         return activityLog;
     }
 
@@ -70,5 +74,14 @@ public class ActivityLogRepository : IActivityLogRepository
             Count = count,
             Pages = (int)Math.Ceiling(count / (double)size)
         };
+    }
+
+    /// <summary>
+    /// Idempotency kontrolü için - belirli bir ID'ye sahip ActivityLog var mı?
+    /// </summary>
+    public async Task<bool> ExistsByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await _context.ActivityLogs
+            .AnyAsync(a => a.Id == id, cancellationToken);
     }
 }

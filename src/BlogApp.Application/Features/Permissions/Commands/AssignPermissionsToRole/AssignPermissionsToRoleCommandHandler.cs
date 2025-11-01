@@ -37,11 +37,10 @@ public class AssignPermissionsToRoleCommandHandler : IRequestHandler<AssignPermi
             return new ErrorResult("Rol bulunamadı");
         }
 
+        // ✅ FIXED: Using repository-specific method instead of Query() leak
         // Permission bilgilerini al (event için)
-        var permissions = await _permissionRepository.Query()
-            .Where(p => request.PermissionIds.Contains(p.Id))
-            .Select(p => p.Name)
-            .ToListAsync(cancellationToken);
+        var permissionsEntities = await _permissionRepository.GetByIdsAsync(request.PermissionIds, cancellationToken);
+        var permissions = permissionsEntities.Select(p => p.Name).ToList();
 
         // Repository üzerinden permission'ları ata
         await _permissionRepository.AssignPermissionsToRoleAsync(request.RoleId, request.PermissionIds, cancellationToken);

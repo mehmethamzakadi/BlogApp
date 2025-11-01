@@ -2,23 +2,33 @@ using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Attributes;
 using BlogApp.Domain.Entities;
 using BlogApp.Persistence.Contexts;
+using MediatR;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace BlogApp.Persistence.Repositories;
 
 /// <summary>
 /// BlogAppDbContext için Unit of Work implementasyonu
+/// Domain event orchestration ve transaction yönetimi
 /// </summary>
 public sealed class UnitOfWork : IUnitOfWork
 {
     private readonly BlogAppDbContext _context;
+    private readonly IMediator _mediator;
+    private readonly ILogger<UnitOfWork> _logger;
     private IDbContextTransaction? _transaction;
     private bool _disposed;
 
-    public UnitOfWork(BlogAppDbContext context)
+    public UnitOfWork(
+        BlogAppDbContext context,
+        IMediator mediator,
+        ILogger<UnitOfWork> logger)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
+        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -56,8 +66,35 @@ public sealed class UnitOfWork : IUnitOfWork
 
     private async Task<int> SaveWithinTransaction(List<IDomainEvent> domainEvents, CancellationToken cancellationToken)
     {
+        // 1. Önce entity değişikliklerini kaydet
         var result = await _context.SaveChangesAsync(cancellationToken);
 
+        // 2. Domain event'leri MediatR ile yayınla (in-process handlers için)
+        // Bu sayede cache invalidation, logging gibi side-effect'ler hemen gerçekleşir
+        foreach (var domainEvent in domainEvents)
+        {
+            try
+            {
+                _logger.LogDebug(
+                    "Publishing domain event {EventType} for aggregate {AggregateId}",
+                    domainEvent.GetType().Name,
+                    domainEvent.AggregateId);
+
+                await _mediator.Publish(domainEvent, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                // Domain event handler hatası transaction'ı bozmasın
+                // Ama logla ki monitoring'de görülebilsin
+                _logger.LogError(ex,
+                    "Error publishing domain event {EventType} for aggregate {AggregateId}",
+                    domainEvent.GetType().Name,
+                    domainEvent.AggregateId);
+            }
+        }
+
+        // 3. Outbox'a kaydet (out-of-process integration events için)
+        // Reliable messaging: RabbitMQ'ya gidecek event'ler
         foreach (var domainEvent in domainEvents)
         {
             if (ShouldStoreInOutbox(domainEvent))
@@ -75,7 +112,12 @@ public sealed class UnitOfWork : IUnitOfWork
             }
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
+        // 4. Outbox mesajlarını kaydet
+        if (domainEvents.Any(ShouldStoreInOutbox))
+        {
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
         return result;
     }
 

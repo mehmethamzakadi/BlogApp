@@ -76,6 +76,10 @@ public class UserConfiguration : BaseConfiguraiton<User>
             .IsUnique()
             .HasDatabaseName("IX_Users_NormalizedEmail");
 
+        // Password reset token index - sadece aktif token'lar için (nullable olmayan)
+        builder.HasIndex(u => u.PasswordResetToken)
+            .HasFilter("\"PasswordResetToken\" IS NOT NULL")
+            .HasDatabaseName("IX_Users_PasswordResetToken");
 
     }
 }

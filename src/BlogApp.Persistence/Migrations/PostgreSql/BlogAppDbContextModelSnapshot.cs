@@ -113,6 +113,12 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                     b.Property<DateTime?>("ReadDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea")
+                        .HasColumnName("RowVersion");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -168,6 +174,12 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea")
+                        .HasColumnName("RowVersion");
+
                     b.Property<Guid?>("UpdatedById")
                         .HasColumnType("uuid");
 
@@ -185,62 +197,6 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         .HasFilter("\"IsDeleted\" = false");
 
                     b.ToTable("Categories");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("10000000-0000-0000-0000-000000000001"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
-                            Name = "ASP.NET Core",
-                            NormalizedName = "ASP.NET CORE"
-                        },
-                        new
-                        {
-                            Id = new Guid("10000000-0000-0000-0000-000000000002"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
-                            Name = "Entity Framework Core",
-                            NormalizedName = "ENTITY FRAMEWORK CORE"
-                        },
-                        new
-                        {
-                            Id = new Guid("10000000-0000-0000-0000-000000000003"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
-                            Name = "Cloud Native DevOps",
-                            NormalizedName = "CLOUD NATIVE DEVOPS"
-                        },
-                        new
-                        {
-                            Id = new Guid("10000000-0000-0000-0000-000000000004"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
-                            Name = "Event-Driven Messaging",
-                            NormalizedName = "EVENT-DRIVEN MESSAGING"
-                        },
-                        new
-                        {
-                            Id = new Guid("10000000-0000-0000-0000-000000000005"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
-                            Name = "Observability & Monitoring",
-                            NormalizedName = "OBSERVABILITY & MONITORING"
-                        },
-                        new
-                        {
-                            Id = new Guid("10000000-0000-0000-0000-000000000006"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
-                            Name = "Clean Architecture",
-                            NormalizedName = "CLEAN ARCHITECTURE"
-                        });
                 });
 
             modelBuilder.Entity("BlogApp.Domain.Entities.Comment", b =>
@@ -279,6 +235,12 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
 
                     b.Property<Guid>("PostId")
                         .HasColumnType("uuid");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea")
+                        .HasColumnName("RowVersion");
 
                     b.Property<Guid?>("UpdatedById")
                         .HasColumnType("uuid");
@@ -333,6 +295,12 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea")
+                        .HasColumnName("RowVersion");
 
                     b.Property<int?>("Size")
                         .HasColumnType("integer");
@@ -406,6 +374,11 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         .HasColumnType("integer")
                         .HasDefaultValue(0);
 
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea");
+
                     b.Property<Guid?>("UpdatedById")
                         .HasColumnType("uuid");
 
@@ -464,6 +437,11 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea");
+
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -488,440 +466,6 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         .HasDatabaseName("IX_Permissions_Module_Type");
 
                     b.ToTable("Permissions", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000001"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Yönetim paneli dashboard ekranına erişim.",
-                            IsDeleted = false,
-                            Module = "Dashboard",
-                            Name = "Dashboard.View",
-                            NormalizedName = "DASHBOARD.VIEW",
-                            Type = "View"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000002"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Yeni kullanıcı oluşturma yetkisi.",
-                            IsDeleted = false,
-                            Module = "Users",
-                            Name = "Users.Create",
-                            NormalizedName = "USERS.CREATE",
-                            Type = "Create"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000003"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Kullanıcı bilgilerini görüntüleme yetkisi.",
-                            IsDeleted = false,
-                            Module = "Users",
-                            Name = "Users.Read",
-                            NormalizedName = "USERS.READ",
-                            Type = "Read"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000004"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Kullanıcı bilgilerini güncelleme yetkisi.",
-                            IsDeleted = false,
-                            Module = "Users",
-                            Name = "Users.Update",
-                            NormalizedName = "USERS.UPDATE",
-                            Type = "Update"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000005"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Kullanıcı silme yetkisi.",
-                            IsDeleted = false,
-                            Module = "Users",
-                            Name = "Users.Delete",
-                            NormalizedName = "USERS.DELETE",
-                            Type = "Delete"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000006"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Tüm kullanıcıları görüntüleme yetkisi.",
-                            IsDeleted = false,
-                            Module = "Users",
-                            Name = "Users.ViewAll",
-                            NormalizedName = "USERS.VIEWALL",
-                            Type = "ViewAll"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000007"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Yeni rol oluşturma yetkisi.",
-                            IsDeleted = false,
-                            Module = "Roles",
-                            Name = "Roles.Create",
-                            NormalizedName = "ROLES.CREATE",
-                            Type = "Create"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000008"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Rolleri görüntüleme yetkisi.",
-                            IsDeleted = false,
-                            Module = "Roles",
-                            Name = "Roles.Read",
-                            NormalizedName = "ROLES.READ",
-                            Type = "Read"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000009"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Rolleri güncelleme yetkisi.",
-                            IsDeleted = false,
-                            Module = "Roles",
-                            Name = "Roles.Update",
-                            NormalizedName = "ROLES.UPDATE",
-                            Type = "Update"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000010"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Rol silme yetkisi.",
-                            IsDeleted = false,
-                            Module = "Roles",
-                            Name = "Roles.Delete",
-                            NormalizedName = "ROLES.DELETE",
-                            Type = "Delete"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000011"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Tüm rolleri görüntüleme yetkisi.",
-                            IsDeleted = false,
-                            Module = "Roles",
-                            Name = "Roles.ViewAll",
-                            NormalizedName = "ROLES.VIEWALL",
-                            Type = "ViewAll"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000012"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Rollere yetki atama yetkisi.",
-                            IsDeleted = false,
-                            Module = "Roles",
-                            Name = "Roles.AssignPermissions",
-                            NormalizedName = "ROLES.ASSIGNPERMISSIONS",
-                            Type = "AssignPermissions"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000013"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Yeni blog yazısı oluşturma yetkisi.",
-                            IsDeleted = false,
-                            Module = "Posts",
-                            Name = "Posts.Create",
-                            NormalizedName = "POSTS.CREATE",
-                            Type = "Create"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000014"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Blog yazılarını görüntüleme yetkisi.",
-                            IsDeleted = false,
-                            Module = "Posts",
-                            Name = "Posts.Read",
-                            NormalizedName = "POSTS.READ",
-                            Type = "Read"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000015"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Blog yazılarını güncelleme yetkisi.",
-                            IsDeleted = false,
-                            Module = "Posts",
-                            Name = "Posts.Update",
-                            NormalizedName = "POSTS.UPDATE",
-                            Type = "Update"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000016"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Blog yazısı silme yetkisi.",
-                            IsDeleted = false,
-                            Module = "Posts",
-                            Name = "Posts.Delete",
-                            NormalizedName = "POSTS.DELETE",
-                            Type = "Delete"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000017"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Tüm blog yazılarını görüntüleme yetkisi.",
-                            IsDeleted = false,
-                            Module = "Posts",
-                            Name = "Posts.ViewAll",
-                            NormalizedName = "POSTS.VIEWALL",
-                            Type = "ViewAll"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000018"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Blog yazısı yayınlama yetkisi.",
-                            IsDeleted = false,
-                            Module = "Posts",
-                            Name = "Posts.Publish",
-                            NormalizedName = "POSTS.PUBLISH",
-                            Type = "Publish"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000019"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Yeni kategori oluşturma yetkisi.",
-                            IsDeleted = false,
-                            Module = "Categories",
-                            Name = "Categories.Create",
-                            NormalizedName = "CATEGORIES.CREATE",
-                            Type = "Create"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000020"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Kategorileri görüntüleme yetkisi.",
-                            IsDeleted = false,
-                            Module = "Categories",
-                            Name = "Categories.Read",
-                            NormalizedName = "CATEGORIES.READ",
-                            Type = "Read"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000021"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Kategorileri güncelleme yetkisi.",
-                            IsDeleted = false,
-                            Module = "Categories",
-                            Name = "Categories.Update",
-                            NormalizedName = "CATEGORIES.UPDATE",
-                            Type = "Update"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000022"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Kategori silme yetkisi.",
-                            IsDeleted = false,
-                            Module = "Categories",
-                            Name = "Categories.Delete",
-                            NormalizedName = "CATEGORIES.DELETE",
-                            Type = "Delete"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000023"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Tüm kategorileri görüntüleme yetkisi.",
-                            IsDeleted = false,
-                            Module = "Categories",
-                            Name = "Categories.ViewAll",
-                            NormalizedName = "CATEGORIES.VIEWALL",
-                            Type = "ViewAll"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000024"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Yeni yorum oluşturma yetkisi.",
-                            IsDeleted = false,
-                            Module = "Comments",
-                            Name = "Comments.Create",
-                            NormalizedName = "COMMENTS.CREATE",
-                            Type = "Create"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000025"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Yorumları görüntüleme yetkisi.",
-                            IsDeleted = false,
-                            Module = "Comments",
-                            Name = "Comments.Read",
-                            NormalizedName = "COMMENTS.READ",
-                            Type = "Read"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000026"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Yorumları güncelleme yetkisi.",
-                            IsDeleted = false,
-                            Module = "Comments",
-                            Name = "Comments.Update",
-                            NormalizedName = "COMMENTS.UPDATE",
-                            Type = "Update"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000027"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Yorum silme yetkisi.",
-                            IsDeleted = false,
-                            Module = "Comments",
-                            Name = "Comments.Delete",
-                            NormalizedName = "COMMENTS.DELETE",
-                            Type = "Delete"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000028"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Tüm yorumları görüntüleme yetkisi.",
-                            IsDeleted = false,
-                            Module = "Comments",
-                            Name = "Comments.ViewAll",
-                            NormalizedName = "COMMENTS.VIEWALL",
-                            Type = "ViewAll"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000029"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Yorum moderasyonu yapma yetkisi.",
-                            IsDeleted = false,
-                            Module = "Comments",
-                            Name = "Comments.Moderate",
-                            NormalizedName = "COMMENTS.MODERATE",
-                            Type = "Moderate"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000030"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Yeni kitap kaydı oluşturma yetkisi.",
-                            IsDeleted = false,
-                            Module = "Bookshelf",
-                            Name = "Bookshelf.Create",
-                            NormalizedName = "BOOKSHELF.CREATE",
-                            Type = "Create"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000031"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Kitap kayıtlarını görüntüleme yetkisi.",
-                            IsDeleted = false,
-                            Module = "Bookshelf",
-                            Name = "Bookshelf.Read",
-                            NormalizedName = "BOOKSHELF.READ",
-                            Type = "Read"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000032"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Kitap kayıtlarını güncelleme yetkisi.",
-                            IsDeleted = false,
-                            Module = "Bookshelf",
-                            Name = "Bookshelf.Update",
-                            NormalizedName = "BOOKSHELF.UPDATE",
-                            Type = "Update"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000033"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Kitap kaydı silme yetkisi.",
-                            IsDeleted = false,
-                            Module = "Bookshelf",
-                            Name = "Bookshelf.Delete",
-                            NormalizedName = "BOOKSHELF.DELETE",
-                            Type = "Delete"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000034"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Tüm kitap kayıtlarını görüntüleme yetkisi.",
-                            IsDeleted = false,
-                            Module = "Bookshelf",
-                            Name = "Bookshelf.ViewAll",
-                            NormalizedName = "BOOKSHELF.VIEWALL",
-                            Type = "ViewAll"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000035"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Sisteme görsel yükleme yetkisi.",
-                            IsDeleted = false,
-                            Module = "Media",
-                            Name = "Media.Upload",
-                            NormalizedName = "MEDIA.UPLOAD",
-                            Type = "Upload"
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000036"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Aktivite loglarını görüntüleme yetkisi.",
-                            IsDeleted = false,
-                            Module = "ActivityLogs",
-                            Name = "ActivityLogs.View",
-                            NormalizedName = "ACTIVITYLOGS.VIEW",
-                            Type = "View"
-                        });
                 });
 
             modelBuilder.Entity("BlogApp.Domain.Entities.Post", b =>
@@ -951,6 +495,12 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
 
                     b.Property<bool>("IsPublished")
                         .HasColumnType("boolean");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea")
+                        .HasColumnName("RowVersion");
 
                     b.Property<string>("Summary")
                         .IsRequired()
@@ -985,73 +535,6 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         .HasDatabaseName("IX_Posts_IsPublished_CategoryId_CreatedDate");
 
                     b.ToTable("Posts");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("40000000-0000-0000-0000-000000000001"),
-                            Body = "OpenTelemetry Collector, distributed tracing ve yapılandırılmış logging birleştiğinde minimal API'ler üretim ortamında şeffaf hâle geliyor.\r\nBu rehberde ActivitySource, Meter ve TraceId bağlamlarını nasıl kodladığımızı adım adım ele alıyoruz.\r\nAyrıca Aspire Dashboard ile gecikme ve hata oranlarını anlık izlemenin püf noktalarını paylaşıyoruz.",
-                            CategoryId = new Guid("10000000-0000-0000-0000-000000000001"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000002"),
-                            CreatedDate = new DateTime(2025, 9, 28, 8, 30, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
-                            IsPublished = true,
-                            Summary = "OpenTelemetry ve Aspire ile ASP.NET Core minimal API projelerinde uçtan uca gözlemlenebilirlik altyapısını kurma rehberi.",
-                            Thumbnail = "https://miro.medium.com/v2/resize:fit:1286/format:webp/1*chhJLW0ApPDHqmVPRBBUtQ.png",
-                            Title = ".NET 9 Minimal API'lerinde Observability Entegrasyonu"
-                        },
-                        new
-                        {
-                            Id = new Guid("40000000-0000-0000-0000-000000000002"),
-                            Body = "SaaS uygulamalarında sorgu optimizasyonu tenant bazında indeksleme ile başlıyor.\r\nModel seeding, global query filter'lar ve concurrency token'ları üzerinden performans analizleri paylaşıyoruz.\r\nAyrıca Npgsql provider'ı ile partitioned table senaryolarını örneklendiriyoruz.",
-                            CategoryId = new Guid("10000000-0000-0000-0000-000000000002"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000004"),
-                            CreatedDate = new DateTime(2025, 10, 2, 9, 15, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
-                            IsPublished = true,
-                            Summary = "Tenant bazlı filtreleme, connection pooling ve caching stratejileriyle çoklu tenant SaaS uygulamalarında EF Core'u hızlandırma.",
-                            Thumbnail = "https://miro.medium.com/0*V56TEDMUsms9XLBY.jpg",
-                            Title = "EF Core 9 ile Çoklu Tenant Mimarisinde Performans İpuçları"
-                        },
-                        new
-                        {
-                            Id = new Guid("40000000-0000-0000-0000-000000000003"),
-                            Body = "GitOps, manifest kaynağını tek gerçeğin kaynağına dönüştürerek roll-forward ve roll-back süreçlerini sadeleştiriyor.\r\nFluxCD ile progressive delivery, ArgoCD ile health check politika tanımlarını örnek YAML dosyalarıyla açıklıyoruz.\r\nPipeline gözlemlenebilirliği için Prometheus ve Grafana entegrasyonlarını da ekliyoruz.",
-                            CategoryId = new Guid("10000000-0000-0000-0000-000000000003"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000002"),
-                            CreatedDate = new DateTime(2025, 10, 5, 10, 45, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
-                            IsPublished = true,
-                            Summary = "FluxCD ve ArgoCD karşılaştırmasıyla GitOps pipeline'larını teknoloji blogu projelerine uyarlama.",
-                            Thumbnail = "https://miro.medium.com/v2/resize:fit:4800/format:webp/1*9P6wnky3C9xMwaBAElALLQ.png",
-                            Title = "GitOps ile Kubernetes Üzerinde Sürekli Teslimat"
-                        },
-                        new
-                        {
-                            Id = new Guid("40000000-0000-0000-0000-000000000004"),
-                            Body = "Mesajlaşma altyapısı seçiminde gereksinimleri segmentlere ayırmak kritik.\r\nRabbitMQ routing esnekliği sağlar; Kafka ise sıralı event log ile akış analitiğine güç katar.\r\nMakale boyunca tüketici grupları, dead-letter stratejileri ve metrik takip yöntemlerini detaylandırıyoruz.",
-                            CategoryId = new Guid("10000000-0000-0000-0000-000000000004"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000004"),
-                            CreatedDate = new DateTime(2025, 10, 12, 15, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
-                            IsPublished = false,
-                            Summary = "Etkinlik yönelimli servisler için mesajlaşma altyapısı seçerken throughput, gecikme ve gözlemlenebilirlik kriterlerinin karşılaştırılması.",
-                            Thumbnail = "https://miro.medium.com/1*BGZy6Puq8X9AQHkJzB7BLA.jpeg",
-                            Title = "Event-Driven Mimarilerde RabbitMQ mu Kafka mı?"
-                        },
-                        new
-                        {
-                            Id = new Guid("40000000-0000-0000-0000-000000000005"),
-                            Body = "Tracing zincirleri, metrik korelasyonları ve yapılandırılmış log'lar aynı veri modelinde buluştuğunda kök neden analizi hızlanıyor.\r\nBu makalede collector konfigürasyonlarını, OTLP protokolünü ve Prometheus remote write senaryolarını harmanlıyoruz.\r\nEk olarak, kullanıcı segmenti bazlı alert kurallarına dair pratik şablonlar sunuyoruz.",
-                            CategoryId = new Guid("10000000-0000-0000-0000-000000000005"),
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000003"),
-                            CreatedDate = new DateTime(2025, 10, 15, 11, 20, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
-                            IsPublished = true,
-                            Summary = "Teknoloji blogu altyapısı için tracing, metrics ve logging verilerini aynı veri gölünde birleştirme stratejileri.",
-                            Thumbnail = "https://miro.medium.com/v2/resize:fit:1400/format:webp/1*zHc9d823Uol9SSj8s_uBug.png",
-                            Title = "OpenTelemetry ile Katmanlı Gözlemlenebilirlik"
-                        });
                 });
 
             modelBuilder.Entity("BlogApp.Domain.Entities.RefreshSession", b =>
@@ -1094,6 +577,11 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                     b.Property<string>("RevokedReason")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea");
 
                     b.Property<string>("TokenHash")
                         .IsRequired()
@@ -1158,6 +646,12 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
 
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea")
+                        .HasColumnName("RowVersion");
+
                     b.Property<Guid?>("UpdatedById")
                         .HasColumnType("uuid");
 
@@ -1174,52 +668,6 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         .HasDatabaseName("IX_Roles_NormalizedName");
 
                     b.ToTable("Roles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("20000000-0000-0000-0000-000000000001"),
-                            ConcurrencyStamp = "11111111-1111-1111-1111-111111111111",
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Tüm sistemi yönetebilen ve yetki atayabilen tam yetkili rol.",
-                            IsDeleted = false,
-                            Name = "Admin",
-                            NormalizedName = "ADMIN"
-                        },
-                        new
-                        {
-                            Id = new Guid("20000000-0000-0000-0000-000000000002"),
-                            ConcurrencyStamp = "22222222-2222-2222-2222-222222222222",
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Kendi içeriklerini oluşturup yönetebilen topluluk yazarı rolü.",
-                            IsDeleted = false,
-                            Name = "User",
-                            NormalizedName = "USER"
-                        },
-                        new
-                        {
-                            Id = new Guid("20000000-0000-0000-0000-000000000003"),
-                            ConcurrencyStamp = "33333333-3333-3333-3333-333333333333",
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Yorumları ve topluluk etkileşimlerini yöneten rol.",
-                            IsDeleted = false,
-                            Name = "Moderator",
-                            NormalizedName = "MODERATOR"
-                        },
-                        new
-                        {
-                            Id = new Guid("20000000-0000-0000-0000-000000000004"),
-                            ConcurrencyStamp = "44444444-4444-4444-4444-444444444444",
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "Yayın akışını yöneten, içerikleri yayımlayan ve kategorileri düzenleyen rol.",
-                            IsDeleted = false,
-                            Name = "Editor",
-                            NormalizedName = "EDITOR"
-                        });
                 });
 
             modelBuilder.Entity("BlogApp.Domain.Entities.RolePermission", b =>
@@ -1242,386 +690,6 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         .HasDatabaseName("IX_RolePermissions_RoleId");
 
                     b.ToTable("RolePermissions", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000001"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000002"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000003"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000004"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000005"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000006"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000007"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000008"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000009"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000010"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000011"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000012"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000013"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000014"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000015"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000016"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000017"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000018"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000019"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000020"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000021"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000022"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000023"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000024"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000025"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000026"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000027"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000028"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000029"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000030"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000031"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000032"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000033"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000034"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000035"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000036"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000004"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000013"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000004"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000014"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000004"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000015"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000004"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000016"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000004"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000017"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000004"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000018"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000004"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000019"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000004"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000020"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000004"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000021"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000004"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000023"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000004"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000025"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000004"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000029"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000004"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000027"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000004"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000001"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000003"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000025"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000003"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000028"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000003"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000029"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000003"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000027"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000003"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000014"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000002"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000013"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000002"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000014"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000002"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000015"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000002"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000020"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000002"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000023"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000002"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000024"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000002"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000025"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000002"),
-                            PermissionId = new Guid("30000000-0000-0000-0000-000000000026"),
-                            GrantedAt = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc)
-                        });
                 });
 
             modelBuilder.Entity("BlogApp.Domain.Entities.User", b =>
@@ -1693,6 +761,12 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea")
+                        .HasColumnName("RowVersion");
+
                     b.Property<string>("SecurityStamp")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -1729,87 +803,11 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         .IsUnique()
                         .HasDatabaseName("IX_Users_NormalizedUserName");
 
-                    b.ToTable("Users", (string)null);
+                    b.HasIndex("PasswordResetToken")
+                        .HasDatabaseName("IX_Users_PasswordResetToken")
+                        .HasFilter("\"PasswordResetToken\" IS NOT NULL");
 
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000001"),
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "55555555-5555-5555-5555-555555555555",
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            EmailConfirmed = true,
-                            IsDeleted = false,
-                            LockoutEnabled = false,
-                            NormalizedEmail = "ADMIN@ADMIN.COM",
-                            NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEP8xlsKNntQQ1SivmqfdllQWKX/655QCNjrVsPYL/Oz4cUgmI8aV55GO0BN9SDNltA==",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "b1a1d25f-8a7e-4e9a-bc55-8dca5bfa1234",
-                            TwoFactorEnabled = false,
-                            _email = "admin@admin.com",
-                            _userName = "admin"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000002"),
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "66666666-6666-6666-6666-666666666666",
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            EmailConfirmed = true,
-                            IsDeleted = false,
-                            LockoutEnabled = false,
-                            NormalizedEmail = "EDITOR@BLOGAPP.DEV",
-                            NormalizedUserName = "EDITOR_LARA",
-                            PasswordHash = "AQAAAAIAAYagAAAAEP8xlsKNntQQ1SivmqfdllQWKX/655QCNjrVsPYL/Oz4cUgmI8aV55GO0BN9SDNltA==",
-                            PhoneNumber = "+905551112233",
-                            PhoneNumberConfirmed = true,
-                            SecurityStamp = "0fa3f1d8-e77f-4aa9-9f12-6f8c7f90a002",
-                            TwoFactorEnabled = false,
-                            _email = "editor@blogapp.dev",
-                            _userName = "editor_lara"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000003"),
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "77777777-7777-7777-7777-777777777777",
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            EmailConfirmed = true,
-                            IsDeleted = false,
-                            LockoutEnabled = false,
-                            NormalizedEmail = "MODERATOR@BLOGAPP.DEV",
-                            NormalizedUserName = "MODERATOR_SELIM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEP8xlsKNntQQ1SivmqfdllQWKX/655QCNjrVsPYL/Oz4cUgmI8aV55GO0BN9SDNltA==",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "7c1dbdbb-3d91-45a2-8578-5392cda53875",
-                            TwoFactorEnabled = false,
-                            _email = "moderator@blogapp.dev",
-                            _userName = "moderator_selim"
-                        },
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000004"),
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "88888888-8888-8888-8888-888888888888",
-                            CreatedById = new Guid("00000000-0000-0000-0000-000000000001"),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            EmailConfirmed = true,
-                            IsDeleted = false,
-                            LockoutEnabled = false,
-                            NormalizedEmail = "AUTHOR@BLOGAPP.DEV",
-                            NormalizedUserName = "AUTHOR_MELIKE",
-                            PasswordHash = "AQAAAAIAAYagAAAAEP8xlsKNntQQ1SivmqfdllQWKX/655QCNjrVsPYL/Oz4cUgmI8aV55GO0BN9SDNltA==",
-                            PhoneNumber = "+905559998877",
-                            PhoneNumberConfirmed = true,
-                            SecurityStamp = "e8de6375-bbb3-4ac6-a5dd-8530b7072d86",
-                            TwoFactorEnabled = false,
-                            _email = "author@blogapp.dev",
-                            _userName = "author_melike"
-                        });
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("BlogApp.Domain.Entities.UserRole", b =>
@@ -1836,6 +834,11 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                     b.Property<Guid>("RoleId")
                         .HasColumnType("uuid");
 
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea");
+
                     b.Property<Guid?>("UpdatedById")
                         .HasColumnType("uuid");
 
@@ -1858,68 +861,6 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         .HasDatabaseName("IX_UserRoles_UserId_RoleId");
 
                     b.ToTable("UserRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000001"),
-                            AssignedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            UpdatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            UserId = new Guid("00000000-0000-0000-0000-000000000001")
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000002"),
-                            AssignedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000004"),
-                            UpdatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            UserId = new Guid("00000000-0000-0000-0000-000000000002")
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000003"),
-                            AssignedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000002"),
-                            UpdatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            UserId = new Guid("00000000-0000-0000-0000-000000000002")
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000004"),
-                            AssignedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000003"),
-                            UpdatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            UserId = new Guid("00000000-0000-0000-0000-000000000003")
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000005"),
-                            AssignedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000002"),
-                            UpdatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            UserId = new Guid("00000000-0000-0000-0000-000000000003")
-                        },
-                        new
-                        {
-                            Id = new Guid("30000000-0000-0000-0000-000000000006"),
-                            AssignedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            CreatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
-                            RoleId = new Guid("20000000-0000-0000-0000-000000000002"),
-                            UpdatedDate = new DateTime(2025, 10, 23, 7, 0, 0, 0, DateTimeKind.Utc),
-                            UserId = new Guid("00000000-0000-0000-0000-000000000004")
-                        });
                 });
 
             modelBuilder.Entity("BlogApp.Domain.Entities.ActivityLog", b =>
@@ -1927,8 +868,7 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                     b.HasOne("BlogApp.Domain.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("User");
                 });
@@ -1939,15 +879,7 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                         .WithMany()
                         .HasForeignKey("ParentId");
 
-                    b.HasOne("BlogApp.Domain.Entities.Post", "Post")
-                        .WithMany("Comments")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Parent");
-
-                    b.Navigation("Post");
                 });
 
             modelBuilder.Entity("BlogApp.Domain.Entities.Post", b =>
@@ -1966,14 +898,12 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
                     b.HasOne("BlogApp.Domain.Entities.Permission", "Permission")
                         .WithMany("RolePermissions")
                         .HasForeignKey("PermissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("BlogApp.Domain.Entities.Role", "Role")
                         .WithMany("RolePermissions")
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Permission");
 
@@ -2007,11 +937,6 @@ namespace BlogApp.Persistence.Migrations.PostgreSql
             modelBuilder.Entity("BlogApp.Domain.Entities.Permission", b =>
                 {
                     b.Navigation("RolePermissions");
-                });
-
-            modelBuilder.Entity("BlogApp.Domain.Entities.Post", b =>
-                {
-                    b.Navigation("Comments");
                 });
 
             modelBuilder.Entity("BlogApp.Domain.Entities.Role", b =>

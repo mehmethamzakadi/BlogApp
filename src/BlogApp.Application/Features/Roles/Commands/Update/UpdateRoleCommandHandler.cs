@@ -29,8 +29,8 @@ public sealed class UpdateRoleCommandHandler : IRequestHandler<UpdateRoleCommand
         if (existingRole != null && existingRole.Id != request.Id)
             return new ErrorResult($"Güncellemek istediğiniz {request.Name} rolü sistemde mevcut!");
 
+        // ✅ RICH DOMAIN: Update method internally updates ConcurrencyStamp
         role.Update(request.Name);
-        role.ConcurrencyStamp = Guid.NewGuid().ToString();
         var result = await _roleRepository.UpdateRole(role);
         if (!result.Success)
             return new ErrorResult("İşlem sırasında bir hata oluştu");

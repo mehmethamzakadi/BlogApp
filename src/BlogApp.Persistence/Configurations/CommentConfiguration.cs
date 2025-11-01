@@ -5,6 +5,10 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace BlogApp.Persistence.Configurations
 {
+    /// <summary>
+    /// Comment entity configuration
+    /// ✅ DDD: Comment is now a separate aggregate, no navigation to Post
+    /// </summary>
     public class CommentConfiguration : BaseConfiguraiton<Comment>
     {
         public override void Configure(EntityTypeBuilder<Comment> builder)
@@ -13,6 +17,9 @@ namespace BlogApp.Persistence.Configurations
 
             builder.Property(x => x.Content).IsRequired().HasMaxLength(300);
             builder.Property(x => x.CommentOwnerMail).IsRequired().HasMaxLength(100);
+
+            // ✅ DDD: PostId is just a reference, no navigation property
+            builder.Property(x => x.PostId).IsRequired();
 
             // Indexler
             builder.HasIndex(x => x.PostId)

@@ -1,23 +1,24 @@
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Events.PostEvents;
-using System.Linq;
 
 namespace BlogApp.Domain.Entities;
 
+/// <summary>
+/// Post aggregate root
+/// ✅ DDD: Comments removed - Comment is now a separate aggregate
+/// </summary>
 public sealed class Post : AggregateRoot
 {
-    private readonly List<Comment> _comments = new();
-
+    // EF Core için parameterless constructor
     public Post() { }
 
-    public string Title { get; set; } = default!;
-    public string Body { get; set; } = default!;
-    public string Summary { get; set; } = default!;
-    public string Thumbnail { get; set; } = string.Empty;
-    public bool IsPublished { get; set; }
-    public IReadOnlyCollection<Comment> Comments => _comments.AsReadOnly();
-    public Guid CategoryId { get; set; }
-    public Category Category { get; set; } = default!;
+    public string Title { get; private set; } = default!;
+    public string Body { get; private set; } = default!;
+    public string Summary { get; private set; } = default!;
+    public string Thumbnail { get; private set; } = string.Empty;
+    public bool IsPublished { get; private set; }
+    public Guid CategoryId { get; private set; }
+    public Category Category { get; private set; } = default!;
 
     public static Post Create(string title, string body, string summary, Guid categoryId, string? thumbnail = null)
     {
@@ -73,21 +74,6 @@ public sealed class Post : AggregateRoot
             throw new InvalidOperationException("Post is not published");
 
         IsPublished = false;
-    }
-
-    public void AddComment(string content, string ownerEmail, Guid? parentId = null)
-    {
-        var comment = Comment.Create(Id, content, ownerEmail, parentId);
-        _comments.Add(comment);
-    }
-
-    public void RemoveComment(Guid commentId)
-    {
-        var comment = _comments.FirstOrDefault(c => c.Id == commentId);
-        if (comment == null)
-            throw new InvalidOperationException($"Comment {commentId} not found");
-
-        _comments.Remove(comment);
     }
 
     public void Delete()

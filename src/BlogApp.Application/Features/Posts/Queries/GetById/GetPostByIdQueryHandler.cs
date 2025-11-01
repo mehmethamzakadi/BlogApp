@@ -7,6 +7,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BlogApp.Application.Features.Posts.Queries.GetById;
 
+/// <summary>
+/// Handler for getting a post by ID
+/// ✅ PERFORMANCE: Using projection to select only required fields
+/// </summary>
 public sealed class GetPostByIdQueryHandler : IRequestHandler<GetByIdPostQuery, IDataResult<GetByIdPostResponse>>
 {
     private readonly IPostRepository _postRepository;
@@ -30,11 +34,12 @@ public sealed class GetPostByIdQueryHandler : IRequestHandler<GetByIdPostQuery, 
             return new SuccessDataResult<GetByIdPostResponse>(cached);
         }
 
-        var response = await _postRepository.Query()
-            .Where(b => b.Id == request.Id && (request.IncludeUnpublished || b.IsPublished))
-            .Include(p => p.Category)
-            .AsNoTracking()
-            .Select(p => new GetByIdPostResponse(
+        // ✅ PERFORMANCE: Using projection instead of loading full entity
+        // Select only the fields we need instead of entire Post + Category
+        var response = await _postRepository.GetByIdProjectedAsync(
+            request.Id,
+            request.IncludeUnpublished,
+            query => query.Select(p => new GetByIdPostResponse(
                 p.Id,
                 p.Title,
                 p.Body,
@@ -44,8 +49,8 @@ public sealed class GetPostByIdQueryHandler : IRequestHandler<GetByIdPostQuery, 
                 p.Category.Name,
                 p.CategoryId,
                 p.CreatedDate
-            ))
-            .FirstOrDefaultAsync(cancellationToken);
+            )),
+            cancellationToken);
 
         if (response is null)
             return new ErrorDataResult<GetByIdPostResponse>("Post bilgisi bulunamadı.");

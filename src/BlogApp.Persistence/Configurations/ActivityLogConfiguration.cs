@@ -30,9 +30,11 @@ public class ActivityLogConfiguration : IEntityTypeConfiguration<ActivityLog>
         builder.Property(a => a.Timestamp)
             .IsRequired();
 
+        // User ilişkisi optional yapıldı (global query filter uyarısını önlemek için)
         builder.HasOne(a => a.User)
             .WithMany()
             .HasForeignKey(a => a.UserId)
+            .IsRequired(false) // ✅ Optional yapıldı
             .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasIndex(a => new { a.UserId, a.Timestamp })

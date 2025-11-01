@@ -84,4 +84,11 @@ public sealed class RoleRepository(BlogAppDbContext context) : EfRepositoryBase<
 
         return result;
     }
+
+    public async Task<List<Role>> GetByIdsAsync(List<Guid> roleIds, CancellationToken cancellationToken = default)
+    {
+        return await Query()
+            .Where(r => roleIds.Contains(r.Id))
+            .ToListAsync(cancellationToken);
+    }
 }

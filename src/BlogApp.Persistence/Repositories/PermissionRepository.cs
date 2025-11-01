@@ -60,4 +60,11 @@ public class PermissionRepository : EfRepositoryBase<Permission, BlogAppDbContex
         // ✅ FIXED: SaveChanges removed - UnitOfWork is responsible for transaction management
         // This ensures proper Outbox Pattern execution and maintains transaction integrity
     }
+
+    public async Task<List<Permission>> GetByIdsAsync(List<Guid> permissionIds, CancellationToken cancellationToken = default)
+    {
+        return await Query()
+            .Where(p => permissionIds.Contains(p.Id))
+            .ToListAsync(cancellationToken);
+    }
 }

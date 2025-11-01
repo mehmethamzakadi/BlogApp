@@ -4,13 +4,16 @@ using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Repositories;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using IResult = BlogApp.Domain.Common.Results.IResult;
 
 namespace BlogApp.Application.Features.Categories.Commands.Delete;
 
+/// <summary>
+/// Handler for deleting a category
+/// </summary>
 public sealed class DeleteCategoryCommandHandler(
     ICategoryRepository categoryRepository,
+    IPostRepository postRepository,
     ICacheService cacheService,
     IUnitOfWork unitOfWork) : IRequestHandler<DeleteCategoryCommand, IResult>
 {
@@ -20,8 +23,8 @@ public sealed class DeleteCategoryCommandHandler(
         if (category is null)
             return new ErrorResult("Kategori bilgisi bulunamadı!");
 
-        var hasActivePosts = await categoryRepository.Query()
-            .AnyAsync(c => c.Id == request.Id && c.Posts.Any(p => !p.IsDeleted), cancellationToken);
+        // ✅ FIXED: Using PostRepository specific method instead of Query() leak on CategoryRepository
+        var hasActivePosts = await postRepository.HasActivePostsInCategoryAsync(request.Id, cancellationToken);
 
         if (hasActivePosts)
             return new ErrorResult("Bu kategoriye ait aktif postlar bulunmaktadır. Önce postları silmeli veya başka kategoriye taşımalısınız.");

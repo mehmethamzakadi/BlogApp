@@ -1,5 +1,5 @@
-using BlogApp.Domain.Repositories;
 using BlogApp.Persistence.Contexts;
+using BlogApp.Persistence.DatabaseInitializer.Seeders;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,14 +19,43 @@ public sealed class DbInitializer : IDbInitializer
     {
         await using AsyncServiceScope scope = serviceProvider.CreateAsyncScope();
 
-        var dataContext = scope.ServiceProvider.GetRequiredService<BlogAppDbContext>();
-        await dataContext.Database.MigrateAsync(cancellationToken);
+        var context = scope.ServiceProvider.GetRequiredService<BlogAppDbContext>();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<DbInitializer>>();
 
-        // Permission'ları seed et
-        var roleRepository = scope.ServiceProvider.GetRequiredService<IRoleRepository>();
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<PermissionSeeder>>();
-        var permissionSeeder = new PermissionSeeder(dataContext, roleRepository, logger);
-        await permissionSeeder.SeedPermissionsAsync();
+        try
+        {
+            // 1. Migration'ları uygula
+            logger.LogInformation("Applying database migrations...");
+            await context.Database.MigrateAsync(cancellationToken);
+            logger.LogInformation("Database migrations applied successfully");
+
+            // 2. Seederleri oluştur ve sırala
+            var seeders = new List<ISeeder>
+            {
+                new RoleSeeder(context, scope.ServiceProvider.GetRequiredService<ILogger<RoleSeeder>>()),
+                new PermissionSeeder(context, scope.ServiceProvider.GetRequiredService<ILogger<PermissionSeeder>>()),
+                new RolePermissionSeeder(context, scope.ServiceProvider.GetRequiredService<ILogger<RolePermissionSeeder>>()),
+                new UserSeeder(context, scope.ServiceProvider.GetRequiredService<ILogger<UserSeeder>>()),
+                new UserRoleSeeder(context, scope.ServiceProvider.GetRequiredService<ILogger<UserRoleSeeder>>())
+            };
+
+            // Order'a göre sırala ve çalıştır
+            var orderedSeeders = seeders.OrderBy(s => s.Order).ToList();
+
+            logger.LogInformation("Starting database seeding with {SeederCount} seeders", orderedSeeders.Count);
+
+            foreach (var seeder in orderedSeeders)
+            {
+                await seeder.SeedAsync(cancellationToken);
+            }
+
+            logger.LogInformation("Database seeding completed successfully");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "An error occurred while initializing the database");
+            throw;
+        }
     }
 
     public Task EnsurePostgreSqlSerilogTableAsync(IConfiguration configuration, CancellationToken cancellationToken = default)

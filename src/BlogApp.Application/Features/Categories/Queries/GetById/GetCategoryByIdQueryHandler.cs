@@ -18,14 +18,13 @@ public sealed class GetCategoryByIdQueryHandler(
         if (cacheValue is not null)
             return new SuccessDataResult<GetByIdCategoryResponse>(cacheValue);
 
-        var response = await categoryRepository.Query()
-            .Where(b => b.Id == request.Id)
-            .AsNoTracking()
-            .Select(c => new GetByIdCategoryResponse(c.Id, c.Name))
-            .FirstOrDefaultAsync(cancellationToken);
+        // ✅ FIXED: Using repository-specific method instead of Query() leak
+        var category = await categoryRepository.GetByIdAsync(request.Id, cancellationToken);
 
-        if (response is null)
+        if (category is null)
             return new ErrorDataResult<GetByIdCategoryResponse>("Kategori bilgisi bulunamadı.");
+
+        var response = new GetByIdCategoryResponse(category.Id, category.Name);
 
         await cacheService.Add(
             cacheKey,

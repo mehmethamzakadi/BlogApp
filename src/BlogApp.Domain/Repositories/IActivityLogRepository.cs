@@ -15,4 +15,9 @@ public interface IActivityLogRepository
         int size = 10,
         Func<System.Linq.IQueryable<ActivityLog>, IIncludableQueryable<ActivityLog, object>>? include = null,
         CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Idempotency kontrolü için - belirli bir ID'ye sahip ActivityLog var mı?
+    /// </summary>
+    Task<bool> ExistsByIdAsync(Guid id, CancellationToken cancellationToken = default);
 }

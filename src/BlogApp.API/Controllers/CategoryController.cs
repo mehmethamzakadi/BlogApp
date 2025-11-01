@@ -26,10 +26,9 @@ namespace BlogApp.API.Controllers
 
         [AllowAnonymous]
         [HttpGet]
-        [ResponseCache(Duration = 300, VaryByQueryKeys = new string[] { })] // 5 dakika cache - public data
         public async Task<IActionResult> GetAll()
         {
-            IQueryable response = await Mediator.Send(new GetAllListCategoriesQuery());
+            var response = await Mediator.Send(new GetAllListCategoriesQuery());
             return Ok(response);
         }
 

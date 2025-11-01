@@ -18,11 +18,14 @@ public sealed class CreateBookshelfItemCommandHandler(
             NormalizeOptionalText(request.Publisher)
         );
 
-        item.PageCount = request.PageCount is > 0 ? request.PageCount : null;
-        item.IsRead = request.IsRead;
-        item.Notes = NormalizeOptionalText(request.Notes);
-        item.ReadDate = NormalizeReadDate(request.ReadDate, request.IsRead);
-        item.ImageUrl = NormalizeOptionalText(request.ImageUrl);
+        // ✅ RICH DOMAIN: Using behavior method instead of direct property assignment
+        item.UpdateDetails(
+            pageCount: request.PageCount is > 0 ? request.PageCount : null,
+            notes: NormalizeOptionalText(request.Notes),
+            imageUrl: NormalizeOptionalText(request.ImageUrl),
+            isRead: request.IsRead,
+            readDate: NormalizeReadDate(request.ReadDate, request.IsRead)
+        );
 
         await bookshelfItemRepository.AddAsync(item);
         await unitOfWork.SaveChangesAsync(cancellationToken);

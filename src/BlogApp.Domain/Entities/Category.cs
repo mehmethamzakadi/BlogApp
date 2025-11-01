@@ -5,11 +5,12 @@ namespace BlogApp.Domain.Entities;
 
 public sealed class Category : AggregateRoot
 {
-    public Category() { } // EF Core ve seed'ler için
+    // EF Core ve seed'ler için parameterless constructor
+    public Category() { }
 
-    public string Name { get; set; } = default!;
-    public string? NormalizedName { get; set; }
-    public ICollection<Post> Posts { get; set; } = new List<Post>();
+    public string Name { get; private set; } = default!;
+    public string? NormalizedName { get; private set; }
+    public ICollection<Post> Posts { get; private set; } = new List<Post>();
 
     public static Category Create(string name)
     {

@@ -60,9 +60,8 @@ public class AssignRolesToUserCommandHandler : IRequestHandler<AssignRolesToUser
         // Silinecek rolleri al
         if (rolesToRemove.Any())
         {
-            var rolesToRemoveEntities = await _roleRepository.Query()
-                .Where(r => rolesToRemove.Contains(r.Id))
-                .ToListAsync(cancellationToken);
+            // ✅ FIXED: Using repository-specific method instead of Query() leak
+            var rolesToRemoveEntities = await _roleRepository.GetByIdsAsync(rolesToRemove, cancellationToken);
 
             var removeResult = _userDomainService.RemoveFromRoles(user, rolesToRemoveEntities);
             if (!removeResult.Success)
@@ -74,9 +73,8 @@ public class AssignRolesToUserCommandHandler : IRequestHandler<AssignRolesToUser
         // Eklenecek rolleri al
         if (rolesToAdd.Any())
         {
-            var rolesToAddEntities = await _roleRepository.Query()
-                .Where(r => rolesToAdd.Contains(r.Id))
-                .ToListAsync(cancellationToken);
+            // ✅ FIXED: Using repository-specific method instead of Query() leak
+            var rolesToAddEntities = await _roleRepository.GetByIdsAsync(rolesToAdd, cancellationToken);
 
             if (rolesToAddEntities.Count != rolesToAdd.Count)
             {

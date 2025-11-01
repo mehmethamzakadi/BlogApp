@@ -1,24 +1,20 @@
 using BlogApp.Domain.Repositories;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace BlogApp.Application.Features.Categories.Queries.GetAll;
 
+/// <summary>
+/// Handler for getting all active categories
+/// </summary>
 public sealed class GetAllCategoriesQueryHandler(ICategoryRepository categoryRepository)
-    : IRequestHandler<GetAllListCategoriesQuery, IQueryable>
+    : IRequestHandler<GetAllListCategoriesQuery, List<CategoryListItemDto>>
 {
-    public Task<IQueryable> Handle(GetAllListCategoriesQuery request, CancellationToken cancellationToken)
+    public async Task<List<CategoryListItemDto>> Handle(GetAllListCategoriesQuery request, CancellationToken cancellationToken)
     {
-        IQueryable query = categoryRepository
-            .Query()
-            .AsNoTracking()
-            .Where(x => x.IsDeleted == false)
-            .Select(x => new
-            {
-                x.Id,
-                x.Name
-            });
+        // ✅ FIXED: Using repository-specific method instead of Query() leak
+        // ✅ FIXED: Returning List<DTO> instead of IQueryable (anti-pattern)
+        var categories = await categoryRepository.GetAllActiveAsync(cancellationToken);
 
-        return Task.FromResult(query);
+        return categories.Select(c => new CategoryListItemDto(c.Id, c.Name)).ToList();
     }
 }

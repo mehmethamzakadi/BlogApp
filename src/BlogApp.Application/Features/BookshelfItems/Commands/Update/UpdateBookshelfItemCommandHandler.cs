@@ -50,8 +50,16 @@ public sealed class UpdateBookshelfItemCommandHandler(
             newImageUrl
         );
 
-        item.IsRead = request.IsRead;
-        item.ReadDate = NormalizeReadDate(request.ReadDate, request.IsRead);
+        // ✅ RICH DOMAIN: Using behavior method for read status
+        var readDate = NormalizeReadDate(request.ReadDate, request.IsRead);
+        if (request.IsRead && !item.IsRead)
+        {
+            item.MarkAsRead(readDate);
+        }
+        else if (!request.IsRead && item.IsRead)
+        {
+            item.MarkAsUnread();
+        }
 
         bookshelfItemRepository.Update(item);
         await unitOfWork.SaveChangesAsync(cancellationToken);
