@@ -36,7 +36,9 @@ public sealed class DbInitializer : IDbInitializer
                 new PermissionSeeder(context, scope.ServiceProvider.GetRequiredService<ILogger<PermissionSeeder>>()),
                 new RolePermissionSeeder(context, scope.ServiceProvider.GetRequiredService<ILogger<RolePermissionSeeder>>()),
                 new UserSeeder(context, scope.ServiceProvider.GetRequiredService<ILogger<UserSeeder>>()),
-                new UserRoleSeeder(context, scope.ServiceProvider.GetRequiredService<ILogger<UserRoleSeeder>>())
+                new UserRoleSeeder(context, scope.ServiceProvider.GetRequiredService<ILogger<UserRoleSeeder>>()),
+                new CategorySeeder(context, scope.ServiceProvider.GetRequiredService<ILogger<CategorySeeder>>()),
+                new PostSeeder(context, scope.ServiceProvider.GetRequiredService<ILogger<PostSeeder>>())
             };
 
             // Order'a göre sırala ve çalıştır
