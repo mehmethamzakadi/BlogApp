@@ -1,7 +1,5 @@
 using BlogApp.Domain.Common.Dynamic;
 using BlogApp.Domain.Common.Paging;
-using Microsoft.EntityFrameworkCore.Query;
-using System.Linq;
 using System.Linq.Expressions;
 
 namespace BlogApp.Domain.Common;
@@ -11,7 +9,7 @@ public interface IRepository<TEntity> : IQuery<TEntity>
 {
     Task<TEntity?> GetAsync(
         Expression<Func<TEntity, bool>> predicate,
-        Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null,
+        Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null,
         bool withDeleted = false,
         bool enableTracking = true,
         CancellationToken cancellationToken = default);
@@ -19,7 +17,7 @@ public interface IRepository<TEntity> : IQuery<TEntity>
     Task<Paginate<TEntity>> GetPaginatedListAsync(
         Expression<Func<TEntity, bool>>? predicate = null,
         Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
-        Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null,
+        Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null,
         int index = 0,
         int size = 10,
         bool withDeleted = false,
@@ -30,7 +28,7 @@ public interface IRepository<TEntity> : IQuery<TEntity>
     Task<Paginate<TEntity>> GetPaginatedListByDynamicAsync(
         DynamicQuery? dynamic,
         Expression<Func<TEntity, bool>>? predicate = null,
-        Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null,
+        Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null,
         int index = 0,
         int size = 10,
         bool withDeleted = false,
@@ -54,7 +52,7 @@ public interface IRepository<TEntity> : IQuery<TEntity>
     Task<List<TEntity>> GetAllAsync(
       Expression<Func<TEntity, bool>>? predicate = null,
       Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
-      Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null,
+      Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null,
         bool withDeleted = false,
         bool enableTracking = true,
         CancellationToken cancellationToken = default

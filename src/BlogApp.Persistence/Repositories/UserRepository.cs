@@ -2,6 +2,7 @@ using BlogApp.Domain.Common.Paging;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Repositories;
 using BlogApp.Persistence.Contexts;
+using BlogApp.Persistence.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace BlogApp.Persistence.Repositories;
@@ -51,7 +52,8 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
     {
         return await Context.UserRoles
             .Where(ur => ur.UserId == user.Id)
-            .Include(ur => ur.Role)
+            // Removed unnecessary Include(ur => ur.Role) to prevent N+1 problem and extra join
+            // Select projection already handles the join efficiently
             .Select(ur => ur.Role.Name)
             .ToListAsync();
     }

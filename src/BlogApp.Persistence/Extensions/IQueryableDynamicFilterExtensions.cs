@@ -1,7 +1,7 @@
-using System.Linq;
 using System.Linq.Dynamic.Core;
+using BlogApp.Domain.Common.Dynamic;
 
-namespace BlogApp.Domain.Common.Dynamic;
+namespace BlogApp.Persistence.Extensions;
 
 public static class IQueryableDynamicFilterExtensions
 {

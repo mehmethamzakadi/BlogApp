@@ -1,7 +1,7 @@
+using BlogApp.Domain.Common.Paging;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
-namespace BlogApp.Domain.Common.Paging;
+namespace BlogApp.Persistence.Extensions;
 
 public static class IQueryablePaginateExtensions
 {
@@ -25,7 +25,6 @@ public static class IQueryablePaginateExtensions
             Pages = (int)Math.Ceiling(count / (double)size)
         };
         return list;
-
     }
 
     public static Paginate<T> ToPaginate<T>(this IQueryable<T> source, int index, int size)

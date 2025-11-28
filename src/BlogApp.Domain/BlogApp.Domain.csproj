@@ -6,14 +6,12 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <!-- 
+    Clean Architecture Improvement:
+    Removed EntityFrameworkCore and System.Linq.Dynamic.Core dependencies.
+    Domain layer is now pure and has no dependency on persistence technologies.
+  -->
   <ItemGroup>
-    <!-- 
-      UYARI: Bu paketler Clean Architecture prensiplerine göre Domain katmanında olmamalı.
-      Ancak IRepository'de IIncludableQueryable kullanıldığı için şimdilik gerekli.
-      TODO: Repository pattern'i refactor edilerek bu bağımlılıklar kaldırılmalı.
-    -->
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
-    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.9" />
   </ItemGroup>
 
 </Project>

@@ -18,6 +18,18 @@ x-restart-policy: &restart-policy
 
 services:
   # ===========================================
+  # Client Service (Frontend)
+  # ===========================================
+  blogapp.client:
+    image: ${DOCKER_REGISTRY:-}blogappclient:${TAG:-latest}
+    build:
+      context: clients/blogapp-client
+      dockerfile: Dockerfile
+    <<: *restart-policy
+    # Production'da client portunu dışarı açmıyoruz, Nginx üzerinden erişiliyor
+    # Local'de override ediliyor
+
+  # ===========================================
   # API Service
   # ===========================================
   blogapp.api:

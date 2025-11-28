@@ -15,6 +15,25 @@ x-common-healthcheck: &common-healthcheck
 
 services:
   # ===========================================
+  # Client Service - Development (Vite HMR)
+  # ===========================================
+  blogapp.client:
+    image: node:20-alpine
+    container_name: blogapp_client_dev
+    restart: unless-stopped
+    working_dir: /app
+    command: sh -c "npm install && npm run dev -- --host"
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:6060/api
+    volumes:
+      - ./clients/blogapp-client:/app
+      - /app/node_modules # node_modules'u container içinde tut
+    networks:
+      - blogapp_local_net
+
+  # ===========================================
   # API Service - Development
   # ===========================================
   blogapp.api:
@@ -60,6 +79,8 @@ services:
       TokenOptions__SecurityKey: "DevSecretKey_32chars_minimum!@#$%"
       # Seq Logging
       Serilog__WriteTo__1__Args__serverUrl: http://seq:80
+      # CORS Policy
+      CorsOptions__AllowedOrigins: "http://localhost:5173"
     depends_on:
       postgresdb:
         condition: service_healthy
