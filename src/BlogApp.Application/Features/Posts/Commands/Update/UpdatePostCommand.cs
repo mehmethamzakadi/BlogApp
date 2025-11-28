@@ -7,17 +7,20 @@ namespace BlogApp.Application.Features.Posts.Commands.Update;
 
 public sealed record UpdatePostCommand(Guid Id, string Title, string Body, string Summary, string Thumbnail, bool IsPublished, Guid CategoryId) : IRequest<IResult>, IInvalidateCache
 {
+    /// <summary>
+    /// Uses version-based cache invalidation strategy.
+    /// Invalidating version keys automatically makes all related cached pages stale.
+    /// </summary>
     public IEnumerable<string> GetCacheKeysToInvalidate()
     {
+        // Invalidate single post caches
         yield return CacheKeys.Post(Id);
         yield return CacheKeys.PostPublic(Id);
         yield return CacheKeys.PostWithDrafts(Id);
-        yield return CacheKeys.CategoryGridVersion();
         
-        for (int i = 0; i < 10; i++)
-        {
-            yield return CacheKeys.PostList(i, 10);
-            yield return CacheKeys.PostsByCategory(CategoryId, i, 10);
-        }
+        // Invalidate version keys - this makes all cached pages stale automatically
+        yield return CacheKeys.PostListVersion();
+        yield return CacheKeys.PostsByCategoryVersion(CategoryId);
+        yield return CacheKeys.CategoryGridVersion();
     }
 }

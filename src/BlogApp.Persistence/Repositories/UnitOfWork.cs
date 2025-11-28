@@ -1,3 +1,4 @@
+using BlogApp.Application.Common;
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Attributes;
 using BlogApp.Domain.Entities;
@@ -71,6 +72,7 @@ public sealed class UnitOfWork : IUnitOfWork
 
         // 2. Domain event'leri MediatR ile yayınla (in-process handlers için)
         // Bu sayede cache invalidation, logging gibi side-effect'ler hemen gerçekleşir
+        // NOT: IDomainEvent artık MediatR'dan bağımsız, DomainEventNotification wrapper kullanılıyor
         foreach (var domainEvent in domainEvents)
         {
             try
@@ -80,7 +82,14 @@ public sealed class UnitOfWork : IUnitOfWork
                     domainEvent.GetType().Name,
                     domainEvent.AggregateId);
 
-                await _mediator.Publish(domainEvent, cancellationToken);
+                // Domain event'i MediatR notification'a dönüştür
+                var notificationType = typeof(DomainEventNotification<>).MakeGenericType(domainEvent.GetType());
+                var notification = Activator.CreateInstance(notificationType, domainEvent);
+                
+                if (notification != null)
+                {
+                    await _mediator.Publish(notification, cancellationToken);
+                }
             }
             catch (Exception ex)
             {

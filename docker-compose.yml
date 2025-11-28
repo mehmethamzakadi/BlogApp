@@ -1,37 +1,51 @@
-version: "3.8"
+# ============================================
+# BlogApp - Base Docker Compose Configuration
+# ============================================
+# Bu dosya temel servis tanımlarını içerir.
+# Kullanım:
+#   Local:  docker-compose -f docker-compose.local.yml up -d
+#   Prod:   docker-compose -f docker-compose.prod.yml up -d
+# ============================================
 
-x-app-environment: &app-environment
-  ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
-  ASPNETCORE_URLS: ${ASPNETCORE_URLS:-http://0.0.0.0:8080}
+x-common-healthcheck: &common-healthcheck
+  interval: 10s
+  timeout: 5s
+  retries: 10
+  start_period: 10s
+
+x-restart-policy: &restart-policy
+  restart: unless-stopped
 
 services:
+  # ===========================================
+  # API Service
+  # ===========================================
   blogapp.api:
-    image: ${DOCKER_REGISTRY-}blogappapi
+    image: ${DOCKER_REGISTRY:-}blogappapi:${TAG:-latest}
     build:
       context: .
       dockerfile: src/BlogApp.API/Dockerfile
-    environment:
-      <<: *app-environment
-      RabbitMQOptions__HostName: rabbitmq
-      RabbitMQOptions__UserName: ${RABBITMQ_DEFAULT_USER:-blogapp}
-      RabbitMQOptions__Password: ${RABBITMQ_DEFAULT_PASS:-supersecret}
-    expose:
-      - "8080"
+    <<: *restart-policy
     depends_on:
-      rabbitmq:
-        condition: service_healthy
       postgresdb:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
       redis.cache:
-        condition: service_started
+        condition: service_healthy
 
+  # ===========================================
+  # PostgreSQL Database
+  # ===========================================
   postgresdb:
-    container_name: postgresdb
-    image: postgres:16
+    image: postgres:16-alpine
+    container_name: blogapp_postgres
+    <<: *restart-policy
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-BlogAppDb}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      PGDATA: /var/lib/postgresql/data/pgdata
     command:
       - "postgres"
       - "-c"
@@ -42,61 +56,89 @@ services:
       - "effective_cache_size=1GB"
       - "-c"
       - "work_mem=4MB"
-    ports:
-      - "5435:5432"   # dış dünyadan erişim (opsiyonel)
+      - "-c"
+      - "maintenance_work_mem=128MB"
+      - "-c"
+      - "checkpoint_completion_target=0.9"
+      - "-c"
+      - "wal_buffers=16MB"
+      - "-c"
+      - "default_statistics_target=100"
+      - "-c"
+      - "random_page_cost=1.1"
+      - "-c"
+      - "effective_io_concurrency=200"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test:
-        - "CMD-SHELL"
-        - "PGPASSWORD=${POSTGRES_PASSWORD:-postgres} pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-BlogAppDb} -h localhost"
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 5s
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-BlogAppDb}"]
+      <<: *common-healthcheck
 
+  # ===========================================
+  # RabbitMQ Message Broker
+  # ===========================================
   rabbitmq:
-    image: rabbitmq:3-management
-    container_name: rabbitmq
+    image: rabbitmq:3-management-alpine
+    container_name: blogapp_rabbitmq
     hostname: rabbitmq
+    <<: *restart-policy
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-blogapp}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-supersecret}
     volumes:
-      - rabbitmq_data:/var/lib/rabbitmq       # ✅ düzeltilmiş (mnesia alt dizini kaldırıldı)
-    ports:
-      - "15672:15672"  # Yönetim paneli (opsiyonel)
-      - "5672:5672"    # AMQP bağlantısı
-    restart: always
-    healthcheck:       # ✅ RabbitMQ tamamen hazır olmadan API başlamasın
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "check_running"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
+      <<: *common-healthcheck
 
+  # ===========================================
+  # Redis Cache
+  # ===========================================
   redis.cache:
-    image: redis:latest
-    container_name: redis_server
-    restart: always
+    image: redis:7-alpine
+    container_name: blogapp_redis
+    <<: *restart-policy
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
     volumes:
       - redis_data:/data
-    ports:
-      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      <<: *common-healthcheck
 
+  # ===========================================
+  # Seq Log Management
+  # ===========================================
   seq:
     image: datalust/seq:latest
-    container_name: seq_logs
-    restart: always
+    container_name: blogapp_seq
+    <<: *restart-policy
     environment:
       ACCEPT_EULA: "Y"
       SEQ_FIRSTRUN_ADMINPASSWORD: ${SEQ_ADMIN_PASSWORD:-Admin123!}
     volumes:
       - seq_data:/data
-    ports:
-      - "5341:80"  # Seq web UI
-      
+
+# ===========================================
+# Volumes
+# ===========================================
 volumes:
   postgres_data:
+    name: blogapp_postgres_data
   rabbitmq_data:
+    name: blogapp_rabbitmq_data
   redis_data:
+    name: blogapp_redis_data
   seq_data:
+    name: blogapp_seq_data
+
+# ===========================================
+# Networks
+# ===========================================
+networks:
+  default:
+    name: blogapp_network
+    driver: bridge

@@ -1,4 +1,5 @@
 using BlogApp.Application.Abstractions;
+using BlogApp.Application.Common;
 using BlogApp.Domain.Events.UserEvents;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -8,7 +9,7 @@ namespace BlogApp.Application.Features.Users.EventHandlers;
 /// <summary>
 /// Kullanıcı güncellendiğinde tetiklenen domain event handler
 /// </summary>
-public sealed class UserUpdatedEventHandler : INotificationHandler<UserUpdatedEvent>
+public sealed class UserUpdatedEventHandler : INotificationHandler<DomainEventNotification<UserUpdatedEvent>>
 {
     private readonly ILogger<UserUpdatedEventHandler> _logger;
     private readonly ICacheService _cacheService;
@@ -21,30 +22,32 @@ public sealed class UserUpdatedEventHandler : INotificationHandler<UserUpdatedEv
         _cacheService = cacheService;
     }
 
-    public async Task Handle(UserUpdatedEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(DomainEventNotification<UserUpdatedEvent> notification, CancellationToken cancellationToken)
     {
+        var domainEvent = notification.DomainEvent;
+        
         _logger.LogInformation(
             "Handling UserUpdatedEvent for User {UserId}",
-            notification.UserId);
+            domainEvent.UserId);
 
         try
         {
             // Specific user cache'ini ve ilgili listeleri temizle
-            await _cacheService.Remove($"user:{notification.UserId}");
-            await _cacheService.Remove($"user:{notification.UserId}:roles");
-            await _cacheService.Remove($"user:{notification.UserId}:permissions");
+            await _cacheService.Remove($"user:{domainEvent.UserId}");
+            await _cacheService.Remove($"user:{domainEvent.UserId}:roles");
+            await _cacheService.Remove($"user:{domainEvent.UserId}:permissions");
             await _cacheService.Remove("users:list");
             await _cacheService.Remove("users:all");
 
             _logger.LogInformation(
                 "Cache invalidated for user {UserId} after update",
-                notification.UserId);
+                domainEvent.UserId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex,
                 "Error invalidating cache for UserUpdatedEvent {UserId}",
-                notification.UserId);
+                domainEvent.UserId);
         }
     }
 }

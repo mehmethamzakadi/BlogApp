@@ -1,4 +1,5 @@
 using BlogApp.Application.Abstractions;
+using BlogApp.Application.Common;
 using BlogApp.Domain.Events.PermissionEvents;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -8,7 +9,7 @@ namespace BlogApp.Application.Features.Permissions.EventHandlers;
 /// <summary>
 /// Role permission'lar atandığında tetiklenen domain event handler
 /// </summary>
-public sealed class PermissionsAssignedToRoleEventHandler : INotificationHandler<PermissionsAssignedToRoleEvent>
+public sealed class PermissionsAssignedToRoleEventHandler : INotificationHandler<DomainEventNotification<PermissionsAssignedToRoleEvent>>
 {
     private readonly ILogger<PermissionsAssignedToRoleEventHandler> _logger;
     private readonly ICacheService _cacheService;
@@ -21,20 +22,22 @@ public sealed class PermissionsAssignedToRoleEventHandler : INotificationHandler
         _cacheService = cacheService;
     }
 
-    public async Task Handle(PermissionsAssignedToRoleEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(DomainEventNotification<PermissionsAssignedToRoleEvent> notification, CancellationToken cancellationToken)
     {
+        var domainEvent = notification.DomainEvent;
+        
         _logger.LogInformation(
             "Handling PermissionsAssignedToRoleEvent for Role {RoleId} ({RoleName}) - {PermissionCount} permissions: {PermissionNames}",
-            notification.RoleId,
-            notification.RoleName,
-            notification.PermissionNames.Count,
-            string.Join(", ", notification.PermissionNames));
+            domainEvent.RoleId,
+            domainEvent.RoleName,
+            domainEvent.PermissionNames.Count,
+            string.Join(", ", domainEvent.PermissionNames));
 
         try
         {
             // Role'ün permission cache'ini temizle
-            await _cacheService.Remove($"role:{notification.RoleId}:permissions");
-            await _cacheService.Remove($"role:{notification.RoleId}");
+            await _cacheService.Remove($"role:{domainEvent.RoleId}:permissions");
+            await _cacheService.Remove($"role:{domainEvent.RoleId}");
             
             // Bu role sahip tüm user'ların permission cache'ini temizlemek gerekir
             // Ancak bu bilgiye burada erişemiyoruz - daha genel bir cache pattern kullanılabilir
@@ -43,13 +46,13 @@ public sealed class PermissionsAssignedToRoleEventHandler : INotificationHandler
 
             _logger.LogInformation(
                 "Cache invalidated for role {RoleId} after permission assignment",
-                notification.RoleId);
+                domainEvent.RoleId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex,
                 "Error invalidating cache for PermissionsAssignedToRoleEvent {RoleId}",
-                notification.RoleId);
+                domainEvent.RoleId);
         }
 
         // Gelecekte eklenebilecek side-effect'ler:

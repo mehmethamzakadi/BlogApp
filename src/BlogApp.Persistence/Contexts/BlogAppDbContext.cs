@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.Linq.Expressions;
 
+// ISoftDeletable interface kullanılarak soft delete filter sadece gerekli entity'lere uygulanır
+
 namespace BlogApp.Persistence.Contexts
 {
     public class BlogAppDbContext : AuditableDbContext
@@ -42,11 +44,14 @@ namespace BlogApp.Persistence.Contexts
                     }
                 }
 
-                // Global query filter for soft delete
-                if (typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))
+                // Global query filter for soft delete - only for ISoftDeletable entities
+                // Excludes OutboxMessage and RefreshSession from soft delete filter
+                if (typeof(ISoftDeletable).IsAssignableFrom(entityType.ClrType) &&
+                    entityType.ClrType != typeof(OutboxMessage) &&
+                    entityType.ClrType != typeof(RefreshSession))
                 {
                     var parameter = Expression.Parameter(entityType.ClrType, "e");
-                    var property = Expression.Property(parameter, nameof(BaseEntity.IsDeleted));
+                    var property = Expression.Property(parameter, nameof(ISoftDeletable.IsDeleted));
                     var filter = Expression.Lambda(
                         Expression.Equal(property, Expression.Constant(false)), 
                         parameter);

@@ -1,3 +1,4 @@
+using BlogApp.Application.Common.Constants;
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Entities;
@@ -29,6 +30,6 @@ public sealed class CreatePostCommandHandler(
         await postRepository.AddAsync(post);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return new SuccessResult("Post bilgisi başarıyla eklendi.");
+        return new SuccessResult(ResponseMessages.Post.Created);
     }
 }

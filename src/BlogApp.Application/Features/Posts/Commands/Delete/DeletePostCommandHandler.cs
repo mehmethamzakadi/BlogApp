@@ -1,3 +1,4 @@
+using BlogApp.Application.Common.Constants;
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Repositories;
@@ -14,12 +15,12 @@ public sealed class DeletePostCommandHandler(
     {
         var post = await postRepository.GetAsync(x => x.Id == request.Id, enableTracking: true);
         if (post is null)
-            return new ErrorResult("Post bilgisi bulunamadı!");
+            return new ErrorResult(ResponseMessages.Post.NotFound);
 
         post.Delete();
         postRepository.Delete(post);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return new SuccessResult("Post bilgisi başarıyla silindi.");
+        return new SuccessResult(ResponseMessages.Post.Deleted);
     }
 }

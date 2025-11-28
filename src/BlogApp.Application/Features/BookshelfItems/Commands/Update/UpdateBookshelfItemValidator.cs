@@ -1,7 +1,12 @@
+using BlogApp.Application.Common.Security;
 using FluentValidation;
 
 namespace BlogApp.Application.Features.BookshelfItems.Commands.Update;
 
+/// <summary>
+/// Validator for UpdateBookshelfItemCommand with security rules.
+/// Uses HtmlSanitizer-based whitelist approach for XSS prevention.
+/// </summary>
 public sealed class UpdateBookshelfItemValidator : AbstractValidator<UpdateBookshelfItemCommand>
 {
     public UpdateBookshelfItemValidator()
@@ -11,14 +16,17 @@ public sealed class UpdateBookshelfItemValidator : AbstractValidator<UpdateBooks
 
         RuleFor(x => x.Title)
             .NotEmpty().WithMessage("Kitap adı boş olmamalıdır!")
-            .MaximumLength(200).WithMessage("Kitap adı 200 karakterden uzun olmamalıdır!");
+            .MaximumLength(200).WithMessage("Kitap adı 200 karakterden uzun olmamalıdır!")
+            .MustBePlainText("Kitap adı HTML veya script içeremez!");
 
         RuleFor(x => x.Author)
             .MaximumLength(150).WithMessage("Yazar bilgisi 150 karakterden uzun olmamalıdır!")
+            .MustBePlainText("Yazar bilgisi HTML veya script içeremez!")
             .When(x => !string.IsNullOrWhiteSpace(x.Author));
 
         RuleFor(x => x.Publisher)
             .MaximumLength(150).WithMessage("Yayınevi bilgisi 150 karakterden uzun olmamalıdır!")
+            .MustBePlainText("Yayınevi bilgisi HTML veya script içeremez!")
             .When(x => !string.IsNullOrWhiteSpace(x.Publisher));
 
         RuleFor(x => x.PageCount)
@@ -28,6 +36,7 @@ public sealed class UpdateBookshelfItemValidator : AbstractValidator<UpdateBooks
 
         RuleFor(x => x.Notes)
             .MaximumLength(2000).WithMessage("Not alanı 2000 karakterden fazla olmamalıdır!")
+            .MustBePlainText("Not alanı HTML veya script içeremez!")
             .When(x => !string.IsNullOrWhiteSpace(x.Notes));
 
         RuleFor(x => x.ReadDate)

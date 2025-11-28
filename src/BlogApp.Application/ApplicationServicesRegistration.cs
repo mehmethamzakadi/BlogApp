@@ -12,7 +12,6 @@ namespace BlogApp.Application
     {
         public static IServiceCollection AddConfigureApplicationServices(this IServiceCollection services, IConfiguration configuration)
         {
-            services.Configure<TelegramOptions>(configuration.GetSection("TelegramBotOptions"));
             services.Configure<TokenOptions>(configuration.GetSection("TokenOptions"));
 
             services.AddAutoMapper(Assembly.GetExecutingAssembly());

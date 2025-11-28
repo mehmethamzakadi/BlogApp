@@ -1,5 +1,6 @@
 using BlogApp.Application.Abstractions;
 using BlogApp.Application.Common.Caching;
+using BlogApp.Application.Common.Constants;
 using BlogApp.Application.Features.Categories.Queries.GetById;
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
@@ -23,7 +24,7 @@ public sealed class UpdateCategoryCommandHandler(
 
         if (category is null)
         {
-            return new ErrorResult("Kategori bilgisi bulunamadı!");
+            return new ErrorResult(ResponseMessages.Category.NotFound);
         }
 
         // Başka bir kategoride aynı isim var mı kontrol et (mevcut kategori hariç)
@@ -34,7 +35,7 @@ public sealed class UpdateCategoryCommandHandler(
 
         if (nameExists)
         {
-            return new ErrorResult("Bu kategori adı zaten kullanılıyor!");
+            return new ErrorResult(ResponseMessages.Category.AlreadyExists);
         }
 
         category.Update(request.Name);
@@ -53,6 +54,6 @@ public sealed class UpdateCategoryCommandHandler(
             null,
             null);
 
-        return new SuccessResult("Kategori bilgisi başarıyla güncellendi.");
+        return new SuccessResult(ResponseMessages.Category.Updated);
     }
 }

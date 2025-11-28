@@ -193,14 +193,14 @@ app.UseSerilogRequestLogging(options =>
     options.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000}ms";
     options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
     {
-        diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
+        diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value ?? "unknown");
         diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
-        diagnosticContext.Set("RemoteIpAddress", httpContext.Connection.RemoteIpAddress);
+        diagnosticContext.Set("RemoteIpAddress", httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown");
         diagnosticContext.Set("UserAgent", httpContext.Request.Headers["User-Agent"].ToString());
 
         if (httpContext.User?.Identity?.IsAuthenticated == true)
         {
-            diagnosticContext.Set("UserName", httpContext.User.Identity.Name);
+            diagnosticContext.Set("UserName", httpContext.User.Identity.Name ?? "unknown");
         }
     };
 });

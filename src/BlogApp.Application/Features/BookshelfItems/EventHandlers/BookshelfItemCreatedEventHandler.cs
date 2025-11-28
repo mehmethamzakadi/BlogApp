@@ -1,4 +1,5 @@
 using BlogApp.Application.Abstractions;
+using BlogApp.Application.Common;
 using BlogApp.Domain.Events.BookshelfItemEvents;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -8,7 +9,7 @@ namespace BlogApp.Application.Features.BookshelfItems.EventHandlers;
 /// <summary>
 /// BookshelfItem oluşturulduğunda tetiklenen domain event handler
 /// </summary>
-public sealed class BookshelfItemCreatedEventHandler : INotificationHandler<BookshelfItemCreatedEvent>
+public sealed class BookshelfItemCreatedEventHandler : INotificationHandler<DomainEventNotification<BookshelfItemCreatedEvent>>
 {
     private readonly ILogger<BookshelfItemCreatedEventHandler> _logger;
     private readonly ICacheService _cacheService;
@@ -21,12 +22,14 @@ public sealed class BookshelfItemCreatedEventHandler : INotificationHandler<Book
         _cacheService = cacheService;
     }
 
-    public async Task Handle(BookshelfItemCreatedEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(DomainEventNotification<BookshelfItemCreatedEvent> notification, CancellationToken cancellationToken)
     {
+        var domainEvent = notification.DomainEvent;
+        
         _logger.LogInformation(
             "Handling BookshelfItemCreatedEvent for Item {ItemId} - {Title}",
-            notification.ItemId,
-            notification.Title);
+            domainEvent.ItemId,
+            domainEvent.Title);
 
         try
         {
@@ -36,13 +39,13 @@ public sealed class BookshelfItemCreatedEventHandler : INotificationHandler<Book
 
             _logger.LogInformation(
                 "Cache invalidated after bookshelf item {ItemId} creation",
-                notification.ItemId);
+                domainEvent.ItemId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex,
                 "Error invalidating cache for BookshelfItemCreatedEvent {ItemId}",
-                notification.ItemId);
+                domainEvent.ItemId);
         }
     }
 }

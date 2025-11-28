@@ -9,7 +9,8 @@ public static class SerilogConfiguration
 {
     public static void ConfigureSerilog(this WebApplicationBuilder builder)
     {
-        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+        var connectionString = builder.Configuration.GetConnectionString("BlogAppPostgreConnectionString") 
+            ?? throw new InvalidOperationException("Connection string 'BlogAppPostgreConnectionString' not found.");
         var seqUrl = builder.Configuration["Serilog:SeqUrl"] ?? "http://localhost:5341";
         var environment = builder.Environment.EnvironmentName;
 

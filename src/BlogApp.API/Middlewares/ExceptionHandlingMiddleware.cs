@@ -49,7 +49,7 @@ namespace BlogApp.API.Middlewares
             {
                 Success = false,
                 Message = "İsteğiniz işlenirken bir hata oluştu.",
-                InternalMessage = _environment.IsDevelopment() ? exception.Message : null,
+                InternalMessage = _environment.IsDevelopment() ? exception.Message : string.Empty,
                 Errors = new List<string>()
             };
 

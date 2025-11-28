@@ -1,4 +1,12 @@
-version: "3.8"
+# ============================================
+# BlogApp - Visual Studio / IDE Override
+# ============================================
+# Bu dosya Visual Studio ile debugging için kullanılır.
+# docker-compose.yml ile birlikte otomatik olarak yüklenir.
+#
+# ÖNEMLİ: Local development için docker-compose.local.yml kullanın!
+# Bu dosya sadece IDE entegrasyonu içindir.
+# ============================================
 
 services:
   blogapp.api:
@@ -8,5 +16,9 @@ services:
     ports:
       - "6060:8080"
     volumes:
-      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
-      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+      # Windows için
+      - ${APPDATA:-/tmp}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA:-/tmp}/ASP.NET/Https:/home/app/.aspnet/https:ro
+      # macOS / Linux için alternatif (HOME değişkeni kullanılır)
+      - ${HOME:-/tmp}/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
+      - ${HOME:-/tmp}/.aspnet/https:/root/.aspnet/https:ro

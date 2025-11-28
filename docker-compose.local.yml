@@ -1,122 +1,221 @@
-﻿version: "3.8"
+# ============================================
+# BlogApp - Local Development Configuration
+# ============================================
+# Kullanım:
+#   docker-compose -f docker-compose.local.yml up -d
+#   docker-compose -f docker-compose.local.yml down -v
+#   docker-compose -f docker-compose.local.yml logs -f blogapp.api
+# ============================================
+
+x-common-healthcheck: &common-healthcheck
+  interval: 10s
+  timeout: 5s
+  retries: 10
+  start_period: 10s
 
 services:
-  # 🔹 API Servisi
+  # ===========================================
+  # API Service - Development
+  # ===========================================
   blogapp.api:
     build:
       context: .
       dockerfile: src/BlogApp.API/Dockerfile
+      args:
+        - CONFIGURATION=Debug
+    container_name: blogapp_api_dev
+    restart: unless-stopped
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://0.0.0.0:8080
-      ConnectionStrings__BlogAppPostgreConnectionString: "Host=postgresdb;Port=5432;Database=BlogAppDb;Username=postgres;Password=postgres;Include Error Detail=true;Pooling=true;Minimum Pool Size=5;Maximum Pool Size=100;Connection Idle Lifetime=300;Connection Pruning Interval=10;"
-      ConnectionStrings__RedisCache: "redis_server:6379,abortConnect=false,connectTimeout=5000,syncTimeout=5000,connectRetry=3,keepAlive=60"
+      # Database
+      ConnectionStrings__BlogAppPostgreConnectionString: >-
+        Host=postgresdb;
+        Port=5432;
+        Database=BlogAppDb;
+        Username=postgres;
+        Password=postgres;
+        Include Error Detail=true;
+        Pooling=true;
+        Minimum Pool Size=5;
+        Maximum Pool Size=50;
+        Connection Idle Lifetime=300;
+        Connection Pruning Interval=10;
+        Command Timeout=30;
+        Timeout=15
+      # Redis (service name: redis.cache)
+      ConnectionStrings__RedisCache: >-
+        redis.cache:6379,
+        abortConnect=false,
+        connectTimeout=5000,
+        syncTimeout=5000,
+        connectRetry=3,
+        keepAlive=60
+      # RabbitMQ
       RabbitMQOptions__HostName: rabbitmq
+      RabbitMQOptions__Port: 5672
       RabbitMQOptions__UserName: blogapp
       RabbitMQOptions__Password: supersecret
+      # JWT Security (Development only - use secrets in production!)
+      TokenOptions__SecurityKey: "DevSecretKey_32chars_minimum!@#$%"
+      # Seq Logging
+      Serilog__WriteTo__1__Args__serverUrl: http://seq:80
     depends_on:
       postgresdb:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
       redis.cache:
-        condition: service_started
+        condition: service_healthy
     ports:
-      - "6060:8080"
+      - "6060:8080"          # API endpoint
     volumes:
+      # Hot reload için appsettings mount
       - ./src/BlogApp.API/appsettings.Development.json:/app/appsettings.Development.json:ro
     networks:
-      - blogapp_net
+      - blogapp_local_net
+    # Healthcheck devre dışı - curl/wget image'da yok
+    # API başlatma sırasında migration ve seed otomatik yapılır
+    healthcheck:
+      test: ["CMD-SHELL", "exit 0"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
-  # 🔹 PostgreSQL Veritabanı
+  # ===========================================
+  # PostgreSQL Database - Development
+  # ===========================================
   postgresdb:
-    container_name: postgresdb
-    image: postgres:16
+    image: postgres:16-alpine
+    container_name: blogapp_postgres_dev
+    restart: unless-stopped
     environment:
       POSTGRES_DB: BlogAppDb
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      PGDATA: /var/lib/postgresql/data/pgdata
     command:
       - "postgres"
       - "-c"
-      - "max_connections=300"
+      - "max_connections=100"
       - "-c"
-      - "shared_buffers=256MB"
+      - "shared_buffers=128MB"
       - "-c"
-      - "effective_cache_size=1GB"
+      - "log_statement=all"   # Development için tüm SQL logla
       - "-c"
-      - "work_mem=4MB"
+      - "log_duration=on"
     ports:
-      - "5435:5432"   # dış dünyadan erişim (opsiyonel)
+      - "5435:5432"           # Host'tan erişim için
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "PGPASSWORD=$${POSTGRES_PASSWORD} pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} -h localhost"
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 5s
+      - postgres_local_data:/var/lib/postgresql/data
     networks:
-      - blogapp_net
+      - blogapp_local_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d BlogAppDb"]
+      <<: *common-healthcheck
 
-  # 🔹 RabbitMQ
+  # ===========================================
+  # RabbitMQ - Development
+  # ===========================================
   rabbitmq:
-    image: rabbitmq:3-management
-    container_name: rabbitmq
+    image: rabbitmq:3-management-alpine
+    container_name: blogapp_rabbitmq_dev
     hostname: rabbitmq
+    restart: unless-stopped
     environment:
       RABBITMQ_DEFAULT_USER: blogapp
       RABBITMQ_DEFAULT_PASS: supersecret
     ports:
-      - "15672:15672"  # yönetim paneli
-      - "5672:5672"    # uygulama bağlantısı
-    restart: always
+      - "15672:15672"         # Management UI
+      - "5672:5672"           # AMQP
+    volumes:
+      - rabbitmq_local_data:/var/lib/rabbitmq
+    networks:
+      - blogapp_local_net
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "check_running"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-    networks:
-      - blogapp_net
+      <<: *common-healthcheck
 
-  # 🔹 Redis Cache
+  # ===========================================
+  # Redis Cache - Development
+  # ===========================================
   redis.cache:
-    image: redis:latest
-    container_name: redis_server
-    restart: always
-    volumes:
-      - redis_data:/data
+    image: redis:7-alpine
+    container_name: blogapp_redis_dev
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 128mb
+      --maxmemory-policy allkeys-lru
     ports:
-      - "6379:6379"
+      - "6379:6379"           # Host'tan erişim için
+    volumes:
+      - redis_local_data:/data
     networks:
-      - blogapp_net
+      - blogapp_local_net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      <<: *common-healthcheck
 
-  # 🔹 Seq (Log Management)
+  # ===========================================
+  # Seq Log Management - Development
+  # ===========================================
   seq:
     image: datalust/seq:latest
-    container_name: seq_logs
-    restart: always
+    container_name: blogapp_seq_dev
+    restart: unless-stopped
     environment:
       ACCEPT_EULA: "Y"
-      SEQ_FIRSTRUN_ADMINPASSWORD: ${SEQ_ADMIN_PASSWORD:-Admin123!}
-    volumes:
-      - seq_data:/data
+      SEQ_FIRSTRUN_ADMINPASSWORD: Admin123!
     ports:
-      - "5341:80"  # Seq web UI
+      - "5341:80"             # Seq Web UI
+    volumes:
+      - seq_local_data:/data
     networks:
-      - blogapp_net
+      - blogapp_local_net
 
-# 🔹 Kalıcı Volume'lar
+  # ===========================================
+  # pgAdmin - Database Management (Opsiyonel)
+  # ===========================================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: blogapp_pgadmin_dev
+    restart: unless-stopped
+    profiles: ["tools"]       # docker-compose --profile tools up -d
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@blogapp.local
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_local_data:/var/lib/pgadmin
+    networks:
+      - blogapp_local_net
+    depends_on:
+      - postgresdb
+
+# ===========================================
+# Volumes - Local Development
+# ===========================================
 volumes:
-  postgres_data:
-  redis_data:
-  seq_data:
+  postgres_local_data:
+    name: blogapp_postgres_local
+  rabbitmq_local_data:
+    name: blogapp_rabbitmq_local
+  redis_local_data:
+    name: blogapp_redis_local
+  seq_local_data:
+    name: blogapp_seq_local
+  pgadmin_local_data:
+    name: blogapp_pgadmin_local
 
-# 🔹 Ortak Network
+# ===========================================
+# Networks - Local Development
+# ===========================================
 networks:
-  blogapp_net:
+  blogapp_local_net:
+    name: blogapp_local_network
     driver: bridge

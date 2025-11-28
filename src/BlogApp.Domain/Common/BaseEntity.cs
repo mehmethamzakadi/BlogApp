@@ -5,8 +5,9 @@ namespace BlogApp.Domain.Common;
 /// <summary>
 /// Tüm domain entity'leri için temel sınıf.
 /// Ortak özellikleri ve domain event yönetimini sağlar.
+/// ISoftDeletable: Soft delete desteği için. Global query filter sadece ISoftDeletable entity'lere uygulanır.
 /// </summary>
-public abstract class BaseEntity : IEntityTimestamps, IHasDomainEvents
+public abstract class BaseEntity : IEntityTimestamps, IHasDomainEvents, ISoftDeletable
 {
     public Guid Id { get; set; }
 

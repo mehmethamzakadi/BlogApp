@@ -1,4 +1,5 @@
 using BlogApp.Application.Abstractions;
+using BlogApp.Application.Common;
 using BlogApp.Domain.Events.UserEvents;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -8,7 +9,7 @@ namespace BlogApp.Application.Features.Users.EventHandlers;
 /// <summary>
 /// Kullanıcı oluşturulduğunda tetiklenen domain event handler
 /// </summary>
-public sealed class UserCreatedEventHandler : INotificationHandler<UserCreatedEvent>
+public sealed class UserCreatedEventHandler : INotificationHandler<DomainEventNotification<UserCreatedEvent>>
 {
     private readonly ILogger<UserCreatedEventHandler> _logger;
     private readonly ICacheService _cacheService;
@@ -21,12 +22,14 @@ public sealed class UserCreatedEventHandler : INotificationHandler<UserCreatedEv
         _cacheService = cacheService;
     }
 
-    public async Task Handle(UserCreatedEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(DomainEventNotification<UserCreatedEvent> notification, CancellationToken cancellationToken)
     {
+        var domainEvent = notification.DomainEvent;
+        
         _logger.LogInformation(
             "Handling UserCreatedEvent for User {UserId} - {Email}",
-            notification.UserId,
-            notification.Email);
+            domainEvent.UserId,
+            domainEvent.Email);
 
         try
         {
@@ -37,13 +40,13 @@ public sealed class UserCreatedEventHandler : INotificationHandler<UserCreatedEv
 
             _logger.LogInformation(
                 "Cache invalidated after user {UserId} creation",
-                notification.UserId);
+                domainEvent.UserId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex,
                 "Error invalidating cache for UserCreatedEvent {UserId}",
-                notification.UserId);
+                domainEvent.UserId);
         }
 
         // Gelecekte eklenebilecek side-effect'ler:

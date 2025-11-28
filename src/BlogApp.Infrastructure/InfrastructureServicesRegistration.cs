@@ -28,7 +28,6 @@ namespace BlogApp.Infrastructure
         public static IServiceCollection AddConfigureInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<TokenOptions>(configuration.GetSection(TokenOptions.SectionName));
-            services.Configure<Application.Options.TelegramOptions>(configuration.GetSection(Application.Options.TelegramOptions.SectionName));
             services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
             services.Configure<PasswordResetOptions>(configuration.GetSection(PasswordResetOptions.SectionName));
             services.Configure<RabbitMqOptions>(configuration.GetSection(RabbitMqOptions.SectionName));
@@ -85,7 +84,6 @@ namespace BlogApp.Infrastructure
 
             services.AddMassTransit(x =>
             {
-                x.AddConsumer<SendTelgeramMessageConsumer>();
                 x.AddConsumer<ActivityLogConsumer>();
 
                 x.UsingRabbitMq((context, cfg) =>
@@ -96,12 +94,6 @@ namespace BlogApp.Infrastructure
                     {
                         hostConfigurator.Username(rabbitOptions.UserName);
                         hostConfigurator.Password(rabbitOptions.Password);
-                    });
-
-                    // Telegram message queue
-                    cfg.ReceiveEndpoint(EventConstants.SendTelegramTextMessageQueue, endpointConfigurator =>
-                    {
-                        endpointConfigurator.ConfigureConsumer<SendTelgeramMessageConsumer>(context);
                     });
 
                     // Activity Log queue with retry and error handling
@@ -128,7 +120,6 @@ namespace BlogApp.Infrastructure
                 });
             });
 
-            services.AddScoped<SendTelgeramMessageConsumer>();
             services.AddScoped<ActivityLogConsumer>();
 
             // Background Services
@@ -153,7 +144,6 @@ namespace BlogApp.Infrastructure
             services.AddScoped<IIntegrationEventConverterStrategy, RoleDeletedIntegrationEventConverter>();
             services.AddScoped<IIntegrationEventConverterStrategy, PermissionsAssignedToRoleIntegrationEventConverter>();
 
-            services.AddSingleton<ITelegramService, TelegramService>();
             services.AddSingleton<ICacheService, RedisCacheService>();
             services.AddTransient<ITokenService, JwtTokenService>();
             services.AddTransient<IMailService, MailService>();

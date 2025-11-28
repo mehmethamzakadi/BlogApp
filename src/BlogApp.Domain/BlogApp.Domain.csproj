@@ -1,17 +1,18 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFramework>net9.0</TargetFramework>
-	<LangVersion>latest</LangVersion>
+    <TargetFramework>net9.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentValidation" Version="12.0.0" />
-    <PackageReference Include="MediatR.Contracts" Version="2.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="9.0.10" />
+    <!-- 
+      UYARI: Bu paketler Clean Architecture prensiplerine göre Domain katmanında olmamalı.
+      Ancak IRepository'de IIncludableQueryable kullanıldığı için şimdilik gerekli.
+      TODO: Repository pattern'i refactor edilerek bu bağımlılıklar kaldırılmalı.
+    -->
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
-    <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="9.0.10" />
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.9" />
   </ItemGroup>
 

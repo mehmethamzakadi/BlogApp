@@ -1,5 +1,6 @@
 using BlogApp.Application.Abstractions;
 using BlogApp.Application.Common.Caching;
+using BlogApp.Application.Common.Constants;
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Repositories;
@@ -21,13 +22,13 @@ public sealed class DeleteCategoryCommandHandler(
     {
         var category = await categoryRepository.GetAsync(predicate: x => x.Id == request.Id, enableTracking: true, cancellationToken: cancellationToken);
         if (category is null)
-            return new ErrorResult("Kategori bilgisi bulunamadı!");
+            return new ErrorResult(ResponseMessages.Category.NotFound);
 
         // ✅ FIXED: Using PostRepository specific method instead of Query() leak on CategoryRepository
         var hasActivePosts = await postRepository.HasActivePostsInCategoryAsync(request.Id, cancellationToken);
 
         if (hasActivePosts)
-            return new ErrorResult("Bu kategoriye ait aktif postlar bulunmaktadır. Önce postları silmeli veya başka kategoriye taşımalısınız.");
+            return new ErrorResult(ResponseMessages.Category.HasActivePosts);
 
         category.Delete();
         categoryRepository.Delete(category);
@@ -41,6 +42,6 @@ public sealed class DeleteCategoryCommandHandler(
             null,
             null);
 
-        return new SuccessResult("Kategori bilgisi başarıyla silindi.");
+        return new SuccessResult(ResponseMessages.Category.Deleted);
     }
 }

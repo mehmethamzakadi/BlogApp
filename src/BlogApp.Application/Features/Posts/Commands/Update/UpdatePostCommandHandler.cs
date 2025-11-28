@@ -1,3 +1,4 @@
+using BlogApp.Application.Common.Constants;
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Repositories;
@@ -16,7 +17,7 @@ public sealed class UpdatePostCommandHandler(
         var entity = await postRepository.GetAsync(x => x.Id == request.Id, enableTracking: true, cancellationToken: cancellationToken);
         if (entity is null)
         {
-            return new ErrorResult("Post bilgisi bulunamadı!");
+            return new ErrorResult(ResponseMessages.Post.NotFound);
         }
 
         // Kategori değiştiriliyorsa geçerliliğini kontrol et
@@ -28,7 +29,7 @@ public sealed class UpdatePostCommandHandler(
 
             if (!categoryExists)
             {
-                return new ErrorResult("Geçersiz kategori seçildi!");
+                return new ErrorResult(ResponseMessages.Post.InvalidCategory);
             }
         }
 
@@ -53,6 +54,6 @@ public sealed class UpdatePostCommandHandler(
         postRepository.Update(entity);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return new SuccessResult("Post bilgisi başarıyla güncellendi.");
+        return new SuccessResult(ResponseMessages.Post.Updated);
     }
 }

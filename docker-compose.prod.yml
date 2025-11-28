@@ -1,115 +1,318 @@
-version: "3.8"
+# ============================================
+# BlogApp - Production Configuration
+# ============================================
+# ÖNEMLİ: Production ortamında .env dosyası ZORUNLUDUR!
+#
+# Kullanım:
+#   1. .env dosyasını oluşturun: cp .env.example .env
+#   2. .env dosyasındaki tüm değerleri doldurun
+#   3. docker-compose -f docker-compose.prod.yml up -d
+#   4. docker-compose -f docker-compose.prod.yml logs -f
+#
+# Ölçeklendirme:
+#   docker-compose -f docker-compose.prod.yml up -d --scale blogapp.api=3
+# ============================================
+
+x-common-healthcheck: &common-healthcheck
+  interval: 30s
+  timeout: 10s
+  retries: 5
+  start_period: 30s
+
+x-logging: &logging
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "10m"
+      max-file: "3"
 
 services:
+  # ===========================================
+  # Nginx Reverse Proxy
+  # ===========================================
+  nginx:
+    image: nginx:alpine
+    container_name: blogapp_nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./deploy/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      # SSL sertifikaları için (Let's Encrypt kullanılıyorsa)
+      # - ./deploy/nginx/ssl:/etc/nginx/ssl:ro
+      # - ./deploy/nginx/certbot:/var/www/certbot:ro
+    depends_on:
+      blogapp.api:
+        condition: service_healthy
+    networks:
+      - blogapp_prod_net
+    <<: *logging
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      <<: *common-healthcheck
+
+  # ===========================================
+  # API Service - Production
+  # ===========================================
   blogapp.api:
-    image: ${DOCKER_REGISTRY-}blogappapi
+    image: ${DOCKER_REGISTRY:-}blogappapi:${TAG:-latest}
     build:
       context: .
       dockerfile: src/BlogApp.API/Dockerfile
+      args:
+        - CONFIGURATION=Release
+    container_name: blogapp_api_prod
+    restart: always
+    expose:
+      - "8080"                # Sadece internal network'ten erişilebilir
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://0.0.0.0:8080
-      ConnectionStrings__BlogAppPostgreConnectionString: "Host=postgresdb;Port=5432;Database=${POSTGRES_DB:-BlogAppDb};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres};Pooling=true;Minimum Pool Size=10;Maximum Pool Size=200;Connection Idle Lifetime=300;Connection Pruning Interval=10;"
-      ConnectionStrings__RedisCache: "redis_server:6379,abortConnect=false,connectTimeout=5000,syncTimeout=5000,connectRetry=3,keepAlive=60"
+      # Database - Production ayarları
+      ConnectionStrings__BlogAppPostgreConnectionString: >-
+        Host=postgresdb;
+        Port=5432;
+        Database=${POSTGRES_DB};
+        Username=${POSTGRES_USER};
+        Password=${POSTGRES_PASSWORD};
+        Pooling=true;
+        Minimum Pool Size=10;
+        Maximum Pool Size=100;
+        Connection Idle Lifetime=300;
+        Connection Pruning Interval=10;
+        Command Timeout=30;
+        Timeout=15;
+        Include Error Detail=false
+      # Redis - Production ayarları (service name: redis.cache)
+      ConnectionStrings__RedisCache: >-
+        redis.cache:6379,
+        password=${REDIS_PASSWORD},
+        abortConnect=false,
+        connectTimeout=5000,
+        syncTimeout=5000,
+        connectRetry=3,
+        keepAlive=60,
+        ssl=false
+      # RabbitMQ
       RabbitMQOptions__HostName: rabbitmq
-      RabbitMQOptions__UserName: ${RABBITMQ_DEFAULT_USER:-blogapp}
-      RabbitMQOptions__Password: ${RABBITMQ_DEFAULT_PASS:-supersecret}
+      RabbitMQOptions__Port: 5672
+      RabbitMQOptions__UserName: ${RABBITMQ_DEFAULT_USER}
+      RabbitMQOptions__Password: ${RABBITMQ_DEFAULT_PASS}
+      # JWT Security
+      TokenOptions__SecurityKey: ${TOKEN_SECURITY_KEY}
+      # Seq Logging
+      Serilog__WriteTo__1__Args__serverUrl: http://seq:80
     depends_on:
       postgresdb:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
       redis.cache:
-        condition: service_started
+        condition: service_healthy
     networks:
-      - blogapp_net
-    ports:
-      - "8080:8080"
-    restart: always
+      - blogapp_prod_net
+    <<: *logging
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      <<: *common-healthcheck
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 256M
 
+  # ===========================================
+  # PostgreSQL Database - Production
+  # ===========================================
   postgresdb:
-    container_name: postgresdb
-    image: postgres:16
+    image: postgres:16-alpine
+    container_name: blogapp_postgres_prod
+    restart: always
+    # ÖNEMLİ: Production'da port dışarıya AÇILMAMALI!
+    # ports:
+    #   - "5432:5432"         # Sadece gerekirse VPN üzerinden erişim
+    expose:
+      - "5432"
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-BlogAppDb}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGDATA: /var/lib/postgresql/data/pgdata
     command:
       - "postgres"
       - "-c"
       - "max_connections=300"
       - "-c"
-      - "shared_buffers=256MB"
+      - "shared_buffers=512MB"
       - "-c"
-      - "effective_cache_size=1GB"
+      - "effective_cache_size=2GB"
       - "-c"
-      - "work_mem=4MB"
+      - "work_mem=8MB"
+      - "-c"
+      - "maintenance_work_mem=256MB"
+      - "-c"
+      - "checkpoint_completion_target=0.9"
+      - "-c"
+      - "wal_buffers=32MB"
+      - "-c"
+      - "default_statistics_target=100"
+      - "-c"
+      - "random_page_cost=1.1"
+      - "-c"
+      - "effective_io_concurrency=200"
+      - "-c"
+      - "log_min_duration_statement=1000"  # 1 saniyeden uzun sorguları logla
+      - "-c"
+      - "log_checkpoints=on"
+      - "-c"
+      - "log_connections=on"
+      - "-c"
+      - "log_disconnections=on"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5435:5432"
-    restart: always
+      - postgres_prod_data:/var/lib/postgresql/data
+    networks:
+      - blogapp_prod_net
+    <<: *logging
     healthcheck:
-      test:
-        - CMD-SHELL
-        - PGPASSWORD=$${POSTGRES_PASSWORD:-postgres} pg_isready -U $${POSTGRES_USER:-postgres} -d $${POSTGRES_DB:-BlogAppDb} -h localhost
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 5s
-    networks:
-      - blogapp_net
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      <<: *common-healthcheck
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
 
+  # ===========================================
+  # RabbitMQ - Production
+  # ===========================================
   rabbitmq:
-    image: rabbitmq:3-management
-    container_name: rabbitmq
+    image: rabbitmq:3-management-alpine
+    container_name: blogapp_rabbitmq_prod
     hostname: rabbitmq
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-blogapp}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-supersecret}
-    ports:
-      - "15672:15672" # web arayüzü (isteğe bağlı)
-      - "5672:5672"   # uygulama bağlantısı
     restart: always
+    # ÖNEMLİ: Production'da management portu dışarıya AÇILMAMALI!
+    # ports:
+    #   - "15672:15672"       # Sadece gerekirse VPN üzerinden erişim
+    expose:
+      - "5672"
+      - "15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    volumes:
+      - rabbitmq_prod_data:/var/lib/rabbitmq
     networks:
-      - blogapp_net
+      - blogapp_prod_net
+    <<: *logging
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "check_running"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-  
-  redis.cache:
-    image: redis:latest
-    container_name: redis_server
-    restart: always
-    volumes:
-      - redis_data:/data
-    ports:
-      - "6379:6379"
-    networks:
-      - blogapp_net
+      <<: *common-healthcheck
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
 
+  # ===========================================
+  # Redis Cache - Production (Password Protected)
+  # ===========================================
+  redis.cache:
+    image: redis:7-alpine
+    container_name: blogapp_redis_prod
+    restart: always
+    # ÖNEMLİ: Production'da port dışarıya AÇILMAMALI!
+    expose:
+      - "6379"
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD}
+      --appendonly yes
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --tcp-keepalive 300
+      --timeout 0
+    volumes:
+      - redis_prod_data:/data
+    networks:
+      - blogapp_prod_net
+    <<: *logging
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      <<: *common-healthcheck
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 768M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  # ===========================================
+  # Seq Log Management - Production
+  # ===========================================
   seq:
     image: datalust/seq:latest
-    container_name: seq_logs
+    container_name: blogapp_seq_prod
     restart: always
+    # ÖNEMLİ: Production'da port dışarıya AÇILMAMALI!
+    # Nginx üzerinden erişim sağlanabilir
+    expose:
+      - "80"
     environment:
       ACCEPT_EULA: "Y"
-      SEQ_FIRSTRUN_ADMINPASSWORD: ${SEQ_ADMIN_PASSWORD:-Admin123!}
-      BASE_URI: ${SEQ_BASE_URI:-http://localhost:5341}
+      SEQ_FIRSTRUN_ADMINPASSWORD: ${SEQ_ADMIN_PASSWORD}
+      SEQ_CACHE_SYSTEMRAMTARGET: 256000000
     volumes:
-      - seq_data:/data
-    ports:
-      - "5341:80"  # Seq web UI
+      - seq_prod_data:/data
     networks:
-      - blogapp_net
-      
-volumes:
-  postgres_data:
-  redis_data:
-  seq_data:
+      - blogapp_prod_net
+    <<: *logging
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
 
+# ===========================================
+# Volumes - Production (Named Volumes)
+# ===========================================
+volumes:
+  postgres_prod_data:
+    name: blogapp_postgres_prod
+    driver: local
+  rabbitmq_prod_data:
+    name: blogapp_rabbitmq_prod
+    driver: local
+  redis_prod_data:
+    name: blogapp_redis_prod
+    driver: local
+  seq_prod_data:
+    name: blogapp_seq_prod
+    driver: local
+
+# ===========================================
+# Networks - Production (Isolated Network)
+# ===========================================
 networks:
-  blogapp_net:
+  blogapp_prod_net:
+    name: blogapp_prod_network
     driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16

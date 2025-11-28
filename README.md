@@ -1,223 +1,418 @@
 # BlogApp
 
-BlogApp; ASP.NET Core tabanlı modern bir blog uygulaması olup, Clean Architecture prensiplerine göre geliştirilmiş REST API ve React tabanlı web client'ı içerir.
+<div align="center">
 
-## 🏗️ Proje Yapısı
+![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
+![React](https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-Latest-DC382D?style=for-the-badge&logo=redis&logoColor=white)
+![RabbitMQ](https://img.shields.io/badge/RabbitMQ-3-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 
-### Backend (ASP.NET Core 9.0)
-- **BlogApp.API** - REST API katmanı
-- **BlogApp.Application** - İş mantığı ve CQRS implementasyonu (MediatR)
-- **BlogApp.Domain** - Domain entities ve business rules
-- **BlogApp.Infrastructure** - External servisler (JWT, Email, RabbitMQ, Redis)
-- **BlogApp.Persistence** - Veritabanı operasyonları (EF Core + PostgreSQL)
+**Modern, ölçeklenebilir ve güvenli blog platformu**
 
-### Frontend (React + TypeScript)
-- **blogapp-client** - Modern React SPA (Vite + TailwindCSS + shadcn/ui)
+[Özellikler](#-özellikler) •
+[Mimari](#-mimari) •
+[Kurulum](#-kurulum) •
+[API Dokümantasyonu](#-api-dokümantasyonu) •
+[Geliştirme](#-geliştirme)
 
-## 🚀 Projeyi Çalıştırma
+</div>
 
-### Sunucu (Backend API)
-`src/BlogApp.API` klasöründen REST API'yi başlatın:
+---
+
+## 📋 Genel Bakış
+
+BlogApp, **Clean Architecture** ve **Domain-Driven Design (DDD)** prensiplerine dayalı, kurumsal düzeyde bir blog yönetim sistemidir. Modern teknolojiler ve en iyi pratikler kullanılarak geliştirilmiştir.
+
+## ✨ Özellikler
+
+### Backend
+- 🏗️ **Clean Architecture** - Katmanlı mimari ile sürdürülebilir kod
+- 📦 **DDD (Domain-Driven Design)** - Aggregate Root, Value Objects, Domain Events
+- 🔄 **CQRS Pattern** - MediatR ile Command/Query ayrımı
+- 🔐 **JWT Authentication** - Access Token & Refresh Token rotation
+- 🛡️ **Permission-Based Authorization** - Granüler yetkilendirme sistemi
+- 📬 **Outbox Pattern** - Güvenilir mesaj iletimi (RabbitMQ)
+- ⚡ **Redis Caching** - Dağıtık önbellek desteği
+- 📊 **Activity Logging** - Detaylı aktivite takibi
+- 🔒 **Rate Limiting** - DDoS koruması
+- 📝 **Serilog** - Yapılandırılmış loglama (Console, File, PostgreSQL, Seq)
+
+### Frontend
+- ⚛️ **React 18** - Modern UI framework
+- 📘 **TypeScript** - Tip güvenli geliştirme
+- 🎨 **Tailwind CSS** - Utility-first CSS framework
+- 🔄 **TanStack Query** - Server state management
+- 🐻 **Zustand** - Client state management
+- 📝 **React Hook Form + Zod** - Form validation
+- 🚀 **Vite** - Hızlı build tool
+
+### DevOps
+- 🐳 **Docker & Docker Compose** - Container orchestration
+- 🔄 **CI/CD Ready** - Pipeline hazır yapı
+- 📈 **Seq Integration** - Merkezi log yönetimi
+
+---
+
+## 🏛️ Mimari
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        Presentation Layer                        │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  │
+│  │   BlogApp.API   │  │  React Client   │  │    Swagger UI   │  │
+│  └────────┬────────┘  └────────┬────────┘  └─────────────────┘  │
+└───────────┼────────────────────┼────────────────────────────────┘
+            │                    │
+┌───────────▼────────────────────▼────────────────────────────────┐
+│                       Application Layer                          │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │              BlogApp.Application                         │    │
+│  │  • Commands & Queries (CQRS)                            │    │
+│  │  • Validators (FluentValidation)                        │    │
+│  │  • Behaviors (Logging, Validation, Caching)             │    │
+│  │  • AutoMapper Profiles                                  │    │
+│  └─────────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────┘
+            │
+┌───────────▼─────────────────────────────────────────────────────┐
+│                         Domain Layer                             │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │                BlogApp.Domain                            │    │
+│  │  • Entities (User, Post, Category, Role, etc.)          │    │
+│  │  • Value Objects (Email, UserName)                      │    │
+│  │  • Domain Events                                        │    │
+│  │  • Repository Interfaces                                │    │
+│  │  • Domain Services                                      │    │
+│  └─────────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────┘
+            │
+┌───────────▼─────────────────────────────────────────────────────┐
+│                     Infrastructure Layer                         │
+│  ┌──────────────────────┐  ┌──────────────────────┐             │
+│  │ BlogApp.Infrastructure│  │ BlogApp.Persistence  │             │
+│  │ • JWT Token Service   │  │ • EF Core DbContext  │             │
+│  │ • Email Service       │  │ • Repositories       │             │
+│  │ • Redis Cache         │  │ • Unit of Work       │             │
+│  │ • RabbitMQ/MassTransit│  │ • Migrations         │             │
+│  │ • Background Services │  │ • Seeders            │             │
+│  └──────────────────────┘  └──────────────────────┘             │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Klasör Yapısı
+
+```
+BlogApp/
+├── src/
+│   ├── BlogApp.API/                 # REST API & Controllers
+│   │   ├── Controllers/
+│   │   ├── Middlewares/
+│   │   ├── Filters/
+│   │   └── Configuration/
+│   ├── BlogApp.Application/         # Business Logic
+│   │   ├── Features/
+│   │   │   ├── Posts/
+│   │   │   ├── Categories/
+│   │   │   ├── Users/
+│   │   │   ├── Roles/
+│   │   │   └── Auths/
+│   │   ├── Behaviors/
+│   │   └── Abstractions/
+│   ├── BlogApp.Domain/              # Core Domain
+│   │   ├── Entities/
+│   │   ├── ValueObjects/
+│   │   ├── Events/
+│   │   ├── Repositories/
+│   │   └── Services/
+│   ├── BlogApp.Infrastructure/      # External Services
+│   │   ├── Services/
+│   │   ├── Consumers/
+│   │   └── Authorization/
+│   └── BlogApp.Persistence/         # Data Access
+│       ├── Contexts/
+│       ├── Repositories/
+│       ├── Configurations/
+│       └── Migrations/
+├── clients/
+│   └── blogapp-client/              # React Frontend
+│       ├── src/
+│       │   ├── components/
+│       │   ├── features/
+│       │   ├── hooks/
+│       │   ├── pages/
+│       │   └── stores/
+│       └── ...
+├── tests/
+│   ├── Domain.UnitTests/
+│   └── Application.UnitTests/
+├── docs/                            # Documentation
+└── deploy/                          # Docker & Nginx configs
+```
+
+---
+
+## 🚀 Kurulum
+
+### Gereksinimler
+
+- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+- [Node.js 20+](https://nodejs.org/)
+- [Docker & Docker Compose](https://www.docker.com/)
+- [PostgreSQL 16](https://www.postgresql.org/) (Docker ile otomatik)
+- [Redis](https://redis.io/) (Docker ile otomatik)
+- [RabbitMQ](https://www.rabbitmq.com/) (Docker ile otomatik)
+
+### Docker ile Hızlı Başlangıç
+
+```bash
+# Repository'yi klonla
+git clone https://github.com/mehmethamzakadi/BlogApp.git
+cd BlogApp
+
+# Tüm servisleri başlat
+docker-compose up -d
+
+# Logları izle
+docker-compose logs -f blogapp.api
+```
+
+### Manuel Kurulum
+
+#### 1. Veritabanı ve Servisleri Başlat
+
+```bash
+# Sadece bağımlılık servislerini başlat
+docker-compose up -d postgresdb redis.cache rabbitmq seq
+```
+
+#### 2. Backend'i Çalıştır
+
 ```bash
 cd src/BlogApp.API
+
+# User secrets ayarla (ilk kez)
+dotnet user-secrets set "ConnectionStrings:BlogAppPostgreConnectionString" "Host=localhost;Port=5435;Database=BlogAppDb;Username=postgres;Password=postgres"
+dotnet user-secrets set "ConnectionStrings:RedisCache" "localhost:6379"
+dotnet user-secrets set "TokenOptions:SecurityKey" "your-super-secret-key-here-at-least-32-chars!"
+
+# Uygulamayı çalıştır
 dotnet run
 ```
-Varsayılan launch profili `https://localhost:7285` ve `http://localhost:5285` adreslerini dinler.
 
-> **Not:** React istemcisi `.env.local` dosyasında `VITE_API_URL=http://localhost:6060/api` kullandığı için API'yi 6060 portunda çalıştırmanız gerekiyorsa:
-> - `dotnet run --urls http://localhost:6060` komutunu verin **veya**
-> - Docker Compose ile `blogapp.api` servisini başlatın (otomatik olarak `http://localhost:6060` portunu map eder).
+#### 3. Frontend'i Çalıştır
 
-### React İstemci
-`clients/blogapp-client` klasöründen React uygulamasını başlatın:
 ```bash
 cd clients/blogapp-client
+
+# Bağımlılıkları yükle
 npm install
+
+# .env.local dosyası oluştur
+echo "VITE_API_URL=http://localhost:5000/api" > .env.local
+
+# Development server başlat
 npm run dev
 ```
 
-İstemci varsayılan olarak `http://localhost:5173` üzerinde çalışır.
+### Environment Variables
 
-## 🐳 Docker ile Çalıştırma
+| Değişken | Açıklama | Varsayılan |
+|----------|----------|------------|
+| `ASPNETCORE_ENVIRONMENT` | Ortam | `Development` |
+| `ConnectionStrings__BlogAppPostgreConnectionString` | PostgreSQL bağlantısı | - |
+| `ConnectionStrings__RedisCache` | Redis bağlantısı | - |
+| `TokenOptions__SecurityKey` | JWT secret key | - |
+| `RabbitMQOptions__HostName` | RabbitMQ host | `localhost` |
+| `RabbitMQOptions__UserName` | RabbitMQ kullanıcı | `blogapp` |
+| `RabbitMQOptions__Password` | RabbitMQ şifre | - |
 
-Projeyi Docker Compose ile hem lokal geliştirme ortamında hem de üretim sunucusunda çalıştırabilirsiniz.
+---
 
-### Lokal Geliştirme
-İmajları oluşturup konteynerleri başlatmak için:
-```bash
-docker compose -f docker-compose.yml -f docker-compose.local.yml up --build
+## 📚 API Dokümantasyonu
+
+### Endpoints
+
+API başladığında Scalar UI üzerinden dokümantasyona erişebilirsiniz:
+
+```
+http://localhost:5000/scalar/v1
 ```
 
-**Servisler:**
-- **API:** `http://localhost:6060`
-- **React Client:** `http://localhost:5173`
-- **PostgreSQL:** `localhost:5435` (User: postgres, Password: postgres, DB: BlogAppDb)
-- **RabbitMQ Management:** `http://localhost:15672` (User: blogapp, Password: supersecret)
-- **Redis:** `localhost:6379`
-- **Seq (Log Viewer):** `http://localhost:5341`
+### Ana Endpoint'ler
 
-Konteynerleri durdurmak için:
+| Endpoint | Method | Açıklama | Auth |
+|----------|--------|----------|------|
+| `/api/auth/login` | POST | Kullanıcı girişi | ❌ |
+| `/api/auth/register` | POST | Kullanıcı kaydı | ❌ |
+| `/api/auth/refresh-token` | POST | Token yenileme | ❌ |
+| `/api/post` | GET | Post listesi | ❌ |
+| `/api/post/{id}` | GET | Post detayı | ❌ |
+| `/api/post` | POST | Post oluştur | ✅ |
+| `/api/post/{id}` | PUT | Post güncelle | ✅ |
+| `/api/post/{id}` | DELETE | Post sil | ✅ |
+| `/api/category` | GET | Kategori listesi | ❌ |
+| `/api/user` | GET | Kullanıcı listesi | ✅ |
+| `/api/role` | GET | Rol listesi | ✅ |
+
+### Örnek İstekler
+
+#### Login
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.local.yml down
+curl -X POST http://localhost:5000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "admin@blogapp.com", "password": "Admin123!"}'
 ```
 
-### Üretim Ortamı (Docker + Nginx)
-Servisleri arka planda başlatmak için:
+#### Post Oluşturma
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
-```
-
-**Yapılandırma:**
-- API konteyneri dahili Docker ağında 8080 portunda çalışır
-- Nginx reverse proxy dış dünyaya 8080 portunu açar ve trafiği API'ye yönlendirir
-- `ASPNETCORE_ENVIRONMENT` otomatik olarak `Production` ayarlanır
-- Seq servisi `http://seq:80` adresinden erişilebilir
-
-Servisleri durdurmak için:
-```bash
-docker compose -f docker-compose.yml -f docker-compose.prod.yml down
-```
-
-### Ortam Değişkenleri ve Docker Volumes
-
-**Temel Yapılandırmalar:**
-- `ASPNETCORE_ENVIRONMENT`: `Development` (lokal) / `Production` (üretim)
-- `POSTGRES_DB`: Veritabanı adı (varsayılan: blogappdb)
-- `POSTGRES_USER`: PostgreSQL kullanıcı adı (varsayılan: postgres)
-- `POSTGRES_PASSWORD`: PostgreSQL şifresi (varsayılan: postgres)
-
-**Docker Volumes:**
-Kalıcı veriler aşağıdaki volume'larda saklanır:
-- `postgres_data`: PostgreSQL veritabanı
-- `rabbitmq_data`: RabbitMQ mesaj kuyruğu
-- `redis_data`: Redis cache
-- `seq_data`: Seq log verileri
-
-**⚠️ RabbitMQ Credentials Değiştirme:**
-RabbitMQ kullanıcı adı/şifresini değiştirirseniz, mevcut volume'daki eski kimlik bilgileri ile çakışma yaşanabilir. Bu durumda volume'u silip yeniden oluşturun:
-```bash
-docker compose down
-docker volume rm blogapp_rabbitmq_data
-docker compose up --build
+curl -X POST http://localhost:5000/api/post \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {token}" \
+  -d '{
+    "title": "Yeni Post",
+    "body": "<p>İçerik</p>",
+    "summary": "Özet",
+    "thumbnail": "/uploads/image.jpg",
+    "categoryId": "guid",
+    "isPublished": true
+  }'
 ```
 
 ---
 
-## 📊 Logging & Monitoring Yapısı
+## 🛠️ Geliştirme
 
-BlogApp **3-katmanlı loglama mimarisi** kullanır:
+### Geliştirme Ortamı Kurulumu
 
-### 1. **File Logs** (`logs/blogapp-*.txt`)
-- **Amaç:** Development & debugging
-- **Seviye:** Debug, Info, Warning, Error, Critical
-- **Saklama:** 31 gün
-- **Kullanım:** Hızlı hata ayıklama, stack trace inceleme
+```bash
+# Repository'yi klonla
+git clone https://github.com/mehmethamzakadi/BlogApp.git
+cd BlogApp
 
-### 2. **Structured Logs** (PostgreSQL `Logs` tablosu)
-- **Amaç:** Production monitoring & analytics
-- **Seviye:** Information ve üzeri (Warning, Error, Critical)
-- **Saklama:** 90 gün (otomatik temizleme)
-- **Kullanım:** SQL sorguları ile log analizi, performans metrikleri
+# Solution'ı restore et
+dotnet restore
 
-### 3. **Activity Logs** (PostgreSQL `ActivityLogs` tablosu)
-- **Amaç:** Compliance & audit trail
-- **Kapsam:** Kullanıcı aksiyonları (create/update/delete)
-- **Saklama:** Süresiz
-- **Kullanım:** GDPR/SOC2 uyumluluk, güvenlik soruşturmaları
+# Servisleri başlat
+docker-compose -f docker-compose.local.yml up -d
 
-### Monitoring Araçları
-- **Seq** (`http://localhost:5341`) - Gelişmiş log görselleştirme ve analiz
-- **PostgreSQL** - SQL sorguları ile detaylı log analizi
-- **File Logs** - CLI araçları (tail, grep) ile hızlı debug
-
-**📖 Detaylı Dokümantasyon:**
-- [DEVELOPER_GUIDE.md](docs/DEVELOPER_GUIDE.md) - Kapsamlı geliştirici kılavuzu
-
----
-
-## 🛠️ Teknoloji Stack
-
-### Backend
-- **Framework:** ASP.NET Core 9.0
-- **ORM:** Entity Framework Core 9.0
-- **Database:** PostgreSQL 16 (latest stable)
-- **Cache:** Redis
-- **Message Queue:** RabbitMQ
-- **Authentication:** JWT Bearer
-- **Validation:** FluentValidation
-- **CQRS:** MediatR
-- **Logging:** Serilog (File + PostgreSQL + Seq)
-- **Rate Limiting:** AspNetCoreRateLimit
-- **API Documentation:** Scalar (OpenAPI 3.0)
-
-### Frontend
-- **Framework:** React 18 + TypeScript
-- **Build Tool:** Vite
-- **UI Library:** TailwindCSS + shadcn/ui
-- **Icons:** Lucide React
-- **Routing:** React Router v7
-- **State Management:** Zustand
-- **HTTP Client:** Axios
-- **Data Fetching:** TanStack Query
-- **Form Validation:** React Hook Form + Zod
-
-### DevOps
-- **Containerization:** Docker + Docker Compose
-- **Reverse Proxy:** Nginx
-- **Log Monitoring:** Seq
-
----
-
-## 🔐 Yetkilendirme & Güvenlik
-
-BlogApp **permission-based authorization** sistemi kullanır:
-
-### Özellikler
-- ✅ **JWT-based Authentication** - Güvenli token tabanlı kimlik doğrulama
-- ✅ **Permission-based Authorization** - Granüler yetki kontrolü
-- ✅ **Route Guards** - Sayfa seviyesinde erişim kontrolü
-- ✅ **UI Guards** - Component/buton seviyesinde görünürlük kontrolü
-- ✅ **403 Forbidden Page** - Kullanıcı dostu erişim engelleme sayfası
-- ✅ **Dynamic Sidebar** - Kullanıcı yetkilerine göre menü filtreleme
-
-### Kullanım
-```typescript
-// Route koruması
-<ProtectedRoute requiredPermission={Permissions.UsersViewAll}>
-  <UsersPage />
-</ProtectedRoute>
-
-// UI element koruması
-<PermissionGuard requiredPermission={Permissions.UsersCreate}>
-  <Button>Yeni Kullanıcı</Button>
-</PermissionGuard>
-
-// Hook kullanımı
-const { hasPermission } = usePermission();
-if (hasPermission(Permissions.PostsDelete)) {
-  // İşlem yap
-}
+# API'yi çalıştır
+cd src/BlogApp.API
+dotnet watch run
 ```
 
-**📖 Detaylı Dokümantasyon:**
-- [DEVELOPER_GUIDE.md](docs/DEVELOPER_GUIDE.md) - Permission sistemi ve diğer tüm detaylar
+### Migration Oluşturma
+
+```bash
+cd src/BlogApp.API
+
+# Yeni migration oluştur
+dotnet ef migrations add MigrationName -p ../BlogApp.Persistence -o Migrations/PostgreSql
+
+# Migration uygula
+dotnet ef database update -p ../BlogApp.Persistence
+```
+
+### Testleri Çalıştırma
+
+```bash
+# Tüm testleri çalıştır
+dotnet test
+
+# Coverage raporu ile
+dotnet test --collect:"XPlat Code Coverage"
+```
+
+### Kod Kalitesi
+
+```bash
+# Format kontrolü
+dotnet format --verify-no-changes
+
+# Analyzer çalıştır
+dotnet build /p:TreatWarningsAsErrors=true
+```
 
 ---
 
-## 📚 Dokümantasyon
+## 📊 Monitoring
 
-- [DEVELOPER_GUIDE.md](docs/DEVELOPER_GUIDE.md) - Kapsamlı geliştirici kılavuzu (Logging, Permission, Outbox Pattern, Best Practices)
-- [PERFORMANCE_OPTIMIZATION.md](docs/PERFORMANCE_OPTIMIZATION.md) - Performans optimizasyonları ve ölçüm yöntemleri
-- [LOAD_TEST_GUIDE.md](LOAD_TEST_GUIDE.md) - 500-2000 kullanıcı load test kılavuzu
-- [OPTIMIZATION_CHANGES.md](OPTIMIZATION_CHANGES.md) - Yapılan optimizasyon değişiklikleri
-- [CONFIGURATION_GUIDE.md](CONFIGURATION_GUIDE.md) - Konfigürasyon kılavuzu (Development/Production)
-- [ANALYSIS.md](docs/ANALYSIS.md) - Kod tabanı analizi ve iyileştirme önerileri
-- [tests/README.md](tests/README.md) - Test dokümantasyonu
+### Seq Log Viewer
+
+```
+http://localhost:5341
+```
+
+Varsayılan şifre: `Admin123!`
+
+### RabbitMQ Management
+
+```
+http://localhost:15672
+```
+
+Kullanıcı/Şifre: `blogapp/supersecret`
+
+### Redis Commander (Opsiyonel)
+
+```bash
+docker run -d -p 8081:8081 --name redis-commander \
+  -e REDIS_HOSTS=local:redis.cache:6379 \
+  rediscommander/redis-commander
+```
 
 ---
 
-## 📝 Lisans
+## 🔐 Güvenlik
 
-Bu proje eğitim amaçlı geliştirilmiştir.
+- **JWT Token Rotation:** Access ve Refresh token mekanizması
+- **Password Hashing:** PBKDF2 ile güvenli şifre saklama
+- **Rate Limiting:** IP bazlı istek sınırlama
+- **CORS Policy:** Yapılandırılabilir origin kontrolü
+- **SQL Injection:** Parametreli sorgular (EF Core)
+- **XSS Protection:** Input validation ve sanitization
 
-````
+---
+
+## 🤝 Katkıda Bulunma
+
+1. Fork yapın
+2. Feature branch oluşturun (`git checkout -b feature/amazing-feature`)
+3. Commit yapın (`git commit -m 'feat: Add amazing feature'`)
+4. Push yapın (`git push origin feature/amazing-feature`)
+5. Pull Request açın
+
+### Commit Mesajları
+
+[Conventional Commits](https://www.conventionalcommits.org/) standardını kullanın:
+
+- `feat:` Yeni özellik
+- `fix:` Bug düzeltmesi
+- `docs:` Dokümantasyon
+- `refactor:` Kod iyileştirmesi
+- `test:` Test ekleme
+- `chore:` Bakım işleri
+
+---
+
+## 📄 Lisans
+
+Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICENSE) dosyasına bakın.
+
+---
+
+## 📞 İletişim
+
+- **Proje Sahibi:** Mehmet Hamza Kadi
+- **GitHub:** [@mehmethamzakadi](https://github.com/mehmethamzakadi)
+
+---
+
+<div align="center">
+
+**BlogApp** ile ❤️ yapıldı
+
+[⬆ Başa Dön](#blogapp)
+
+</div>

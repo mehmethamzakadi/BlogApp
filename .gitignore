@@ -373,4 +373,14 @@ FodyWeavers.xsd
 # Uploaded files
 **/wwwroot/uploads/
 
+# IDE
 .idea
+
+# Environment files (sensitive data)
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# User Secrets
+secrets.json

@@ -1,5 +1,6 @@
 using BlogApp.Application.Abstractions;
 using BlogApp.Application.Common.Caching;
+using BlogApp.Application.Common.Constants;
 using BlogApp.Application.Features.Categories.Queries.GetById;
 using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
@@ -25,7 +26,7 @@ public sealed class CreateCategoryCommandHandler(
 
         if (categoryExists)
         {
-            return new ErrorResult("Bu kategori adı zaten mevcut!");
+            return new ErrorResult(ResponseMessages.Category.AlreadyExists);
         }
 
         var category = Category.Create(request.Name);
@@ -44,6 +45,6 @@ public sealed class CreateCategoryCommandHandler(
             null,
             null);
 
-        return new SuccessResult("Kategori bilgisi başarıyla eklendi.");
+        return new SuccessResult(ResponseMessages.Category.Created);
     }
 }

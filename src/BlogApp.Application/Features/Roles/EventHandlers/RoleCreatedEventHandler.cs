@@ -1,4 +1,5 @@
 using BlogApp.Application.Abstractions;
+using BlogApp.Application.Common;
 using BlogApp.Domain.Events.RoleEvents;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -8,7 +9,7 @@ namespace BlogApp.Application.Features.Roles.EventHandlers;
 /// <summary>
 /// Rol oluşturulduğunda tetiklenen domain event handler
 /// </summary>
-public sealed class RoleCreatedEventHandler : INotificationHandler<RoleCreatedEvent>
+public sealed class RoleCreatedEventHandler : INotificationHandler<DomainEventNotification<RoleCreatedEvent>>
 {
     private readonly ILogger<RoleCreatedEventHandler> _logger;
     private readonly ICacheService _cacheService;
@@ -21,12 +22,14 @@ public sealed class RoleCreatedEventHandler : INotificationHandler<RoleCreatedEv
         _cacheService = cacheService;
     }
 
-    public async Task Handle(RoleCreatedEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(DomainEventNotification<RoleCreatedEvent> notification, CancellationToken cancellationToken)
     {
+        var domainEvent = notification.DomainEvent;
+        
         _logger.LogInformation(
             "Handling RoleCreatedEvent for Role {RoleId} - {RoleName}",
-            notification.RoleId,
-            notification.RoleName);
+            domainEvent.RoleId,
+            domainEvent.RoleName);
 
         try
         {
@@ -36,13 +39,13 @@ public sealed class RoleCreatedEventHandler : INotificationHandler<RoleCreatedEv
 
             _logger.LogInformation(
                 "Cache invalidated after role {RoleId} creation",
-                notification.RoleId);
+                domainEvent.RoleId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex,
                 "Error invalidating cache for RoleCreatedEvent {RoleId}",
-                notification.RoleId);
+                domainEvent.RoleId);
         }
     }
 }
