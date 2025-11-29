@@ -12,7 +12,7 @@ import {
 } from './types';
 
 export async function fetchUsers(filters: UserTableFilters): Promise<UserListResponse> {
-  const searchFields = ['FirstName', 'LastName', 'Email', 'UserName'];
+  const searchFields = ['Email', 'UserName'];
   const response = await api.post('/user/search', buildMultiFieldDataGridPayload(filters, searchFields));
   return normalizePaginatedResponse<User>(response.data);
 }

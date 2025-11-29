@@ -187,6 +187,9 @@ public sealed class UnitOfWork : IUnitOfWork
 
     public IEnumerable<IDomainEvent> GetDomainEvents()
     {
+        // Tüm track edilen entity'lerden domain event'leri topla
+        // EntityState'e bakmadan (Unchanged, Modified, Added, Deleted hepsi dahil)
+        // Çünkü entity'de property değişikliği olmasa bile domain event eklenebilir
         return _context.ChangeTracker
             .Entries<BaseEntity>()
             .Where(e => e.Entity.DomainEvents.Any())

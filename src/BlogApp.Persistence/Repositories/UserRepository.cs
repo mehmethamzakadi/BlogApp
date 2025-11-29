@@ -65,4 +65,46 @@ public sealed class UserRepository : EfRepositoryBase<User, BlogAppDbContext>, I
             .Select(ur => ur.RoleId)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<List<UserRole>> GetAllUserRolesAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        return await Context.UserRoles
+            .IgnoreQueryFilters()
+            .Where(ur => ur.UserId == userId)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task SoftDeleteUserRolesAsync(List<UserRole> userRoles, CancellationToken cancellationToken = default)
+    {
+        foreach (var userRole in userRoles)
+        {
+            userRole.IsDeleted = true;
+            userRole.DeletedDate = DateTime.UtcNow;
+            userRole.UpdatedDate = DateTime.UtcNow;
+            Context.UserRoles.Update(userRole);
+        }
+        await Task.CompletedTask;
+    }
+
+    public async Task RestoreUserRoleAsync(UserRole userRole, CancellationToken cancellationToken = default)
+    {
+        userRole.IsDeleted = false;
+        userRole.DeletedDate = null;
+        userRole.AssignedDate = DateTime.UtcNow;
+        userRole.UpdatedDate = DateTime.UtcNow;
+        Context.UserRoles.Update(userRole);
+        await Task.CompletedTask;
+    }
+
+    public async Task AddUserRoleAsync(Guid userId, Guid roleId, CancellationToken cancellationToken = default)
+    {
+        var newUserRole = new UserRole
+        {
+            UserId = userId,
+            RoleId = roleId,
+            AssignedDate = DateTime.UtcNow,
+            IsDeleted = false
+        };
+        await Context.UserRoles.AddAsync(newUserRole, cancellationToken);
+    }
 }

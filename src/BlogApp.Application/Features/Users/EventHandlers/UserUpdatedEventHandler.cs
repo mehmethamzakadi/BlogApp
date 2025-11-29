@@ -1,5 +1,6 @@
 using BlogApp.Application.Abstractions;
 using BlogApp.Application.Common;
+using BlogApp.Application.Common.Caching;
 using BlogApp.Domain.Events.UserEvents;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -32,12 +33,14 @@ public sealed class UserUpdatedEventHandler : INotificationHandler<DomainEventNo
 
         try
         {
-            // Specific user cache'ini ve ilgili listeleri temizle
-            await _cacheService.Remove($"user:{domainEvent.UserId}");
-            await _cacheService.Remove($"user:{domainEvent.UserId}:roles");
-            await _cacheService.Remove($"user:{domainEvent.UserId}:permissions");
-            await _cacheService.Remove("users:list");
-            await _cacheService.Remove("users:all");
+            // ✅ FIXED: Use centralized CacheKeys instead of hardcoded strings
+            // Invalidate specific user caches
+            await _cacheService.Remove(CacheKeys.User(domainEvent.UserId));
+            await _cacheService.Remove(CacheKeys.UserRoles(domainEvent.UserId));
+            await _cacheService.Remove(CacheKeys.UserPermissions(domainEvent.UserId));
+            
+            // Invalidate user list version to invalidate all cached user lists
+            await _cacheService.Remove(CacheKeys.UserListVersion());
 
             _logger.LogInformation(
                 "Cache invalidated for user {UserId} after update",

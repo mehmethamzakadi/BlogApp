@@ -1,5 +1,6 @@
 using BlogApp.Application.Abstractions;
 using BlogApp.Application.Common;
+using BlogApp.Application.Common.Caching;
 using BlogApp.Domain.Events.PostEvents;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -33,11 +34,15 @@ public class PostUpdatedEventHandler : INotificationHandler<DomainEventNotificat
 
         try
         {
-            // Specific post cache'ini ve ilgili listeleri temizle
-            await _cacheService.Remove($"post:{domainEvent.PostId}");
-            await _cacheService.Remove($"post:{domainEvent.PostId}:withdrafts");
-            await _cacheService.Remove("posts:recent");
-            await _cacheService.Remove("posts:list");
+            // ✅ FIXED: Use centralized CacheKeys instead of hardcoded strings
+            // Invalidate specific post caches
+            await _cacheService.Remove(CacheKeys.Post(domainEvent.PostId));
+            await _cacheService.Remove(CacheKeys.PostPublic(domainEvent.PostId));
+            await _cacheService.Remove(CacheKeys.PostWithDrafts(domainEvent.PostId));
+            
+            // Invalidate post list version to invalidate all cached post lists
+            // This is more efficient than removing individual list cache entries
+            await _cacheService.Remove(CacheKeys.PostListVersion());
 
             _logger.LogInformation(
                 "Cache invalidated for post {PostId} after update",

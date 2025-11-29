@@ -42,13 +42,20 @@ public class UserRoleSeeder : BaseSeeder
             new UserRole { UserId = authorUserId, RoleId = userRoleId, AssignedDate = assignedAt, IsDeleted = false }
         };
 
-        // Mevcut user-role ilişkilerini kontrol et
+        // Mevcut user-role ilişkilerini kontrol et (silinmiş olanlar dahil)
+        // Query filter'ı ignore et çünkü unique constraint tüm kayıtları kontrol eder
         var existingRelations = await Context.UserRoles
+            .IgnoreQueryFilters()
             .Select(ur => new { ur.UserId, ur.RoleId })
             .ToHashSetAsync(cancellationToken);
 
+        // Anonymous type'ları karşılaştırmak için tuple kullan
+        var existingTuples = existingRelations
+            .Select(r => (r.UserId, r.RoleId))
+            .ToHashSet();
+
         var newUserRoles = userRoles
-            .Where(ur => !existingRelations.Contains(new { ur.UserId, ur.RoleId }))
+            .Where(ur => !existingTuples.Contains((ur.UserId, ur.RoleId)))
             .ToList();
 
         if (newUserRoles.Any())

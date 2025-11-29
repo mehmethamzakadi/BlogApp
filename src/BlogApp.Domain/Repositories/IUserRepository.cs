@@ -12,4 +12,8 @@ public interface IUserRepository : IRepository<User>
     Task<User?> FindByUserNameAsync(string userName);
     Task<List<string>> GetRolesAsync(User user);
     Task<List<Guid>> GetUserRoleIdsAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task<List<UserRole>> GetAllUserRolesAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task SoftDeleteUserRolesAsync(List<UserRole> userRoles, CancellationToken cancellationToken = default);
+    Task RestoreUserRoleAsync(UserRole userRole, CancellationToken cancellationToken = default);
+    Task AddUserRoleAsync(Guid userId, Guid roleId, CancellationToken cancellationToken = default);
 }

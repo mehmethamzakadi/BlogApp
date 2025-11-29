@@ -61,8 +61,10 @@ where TContext : DbContext
 
     public async Task<TEntity?> GetAsync(Expression<Func<TEntity, bool>> predicate, Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null, bool withDeleted = false, bool enableTracking = false, CancellationToken cancellationToken = default)
     {
+        // ✅ FIXED: Predicate is already applied in BuildQueryable via Where clause
+        // No need to apply it again in FirstOrDefaultAsync
         IQueryable<TEntity> queryable = BuildQueryable(predicate, include, withDeleted, enableTracking);
-        return await queryable.FirstOrDefaultAsync(predicate, cancellationToken);
+        return await queryable.FirstOrDefaultAsync(cancellationToken);
     }
 
     public async Task<Paginate<TEntity>> GetPaginatedListAsync(Expression<Func<TEntity, bool>>? predicate = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null, Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null, int index = 0, int size = 10, bool withDeleted = false, bool enableTracking = false, CancellationToken cancellationToken = default)

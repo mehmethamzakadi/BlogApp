@@ -1,5 +1,6 @@
 using BlogApp.Application.Abstractions;
 using BlogApp.Application.Common;
+using BlogApp.Application.Common.Caching;
 using BlogApp.Domain.Events.CategoryEvents;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -33,11 +34,19 @@ public sealed class CategoryDeletedEventHandler : INotificationHandler<DomainEve
 
         try
         {
-            // Tüm ilgili cache'leri temizle
-            await _cacheService.Remove($"category:{domainEvent.CategoryId}");
-            await _cacheService.Remove($"category:{domainEvent.CategoryId}:posts");
-            await _cacheService.Remove("categories:list");
-            await _cacheService.Remove("categories:all");
+            // ✅ FIXED: Use centralized CacheKeys instead of hardcoded strings
+            // Invalidate specific category caches
+            await _cacheService.Remove(CacheKeys.Category(domainEvent.CategoryId));
+            await _cacheService.Remove(CacheKeys.CategoryPosts(domainEvent.CategoryId));
+            
+            // Invalidate category list version to invalidate all cached category lists
+            await _cacheService.Remove(CacheKeys.CategoryListVersion());
+            
+            // Also invalidate category grid version
+            await _cacheService.Remove(CacheKeys.CategoryGridVersion());
+            
+            // Invalidate posts by category version
+            await _cacheService.Remove(CacheKeys.PostsByCategoryVersion(domainEvent.CategoryId));
 
             _logger.LogInformation(
                 "Cache invalidated for deleted category {CategoryId}",

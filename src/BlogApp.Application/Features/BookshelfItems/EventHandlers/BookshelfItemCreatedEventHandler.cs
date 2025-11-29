@@ -1,5 +1,6 @@
 using BlogApp.Application.Abstractions;
 using BlogApp.Application.Common;
+using BlogApp.Application.Common.Caching;
 using BlogApp.Domain.Events.BookshelfItemEvents;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -33,9 +34,9 @@ public sealed class BookshelfItemCreatedEventHandler : INotificationHandler<Doma
 
         try
         {
-            // Cache invalidation
-            await _cacheService.Remove("bookshelf:list");
-            await _cacheService.Remove("bookshelf:all");
+            // ✅ FIXED: Use centralized CacheKeys instead of hardcoded strings
+            // Invalidate bookshelf list version to invalidate all cached bookshelf lists
+            await _cacheService.Remove(CacheKeys.BookshelfListVersion());
 
             _logger.LogInformation(
                 "Cache invalidated after bookshelf item {ItemId} creation",

@@ -3,6 +3,7 @@ using BlogApp.Domain.Common.Paging;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Repositories;
 using BlogApp.Persistence.Contexts;
+using BlogApp.Persistence.Extensions;
 using Microsoft.EntityFrameworkCore;
  
 
@@ -49,16 +50,8 @@ public class ActivityLogRepository : IActivityLogRepository
         if (include != null)
             queryable = include(queryable);
 
-        // Apply dynamic sorting
-        if (dynamic.Sort != null && dynamic.Sort.Any())
-        {
-            foreach (var sort in dynamic.Sort)
-            {
-                queryable = sort.Dir == "asc"
-                    ? queryable.OrderBy(a => EF.Property<object>(a, sort.Field))
-                    : queryable.OrderByDescending(a => EF.Property<object>(a, sort.Field));
-            }
-        }
+        // Apply dynamic filtering and sorting using ToDynamic extension
+        queryable = queryable.ToDynamic(dynamic);
 
         var count = await queryable.CountAsync(cancellationToken);
         var items = await queryable

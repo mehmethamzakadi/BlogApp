@@ -20,6 +20,20 @@ public static class CacheKeys
     public static string PostPublic(Guid postId) => $"post:public:{postId}";
 
     public static string PostWithDrafts(Guid postId) => $"post:full:{postId}";
+
+    public static string User(Guid userId) => $"user:{userId}";
+
+    public static string UserRoles(Guid userId) => $"user:{userId}:roles";
+
+    public static string UserPermissions(Guid userId) => $"user:{userId}:permissions";
+
+    public static string Role(Guid roleId) => $"role:{roleId}";
+
+    public static string RolePermissions(Guid roleId) => $"role:{roleId}:permissions";
+
+    public static string CategoryPosts(Guid categoryId) => $"category:{categoryId}:posts";
+
+    public static string BookshelfItem(Guid itemId) => $"bookshelf:{itemId}";
     
     #endregion
 
@@ -39,6 +53,26 @@ public static class CacheKeys
     /// Version key for posts in a specific category. When this changes, that category's post list caches become stale.
     /// </summary>
     public static string PostsByCategoryVersion(Guid categoryId) => $"version:posts:category:{categoryId}";
+
+    /// <summary>
+    /// Version key for all user lists. When this changes, all user list caches become stale.
+    /// </summary>
+    public static string UserListVersion() => "version:users:list";
+
+    /// <summary>
+    /// Version key for all role lists. When this changes, all role list caches become stale.
+    /// </summary>
+    public static string RoleListVersion() => "version:roles:list";
+
+    /// <summary>
+    /// Version key for all category lists. When this changes, all category list caches become stale.
+    /// </summary>
+    public static string CategoryListVersion() => "version:categories:list";
+
+    /// <summary>
+    /// Version key for all bookshelf item lists. When this changes, all bookshelf list caches become stale.
+    /// </summary>
+    public static string BookshelfListVersion() => "version:bookshelf:list";
     
     #endregion
 
@@ -79,6 +113,30 @@ public static class CacheKeys
 
     [Obsolete("Use PostsByCategory(versionToken, categoryId, pageIndex, pageSize) instead for version-based invalidation")]
     public static string PostsByCategoryLegacy(Guid categoryId, int pageIndex, int pageSize) => $"posts:category:{categoryId}:{pageIndex}:{pageSize}";
+
+    [Obsolete("Use UserListVersion() for version-based invalidation")]
+    public static string UserListLegacy() => "users:list";
+
+    [Obsolete("Use UserListVersion() for version-based invalidation")]
+    public static string UserAllLegacy() => "users:all";
+
+    [Obsolete("Use RoleListVersion() for version-based invalidation")]
+    public static string RoleListLegacy() => "roles:list";
+
+    [Obsolete("Use RoleListVersion() for version-based invalidation")]
+    public static string RoleAllLegacy() => "roles:all";
+
+    [Obsolete("Use CategoryListVersion() for version-based invalidation")]
+    public static string CategoryListLegacy() => "categories:list";
+
+    [Obsolete("Use CategoryListVersion() for version-based invalidation")]
+    public static string CategoryAllLegacy() => "categories:all";
+
+    [Obsolete("Use BookshelfListVersion() for version-based invalidation")]
+    public static string BookshelfListLegacy() => "bookshelf:list";
+
+    [Obsolete("Use BookshelfListVersion() for version-based invalidation")]
+    public static string BookshelfAllLegacy() => "bookshelf:all";
     
     #endregion
 

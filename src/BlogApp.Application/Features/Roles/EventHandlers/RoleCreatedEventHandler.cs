@@ -1,5 +1,6 @@
 using BlogApp.Application.Abstractions;
 using BlogApp.Application.Common;
+using BlogApp.Application.Common.Caching;
 using BlogApp.Domain.Events.RoleEvents;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -33,9 +34,9 @@ public sealed class RoleCreatedEventHandler : INotificationHandler<DomainEventNo
 
         try
         {
-            // Cache invalidation
-            await _cacheService.Remove("roles:list");
-            await _cacheService.Remove("roles:all");
+            // ✅ FIXED: Use centralized CacheKeys instead of hardcoded strings
+            // Invalidate role list version to invalidate all cached role lists
+            await _cacheService.Remove(CacheKeys.RoleListVersion());
 
             _logger.LogInformation(
                 "Cache invalidated after role {RoleId} creation",

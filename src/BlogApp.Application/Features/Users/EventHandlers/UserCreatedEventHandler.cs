@@ -1,5 +1,6 @@
 using BlogApp.Application.Abstractions;
 using BlogApp.Application.Common;
+using BlogApp.Application.Common.Caching;
 using BlogApp.Domain.Events.UserEvents;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -33,10 +34,9 @@ public sealed class UserCreatedEventHandler : INotificationHandler<DomainEventNo
 
         try
         {
-            // Cache invalidation - kullanıcı listelerini temizle
-            await _cacheService.Remove("users:list");
-            await _cacheService.Remove("users:all");
-            await _cacheService.Remove("users:count");
+            // ✅ FIXED: Use centralized CacheKeys instead of hardcoded strings
+            // Invalidate user list version to invalidate all cached user lists
+            await _cacheService.Remove(CacheKeys.UserListVersion());
 
             _logger.LogInformation(
                 "Cache invalidated after user {UserId} creation",

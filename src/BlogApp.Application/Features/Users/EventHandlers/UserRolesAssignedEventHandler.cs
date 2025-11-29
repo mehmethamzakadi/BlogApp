@@ -1,5 +1,6 @@
 using BlogApp.Application.Abstractions;
 using BlogApp.Application.Common;
+using BlogApp.Application.Common.Caching;
 using BlogApp.Domain.Events.UserEvents;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -35,10 +36,11 @@ public sealed class UserRolesAssignedEventHandler : INotificationHandler<DomainE
 
         try
         {
+            // ✅ FIXED: Use centralized CacheKeys instead of hardcoded strings
             // User'ın permission cache'ini temizle - roller değişti
-            await _cacheService.Remove($"user:{domainEvent.UserId}:roles");
-            await _cacheService.Remove($"user:{domainEvent.UserId}:permissions");
-            await _cacheService.Remove($"user:{domainEvent.UserId}");
+            await _cacheService.Remove(CacheKeys.UserRoles(domainEvent.UserId));
+            await _cacheService.Remove(CacheKeys.UserPermissions(domainEvent.UserId));
+            await _cacheService.Remove(CacheKeys.User(domainEvent.UserId));
 
             _logger.LogInformation(
                 "Cache invalidated for user {UserId} after role assignment",

@@ -1,5 +1,6 @@
 using BlogApp.Application.Abstractions;
 using BlogApp.Application.Common;
+using BlogApp.Application.Common.Caching;
 using BlogApp.Domain.Events.PermissionEvents;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -35,14 +36,17 @@ public sealed class PermissionsAssignedToRoleEventHandler : INotificationHandler
 
         try
         {
+            // ✅ FIXED: Use centralized CacheKeys instead of hardcoded strings
             // Role'ün permission cache'ini temizle
-            await _cacheService.Remove($"role:{domainEvent.RoleId}:permissions");
-            await _cacheService.Remove($"role:{domainEvent.RoleId}");
+            await _cacheService.Remove(CacheKeys.RolePermissions(domainEvent.RoleId));
+            await _cacheService.Remove(CacheKeys.Role(domainEvent.RoleId));
             
-            // Bu role sahip tüm user'ların permission cache'ini temizlemek gerekir
+            // Note: Bu role sahip tüm user'ların permission cache'ini temizlemek gerekir
             // Ancak bu bilgiye burada erişemiyoruz - daha genel bir cache pattern kullanılabilir
             // Alternatif: Cache key pattern'i ile tüm user permission cache'lerini temizle
             // await _cacheService.RemoveByPattern("user:*:permissions");
+            // Veya: UserListVersion() invalidate edilerek tüm user cache'leri yenilenebilir
+            // Ancak bu çok agresif olabilir, sadece bu role sahip user'ları etkilemeli
 
             _logger.LogInformation(
                 "Cache invalidated for role {RoleId} after permission assignment",

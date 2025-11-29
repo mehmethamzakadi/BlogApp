@@ -1,5 +1,6 @@
 using BlogApp.Application.Abstractions;
 using BlogApp.Application.Common;
+using BlogApp.Application.Common.Caching;
 using BlogApp.Domain.Events.BookshelfItemEvents;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -33,9 +34,12 @@ public sealed class BookshelfItemUpdatedEventHandler : INotificationHandler<Doma
 
         try
         {
-            await _cacheService.Remove($"bookshelf:{domainEvent.ItemId}");
-            await _cacheService.Remove("bookshelf:list");
-            await _cacheService.Remove("bookshelf:all");
+            // ✅ FIXED: Use centralized CacheKeys instead of hardcoded strings
+            // Invalidate specific bookshelf item cache
+            await _cacheService.Remove(CacheKeys.BookshelfItem(domainEvent.ItemId));
+            
+            // Invalidate bookshelf list version to invalidate all cached bookshelf lists
+            await _cacheService.Remove(CacheKeys.BookshelfListVersion());
 
             _logger.LogInformation(
                 "Cache invalidated for bookshelf item {ItemId} after update",

@@ -16,13 +16,12 @@ public class UserConfiguration : BaseConfiguraiton<User>
         // Table name
         builder.ToTable("Users");
 
-        // UserName - backing field only
-        builder.Property("_userName")
+        // UserName - property mapped to backing field
+        builder.Property(u => u.UserName)
+            .HasField("_userName")
             .HasColumnName("UserName")
             .IsRequired()
             .HasMaxLength(100);
-
-        builder.Ignore(u => u.UserName);
 
         builder.Property(u => u.NormalizedUserName)
             .IsRequired()
@@ -30,13 +29,12 @@ public class UserConfiguration : BaseConfiguraiton<User>
             .HasComputedColumnSql("UPPER(\"UserName\")", stored: true)
             .ValueGeneratedOnAddOrUpdate();
 
-        // Email - backing field only
-        builder.Property("_email")
+        // Email - property mapped to backing field
+        builder.Property(u => u.Email)
+            .HasField("_email")
             .HasColumnName("Email")
             .IsRequired()
             .HasMaxLength(200);
-
-        builder.Ignore(u => u.Email);
 
         builder.Property(u => u.NormalizedEmail)
             .IsRequired()

@@ -3,9 +3,7 @@ using BlogApp.Domain.Common;
 using BlogApp.Domain.Common.Results;
 using BlogApp.Domain.Events.UserEvents;
 using BlogApp.Domain.Repositories;
-using BlogApp.Domain.Services;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using IResult = BlogApp.Domain.Common.Results.IResult;
 
 namespace BlogApp.Application.Features.Users.Commands.AssignRolesToUser;
@@ -14,20 +12,17 @@ public class AssignRolesToUserCommandHandler : IRequestHandler<AssignRolesToUser
 {
     private readonly IUserRepository _userRepository;
     private readonly IRoleRepository _roleRepository;
-    private readonly IUserDomainService _userDomainService;
     private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
 
     public AssignRolesToUserCommandHandler(
         IUserRepository userRepository,
         IRoleRepository roleRepository,
-        IUserDomainService userDomainService,
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork)
     {
         _userRepository = userRepository;
         _roleRepository = roleRepository;
-        _userDomainService = userDomainService;
         _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
     }
@@ -41,15 +36,21 @@ public class AssignRolesToUserCommandHandler : IRequestHandler<AssignRolesToUser
             return new ErrorResult("Kullanıcı bulunamadı");
         }
 
-        var currentUserRoles = await _userRepository.GetUserRoleIdsAsync(user.Id, cancellationToken);
         var requestedRoleIds = request.RoleIds.ToHashSet();
-        var currentRoleIds = currentUserRoles.ToHashSet();
+
+        // Mevcut UserRole'leri al (silinmiş olanlar dahil)
+        var existingUserRoles = await _userRepository.GetAllUserRolesAsync(request.UserId, cancellationToken);
+
+        var existingRoleIds = existingUserRoles
+            .Where(ur => !ur.IsDeleted)
+            .Select(ur => ur.RoleId)
+            .ToHashSet();
 
         // Silinecek roller (mevcut ama istenen listede yok)
-        var rolesToRemove = currentRoleIds.Except(requestedRoleIds).ToList();
+        var rolesToRemove = existingRoleIds.Except(requestedRoleIds).ToList();
 
         // Eklenecek roller (istenen listede var ama mevcut değil)
-        var rolesToAdd = requestedRoleIds.Except(currentRoleIds).ToList();
+        var rolesToAdd = requestedRoleIds.Except(existingRoleIds).ToList();
 
         // Değişiklik yoksa erken çık
         if (!rolesToRemove.Any() && !rolesToAdd.Any())
@@ -57,40 +58,41 @@ public class AssignRolesToUserCommandHandler : IRequestHandler<AssignRolesToUser
             return new SuccessResult("Roller zaten güncel");
         }
 
-        // Silinecek rolleri al
+        // Silinecek rolleri soft delete yap
         if (rolesToRemove.Any())
         {
-            // ✅ FIXED: Using repository-specific method instead of Query() leak
-            var rolesToRemoveEntities = await _roleRepository.GetByIdsAsync(rolesToRemove, cancellationToken);
+            var userRolesToRemove = existingUserRoles
+                .Where(ur => rolesToRemove.Contains(ur.RoleId) && !ur.IsDeleted)
+                .ToList();
 
-            var removeResult = _userDomainService.RemoveFromRoles(user, rolesToRemoveEntities);
-            if (!removeResult.Success)
-            {
-                return new ErrorResult("Roller kaldırılamadı: " + removeResult.Message);
-            }
+            await _userRepository.SoftDeleteUserRolesAsync(userRolesToRemove, cancellationToken);
         }
 
-        // Eklenecek rolleri al
+        // Eklenecek rolleri ekle veya geri ekle
         if (rolesToAdd.Any())
         {
-            // ✅ FIXED: Using repository-specific method instead of Query() leak
-            var rolesToAddEntities = await _roleRepository.GetByIdsAsync(rolesToAdd, cancellationToken);
-
-            if (rolesToAddEntities.Count != rolesToAdd.Count)
+            foreach (var roleId in rolesToAdd)
             {
-                return new ErrorResult("Bazı roller bulunamadı");
-            }
+                // Önce silinmiş bir UserRole var mı kontrol et
+                var deletedUserRole = existingUserRoles
+                    .FirstOrDefault(ur => ur.RoleId == roleId && ur.IsDeleted);
 
-            var addResult = _userDomainService.AddToRoles(user, rolesToAddEntities);
-            if (!addResult.Success)
-            {
-                return new ErrorResult("Roller eklenemedi: " + addResult.Message);
+                if (deletedUserRole != null)
+                {
+                    // Silinmiş rolü geri ekle
+                    await _userRepository.RestoreUserRoleAsync(deletedUserRole, cancellationToken);
+                }
+                else
+                {
+                    // Yeni UserRole oluştur
+                    await _userRepository.AddUserRoleAsync(request.UserId, roleId, cancellationToken);
+                }
             }
-
-            // Domain Event - sadece değişiklik olduğunda
-            var allCurrentRoleNames = await _userRepository.GetRolesAsync(user);
-            user.AddDomainEvent(new UserRolesAssignedEvent(user.Id, user.UserName!, allCurrentRoleNames));
         }
+
+        // Domain Event
+        var allCurrentRoleNames = await _userRepository.GetRolesAsync(user);
+        user.AddDomainEvent(new UserRolesAssignedEvent(user.Id, user.UserName!, allCurrentRoleNames));
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 

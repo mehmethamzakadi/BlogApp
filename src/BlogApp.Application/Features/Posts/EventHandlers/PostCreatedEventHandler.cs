@@ -1,5 +1,6 @@
 using BlogApp.Application.Abstractions;
 using BlogApp.Application.Common;
+using BlogApp.Application.Common.Caching;
 using BlogApp.Domain.Events.PostEvents;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -34,10 +35,12 @@ public class PostCreatedEventHandler : INotificationHandler<DomainEventNotificat
 
         try
         {
-            // Cache invalidation - kategori bazlı post listelerini temizle
-            await _cacheService.Remove($"category:{domainEvent.CategoryId}:posts");
-            await _cacheService.Remove("posts:recent");
-            await _cacheService.Remove("posts:list");
+            // ✅ FIXED: Use centralized CacheKeys instead of hardcoded strings
+            // Invalidate post list version to invalidate all cached post lists
+            await _cacheService.Remove(CacheKeys.PostListVersion());
+            
+            // Invalidate category-specific post list version
+            await _cacheService.Remove(CacheKeys.PostsByCategoryVersion(domainEvent.CategoryId));
 
             _logger.LogInformation(
                 "Cache invalidated for category {CategoryId} after post creation",

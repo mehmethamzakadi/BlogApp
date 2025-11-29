@@ -1,5 +1,6 @@
 using BlogApp.Application.Abstractions;
 using BlogApp.Application.Common;
+using BlogApp.Application.Common.Caching;
 using BlogApp.Domain.Events.RoleEvents;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -33,10 +34,13 @@ public sealed class RoleUpdatedEventHandler : INotificationHandler<DomainEventNo
 
         try
         {
-            await _cacheService.Remove($"role:{domainEvent.RoleId}");
-            await _cacheService.Remove($"role:{domainEvent.RoleId}:permissions");
-            await _cacheService.Remove("roles:list");
-            await _cacheService.Remove("roles:all");
+            // ✅ FIXED: Use centralized CacheKeys instead of hardcoded strings
+            // Invalidate specific role caches
+            await _cacheService.Remove(CacheKeys.Role(domainEvent.RoleId));
+            await _cacheService.Remove(CacheKeys.RolePermissions(domainEvent.RoleId));
+            
+            // Invalidate role list version to invalidate all cached role lists
+            await _cacheService.Remove(CacheKeys.RoleListVersion());
 
             _logger.LogInformation(
                 "Cache invalidated for role {RoleId} after update",
