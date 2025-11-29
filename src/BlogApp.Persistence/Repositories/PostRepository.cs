@@ -2,6 +2,7 @@ using BlogApp.Domain.Common.Paging;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Repositories;
 using BlogApp.Persistence.Contexts;
+using BlogApp.Persistence.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace BlogApp.Persistence.Repositories;

@@ -4,7 +4,7 @@ using BlogApp.Domain.Entities;
 using BlogApp.Domain.Repositories;
 using BlogApp.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
+ 
 
 namespace BlogApp.Persistence.Repositories;
 
@@ -41,7 +41,7 @@ public class ActivityLogRepository : IActivityLogRepository
         DynamicQuery dynamic,
         int index = 0,
         int size = 10,
-        Func<IQueryable<ActivityLog>, IIncludableQueryable<ActivityLog, object>>? include = null,
+        Func<IQueryable<ActivityLog>, IQueryable<ActivityLog>>? include = null,
         CancellationToken cancellationToken = default)
     {
         IQueryable<ActivityLog> queryable = _context.ActivityLogs.AsQueryable();

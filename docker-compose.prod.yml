@@ -46,38 +46,12 @@ services:
     depends_on:
       blogapp.api:
         condition: service_healthy
-      blogapp.client:
-        condition: service_started
     networks:
       - blogapp_prod_net
     <<: *logging
     healthcheck:
       test: ["CMD", "nginx", "-t"]
       <<: *common-healthcheck
-
-  # ===========================================
-  # Client Service - Production
-  # ===========================================
-  blogapp.client:
-    image: ${DOCKER_REGISTRY:-}blogappclient:${TAG:-latest}
-    build:
-      context: clients/blogapp-client
-      dockerfile: Dockerfile
-    container_name: blogapp_client_prod
-    restart: always
-    environment:
-      # Build sırasında API URL gerekebilir, Dockerfile içinde bu ARG olarak kullanılabilir
-      # veya Runtime config (config.js) kullanılabilir.
-      # Şimdilik basit yapı.
-      - VITE_API_URL=/api
-    networks:
-      - blogapp_prod_net
-    <<: *logging
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 256M
 
   # ===========================================
   # API Service - Production

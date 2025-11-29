@@ -1,7 +1,7 @@
 using BlogApp.Domain.Common.Dynamic;
 using BlogApp.Domain.Common.Paging;
 using BlogApp.Domain.Entities;
-using Microsoft.EntityFrameworkCore.Query;
+
 
 namespace BlogApp.Domain.Repositories;
 
@@ -13,7 +13,7 @@ public interface IActivityLogRepository
         DynamicQuery dynamic,
         int index = 0,
         int size = 10,
-        Func<System.Linq.IQueryable<ActivityLog>, IIncludableQueryable<ActivityLog, object>>? include = null,
+        Func<System.Linq.IQueryable<ActivityLog>, IQueryable<ActivityLog>>? include = null,
         CancellationToken cancellationToken = default);
     
     /// <summary>
