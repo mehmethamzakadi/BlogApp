@@ -126,23 +126,15 @@ namespace BlogApp.Infrastructure
             services.AddHostedService<Services.BackgroundServices.OutboxProcessorService>();
             services.AddHostedService<Services.BackgroundServices.SessionCleanupService>();
 
-            services.AddScoped<IIntegrationEventConverterStrategy, CategoryCreatedIntegrationEventConverter>();
-            services.AddScoped<IIntegrationEventConverterStrategy, CategoryUpdatedIntegrationEventConverter>();
-            services.AddScoped<IIntegrationEventConverterStrategy, CategoryDeletedIntegrationEventConverter>();
-            services.AddScoped<IIntegrationEventConverterStrategy, BookshelfItemCreatedIntegrationEventConverter>();
-            services.AddScoped<IIntegrationEventConverterStrategy, BookshelfItemUpdatedIntegrationEventConverter>();
-            services.AddScoped<IIntegrationEventConverterStrategy, BookshelfItemDeletedIntegrationEventConverter>();
-            services.AddScoped<IIntegrationEventConverterStrategy, PostCreatedIntegrationEventConverter>();
-            services.AddScoped<IIntegrationEventConverterStrategy, PostUpdatedIntegrationEventConverter>();
-            services.AddScoped<IIntegrationEventConverterStrategy, PostDeletedIntegrationEventConverter>();
-            services.AddScoped<IIntegrationEventConverterStrategy, UserCreatedIntegrationEventConverter>();
-            services.AddScoped<IIntegrationEventConverterStrategy, UserUpdatedIntegrationEventConverter>();
-            services.AddScoped<IIntegrationEventConverterStrategy, UserDeletedIntegrationEventConverter>();
-            services.AddScoped<IIntegrationEventConverterStrategy, UserRolesAssignedIntegrationEventConverter>();
-            services.AddScoped<IIntegrationEventConverterStrategy, RoleCreatedIntegrationEventConverter>();
-            services.AddScoped<IIntegrationEventConverterStrategy, RoleUpdatedIntegrationEventConverter>();
-            services.AddScoped<IIntegrationEventConverterStrategy, RoleDeletedIntegrationEventConverter>();
-            services.AddScoped<IIntegrationEventConverterStrategy, PermissionsAssignedToRoleIntegrationEventConverter>();
+            // Register all IIntegrationEventConverterStrategy implementations automatically
+            var converterInterface = typeof(IIntegrationEventConverterStrategy);
+            var converterTypes = typeof(InfrastructureServicesRegistration).Assembly.GetTypes()
+                .Where(t => converterInterface.IsAssignableFrom(t) && t.IsClass && !t.IsAbstract);
+
+            foreach (var impl in converterTypes)
+            {
+                services.AddScoped(converterInterface, impl);
+            }
 
             services.AddSingleton<ICacheService, RedisCacheService>();
             services.AddTransient<ITokenService, JwtTokenService>();
