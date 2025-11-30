@@ -15,6 +15,6 @@ public sealed class GetAllCategoriesQueryHandler(ICategoryRepository categoryRep
         // ✅ FIXED: Returning List<DTO> instead of IQueryable (anti-pattern)
         var categories = await categoryRepository.GetAllActiveAsync(cancellationToken);
 
-        return categories.Select(c => new CategoryListItemDto(c.Id, c.Name)).ToList();
+        return categories.Select(c => new CategoryListItemDto(c.Id, c.Name, c.Description, c.ParentId)).ToList();
     }
 }

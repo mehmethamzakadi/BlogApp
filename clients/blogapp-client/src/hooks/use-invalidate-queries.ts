@@ -43,6 +43,7 @@ export function useInvalidateQueries() {
    */
   const invalidateCategories = () => {
     queryClient.invalidateQueries({ queryKey: ['categories'] });
+    queryClient.invalidateQueries({ queryKey: ['all-categories'] });
     queryClient.invalidateQueries({ queryKey: ['dashboard-statistics'] });
     queryClient.invalidateQueries({ queryKey: ['activity-logs'] });
     queryClient.invalidateQueries({ queryKey: ['recent-activities'] });

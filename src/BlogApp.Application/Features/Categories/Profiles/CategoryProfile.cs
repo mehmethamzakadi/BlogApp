@@ -20,7 +20,9 @@ namespace BlogApp.Application.Features.Categories.Profiles
             CreateMap<Category, UpdateCategoryCommand>().ReverseMap();
             CreateMap<Category, DeleteCategoryCommand>().ReverseMap();
 
-            CreateMap<Category, GetPaginatedListByDynamicCategoriesResponse>().ReverseMap();
+            CreateMap<Category, GetPaginatedListByDynamicCategoriesResponse>()
+                .ForMember(dest => dest.ParentName, opt => opt.MapFrom(src => src.Parent != null ? src.Parent.Name : null))
+                .ReverseMap();
             CreateMap<Category, GetAllListCategoriesResponse>().ReverseMap();
 
             CreateMap<Category, GetByIdCategoryResponse>().ReverseMap();

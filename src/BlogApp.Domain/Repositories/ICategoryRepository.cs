@@ -22,4 +22,14 @@ public interface ICategoryRepository : IRepository<Category>
     /// Count total categories
     /// </summary>
     Task<int> CountAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Check if category has any child categories
+    /// </summary>
+    Task<bool> HasChildrenAsync(Guid categoryId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get all root categories (categories without parent)
+    /// </summary>
+    Task<List<Category>> GetRootCategoriesAsync(CancellationToken cancellationToken = default);
 }

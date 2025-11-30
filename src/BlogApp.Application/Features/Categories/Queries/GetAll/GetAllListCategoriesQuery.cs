@@ -10,4 +10,4 @@ public sealed record GetAllListCategoriesQuery() : IRequest<List<CategoryListIte
 /// <summary>
 /// DTO for category list item
 /// </summary>
-public sealed record CategoryListItemDto(Guid Id, string Name);
+public sealed record CategoryListItemDto(Guid Id, string Name, string? Description = null, Guid? ParentId = null);

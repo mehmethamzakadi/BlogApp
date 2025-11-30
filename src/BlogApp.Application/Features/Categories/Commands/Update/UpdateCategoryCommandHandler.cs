@@ -38,13 +38,50 @@ public sealed class UpdateCategoryCommandHandler(
             return new ErrorResult(ResponseMessages.Category.AlreadyExists);
         }
 
-        category.Update(request.Name);
+        // Parent kontrolü - eğer parentId verilmişse, parent'ın var olduğunu ve döngüsel referans olmadığını kontrol et
+        if (request.ParentId.HasValue)
+        {
+            // Kendi kendisinin parent'ı olamaz (bu kontrol entity'de de var ama burada da kontrol ediyoruz)
+            if (request.ParentId.Value == request.Id)
+            {
+                return new ErrorResult("Kategori kendi üst kategorisi olamaz.");
+            }
+
+            var parentExists = await categoryRepository.AnyAsync(
+                x => x.Id == request.ParentId.Value && !x.IsDeleted,
+                cancellationToken: cancellationToken);
+
+            if (!parentExists)
+            {
+                return new ErrorResult("Üst kategori bulunamadı.");
+            }
+
+            // Döngüsel referans kontrolü: Parent'ın kendisi veya üst kategorileri bu kategoriyi içeriyor mu?
+            var parentCategory = await categoryRepository.GetByIdAsync(request.ParentId.Value, cancellationToken);
+            if (parentCategory != null)
+            {
+                // Parent'ın parent'larını kontrol et (basit döngü kontrolü)
+                var currentParentId = parentCategory.ParentId;
+                while (currentParentId.HasValue)
+                {
+                    if (currentParentId.Value == request.Id)
+                    {
+                        return new ErrorResult("Döngüsel kategori referansı oluşturulamaz.");
+                    }
+                    var currentParent = await categoryRepository.GetByIdAsync(currentParentId.Value, cancellationToken);
+                    if (currentParent == null) break;
+                    currentParentId = currentParent.ParentId;
+                }
+            }
+        }
+
+        category.Update(request.Name, request.Description, request.ParentId);
         categoryRepository.Update(category);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         await cacheService.Add(
             CacheKeys.Category(category.Id),
-            new GetByIdCategoryResponse(category.Id, category.Name),
+            new GetByIdCategoryResponse(category.Id, category.Name, category.Description, category.ParentId),
             DateTimeOffset.UtcNow.Add(CacheDurations.Category),
             null);
 

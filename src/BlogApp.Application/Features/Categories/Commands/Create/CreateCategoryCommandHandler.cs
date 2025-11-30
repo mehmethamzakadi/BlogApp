@@ -29,13 +29,26 @@ public sealed class CreateCategoryCommandHandler(
             return new ErrorResult(ResponseMessages.Category.AlreadyExists);
         }
 
-        var category = Category.Create(request.Name);
+        // Parent kontrolü - eğer parentId verilmişse, parent'ın var olduğunu kontrol et
+        if (request.ParentId.HasValue)
+        {
+            var parentExists = await categoryRepository.AnyAsync(
+                x => x.Id == request.ParentId.Value && !x.IsDeleted,
+                cancellationToken: cancellationToken);
+
+            if (!parentExists)
+            {
+                return new ErrorResult("Üst kategori bulunamadı.");
+            }
+        }
+
+        var category = Category.Create(request.Name, request.Description, request.ParentId);
         await categoryRepository.AddAsync(category);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         await cache.Add(
             CacheKeys.Category(category.Id),
-            new GetByIdCategoryResponse(Id: category.Id, Name: category.Name),
+            new GetByIdCategoryResponse(Id: category.Id, Name: category.Name, Description: category.Description, ParentId: category.ParentId),
             DateTimeOffset.UtcNow.Add(CacheDurations.Category),
             null);
 

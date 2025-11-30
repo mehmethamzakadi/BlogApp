@@ -6,6 +6,7 @@ using BlogApp.Domain.Common.Responses;
 using BlogApp.Domain.Entities;
 using BlogApp.Domain.Repositories;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlogApp.Application.Features.Categories.Queries.GetPaginatedListByDynamic;
 
@@ -36,6 +37,7 @@ public sealed class GetPaginatedListByDynamicCategoriesQueryHandler(
             dynamic: request.DataGridRequest.DynamicQuery,
             index: pagination.PageIndex,
             size: pagination.PageSize,
+            include: q => q.Include(c => c.Parent),
             cancellationToken: cancellationToken
         );
 

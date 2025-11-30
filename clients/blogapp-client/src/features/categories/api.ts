@@ -17,7 +17,9 @@ export async function fetchCategories(
 
 export async function createCategory(values: CategoryFormValues) {
   const response = await api.post<ApiResult>('/category', {
-    Name: values.name
+    Name: values.name,
+    Description: values.description || null,
+    ParentId: values.parentId || null
   });
   return normalizeApiResult(response.data);
 }
@@ -25,7 +27,9 @@ export async function createCategory(values: CategoryFormValues) {
 export async function updateCategory(id: string, values: CategoryFormValues) {
   const response = await api.put<ApiResult>(`/category/${id}`, {
     Id: id,
-    Name: values.name
+    Name: values.name,
+    Description: values.description || null,
+    ParentId: values.parentId || null
   });
   return normalizeApiResult(response.data);
 }

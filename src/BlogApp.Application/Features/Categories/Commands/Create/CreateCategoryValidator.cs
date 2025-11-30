@@ -16,5 +16,9 @@ public sealed class CreateCategoryValidator : AbstractValidator<CreateCategoryCo
             .MinimumLength(5).WithMessage("Kategori adı en az 5 karakter olmalıdır!")
             .MaximumLength(100).WithMessage("Kategori adı en fazla 100 karakter olmalıdır!")
             .MustBePlainText("Kategori adı HTML veya script içeremez!");
+
+        RuleFor(c => c.Description)
+            .MaximumLength(500).WithMessage("Açıklama en fazla 500 karakter olabilir!")
+            .When(c => !string.IsNullOrWhiteSpace(c.Description));
     }
 }

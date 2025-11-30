@@ -30,6 +30,11 @@ public sealed class DeleteCategoryCommandHandler(
         if (hasActivePosts)
             return new ErrorResult(ResponseMessages.Category.HasActivePosts);
 
+        // Alt kategori kontrolü - eğer alt kategoriler varsa silinemez
+        var hasChildren = await categoryRepository.HasChildrenAsync(request.Id, cancellationToken);
+        if (hasChildren)
+            return new ErrorResult("Bu kategorinin alt kategorileri bulunmaktadır. Önce alt kategorileri silmeniz gerekmektedir.");
+
         category.Delete();
         categoryRepository.Delete(category);
         await unitOfWork.SaveChangesAsync(cancellationToken);

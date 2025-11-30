@@ -24,7 +24,7 @@ public sealed class GetCategoryByIdQueryHandler(
         if (category is null)
             return new ErrorDataResult<GetByIdCategoryResponse>("Kategori bilgisi bulunamadı.");
 
-        var response = new GetByIdCategoryResponse(category.Id, category.Name);
+        var response = new GetByIdCategoryResponse(category.Id, category.Name, category.Description, category.ParentId);
 
         await cacheService.Add(
             cacheKey,

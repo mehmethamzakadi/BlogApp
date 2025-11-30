@@ -5,7 +5,7 @@ using MediatR;
 
 namespace BlogApp.Application.Features.Categories.Commands.Update;
 
-public sealed record UpdateCategoryCommand(Guid Id, string Name) : IRequest<IResult>, IInvalidateCache
+public sealed record UpdateCategoryCommand(Guid Id, string Name, string? Description = null, Guid? ParentId = null) : IRequest<IResult>, IInvalidateCache
 {
     public IEnumerable<string> GetCacheKeysToInvalidate()
     {
